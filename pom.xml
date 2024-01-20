@@ -9,13 +9,9 @@
 	<description>mercator: a computer game implementation of a closed economical simulation.</description>
 
 	<properties>
-		<!-- Java Code Compliance Level -->
 		<java.version>17</java.version>
 		<file.encoding>utf-8</file.encoding>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<!--
-		<java.libraray.path>${env.JAVA_HOME}\bin</java.libraray.path>
-		-->
 		<maven.build.timestamp.format>yyyy-MM-dd-HH-mm</maven.build.timestamp.format>
 		<libgdxVersion>1.9.15-SNAPSHOT</libgdxVersion>
 	</properties>

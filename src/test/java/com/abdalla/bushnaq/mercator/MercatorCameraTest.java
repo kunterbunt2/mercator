@@ -4,10 +4,10 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.abdalla.bushnaq.mercator.audio.synthesis.util.LiniarTranslation;
-import com.abdalla.bushnaq.mercator.audio.synthesis.util.TranslationUtil;
-import com.abdalla.bushnaq.mercator.renderer.camera.MovingCamera;
-import com.abdalla.bushnaq.mercator.universe.sim.trader.Trader;
+import de.bushnaq.abdalla.mercator.audio.synthesis.util.LiniarTranslation;
+import de.bushnaq.abdalla.mercator.audio.synthesis.util.TranslationUtil;
+import de.bushnaq.abdalla.mercator.renderer.camera.MovingCamera;
+import de.bushnaq.abdalla.mercator.universe.sim.trader.Trader;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Files;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3NativesLoader;

@@ -1,0 +1,283 @@
+package com.abdalla.bushnaq.mercator.universe.sim;
+
+import java.util.Collections;
+
+import de.bushnaq.abdalla.mercator.renderer.ObjectRenderer;
+import de.bushnaq.abdalla.mercator.renderer.Renderable;
+import com.abdalla.bushnaq.mercator.renderer.Sim2DRenderer;
+import factory.de.bushnaq.abdalla.mercator.universe.ProductionFacility;
+import good.de.bushnaq.abdalla.mercator.universe.Good;
+import good.de.bushnaq.abdalla.mercator.universe.GoodList;
+import good.de.bushnaq.abdalla.mercator.universe.GoodType;
+import planet.de.bushnaq.abdalla.mercator.universe.Planet;
+import tools.de.bushnaq.abdalla.mercator.universe.Tools;
+import de.bushnaq.abdalla.mercator.util.HistoryManager;
+import de.bushnaq.abdalla.mercator.util.MercatorRandomGenerator;
+import de.bushnaq.abdalla.mercator.util.SimEventManager;
+import de.bushnaq.abdalla.mercator.util.SimEventType;
+import de.bushnaq.abdalla.mercator.util.TimeUnit;
+import de.bushnaq.abdalla.mercator.util.TradingPartner;
+import de.bushnaq.abdalla.mercator.util.Transaction;
+
+public class Sim extends Renderable implements TradingPartner {
+	static final long BUYS_GOODS_EVERY = 5 * TimeUnit.TICKS_PER_DAY;
+	// private static final int CAN_REPRODUCE_UP_TO = 10;
+	// private static final int CAN_SURVIVE_UP_TO = 10;
+	// private static final float CREDITS_NEEDED_TO_REPRODUCE = 500f;
+	// static final long NEEDS_GOODS_EVERY = 100 * TimeUnit.TICKS_PER_DAY;
+	public static final float SIM_START_CREDITS = 10f;
+	public float cost = 1.0f;
+	private float credits = 0;
+	public float creditsToSave = SIM_START_CREDITS;
+	private int currentConsumedAmount;
+	public SimEventManager eventManager;
+	private GoodList goodList = new GoodList();
+	private HistoryManager historyManager;
+	public long lastTimeAdvancement = 0;
+	public int lastYearConsumedAmount;
+	private String name = null;
+	public Planet planet = null;
+	public ProductionFacility productionFacility = null;
+	public SimProfession profession = SimProfession.UNIMPLOYED;
+	public ObjectRenderer renderer = new Sim2DRenderer(this);
+	public SimNeedList simNeedsList = new SimNeedList();
+	public SimStatus status = SimStatus.LIVING;
+	private long timeDelta = 0;
+
+	public Sim(Planet planet, String name, float credits) {
+		this.planet = planet;
+		this.setName(name);
+		this.setCredits(credits);
+		getGoodList().createEmptyGoodList();
+		setHistoryManager(new HistoryManager());
+		simNeedsList.createGoodList();
+		eventManager = new SimEventManager(this);
+	}
+
+	public boolean advanveInTime(long currentTime, MercatorRandomGenerator randomGenerator, SimList simList) {
+		if (TimeUnit.isInt(currentTime)/* ( currentTime - (int)currentTime ) == 0.0f */ ) {
+			timeDelta = currentTime - lastTimeAdvancement;
+			lastTimeAdvancement = currentTime;
+			// are we at the start of a new year?
+			if (currentTime % (TimeUnit.TICKS_PER_DAY * TimeUnit.DAYS_PER_YEAR) == 0) {
+				lastYearConsumedAmount = currentConsumedAmount;
+				currentConsumedAmount = 0;
+			}
+			SimNeedList sortedSimNeedsList = sortGoodList();
+			Collections.sort(sortedSimNeedsList);
+			for (SimNeed needs : sortedSimNeedsList) {
+				if (currentTime - needs.lastConsumed > needs.consumeEvery) {
+					Good food = planet.getGoodList().getByType(needs.type);
+					food.indicateBuyInterest(currentTime);
+					if (getCredits() >= food.price) {
+						if (getCredits() > needs.creditLimit) {
+							if (food.getAmount() > 0) {
+								// Transaction.pay( planet, this, food.price );
+								Transaction.trade(currentTime, food.type, food.price, 1, planet, this, planet, false);
+								// buy( currentTime, food.type, food.price, 1, planet, planet );
+								// needs.amount = (int)NEEDS_GOODS_EVERY;
+								eventManager.add(currentTime, getVolume(), SimEventType.buy, credits,
+										String.format("%d %s for %5.2f from %s.", 1, food.type.getName(),
+												food.price * 1, planet.getName()));
+								currentConsumedAmount += 1;
+								needs.consume(currentTime);
+								goodList.consume(food.type, 1);
+								eventManager.add(currentTime, getVolume(), SimEventType.consue, credits,
+										String.format("%d %s.", 1, food.type.getName()));
+								status = SimStatus.LIVING;
+							} else {
+								// ---No food available on planet
+								Tools.print("No food available on planet " + planet.getName());
+								// Tools.speak( "no food" );
+								if (calculateStatus(currentTime, needs, SimStatus.DEAD_REASON_NO_FOOD)) {
+									eventManager.add(currentTime, getVolume(), SimEventType.die, credits,
+											String.format("because no food."));
+									return true;
+								}
+							}
+						} else {
+							// ---We are not rich enough for this luxury
+						}
+					} else {
+						if (food.getAmount() > 0) {
+							// ---Sim cannot afford any food
+							Tools.print(String.format("Sim %s cannot afford any food on planet %s.\n", getName(),
+									planet.getName()));
+							if (calculateStatus(currentTime, needs, SimStatus.DEAD_REASON_NO_MONEY)) {
+								eventManager.add(currentTime, getVolume(), SimEventType.die, credits, String
+										.format("because no money to buy %s(%5.2f).", food.type.getName(), food.price));
+								return true;
+							}
+						} else {
+							// ---No food available on planet
+							Tools.print(String.format("No food available on planet %s.\n", planet.getName()));
+							if (calculateStatus(currentTime, needs, SimStatus.DEAD_REASON_NO_FOOD)) {
+								eventManager.add(currentTime, getVolume(), SimEventType.die, credits,
+										String.format("because no food."));
+								return true;
+							}
+						}
+					}
+				}
+			}
+			// }
+			// ---Reproduce
+			// if ( queryReproductionReady() )
+			// {
+			// reproduce( simList );
+			// }
+		}
+		return false;
+	}
+
+	private boolean calculateStatus(long currentTime, SimNeed needs, SimStatus deadReason) {
+		boolean breakLoop = false;
+		if (currentTime - needs.lastConsumed > needs.consumeEvery) {
+			if (needs.creditLimit == 0) // ---this is no luxury
+				status = SimStatus.STARVING;
+		}
+		if (currentTime - needs.lastConsumed > needs.dieIfNotConsumedWithin) {
+			status = deadReason;
+			breakLoop = true;
+		}
+		return breakLoop;
+	}
+	// private boolean queryDyingReady()
+	// {
+	// return ( Universe.randomGenerator.nextInt( CAN_SURVIVE_UP_TO ) == 1 );
+	// }
+
+	@Override
+	public void ern(long currentTime, float credits) {
+		this.credits += credits;
+		eventManager.add(currentTime, getVolume(), SimEventType.ern, getCredits(),
+				String.format("%5.2f credits.", credits));
+	}
+
+	// @Override
+	// public void buy( long currentTime, GoodType goodType, float price, float
+	// transactionAmount, Transaction from, Transaction producer )
+	// {
+	// Good ownGood = goodList.getByType( goodType );
+	// ownGood.buy( transactionAmount );
+	// ownGood.price = price;//---remember the price we bought this good
+	// setCredits( getCredits() - transactionAmount * price );
+	// planet.universe.eventManager.add( currentTime, this, String.format( "buys %s
+	// from %s produced at %s", goodType.getName(), from.getName(),
+	// producer.getName() ) );
+	// from.sell( currentTime, goodType, price, transactionAmount, this );
+	// }
+	// private void die( SimList simList )
+	// {
+	// planet.setCredits( planet.getCredits() + getCredits() );
+	// setCredits( 0 );
+	// simList.kill( this );
+	// }
+	@Override
+	public float getCredits() {
+		return credits;
+	}
+
+	@Override
+	public GoodList getGoodList() {
+		return goodList;
+	}
+
+	@Override
+	public HistoryManager getHistoryManager() {
+		return historyManager;
+	}
+
+	@Override
+	public String getName() {
+		return name;
+	}
+
+	@Override
+	public Planet getPlanet() {
+		return planet;
+	}
+
+	// public String getProfessionName()
+	// {
+	// switch ( profession )
+	// {
+	// case ENGINEERING:
+	// return "Engineering";
+	// case SERVICE:
+	// return "Service";
+	// case SCIENCE:
+	// return "Science";
+	// case UNIMPLOYED:
+	// return "Unemployed";
+	// default:
+	// return "Unknown";
+	// }
+	// }
+	public ObjectRenderer getRenderer() {
+		return renderer;
+	}
+
+	// @Override
+	// public void sell( long currentTime, GoodType goodType, float price, float
+	// transactionAmount, Transaction to )
+	// {
+	// Good ownGood = goodList.getByType( goodType );
+	// ownGood.sell( transactionAmount );
+	// setCredits( getCredits() + transactionAmount * price );
+	// planet.universe.eventManager.add( currentTime, this, String.format( "%s sells
+	// %s to %s", getName(), goodType.getName(), to.getName() ) );
+	// }
+	public float getSatisfactionFactor(long currentTime) {
+		float satisfaction = 0;
+		for (SimNeed needs : simNeedsList) {
+			if (currentTime - needs.lastConsumed < needs.consumeEvery)
+				satisfaction += 100 / simNeedsList.size();
+		}
+		return satisfaction;
+	}
+
+	protected int getVolume() {
+		int volume = 0;
+		for (Good good : goodList) {
+			volume += good.getAmount();
+		}
+		return volume;
+	}
+
+	protected float queryAverageFoodConsumption(float planetTime) {
+		return planetTime / simNeedsList.getByType(GoodType.FOOD).dieIfNotConsumedWithin;
+	}
+
+	// private boolean queryReproductionReady()
+	// {
+	// return ( credits > CREDITS_NEEDED_TO_REPRODUCE ) && (
+	// Universe.randomGenerator.nextInt( CAN_REPRODUCE_UP_TO ) == 1 );
+	// }
+	// private void reproduce( SimList simList )
+	// {
+	// simList.create( planet, getCredits() / 2, 1 );
+	// setCredits( getCredits() - getCredits() / 2 );
+	// }
+	@Override
+	public void setCredits(float credits) {
+		this.credits = credits;
+	}
+
+	public void setGoodList(GoodList goodList) {
+		this.goodList = goodList;
+	}
+
+	public void setHistoryManager(HistoryManager historyManager) {
+		this.historyManager = historyManager;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	private SimNeedList sortGoodList() {
+		SimNeedList sortedSimNeedsList = simNeedsList.clone();
+		return sortedSimNeedsList;
+	}
+}

@@ -1,4 +1,4 @@
-package com.abdalla.bushnaq.mercator;
+package de.bushnaq.abdalla.mercator;
 
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;

@@ -13,7 +13,7 @@
 		<file.encoding>utf-8</file.encoding>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.build.timestamp.format>yyyy-MM-dd-HH-mm</maven.build.timestamp.format>
-		<libgdxVersion>1.9.15-SNAPSHOT</libgdxVersion>
+		<libgdxVersion>1.12.1</libgdxVersion>
 	</properties>
 
 	<dependencies>
@@ -68,7 +68,7 @@
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
-			<version>1.2.3</version>
+			<version>1.4.14</version>
 		</dependency>
 		<dependency>
 			<groupId>com.crashinvaders.vfx</groupId>
@@ -87,6 +87,16 @@
 			<resource>
 				<directory>src/main/resources</directory>
 				<filtering>true</filtering>
+				<includes>
+					<include>maven.properties</include>
+				</includes>
+			</resource>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>false</filtering>
+				<excludes>
+					<exclude>maven.properties</exclude>
+				</excludes>
 			</resource>
 		</resources>
 

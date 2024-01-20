@@ -129,7 +129,7 @@ class MyVfxGLUtils extends VfxGLUtils {
 
 		final StringBuilder sb = new StringBuilder();
 		sb.append("Compiling \"").append(vertexFile.name()).append('/').append(fragmentFile.name()).append('\"');
-		if (defines.length() > 0) {
+		if (!defines.isEmpty()) {
 			sb.append(" w/ (").append(defines.replace("\n", ", ")).append(")");
 		}
 		sb.append("...");

@@ -827,4 +827,9 @@ public class Screen3D implements ScreenListener, ApplicationListener, InputProce
 		return false;
 	}
 
+	@Override
+	public boolean touchCancelled(int screenX, int screenY, int pointer, int button) {
+		return false;
+	}
+
 }

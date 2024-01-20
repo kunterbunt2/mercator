@@ -734,4 +734,9 @@ public class Screen2D implements ScreenListener, ApplicationListener, InputProce
 		lastDragY = -1;
 		return true;
 	}
+
+	@Override
+	public boolean touchCancelled(int screenX, int screenY, int pointer, int button) {
+		return false;
+	}
 }

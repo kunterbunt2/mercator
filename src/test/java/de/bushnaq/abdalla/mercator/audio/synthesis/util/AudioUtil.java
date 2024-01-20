@@ -61,7 +61,8 @@ public abstract class AudioUtil implements ApplicationListener, InputProcessor {
 		config.useVsync(true);
 		config.setForegroundFPS(0);
 		config.setResizable(false);
-		config.useOpenGL3(true, 3, 2);
+		config.setOpenGLEmulation(Lwjgl3ApplicationConfiguration.GLEmulation.GL30, 3, 2); // use GL 3.0 (emulated by OpenGL 3.2)
+//		config.useOpenGL3(true, 3, 2);
 		config.setBackBufferConfig(8, 8, 8, 8, 16, 0, 4);
 		config.setTitle("Mercator");
 		final Monitor[] monitors = Lwjgl3ApplicationConfiguration.getMonitors();

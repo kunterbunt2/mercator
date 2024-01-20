@@ -285,4 +285,8 @@ public abstract class TranslationUtil<T extends Translation> extends AudioUtil {
 
 	protected abstract void updateTranslation();
 
+	@Override
+	public boolean touchCancelled(int screenX, int screenY, int pointer, int button) {
+		return false;
+	}
 }

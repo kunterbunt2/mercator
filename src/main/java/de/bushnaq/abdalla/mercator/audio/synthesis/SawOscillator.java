@@ -15,10 +15,10 @@ public class SawOscillator implements Oscilator {
 
 	}
 
-	@Override
-	public void finalize() {
+//	@Override
+//    protected void finalize() {
 		//		System.out.println(String.format("min=%f, max=%f", min, max));
-	}
+//	}
 
 	@Override
 	public double gen(final long i) {

@@ -18,4 +18,4 @@ buildNumber.properties
 .idea
 .settings
 docs/references
-/src/main/resources/atlas/atlas.png
+src/main/resources/atlas/atlas.png

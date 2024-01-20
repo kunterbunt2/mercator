@@ -15,3 +15,7 @@ buildNumber.properties
 .project
 # JDT-specific (Eclipse Java Development Tools)
 .classpath
+.idea
+.settings
+docs/references
+/src/main/resources/atlas/atlas.png

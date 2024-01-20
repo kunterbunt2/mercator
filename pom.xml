@@ -1,0 +1,167 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>de.abdalla.bushnaq</groupId>
+	<artifactId>mercatorpbr</artifactId>
+	<version>0.0.1</version>
+	<name>abdalla.bushnaq.mercatorpbr</name>
+	<description>abdalla.bushnaq.mercatorpbr</description>
+
+	<properties>
+		<!-- Java Code Compliance Level -->
+		<source.level>1.8</source.level>
+		<target.level>1.8</target.level>
+		<file.encoding>utf-8</file.encoding>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<java.libraray.path>${env.JAVA_HOME}\bin</java.libraray.path>
+		<module.version>${project.version}</module.version>
+		<libgdxVersion>1.9.15-SNAPSHOT</libgdxVersion>
+	</properties>
+	<build>
+		<plugins>
+			<plugin>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.7.0</version>
+				<configuration>
+					<source>1.8</source>
+					<target>1.8</target>
+				</configuration>
+			</plugin>
+			<plugin>
+				<artifactId>maven-clean-plugin</artifactId>
+				<version>3.0.0</version>
+				<configuration>
+					<filesets>
+						<fileset>
+							<directory>projects.dashboard/lib</directory>
+							<includes>
+								<include>**/*.jar</include>
+							</includes>
+							<followSymlinks>false</followSymlinks>
+						</fileset>
+					</filesets>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>2.3.1</version>
+				<configuration>
+					<outputDirectory>projects.dashboard/lib</outputDirectory>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+	<!-- Artifact Repositories -->
+	<dependencies>
+		<dependency>
+			<groupId>de.abdalla.bushnaq</groupId>
+			<artifactId>lib</artifactId>
+			<version>0.0.1</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/com.badlogicgames.gdx/gdx-backend-lwjgl -->
+
+		<dependency>
+			<groupId>com.badlogicgames.gdx</groupId>
+			<artifactId>gdx-backend-lwjgl3</artifactId>
+			<version>${libgdxVersion}</version>
+		</dependency>
+		<!-- <dependency> <groupId>com.badlogicgames.gdx</groupId> <artifactId>gdx-backend-lwjgl</artifactId> 
+			<version>${libgdxVersion}</version> </dependency> -->
+		<!-- https://mvnrepository.com/artifact/com.badlogicgames.gdx/gdx -->
+		<dependency>
+			<groupId>com.badlogicgames.gdx</groupId>
+			<artifactId>gdx</artifactId>
+			<version>${libgdxVersion}</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/com.badlogicgames.gdx/gdx-ai -->
+		<!-- <dependency> <groupId>com.badlogicgames.gdx</groupId> <artifactId>gdx-ai</artifactId> 
+			<version>1.6.0</version> </dependency> -->
+		<!-- https://mvnrepository.com/artifact/com.badlogicgames.gdx/gdx-freetype -->
+		<dependency>
+			<groupId>com.badlogicgames.gdx</groupId>
+			<artifactId>gdx-freetype-platform</artifactId>
+			<classifier>natives-desktop</classifier>
+			<version>${libgdxVersion}</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/com.badlogicgames.gdx/gdx-platform -->
+		<dependency>
+			<groupId>com.badlogicgames.gdx</groupId>
+			<artifactId>gdx-platform</artifactId>
+			<classifier>natives-desktop</classifier>
+			<version>${libgdxVersion}</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/com.badlogicgames.gdx/gdx-freetype -->
+		<dependency>
+			<groupId>com.badlogicgames.gdx</groupId>
+			<artifactId>gdx-freetype</artifactId>
+			<version>${libgdxVersion}</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.lwjgl/lwjgl-stb -->
+		<!-- <dependency> <groupId>org.lwjgl</groupId> <artifactId>lwjgl-stb</artifactId> 
+			<version>3.1.0</version> </dependency> -->
+
+
+
+		<dependency>
+			<groupId>com.github.mgsx-dev.gdx-gltf</groupId> <!-- Different group -->
+			<artifactId>gltf</artifactId> <!-- Different artifact -->
+			<version>2.1.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-math3</artifactId>
+			<version>3.6.1</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-engine -->
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-engine</artifactId>
+			<version>5.7.1</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.hamcrest</groupId>
+			<artifactId>java-hamcrest</artifactId>
+			<version>2.0.0.0</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/ch.qos.logback/logback-classic -->
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
+			<version>1.2.3</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/com.crashinvaders.vfx/gdx-vfx-core -->
+		<dependency>
+			<groupId>com.crashinvaders.vfx</groupId>
+			<artifactId>gdx-vfx-core</artifactId>
+			<version>0.5.0</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/com.crashinvaders.vfx/gdx-vfx-effects -->
+		<dependency>
+			<groupId>com.crashinvaders.vfx</groupId>
+			<artifactId>gdx-vfx-effects</artifactId>
+			<version>0.5.0</version>
+		</dependency>
+
+
+	</dependencies>
+	<repositories>
+		<repository>
+			<id>jitpack.io</id>
+			<url>https://jitpack.io</url>
+		</repository>
+		<repository>
+			<id>gdx-nightlies</id>
+			<url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+		</repository>
+		<repository>
+			<id>sonartype-snapshots</id>
+			<url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+		</repository>
+		<!-- -->
+	</repositories>
+</project>

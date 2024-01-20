@@ -1,0 +1,73 @@
+MEMORY
+ - universe.advanceInTime()
+
+PERFORMANCE
+ - do not call update bounding box for every frame
+
+ISSUES
+- form selecting an item does not show info in the lower pane
+- renderer statistics missing
+- unierse statistics never showing up
+- Q dose not end the application
+- cluster bounding box not working
+
+
+TASKS
+	DONE
+		- allow selection of objects
+		- add screenshot key
+		- check font issue and answer ticket
+		- introduce logger
+		- introduce junit 5
+
+	TODO
+		- Game
+			- who has the money pie chart
+			- number of x per duration (transactions, buy, produce, ...)
+			- rotate trader to face translation direction
+			- rotate and shift goods on traders
+			- implement a communication bus to reduce dependencies
+			- water should cover all empty space
+			- How to manage the edge of the game area?
+		- Audio
+			- document audio engine
+			- try flanger
+			- try ring modulator
+			- try equalizer
+		- Graphics
+			- introduce text capability in 3D
+				use pbr renderer
+			- test emissive material
+				emissive bloom
+				you can render a scene with emissive only to a FBO and blur it
+			- deferred rendering
+				https://github.com/libgdx/libgdx/blob/master/tests/gdx-tests/src/com/badlogic/gdx/tests/g3d/MultipleRenderTargetTest.java
+			- post processing using depth of field shader
+			- investigate depth of field
+			- investigate light bloom
+			
+
+gdx-are
+Openal based Audio Render Engine for libgdx supporting procedurally generated audio.
+Openal audio effect including Doppler effect, hall, bass boosting and filtering are supported.
+Openal listener position in space and velocity attribute are supported.
+All audio is streamed in mono positioned in space and have velocity attributes.
+Supports one synthesizer per audio stream.
+A synthesizer supports any number of Generators and LFOs. keep in mind that number of generators and LFOs has an impact on performance.
+Generators implement the Generator interface, LFOs implement the Lfo interface.
+Every audio stream owns a thread that is responsible to render audio when a buffer is ready.
+Supports maximum number of device context mono audio streams.
+Audio streams are assigned to entities whenever they are within hearing distance.
+
+Automatic effects
+openal will adapt audio volume and balance (3D sound) taking into account lister and source position in space.
+openal will adapt audio frequency (Doppler) taking into account lister and source velocity.
+gdx-are will adapt audio frequency taking into account listener and source position in space.
+                - bass is reduced for far sounds
+                - treble is boosted for far sounds
+
+Entities have control over the stream to notify
+                - spoolup of stream, notifying the start
+                - spool-down of stream, notifying the end
+                - volume
+

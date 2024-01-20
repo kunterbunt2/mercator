@@ -1,0 +1,11 @@
+				libgdx						data
+uniform mat4	u_projTrans					camera.projection
+uniform mat4	u_viewTrans					camera.view
+uniform mat4 	u_projViewTrans				camera.combined
+uniform mat4	u_worldTrans				renderable.worldTransform
+uniform mat4	u_viewWorldTrans			temp.set(shader.camera.view).mul(renderable.worldTransform)
+uniform mat4	u_projViewWorldTrans		temp.set(shader.camera.combined).mul(renderable.worldTransform)
+
+				SpriteBatch.defaultShader
+uniform mat4	u_projTrans					combinedMatrix.set(projectionMatrix).mul(transformMatrix)
+

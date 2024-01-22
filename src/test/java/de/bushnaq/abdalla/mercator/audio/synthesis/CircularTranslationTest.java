@@ -2,11 +2,10 @@ package de.bushnaq.abdalla.mercator.audio.synthesis;
 
 import de.bushnaq.abdalla.mercator.audio.synthesis.util.CircularTranslation;
 import de.bushnaq.abdalla.mercator.audio.synthesis.util.TranslationUtil;
+import de.bushnaq.abdalla.mercator.universe.sim.trader.Trader;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import de.bushnaq.abdalla.mercator.universe.sim.trader.Trader;
 
 public class CircularTranslationTest extends TranslationUtil<CircularTranslation> {
 	private static final float MAX_GRID_SIZE = 1000f;

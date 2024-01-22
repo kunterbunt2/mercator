@@ -35,7 +35,7 @@ public class TraderList extends Vector<Trader> {
 
 	public Sim seekTraderByName(final String aName) {
 		for (final Sim trader : this) {
-			if (trader.getName() == aName) {
+			if (trader.getName().equals(aName)) {
 				return trader;
 			}
 		}

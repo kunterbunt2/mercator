@@ -1,5 +1,6 @@
 package de.bushnaq.abdalla.mercator.shader;
 
+import de.bushnaq.abdalla.mercator.universe.Universe;
 import com.badlogic.gdx.Application.ApplicationType;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g3d.Renderable;
@@ -82,7 +83,8 @@ public class MercatorShaderProvider extends PBRShaderProvider {
 		config.vertexShader = Gdx.files.internal("shader/water.vertex.glsl").readString();
 		config.fragmentShader = Gdx.files.internal("shader/water.fragment.glsl").readString();
 		waterShader = new WaterShader(renderable, config, prefix, waterRefractionFbo, waterReflectionFbo);
-		waterShader.setTiling(universeSize * 2 * 4 * 2);
+		waterShader.setTiling(universeSize * 2 * 4 * 2 / Universe.WORLD_SCALE);
+		waterShader.setWaveStrength(0.01f / Universe.WORLD_SCALE);
 		waterShader.setClippingPlane(clippingPlane);
 		return waterShader;
 

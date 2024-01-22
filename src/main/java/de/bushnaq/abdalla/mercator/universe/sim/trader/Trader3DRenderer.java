@@ -1,24 +1,5 @@
 package de.bushnaq.abdalla.mercator.universe.sim.trader;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import de.bushnaq.abdalla.mercator.universe.good.Good;
-import de.bushnaq.abdalla.mercator.universe.good.Good3DRenderer;
-import de.bushnaq.abdalla.mercator.universe.good.GoodType;
-import de.bushnaq.abdalla.mercator.universe.jumpgate.JumpGate3DRenderer;
-import de.bushnaq.abdalla.mercator.universe.planet.Planet3DRenderer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import de.bushnaq.abdalla.mercator.audio.synthesis.MercatorSynthesizer;
-import de.bushnaq.abdalla.mercator.renderer.GameObject;
-import de.bushnaq.abdalla.mercator.renderer.ObjectRenderer;
-import de.bushnaq.abdalla.mercator.renderer.Render3DMaster;
-import de.bushnaq.abdalla.mercator.renderer.SceneManager;
-import de.bushnaq.abdalla.mercator.renderer.Screen3D;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
@@ -27,24 +8,39 @@ import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.PointLight;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
-
+import de.bushnaq.abdalla.mercator.audio.synthesis.MercatorSynthesizer;
+import de.bushnaq.abdalla.mercator.renderer.*;
+import de.bushnaq.abdalla.mercator.universe.Universe;
+import de.bushnaq.abdalla.mercator.universe.good.Good;
+import de.bushnaq.abdalla.mercator.universe.good.Good3DRenderer;
+import de.bushnaq.abdalla.mercator.universe.good.GoodType;
+import de.bushnaq.abdalla.mercator.universe.planet.Planet3DRenderer;
 import net.mgsx.gltf.scene3d.attributes.PBRColorAttribute;
 import net.mgsx.gltf.scene3d.model.ModelInstanceHack;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class Trader3DRenderer extends ObjectRenderer {
 
-	private static final float LIGHT_DISTANCE = 10f;
+	private static final float LIGHT_DISTANCE = 5f;
 	private static final float LIGHT_INTENSITY = 10000f;
 	private static int NUMBER_OF_LIGHTS = 1;
 	private static final Color TRADER_NAME_COLOR = Color.WHITE;
-	private static final float TRADER_X_SIZE = 16/* 2.4f */;
-	private static final float TRADER_Y_SIZE = 8/* 1.2f */;
-	private static final float TRADER_Z_SIZE = 16/* 1.2f */;
+	private static final float TRADER_SIZE_X = 16 / Universe.WORLD_SCALE;
+	private static final float TRADER_SIZE_Y = 8 / Universe.WORLD_SCALE;
+	public static final float TRADER_SIZE_Z = 16 / Universe.WORLD_SCALE;
+	private static final float TRADER_TRAVELING_HEIGHT = -TRADER_SIZE_Y / 2 + Planet3DRenderer.WATER_Y;
 	private final Vector3 direction = new Vector3();//intermediate value
 	private final List<GameObject> goodInstances = new ArrayList<>();
 	private GameObject instance;
 	private boolean lastSelected = false;
 	private long lastTransaction = 0;
+	private final Vector3 target = new Vector3();//intermediate value
 	private final List<GameObject> lightGameObjects = new ArrayList<>();
 	private final Vector3 lightScaling = new Vector3(2.0f, 2.0f, 2.0f);
 	private final Vector3 lightTranslation = new Vector3();
@@ -54,6 +50,7 @@ public class Trader3DRenderer extends ObjectRenderer {
 	private final Vector3 scaling = new Vector3();//intermediate value
 	private final Vector3 shift = new Vector3();//intermediate value
 	Vector3 speed = new Vector3(0, 0, 0);
+	float[] lastVelocity = new float[3];
 	private MercatorSynthesizer synth;
 	private final Trader trader;
 	private int TraderColorIndex = -1;
@@ -68,7 +65,7 @@ public class Trader3DRenderer extends ObjectRenderer {
 	}
 
 	@Override
-	public void create(final float x, final float y, final Render3DMaster renderMaster) {
+	public void create( final Render3DMaster renderMaster) {
 		try {
 			createTader(renderMaster);
 			createLights(renderMaster);
@@ -161,7 +158,7 @@ public class Trader3DRenderer extends ObjectRenderer {
 	}
 
 	@Override
-	public void renderText(final float aX, final float aY, final SceneManager sceneManager, final int index) {
+	public void renderText( final SceneManager sceneManager, final int index, final boolean selected) {
 		renderTextOnTop(sceneManager, 0, 0, trader.getName().substring(2), 16);
 		renderTextOnTop(sceneManager, -6, -7, "" + (int) velocity[0], 3);//x speed
 		renderTextOnTop(sceneManager, 6, -7, "" + (int) velocity[2], 3);//z speed
@@ -187,7 +184,7 @@ public class Trader3DRenderer extends ObjectRenderer {
 			{
 				final Vector3 xVector = new Vector3(1, 0, 0);
 				final Vector3 yVector = new Vector3(0, 1, 0);
-				m.setToTranslation(x - height * scaling / 2.0f - dy, y + TRADER_Y_SIZE / 2.0f + 0.2f, z + width * scaling / 2.0f - dx);
+				m.setToTranslation(x - height * scaling / 2.0f - dy, y + TRADER_SIZE_Y / 2.0f + 0.2f, z + width * scaling / 2.0f - dx);
 				m.rotate(yVector, 90);
 				m.rotate(xVector, -90);
 				m.scale(scaling, scaling, 1f);
@@ -204,7 +201,7 @@ public class Trader3DRenderer extends ObjectRenderer {
 	}
 
 	@Override
-	public void update(final float px, final float py, final Render3DMaster renderMaster, final long currentTime, final float timeOfDay, final int index, final boolean selected) throws Exception {
+	public void update( final Render3DMaster renderMaster, final long currentTime, final float timeOfDay, final int index, final boolean selected) throws Exception {
 		update(renderMaster, currentTime, index, selected);
 	}
 
@@ -223,14 +220,14 @@ public class Trader3DRenderer extends ObjectRenderer {
 
 		for (int i = 0; i < goodInstances.size(); i++) {
 			final GameObject go = goodInstances.get(i);
-			final int xEdgeSize = (int) (TRADER_X_SIZE / Good3DRenderer.GOOD_X);
-			final int zEdgeSize = (int) (TRADER_Z_SIZE / Good3DRenderer.GOOD_Y);
+			final int xEdgeSize = (int) (TRADER_SIZE_X / Good3DRenderer.GOOD_X);
+			final int zEdgeSize = (int) (TRADER_SIZE_Z / Good3DRenderer.GOOD_Y);
 			final int xContainer = i % xEdgeSize;
 			final int zContainer = (int) Math.floor(i / xEdgeSize) % zEdgeSize;
 			final int yContainer = (int) Math.floor(i / (xEdgeSize * zEdgeSize));
-			final float x = translation.x - TRADER_X_SIZE / 2 + Good3DRenderer.GOOD_X / 2 + xContainer * (Good3DRenderer.GOOD_X);
-			final float z = translation.z - TRADER_Z_SIZE / 2 + Good3DRenderer.GOOD_Y / 2 + zContainer * (Good3DRenderer.GOOD_Z);
-			final float y = translation.y - TRADER_Y_SIZE / 2 - Good3DRenderer.GOOD_Z / 2 - yContainer * (Good3DRenderer.GOOD_Y);
+			final float x = translation.x - TRADER_SIZE_X / 2 + Good3DRenderer.GOOD_X / 2 + xContainer * (Good3DRenderer.GOOD_X);
+			final float z = translation.z - TRADER_SIZE_Z / 2 + Good3DRenderer.GOOD_Y / 2 + zContainer * (Good3DRenderer.GOOD_Z);
+			final float y = translation.y - TRADER_SIZE_Y / 2 - Good3DRenderer.GOOD_Z / 2 - yContainer * (Good3DRenderer.GOOD_Y);
 			go.instance.transform.setToTranslationAndScaling(x, y, z, Good3DRenderer.GOOD_X - Good3DRenderer.SPACE_BETWEEN_GOOD, Good3DRenderer.GOOD_Y - Good3DRenderer.SPACE_BETWEEN_GOOD, Good3DRenderer.GOOD_Z - Good3DRenderer.SPACE_BETWEEN_GOOD);
 			go.update();
 
@@ -249,11 +246,11 @@ public class Trader3DRenderer extends ObjectRenderer {
 	}
 
 	private void updateLights(final long currentTime) {
-		final float[] dx = { translation.x + TRADER_X_SIZE / 2 + LIGHT_DISTANCE, translation.x - TRADER_X_SIZE / 2 - LIGHT_DISTANCE, translation.x + TRADER_X_SIZE / 2 + LIGHT_DISTANCE, translation.x - TRADER_X_SIZE / 2 - LIGHT_DISTANCE };
-		final float[] dz = { translation.z + TRADER_Z_SIZE / 2 + LIGHT_DISTANCE, translation.z + TRADER_Z_SIZE / 2 + LIGHT_DISTANCE, translation.z - TRADER_Z_SIZE / 2 - LIGHT_DISTANCE, translation.z - TRADER_Z_SIZE / 2 - LIGHT_DISTANCE };
-		lightTranslation.y = translation.y - TRADER_Y_SIZE / 2 + Screen3D.SPACE_BETWEEN_OBJECTS * 10;
+		final float[] dx = { translation.x + TRADER_SIZE_X / 2 + LIGHT_DISTANCE, translation.x - TRADER_SIZE_X / 2 - LIGHT_DISTANCE, translation.x + TRADER_SIZE_X / 2 + LIGHT_DISTANCE, translation.x - TRADER_SIZE_X / 2 - LIGHT_DISTANCE };
+		final float[] dz = { translation.z + TRADER_SIZE_Z / 2 + LIGHT_DISTANCE, translation.z + TRADER_SIZE_Z / 2 + LIGHT_DISTANCE, translation.z - TRADER_SIZE_Z / 2 - LIGHT_DISTANCE, translation.z - TRADER_SIZE_Z / 2 - LIGHT_DISTANCE };
+		lightTranslation.y = translation.y - TRADER_SIZE_Y / 2 + Screen3D.SPACE_BETWEEN_OBJECTS * 10;
 		//		lightTranslation.set(translation);
-		if (trader.destinationWaypointPlanet != null) {
+		if (trader.targetWaypoint != null) {
 			final float intensitiy = LIGHT_INTENSITY;
 			for (int i = 0; i < NUMBER_OF_LIGHTS; i++) {
 				lightTranslation.x = dx[i];
@@ -276,59 +273,90 @@ public class Trader3DRenderer extends ObjectRenderer {
 	}
 
 	private void updateTrader(final Render3DMaster renderMaster, final int index, final boolean selected) throws Exception {
-		if (trader.destinationWaypointPlanet != null) {
+		if (trader.targetWaypoint != null) {
 
 			position[0] = translation.x;
 			position[1] = translation.y;
 			position[2] = translation.z;
-			trader.calcualteEngineSpeed();
-			speed.set(trader.destinationWaypointPlanet.x - trader.planet.x, 0, trader.destinationWaypointPlanet.y - trader.planet.y);
+			trader.calculateEngineSpeed();
+			if (trader.sourceWaypoint != null)
+				speed.set(trader.targetWaypoint.x - trader.sourceWaypoint.x, 0, trader.targetWaypoint.z - trader.sourceWaypoint.z);
+			else
+				speed.set(1, 0, 1);
+
 			speed.nor();
+			//			final float engineSpeed = trader.getMaxEngineSpeed();
 			speed.scl(trader.getMaxEngineSpeed());
 			velocity[0] = speed.x;
 			velocity[1] = 0;
 			velocity[2] = speed.z;
-			synth.setPositionAndVelocity(position, velocity);
+
+			boolean update = false;
+			for (int i = 0; i < 3; i++) {
+				if (Math.abs(lastVelocity[i] - velocity[i]) > 0.001f) {
+					update = true;
+				}
+			}
+			if (update) {
+				synth.setPositionAndVelocity(position, velocity);
+				//				if (trader.getName().equals("T-6"))
+				//					logger.info(String.format("%f %f  %f %f  %f %f", lastVelocity[0], velocity[0], lastVelocity[1], velocity[1], lastVelocity[2], velocity[2]));
+				for (int i = 0; i < 3; i++)
+					lastVelocity[i] = velocity[i];
+			}
+
+			//			if (trader.getName().equals("T-6"))
 			synth.play();
-			// ---Traveling
 			translation.y = Good3DRenderer.GOOD_HEIGHT * 8 + Screen3D.SPACE_BETWEEN_OBJECTS;
+			// ---Traveling
 			if (trader.destinationWaypointDistance != 0) {
-				final float scalex = (trader.destinationWaypointPlanet.x - trader.planet.x);
-				final float scalez = (trader.destinationWaypointPlanet.y - trader.planet.y);
-				direction.set(scalex, 0, scalez);
-				shift.set(-direction.z, direction.y, direction.x);
-				shift.nor();
-				shift.scl(JumpGate3DRenderer.JUMP_GATE_SIZE);
-				//				Matrix4 m = new Matrix4();
-				//				final Vector3 targetVector = new Vector3(trader.destinationWaypointPlanet.x- trader.planet.x, 0, trader.destinationWaypointPlanet.y - trader.planet.y);
-				//				m.rotateTowardTarget(targetVector, Vector3.Y);
-				//				shift.rot(m);
-				translation.x = (trader.planet.x + (trader.destinationWaypointPlanet.x - trader.planet.x) * trader.destinationWaypointDistanceProgress / trader.destinationWaypointDistance) + shift.x;
-				translation.z = (trader.planet.y + (trader.destinationWaypointPlanet.y - trader.planet.y) * trader.destinationWaypointDistanceProgress / trader.destinationWaypointDistance) + shift.z;
+				final float scalex = (trader.targetWaypoint.x - trader.sourceWaypoint.x);
+				final float scaley = (trader.targetWaypoint.y - trader.sourceWaypoint.y);
+				final float scalez = (trader.targetWaypoint.z - trader.sourceWaypoint.z);
+				direction.set(scalex, scaley, scalez);
+				//				shift.set(-direction.z, direction.y, direction.x);
+				//				shift.nor();
+				//				shift.scl(Planet.CHANNEL_SIZE / 2);
+				translation.x = (trader.sourceWaypoint.x + (trader.targetWaypoint.x - trader.sourceWaypoint.x) * trader.destinationWaypointDistanceProgress / trader.destinationWaypointDistance) /*+ shift.x*/;
+//				translation.y = (trader.sourceWaypoint.y + (trader.targetWaypoint.y - trader.sourceWaypoint.y) * trader.destinationWaypointDistanceProgress / trader.destinationWaypointDistance) /*+ shift.y*/ + TRADER_TRAVELING_HEIGHT;
+				translation.z = (trader.sourceWaypoint.z + (trader.targetWaypoint.z - trader.sourceWaypoint.z) * trader.destinationWaypointDistanceProgress / trader.destinationWaypointDistance) /*+ shift.z*/;
 			} else {
-				translation.x = trader.planet.x - Planet3DRenderer.PLANET_ATMOSPHARE_SIZE / 2;
-				translation.z = trader.planet.y - Planet3DRenderer.PLANET_ATMOSPHARE_SIZE / 2 + index * TRADER_Z_SIZE;
+				translation.x = trader.planet.x /*- Planet3DRenderer.PLANET_ATMOSPHARE_SIZE / 2*/;
+//				translation.y = trader.planet.y + TRADER_TRAVELING_HEIGHT;
+				translation.z = trader.planet.z /*- Planet3DRenderer.PLANET_ATMOSPHARE_SIZE / 2 + index * TRADER_SIZE_Z*/;
 			}
 		} else {
 			synth.pause();
 			// in port
-			translation.y = Planet3DRenderer.PLANET_HIGHT + Screen3D.SPACE_BETWEEN_OBJECTS;
-			translation.x = trader.planet.x - Planet3DRenderer.PLANET_ATMOSPHARE_SIZE / 2;
-			translation.z = trader.planet.y - Planet3DRenderer.PLANET_ATMOSPHARE_SIZE / 2 + index * TRADER_Z_SIZE;
+			translation.x = trader.planet.x /*- Planet3DRenderer.PLANET_ATMOSPHARE_SIZE / 2*/;
+//			translation.y = trader.planet.y + TRADER_TRAVELING_HEIGHT;
+			translation.z = trader.planet.z /*- Planet3DRenderer.PLANET_ATMOSPHARE_SIZE / 2 + index * TRADER_SIZE_Z*/;
 		}
-		translation.add(TRADER_X_SIZE / 2, TRADER_Y_SIZE / 2, 0);
-		scaling.set(TRADER_X_SIZE, TRADER_Y_SIZE, TRADER_Z_SIZE);
-		//		float factor = Math.max(trader.getGoodList().queryAmount() / trader.goodSpace, 0.2f);
-		//		scaling.scl(100);
-		instance.instance.transform.setToTranslationAndScaling(translation, scaling);
+		//translation.add(0, TRADER_SIZE_Y / 2, 0);
+		scaling.set(TRADER_SIZE_X, TRADER_SIZE_Y, TRADER_SIZE_Z);
+		instance.instance.transform.setToTranslation(translation);
+
+		//		pole.instance.transform.setToTranslation(translation);
+
+		if (trader.targetWaypoint != null) {
+			target.set(trader.targetWaypoint.x/* + shift.x*/, Planet3DRenderer.WATER_Y, trader.targetWaypoint.z/* + shift.z*/);
+			//			instance.instance.transform.rotateTowardTarget(target, Vector3.Y);
+			instance.instance.transform.rotateTowardDirection(direction, Vector3.Y);
+			instance.instance.transform.scale(scaling.x, scaling.y, scaling.z);
+			//			pole.instance.transform.rotateTowardDirection(direction, Vector3.Y);
+			//			pole.instance.transform.translate(-TRADER_X_SIZE / 2, POLE_Y_SIZE / 2, -TRADER_Z_SIZE / 2);
+			//			pole.instance.transform.scale(1f, POLE_Y_SIZE, 1f);
+		}
 
 		//		if (trader.getName().equals("T-50")) {
 		//						System.out.println("x=" + position[0] + " y=" + position[1] + " z=" + position[2]);
 		//		}
 
 		trader.x = translation.x;
+		trader.y = translation.y;
 		trader.z = translation.z;
 		instance.update();
+		//		pole.update();
 		if (selected != lastSelected) {
 			if (selected) {
 				instance.instance.materials.get(0).set(new PBRColorAttribute(ColorAttribute.Emissive, Color.YELLOW));

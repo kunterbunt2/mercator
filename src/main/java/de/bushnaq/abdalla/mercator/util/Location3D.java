@@ -20,8 +20,6 @@ public class Location3D {
 	}
 
 	public float queryDistance(final Location3D aLocation) {
-		return (float) Math.sqrt(Math.pow(x - aLocation.x, 2) + Math.pow(y - aLocation.y, 2));
-		//		return (Math.abs((x - aLocation.x)) + Math.abs((y - aLocation.y))) * Planet.MIN_PLANET_DISTANCE;
-		//TODO needs adapting for 2D
+		return (float) Math.sqrt(Math.pow(x - aLocation.x, 2) + Math.pow(y - aLocation.y, 2) + Math.pow(z - aLocation.z, 2));
 	}
 }

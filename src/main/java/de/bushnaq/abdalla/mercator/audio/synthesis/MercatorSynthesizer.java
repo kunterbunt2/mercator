@@ -68,22 +68,25 @@ public class MercatorSynthesizer extends Synthesizer {
 
 		saw3.setOscillator(frequency1 / 2);
 		saw3.setLfo(.88f, 15f);
-
+		//
 		saw4.setOscillator(frequency2 / 2);
 		saw4.setLfo(.85f, 15f);
-
+		//
 		sin1.setOscillator(frequency1 * 2);
 		sin1.setLfo(.88f, 15f);
-
+		//
 		sin2.setOscillator(frequency2 * 2);
 		sin2.setLfo(.85f, 15f);
 
 		final float factor = (speed - Trader.MIN_ENGINE_SPEED) / (Trader.MAX_ENGINE_SPEED - Trader.MIN_ENGINE_SPEED);
+		//		setGain( 10.0f);
 		setGain(0.1f + bassGain * 20);
 		lfo1.setFrequency(1f + 5f * factor, 0.1f);
+		//		lfo1.setFrequency(1f, 1.0f);
 
 		final float lowGain = bassGain;
-		final float highGain = 1 - bassGain;
+		final float highGain = (1 - bassGain);
+		//		setFilter(true);
 		setFilterGain(lowGain, highGain);
 		if (lowGain < 0.5f) {
 			setFilter(false);

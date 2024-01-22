@@ -21,7 +21,7 @@ public class Planet2DRenderer extends ObjectRenderer {
 
 	public Planet2DRenderer(final Planet planet) {
 		this.planet = planet;
-		circle = new Circle(planet.x, planet.y, PLANET_SIZE / 2 + 1);
+		circle = new Circle(planet.x, planet.z, PLANET_SIZE / 2 + 1);
 	}
 
 	@Override
@@ -32,13 +32,13 @@ public class Planet2DRenderer extends ObjectRenderer {
 	private void renderFactory(final Planet planet, final Render2DMaster renderMaster) {
 		for (final ProductionFacility productionFacility : planet.productionFacilityList) {
 			int index = productionFacility.producedGood.type.ordinal();
-			productionFacility.get2DRenderer().render(planet.x, planet.y, renderMaster, index++, planet.universe.selectedProductionFacility == productionFacility);
+			productionFacility.get2DRenderer().render(planet.x, planet.z, renderMaster, index++, planet.universe.selectedProductionFacility == productionFacility);
 		}
 	}
 
 	private void renderPlanet(final Planet planet, final Render2DMaster renderMaster, final boolean selected) {
 		final float x = planet.x;
-		final float y = planet.y;
+		final float y = planet.z;
 		final float hps = PLANET_SIZE / 2;
 		Color color;
 		// ---Planet color
@@ -114,7 +114,7 @@ public class Planet2DRenderer extends ObjectRenderer {
 		{
 			int simIndex = 0;
 			for (final Sim sim : planet.simList) {
-				sim.get2DRenderer().render(planet.x, planet.y, renderMaster, simIndex++, false);
+				sim.get2DRenderer().render(planet.x, planet.z, renderMaster, simIndex++, false);
 			}
 		}
 	}

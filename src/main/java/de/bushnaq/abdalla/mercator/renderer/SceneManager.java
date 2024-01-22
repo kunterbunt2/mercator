@@ -4,20 +4,22 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.zip.Deflater;
 
-import org.lwjgl.opengl.GL30C;
-
 import de.bushnaq.abdalla.mercator.audio.synthesis.AudioEngine;
 import de.bushnaq.abdalla.mercator.audio.synthesis.MercatorAudioEngine;
 import de.bushnaq.abdalla.mercator.renderer.camera.MovingCamera;
 import de.bushnaq.abdalla.mercator.renderer.camera.MyCameraInputController;
 import de.bushnaq.abdalla.mercator.renderer.reports.Info;
-import de.bushnaq.abdalla.mercator.shader.DepthOfFieldEffect;
-import de.bushnaq.abdalla.mercator.shader.MercatorShaderProvider;
 import de.bushnaq.abdalla.mercator.universe.Universe;
 import de.bushnaq.abdalla.mercator.universe.good.Good;
+import de.bushnaq.abdalla.mercator.universe.path.Path;
 import de.bushnaq.abdalla.mercator.universe.planet.Planet;
 import de.bushnaq.abdalla.mercator.universe.planet.Planet3DRenderer;
 import de.bushnaq.abdalla.mercator.universe.sim.trader.Trader;
+import org.lwjgl.opengl.GL30C;
+
+import de.bushnaq.abdalla.mercator.desktop.LaunchMode;
+import de.bushnaq.abdalla.mercator.shader.DepthOfFieldEffect;
+import de.bushnaq.abdalla.mercator.shader.MercatorShaderProvider;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.InputProcessor;
@@ -98,6 +100,7 @@ public class SceneManager {
 	private MyCameraInputController camController;
 	MovingCamera camera;
 	private final EnvironmentCache computedEnvironement = new EnvironmentCache();
+	float currentDayTime;
 	private SceneSkybox daySkyBox;
 	//	private ModelBatch defaultBatch;
 	private ModelBatch depthBatch;
@@ -119,6 +122,7 @@ public class SceneManager {
 	Info info;
 	private boolean infoVisible;
 	private final InputMultiplexer inputMultiplexer = new InputMultiplexer();
+	private final LaunchMode launchMode;
 	//	private ShaderProvider createShaderProvider() {
 	//		final PBRShaderConfig config = PBRShaderProvider.createDefaultConfig();
 	//		config.numBones = 0;
@@ -167,8 +171,9 @@ public class SceneManager {
 	private FrameBuffer waterReflectionFbo;
 	private FrameBuffer waterRefractionFbo;
 
-	public SceneManager(final Universe universe, final InputProcessor inputProcessor) throws Exception {
+	public SceneManager(final Universe universe, final InputProcessor inputProcessor, final LaunchMode launchMode) throws Exception {
 		this.universe = universe;
+		this.launchMode = launchMode;
 		createFrameBuffer();
 		createEnvironment();
 		createCamera();
@@ -218,10 +223,12 @@ public class SceneManager {
 
 	private void createCamera() throws Exception {
 		camera = new MovingCamera(67f, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-		final Planet planet = universe.findBusyCenterPlanet();
+		Planet planet = universe.findBusyCenterPlanet();
+		if (planet == null)
+			planet = universe.planetList.get(0);
 
-		final Vector3 lookat = new Vector3(planet.x, 0, planet.y);
-		camera.position.set(lookat.x + 300f, lookat.y + 500f, lookat.z + 400f);
+		final Vector3 lookat = new Vector3(planet.x, 0, planet.z);
+		camera.position.set(lookat.x + 300f / Universe.WORLD_SCALE, lookat.y + 500f / Universe.WORLD_SCALE, lookat.z + 400f / Universe.WORLD_SCALE);
 		//		camera.position.set(300f, 0f, 0f);//-270, pitch=0
 		//		camera.position.set(0f, 0f, 300f);//180
 		//		camera.position.set(-300f, 0f, 0f);//-90
@@ -358,7 +365,7 @@ public class SceneManager {
 	}
 
 	private void createStage() throws Exception {
-		info = new Info(universe, getAtlasManager(), batch2D, inputMultiplexer);
+		info = new Info(getAtlasManager(), batch2D, inputMultiplexer);
 		info.createStage();
 		//		final int height = 12;
 		//		stage = new Stage();
@@ -527,6 +534,10 @@ public class SceneManager {
 		return (alwaysDay || (timeOfDay > 6 && timeOfDay <= 18));
 	}
 
+	public boolean isEnableDepthOfField() {
+		return enableDepthOfField;
+	}
+
 	public boolean isInfoVisible() {
 		return infoVisible;
 	}
@@ -595,6 +606,7 @@ public class SceneManager {
 			////								batch2D.draw(postFbo.getTextureAttachments().get(1), 0, 0, 1920, 1080, 0, 0, 1920, 1080, false, true);
 			//								batch2D.draw(waterRefractionFbo.getTextureAttachments().get(1), 0, 0, 1920, 1080, 0, 0, 1920, 1080, false, true);
 			batch2D.end();
+			//batch2D.enableBlending();
 
 		}
 	}
@@ -614,7 +626,7 @@ public class SceneManager {
 	}
 
 	public void render(final long currentTime, final float deltaTime, final boolean takeScreenShot) throws Exception {
-		float currentDayTime = currentTime - ((currentTime / (50000L / speed * 24)) * (50000L / speed * 24));
+		currentDayTime = currentTime - ((currentTime / (50000L / speed * 24)) * (50000L / speed * 24));
 		currentDayTime /= 50000 / speed;
 		updateEnvironment(currentDayTime);
 		renderableProviders.clear();
@@ -696,20 +708,27 @@ public class SceneManager {
 
 	private void render3DText() {
 		for (final Planet planet : universe.planetList) {
-			planet.get3DRenderer().renderText(0, 0, this, 0);
+			planet.get3DRenderer().renderText(this, 0, planet == universe.selectedPlanet);
 		}
 		for (final Planet planet : universe.planetList) {
 			int index = 0;
 			for (final Good good : planet.getGoodList()) {
-				good.get3DRenderer().renderText(planet.x, planet.y, this, index++);
+				good.get3DRenderer().renderText(planet.x, planet.y, planet.z, this, index++);
 			}
 		}
 		for (final Planet planet : universe.planetList) {
 			int index = 0;
 			for (final Trader trader : planet.traderList) {
-				trader.get3DRenderer().renderText(0, 0, this, index++);
+				trader.get3DRenderer().renderText(this, index++, trader == universe.selectedTrader);
 			}
 
+		}
+		if (launchMode == LaunchMode.development)
+		{
+			for (final Path path : universe.pathList) {
+				int index = 0;
+				path.get3DRenderer().renderText(this, index++, path.selected);
+			}
 		}
 	}
 
@@ -806,60 +825,6 @@ public class SceneManager {
 	}
 
 	protected void renderStage() throws Exception {
-		//		int labelIndex = 0;
-		//time of day
-		//		{
-		//			stringBuilder.setLength(0);
-		//			stringBuilder.append(" timeOfDay: ").append(timeOfDay);
-		//			labels.get(labelIndex++).setText(stringBuilder);
-		//		}
-		//angle
-		//		{
-		//			stringBuilder.setLength(0);
-		//			stringBuilder.append(" angle: ").append((angle / Math.PI) * 180);
-		//			labels.get(labelIndex++).setText(stringBuilder);
-		//		}
-		//		{
-		//			stringBuilder.setLength(0);
-		//			stringBuilder.append(" dirty count: ").append(staticCacheDirtyCount);
-		//			labels.get(labelIndex++).setText(stringBuilder);
-		//		}
-		//		{
-		//			stringBuilder.setLength(0);
-		//			int count = visibleStaticGameObjectCount;
-		//			int totalCount = staticModelInstances.size;
-		//			stringBuilder.append(" Static Models: ").append(count).append(" / ").append(totalCount);
-		//			labels.get(labelIndex++).setText(stringBuilder);
-		//		}
-		//		{
-		//			stringBuilder.setLength(0);
-		//			int count = visibleDynamicGameObjectCount;
-		//			int totalCount = dynamicModelInstances.size;
-		//			stringBuilder.append(" Dynamic Models: ").append(count).append(" / ").append(totalCount);
-		//			labels.get(labelIndex++).setText(stringBuilder);
-		//		}
-		// light
-		//		{
-		//			stringBuilder.setLength(0);
-		//			int count = visibleStaticLightCount;
-		//			int totalCount = environment.get(PointLightsAttribute.class, PointLightsAttribute.Type).lights.size;
-		//			stringBuilder.append(" Static PointLights: ").append(count).append(" / ").append(totalCount);
-		//			labels.get(labelIndex++).setText(stringBuilder);
-		//		}
-		//		{
-		//			stringBuilder.setLength(0);
-		//			int count = visibleDynamicLightCount;
-		//			int totalCount = environment.get(PointLightsAttribute.class, PointLightsAttribute.Type).lights.size;
-		//			stringBuilder.append(" Dynamic PointLights: ").append(count).append(" / ").append(totalCount);
-		//			labels.get(labelIndex++).setText(stringBuilder);
-		//		}
-		// fps
-		//		{
-		//			stringBuilder.setLength(0);
-		//			stringBuilder.append(" FPS: ").append(Gdx.graphics.getFramesPerSecond());
-		//			labels.get(labelIndex++).setText(stringBuilder);
-		//		}
-		//		stage.draw();
 		if (infoVisible) {
 			info.update(universe, universe.selected, this);
 			info.act(Gdx.graphics.getDeltaTime());
@@ -941,10 +906,6 @@ public class SceneManager {
 		//		camController.notifyListener(camera);
 	}
 
-	public void setInfoVisible(final boolean infoVisible) {
-		this.infoVisible = infoVisible;
-	}
-
 	//	@Override
 	//	public void setPositionDirectionUp(final Vector3 position, final Vector3 direction, final Vector3 up) throws Exception {
 	//		if (audioEngine != null) {
@@ -952,6 +913,14 @@ public class SceneManager {
 	//			audioEngine.setListenerOrientation(direction, up);
 	//		}
 	//	}
+
+	public void setEnableDepthOfField(final boolean enableDepthOfField) {
+		this.enableDepthOfField = enableDepthOfField;
+	}
+
+	public void setInfoVisible(final boolean infoVisible) {
+		this.infoVisible = infoVisible;
+	}
 
 	private void setShadowLight(final float lum) {
 		shadowLight.intensity = lum;
@@ -1107,14 +1076,6 @@ public class SceneManager {
 		//		final Pixmap frameBufferPixmap = ScreenUtils.getFrameBufferPixmap(0, 0, frameBuffer.getWidth(), frameBuffer.getHeight());
 		PixmapIO.writePNG(Gdx.files.local(fileName), frameBufferPixmap, Deflater.DEFAULT_COMPRESSION, true);
 		FrameBuffer.unbind();
-	}
-
-	public boolean isEnableDepthOfField() {
-		return enableDepthOfField;
-	}
-
-	public void setEnableDepthOfField(boolean enableDepthOfField) {
-		this.enableDepthOfField = enableDepthOfField;
 	}
 
 }

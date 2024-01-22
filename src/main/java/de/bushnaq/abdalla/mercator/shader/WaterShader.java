@@ -21,15 +21,17 @@ public class WaterShader extends DefaultShader {
 	private final Texture normalMap;
 	private float tiling;
 	private final int u_clippingPlane = register("u_clippingPlane");
-
 	private final int u_depthMap = register("u_depthMap");
+
 	private final int u_dudvMapTexture = register("u_dudvMapTexture");
 	private final int u_moveFactor = register("u_moveFactor");
 	private final int u_normalMap = register("u_normalMap");
 	private final int u_reflectionTexture = register("u_reflectionTexture");
 	private final int u_refractionTexture = register("u_refractionTexture");
 	private final int u_tiling = register("u_tiling");
+	private final int u_waveStrength = register("u_waveStrength");
 	private final Texture waterDuDv;
+	private float waveStrength = 0.01f;
 
 	public WaterShader(final Renderable renderable, final Config config, final String prefix, final FrameBuffer waterRefractionFbo, final FrameBuffer waterReflectionFbo) {
 		super(renderable, config, prefix);
@@ -55,6 +57,8 @@ public class WaterShader extends DefaultShader {
 		moveFactor += WAVE_SPEED * Gdx.graphics.getDeltaTime();
 		moveFactor %= 1.0;
 		set(u_moveFactor, moveFactor);
+		set(u_waveStrength, waveStrength);
+
 	}
 
 	@Override
@@ -80,6 +84,10 @@ public class WaterShader extends DefaultShader {
 
 	public void setTiling(final float tiling) {
 		this.tiling = tiling;
+	}
+
+	public void setWaveStrength(final float waveStrength) {
+		this.waveStrength = waveStrength;
 	}
 
 }

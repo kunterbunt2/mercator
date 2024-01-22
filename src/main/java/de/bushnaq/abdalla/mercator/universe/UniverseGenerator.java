@@ -1,541 +1,514 @@
 package de.bushnaq.abdalla.mercator.universe;
 
 import de.bushnaq.abdalla.mercator.universe.good.GoodList;
-import de.bushnaq.abdalla.mercator.universe.jumpgate.JumpGate;
+import de.bushnaq.abdalla.mercator.universe.land.Land;
+import de.bushnaq.abdalla.mercator.universe.land.LandList;
+import de.bushnaq.abdalla.mercator.universe.path.Path;
+import de.bushnaq.abdalla.mercator.universe.path.PathList;
+import de.bushnaq.abdalla.mercator.universe.path.Waypoint;
 import de.bushnaq.abdalla.mercator.universe.planet.Planet;
 import de.bushnaq.abdalla.mercator.universe.planet.Planet3DRenderer;
 import de.bushnaq.abdalla.mercator.universe.planet.PlanetList;
+import de.bushnaq.abdalla.mercator.universe.ring.Ring;
 import de.bushnaq.abdalla.mercator.universe.sector.Sector;
 import de.bushnaq.abdalla.mercator.universe.sector.SectorList;
 import de.bushnaq.abdalla.mercator.universe.sim.trader.Trader;
 import de.bushnaq.abdalla.mercator.universe.sim.trader.TraderList;
-import de.bushnaq.abdalla.mercator.universe.tools.Tools;
-import de.bushnaq.abdalla.mercator.util.MercatorRandomGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import de.bushnaq.abdalla.mercator.util.MercatorRandomGenerator;
 
 /**
  * @author bushnaq Created 13.02.2005
  */
 public class UniverseGenerator {
-	public static final int PLANET_CHANCE_DICE_PORLTION = 6;
-	//	public static final float PLANET_MAX_JUMP_GATE_DISTANCE = 1610;// TODO adapt to 2D 1636
-	public static final int PLANET_CHANCE_DICE_SIZE = 10;
-	
-	
-	
-	public GoodList goodList;
-	final int MAX_NUMBER_OF_TRADERS = 1;
-	PlanetList planetList;
-	private final Logger logger = LoggerFactory.getLogger(this.getClass());
-	
-	
-	public MercatorRandomGenerator randomGenerator;
-	// public int randomGeneratorSeed = 5;
-	SectorList sectorList;
-	private int size;
-	public TraderList traderList;
+    public static final int PLANET_CHANCE_DICE_PORLTION = 6;
+    //	public static final float PLANET_MAX_JUMP_GATE_DISTANCE = 1610;// TODO adapt to 2D 1636
+    public static final int PLANET_CHANCE_DICE_SIZE = 10;
+    public static final int PLANET_MAX_HIGHT = 256;
+    public static final int PLANET_MAX_SHIFT = Planet.PLANET_DISTANCE / 4;
+    public static final float PLANET_MAX_SHIFT_JUMP_GATE = (float) Planet.PLANET_DISTANCE + PLANET_MAX_SHIFT + 10;
+    public GoodList goodList;
+    LandList landList;
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
+    final int MAX_NUMBER_OF_TRADERS = 1;
+    public PathList pathList;
+    PlanetList planetList;
+    public MercatorRandomGenerator randomGenerator;
+    // public int randomGeneratorSeed = 5;
+    SectorList sectorList;
+    private int size;
+    public TraderList traderList;
 
-	public UniverseGenerator() {
-	}
+    public UniverseGenerator() {
+    }
 
-	private void assignSectors() {
-		// ---Assign to sectors
-		{
-			// ---insert the seed
-			// ---for every sector, pick one planet
-			for (int i = 1; i < sectorList.size(); i++) {
-				final Sector sector = sectorList.get(i);
-				Planet planet = null;
-				do {
-					planet = planetList.get(randomGenerator.nextInt(0, this, planetList.size()));
-				} while (planet.sector != null);
-				planet.sector = sector;
-				// sectorList.sectorMap[(int)( planet.x + size )][(int)( planet.y + size )] =
-				// sector;
-				sector.numberOfPlanets++;
-			}
-			// ---Spread the sector seed through the planets
-			boolean changesExist = false;
-			do {
-				changesExist = false;
-				for (final Planet planet : planetList) {
-					if (planet.sector != null) {
-						for (final JumpGate jumpGate : planet.jumpGateList) {
-							if (jumpGate.targetPlanet.sector == null) {
-								jumpGate.targetPlanet.sector = planet.sector;
-								// universe.sectorList.sectorMap[(int)( jumpGate.planet.x + universe.size
-								// )][(int)( jumpGate.planet.y + universe.size )] = planet.sector;
-								planet.sector.numberOfPlanets++;
-								changesExist = true;
-							} else {
-							}
-						}
-					} else {
-					}
-				}
-			} while (changesExist);
-			// ---Destroy disconnected planets
-			{
-				for (int i = 0; i < planetList.size();) {
-					final Planet planet = planetList.get(i);
-					if (planet.sector == null) {
-						planetList.remove(i);
-					} else {
-						i++;
-					}
-				}
-			}
-		}
+    private void assignSectors() {
+        // ---Assign to sectors
+        {
+            // ---insert the seed
+            // ---for every sector, pick one planet
+            for (int i = 1; i < sectorList.size(); i++) {
+                final Sector sector = sectorList.get(i);
+                Planet planet = null;
+                do {
+                    planet = planetList.get(randomGenerator.nextInt(0, this, planetList.size()));
+                } while (planet.sector != null);
+                planet.sector = sector;
+                // sectorList.sectorMap[(int)( planet.x + size )][(int)( planet.y + size )] =
+                // sector;
+                sector.numberOfPlanets++;
+            }
+            // ---Spread the sector seed through the planets
+            boolean changesExist = false;
+            do {
+                changesExist = false;
+                // propagate sector info from planet to its jumpgates (path)
+                for (final Planet planet : planetList) {
+                    if (planet.sector != null) {
+                        for (final Path jumpGate : planet.pathList) {
+                            if (jumpGate.target.sector == null) {
+                                jumpGate.target.sector = planet.sector;
+                                propergateSector(jumpGate.target);
+                                // universe.sectorList.sectorMap[(int)( jumpGate.planet.x + universe.size
+                                // )][(int)( jumpGate.planet.y + universe.size )] = planet.sector;
+                                planet.sector.numberOfPlanets++;
+                                changesExist = true;
+                            } else {
+                            }
+                        }
+                    } else {
+                    }
+                }
+            } while (changesExist);
+            // ---Destroy disconnected planets
+            {
+                for (int i = 0; i < planetList.size(); ) {
+                    final Planet planet = planetList.get(i);
+                    if (planet.sector == null) {
+                        planetList.remove(i);
+                    } else {
+                        i++;
+                    }
+                }
+            }
+        }
         logger.info(String.format("%d planets left after assigning sectors.", planetList.size()));
-	}
-	// ---Create the planets
-	private PlanetList generatePlanetList(final Universe universe) {
-		final PlanetList planetList = new PlanetList();
-		int count = 0;
-		do {
-			planetList.clear();
-			int index = 0;
-			count = 0;
-			for (int y = -size; y <= size; y++) {
-				for (int x = -size; x <= size; x++) {
-					if (randomGenerator.nextInt(0, this, PLANET_CHANCE_DICE_SIZE) < PLANET_CHANCE_DICE_PORLTION) {
-						// ---Create planet
-						index++;
-						final String name = generatePlanetName(index, x, y);
-						final float tx = x * Planet.PLANET_DISTANCE /*+ Planet3DRenderer.PLANET_BORDER*/ + randomGenerator.nextInt(0, this, Planet3DRenderer.PLANET_MAX_SHIFT);
-						final float ty = y * Planet.PLANET_DISTANCE /*+ Planet3DRenderer.PLANET_BORDER*/ + randomGenerator.nextInt(0, this, Planet3DRenderer.PLANET_MAX_SHIFT);
-						final Planet planet = new Planet(name, tx, ty, universe);
-						planet.create(randomGenerator);
-						count++;
-						planetList.add(planet);
+        logger.info("");
+    }
 
-					}
-				}
-			}
-		} while (planetList.size() < ((size * 2 + 1) * (size * 2 + 1)) / 2);
-		Tools.print(String.format("generated %d planets.\n", count));
-//		for (Planet planet : planetList) {
-//			logger.info(String.format("%s.", planet.getName()));
-//		}
-		return planetList;
-	}
+    private void propergateSector(Waypoint start) {
+//        logger.info(String.format("Waypoint=%s",start.name));
+        for (Path path : start.pathList) {
+            if( path.target.sector == null )
+            {
+                if(path.target.city!=null)
+                    path.target.city.sector = start.sector;
+                path.target.sector = start.sector;
+                propergateSector(path.target);
+            }
+        }
 
-	public void generate(final Universe universe) throws Exception {
-		final long time = System.currentTimeMillis();
-		System.out.printf("creating universe of " + universe.size + " light years across\n", System.currentTimeMillis() - time);
-		size = universe.size;
-		randomGenerator = universe.universeRG;
-		sectorList = generateSectorList();
-		planetList = generatePlanetList(universe);
-		generateJumpGates();
-		assignSectors();
-		removeUnconnectedSectors();
-		removeUnusedSectors();
-		mapGalaxy();
-		traderList = generateTraders();
-		// goodList = generateGoods();
-		System.out.printf(" in %dms.\n", System.currentTimeMillis() - time);
-		universe.sectorList = sectorList;
-		universe.planetList = planetList;
-		universe.traderList = traderList;
-		// universe.goodList = goodList;
-	}
+    }
 
-	// private GoodList generateGoods()
-	// {
-	// GoodList goodList = new GoodList();
-	// goodList.createGoodList();
-	// {
-	// for ( Trader trader : traderList )
-	// {
-	// trader.getGoodList().createEmptyGoodList();
-	// }
-	// }
-	// return goodList;
-	// }
-	private void generateJumpGates() throws Exception {
-		// ---Create the jump gates
-		int count = 0;
-		for (int i = 0; i < planetList.size(); i++) {
-			final Planet planet = planetList.get(i);
-			for (int j = 0; j < planetList.size(); j++) {
-				if (i != j) {
-					final Planet targetPlanet = planetList.get(j);
-					final float distance = planet.queryDistance(targetPlanet);
-					if (distance < Planet.PLANET_MAX_JUMP_GATE_DISTANCE) {
-						count++;
-						planet.jumpGateList.add(new JumpGate(planet, targetPlanet));
-						if (planet.jumpGateList.size() > 8)
-							throw new Exception("unexpected number of jump gates");
-					}
-				}
-			}
-		}
-		Tools.print(String.format("generated %d jumpgates.\n", count));
-		// ---Destroy disconnected planets
-		for (int i = 0; i < planetList.size();) {
-			final Planet planet = planetList.get(i);
-			if (planet.jumpGateList.size() == 0) {
-				planetList.remove(i);
-			} else {
-				i++;
-			}
-		}
-		Tools.print(String.format("%d planets left.\n", planetList.size()));
-	}
+    // ---Create the planets
+    private PlanetList generatePlanetList(final Universe universe) {
+        final PlanetList planetList = new PlanetList();
+        int count = 0;
+        do {
+            planetList.clear();
+            int index = 0;
+            count = 0;
+            for (int z = -size; z <= size; z++) {
+                for (int x = -size; x <= size; x++) {
+                    if (randomGenerator.nextInt(0, this, PLANET_CHANCE_DICE_SIZE) < PLANET_CHANCE_DICE_PORLTION) {
+                        // ---Create planet
+                        index++;
+                        final String name = generatePlanetName(index, x, z);
+                        final float tx = x * Planet.PLANET_DISTANCE + randomGenerator.nextInt(0, this, PLANET_MAX_SHIFT);
+                        final float ty = 0/*randomGenerator.nextInt(0, this, PLANET_MAX_HIGHT)*/;
+                        final float tz = z * Planet.PLANET_DISTANCE + randomGenerator.nextInt(0, this, PLANET_MAX_SHIFT);
+                        final Planet planet = new Planet(name, tx, ty, tz, universe);
+                        planet.create(randomGenerator);
+                        count++;
+                        planetList.add(planet);
+
+                    }
+                }
+            }
+        } while (planetList.size() < ((size * 2 + 1) * (size * 2 + 1)) / 2);
+        logger.info(String.format("generated %d planets.", count));
+//        for (Planet planet : planetList) {
+//            logger.info(String.format("%s.", planet.getName()));
+//        }
+
+        return planetList;
+    }
+
+    private void connectPlanets(final Planet sourcePlanet, final Planet targetPlanet, final float zSign, final float xSign, final String name) {
+        final Waypoint w0 = new Waypoint(sourcePlanet.getName() + "-0" + name, sourcePlanet.x + zSign * Planet.CHANNEL_SIZE / 2 - xSign * (Planet3DRenderer.PLANET_SIZE / 4), sourcePlanet.y, sourcePlanet.z - zSign * (Planet3DRenderer.PLANET_SIZE / 4) - xSign * Planet.CHANNEL_SIZE / 2);
+        final Path p0 = new Path(sourcePlanet, w0);
+        sourcePlanet.pathList.add(p0);
+
+        final Waypoint w1 = new Waypoint(sourcePlanet.getName() + "-1*" + name, sourcePlanet.x + zSign * Planet.CHANNEL_SIZE / 2 - xSign * (Planet3DRenderer.PLANET_SIZE / 2 + Planet.CHANNEL_SIZE), sourcePlanet.y, sourcePlanet.z - zSign * (Planet3DRenderer.PLANET_SIZE / 2 + Planet.CHANNEL_SIZE) - xSign * Planet.CHANNEL_SIZE / 2);
+        //		final Path p1 = new Path(w0, w1);
+        //		w0.pathList.add(p1);
+
+        final Waypoint w2 = new Waypoint(sourcePlanet.getName() + "-2*" + name, targetPlanet.x + zSign * Planet.CHANNEL_SIZE / 2 + xSign * (Planet3DRenderer.PLANET_SIZE / 2 + Planet.CHANNEL_SIZE), targetPlanet.y, targetPlanet.z + zSign * (Planet3DRenderer.PLANET_SIZE / 2 + Planet.CHANNEL_SIZE) - xSign * Planet.CHANNEL_SIZE / 2);
+
+        //		if (sourcePlanet.getName().equals("P-0103") || targetPlanet.getName().equals("P-0103"))
+        {
+            final float p0X = w1.x;
+            final float p0Z = w1.z;
+
+            final float p1X = w1.x - xSign * (Planet3DRenderer.PLANET_SIZE);
+            final float p1Z = w1.z - zSign * (Planet3DRenderer.PLANET_SIZE);
+
+            final float p2X = w2.x + xSign * (Planet3DRenderer.PLANET_SIZE);
+            final float p2Z = w2.z + zSign * (Planet3DRenderer.PLANET_SIZE);
+
+            final float p3X = w2.x;
+            final float p3Z = w2.z;
+
+            Waypoint lastW = w0;
+            Waypoint w = null;
+            int n = 1;
+            for (float t = 0.0f; t <= 1.0f; t += 0.05f) {
+                final float x = ((1.0f - t) * (1.0f - t) * (1.0f - t) * p0X + 3 * (1.0f - t) * (1.0f - t) * t * p1X + 3 * (1.0f - t) * t * t * p2X + t * t * t * p3X);
+                final float z = ((1.0f - t) * (1.0f - t) * (1.0f - t) * p0Z + 3 * (1.0f - t) * (1.0f - t) * t * p1Z + 3 * (1.0f - t) * t * t * p2Z + t * t * t * p3Z);
+                final float y = sourcePlanet.y;
+                w = new Waypoint(sourcePlanet.getName() + "-" + n++ + name, x, y, z);
+                final Path p = new Path(lastW, w);
+                lastW.pathList.add(p);
+                lastW = w;
+            }
+
+            final Waypoint w3 = new Waypoint(sourcePlanet.getName() + "-" + n + name, targetPlanet.x + zSign * Planet.CHANNEL_SIZE / 2 + xSign * (Planet3DRenderer.PLANET_SIZE / 4), targetPlanet.y, targetPlanet.z + zSign * (Planet3DRenderer.PLANET_SIZE / 4) - xSign * Planet.CHANNEL_SIZE / 2);
+            final Path p3 = new Path(w, w3);
+            w.pathList.add(p3);
+
+            final Path p4 = new Path(w3, targetPlanet);
+            w3.pathList.add(p4);
+
+        }
+
+    }
+
+    public void generate(final Universe universe) throws Exception {
+        final long time = System.currentTimeMillis();
+        logger.info(String.format("creating universe of %d light years across within %dms.", universe.size, System.currentTimeMillis() - time));
+        size = universe.size;
+        universe.ring = new Ring(universe);
+        randomGenerator = universe.universeRG;
+        sectorList = generateSectorList();
+        planetList = generatePlanetList(universe);
+        generatePaths();
+        assignSectors();
+        removeUnconnectedSectors();
+        removeUnusedSectors();
+        mapGalaxy();
+        pathList = generatePathList();
+        landList = generateLand(planetList, universe);
+        traderList = generateTraders();
+        // goodList = generateGoods();
+        System.out.printf(" in %dms.\n", System.currentTimeMillis() - time);
+        universe.sectorList = sectorList;
+        universe.planetList = planetList;
+        universe.traderList = traderList;
+        universe.landList = landList;
+        universe.pathList = pathList;
+        // universe.goodList = goodList;
+        //		for (final Planet planet : planetList) {
+        //			logger.info(planet.getName());
+        //		}
+    }
+
+    private LandList generateLand(final PlanetList planetList, final Universe universe) {
+        final LandList landList = new LandList();
+        for (int z = -size; z <= size; z++) {
+            for (int x = -size; x <= size; x++) {
+                final float lx = x * Planet.PLANET_DISTANCE;
+                final float lz = z * Planet.PLANET_DISTANCE;
+                boolean found = false;
+                for (final Planet planet : planetList) {
+                    if (planet.x >= lx && planet.x < lx + Planet.PLANET_DISTANCE && planet.z >= lz && planet.z < lz + Planet.PLANET_DISTANCE) {
+                        found = true;
+                        break;
+                    }
+                }
+
+                if (!found) {
+                    final float ly = 0;
+                    final Land land = new Land(lx + PLANET_MAX_SHIFT / 2, ly, lz + PLANET_MAX_SHIFT / 2, universe);
+                    landList.add(land);
+                }
+            }
+        }
+        final int border = size + 1;
+        for (int z = -border; z <= border; z++) {
+            for (int x = -border; x <= border; x++) {
+                if (z == border || z == -border || x == border || x == -border) {
+                    final float lx = x * Planet.PLANET_DISTANCE;
+                    final float lz = z * Planet.PLANET_DISTANCE;
+                    final float ly = 0;
+                    final Land land = new Land(lx + PLANET_MAX_SHIFT / 2, ly, lz + PLANET_MAX_SHIFT / 2, universe);
+                    landList.add(land);
+                }
+            }
+        }
+        logger.info(String.format("generated %d lands.", landList.size()));
+        return landList;
+    }
+
+    private PathList generatePathList() {
+        final PathList pathList = new PathList();
+        planetList.clearSeed();
+        final Planet planet = planetList.get(0);
+        //		planet.seed = new Object();
+        addPath(pathList, planet, new Object());
+        logger.info(String.format("generated %d paths.", pathList.size()));
+        return pathList;
+    }
+
+    // private GoodList generateGoods()
+    // {
+    // GoodList goodList = new GoodList();
+    // goodList.createGoodList();
+    // {
+    // for ( Trader trader : traderList )
+    // {
+    // trader.getGoodList().createEmptyGoodList();
+    // }
+    // }
+    // return goodList;
+    // }
+    private void generatePaths() throws Exception {
+        // ---Create the jump gates
+        int count = 0;
+        for (int i = 0; i < planetList.size(); i++) {
+            final Planet sourcePlanet = planetList.get(i);
+            for (int j = 0; j < planetList.size(); j++) {
+                if (i != j) {
+                    final Planet targetPlanet = planetList.get(j);
+                    final float distance = sourcePlanet.queryDistance(targetPlanet);
+                    if (distance < PLANET_MAX_SHIFT_JUMP_GATE) {
+                        final float xDelta = (float) Math.floor(sourcePlanet.x / Planet.PLANET_DISTANCE) - (float) Math.floor(targetPlanet.x / Planet.PLANET_DISTANCE);
+                        final float zDelta = (float) Math.floor(sourcePlanet.z / Planet.PLANET_DISTANCE) - (float) Math.floor(targetPlanet.z / Planet.PLANET_DISTANCE);
+                        //target lies to one of the cardinal directions
+                        String name;
+                        if (xDelta == 0f) {
+                            final float zSign = Math.signum(zDelta);
+                            final float xSign = 0;
+                            if (zSign > 0)
+                                name = "N";
+                            else
+                                name = "S";
+                            connectPlanets(sourcePlanet, targetPlanet, zSign, xSign, name);
+                        } else if (zDelta == 0f) {
+                            final float xSign = Math.signum(xDelta);
+                            final float zSign = 0;
+                            if (xSign > 0)
+                                name = "W";
+                            else
+                                name = "E";
+                            connectPlanets(sourcePlanet, targetPlanet, zSign, xSign, name);
+                        } else {
+                            //not a direct neighbor
+                        }
+
+                        count++;
+                        if (sourcePlanet.pathList.size() > 4)
+                            throw new Exception("unexpected number of paths");
+                    }
+                }
+            }
+        }
+        logger.info(String.format("generated %d jumpgates.", count));
+        // ---Destroy disconnected planets
+        for (int i = 0; i < planetList.size(); ) {
+            final Planet planet = planetList.get(i);
+            if (planet.pathList.size() == 0) {
+                planetList.remove(i);
+            } else {
+                i++;
+            }
+        }
+        logger.info(String.format("%d planets left.", planetList.size()));
+    }
 
 
-	private String generatePlanetName(final int index, final int x, final int y) {
-		//		return "P-" + index;
-		return String.format("P-%02d%02d", x + size, y + size);
-	}
+    private String generatePlanetName(final int index, final int x, final int z) {
+        return String.format("P-%02d%02d", x + size, z + size);
+    }
 
-	private SectorList generateSectorList() {
-		final SectorList sectorList = new SectorList();
-		sectorList.createSectors(size);
-		return sectorList;
-	}
+    private SectorList generateSectorList() {
+        final SectorList sectorList = new SectorList();
+        sectorList.createSectors(size);
+        return sectorList;
+    }
 
-	/**
-	 * @param aUniverseSize
-	 * @throws Exception
-	 */
-	// private void generatePlanets_old( int aUniverseSize )
-	// {
-	// universe.planetList.clear();
-	// //---Create the planets
-	// {
-	// for ( int y = -aUniverseSize; y < aUniverseSize; y++ )
-	// {
-	// for ( int x = -aUniverseSize; x < aUniverseSize; x++ )
-	// {
-	// if ( randomGenerator.nextInt( 4 ) < 2 )
-	// {
-	// //---Create planet
-	// String name = "P-" + "" + ( ( x + aUniverseSize ) + ( y + aUniverseSize ) * 8
-	// );
-	// Planet planet = new Planet( name, x, y, universe );
-	// planet.create( randomGenerator );
-	// universe.planetList.add( planet );
-	// }
-	// }
-	// }
-	// }
-	// //---Create the jump gates
-	// {
-	// for ( Planet planet : universe.planetList )
-	// {
-	// //---For each of the 4 immediate neighbors (west, south, east, north) we try
-	// to find a planet sitting there
-	// {
-	// int dx[] = { -1, 0, 1, 0 };
-	// int dy[] = { 0, -1, 0, 1 };
-	// for ( int i = 0; i < 4; i++ )
-	// {
-	// Planet p = universe.planetList.queryPlanetByLocation( planet.x + dx[i],
-	// planet.y + dy[i] );
-	// if ( p != null )
-	// {
-	// planet.jumpGateList.add( new JumpGate( p ) );
-	// }
-	// }
-	// }
-	// //---For each of the 4 more further neighbors (south-west, south-east,
-	// north-east, north-west) we try to find a planet sitting there
-	// {
-	// int dx[] = { -1, 1, 1, -1 };
-	// int dy[] = { -1, -1, 1, 1 };
-	// for ( int i = 0; i < 4; i++ )
-	// {
-	// if ( planet.jumpGateList.size() < 2 )
-	// {
-	// Planet p = universe.planetList.queryPlanetByLocation( planet.x + dx[i],
-	// planet.y + dy[i] );
-	// if ( p != null )
-	// {
-	// planet.jumpGateList.add( new JumpGate( p ) );
-	// p.jumpGateList.add( new JumpGate( planet ) );//---This could lead to double
-	// connections
-	// }
-	// }
-	// }
-	// }
-	// //---For each of the 4 more even further neighbors (2xwest, 2xsouth, 2xeast,
-	// 2xnorth) we try to find a planet sitting there
-	// //---Make sure no planet sits in between
-	// {
-	// int dx1[] = { -1, 0, 1, 0 };
-	// int dy1[] = { 0, -1, 0, 1 };
-	// int dx2[] = { -2, 0, 2, 0 };
-	// int dy2[] = { 0, -2, 0, 2 };
-	// for ( int i = 0; i < 4; i++ )
-	// {
-	// if ( planet.jumpGateList.size() < 2 )
-	// {
-	// Planet p = universe.planetList.queryPlanetByLocation( planet.x + dx2[i],
-	// planet.y + dy2[i] );
-	// if ( ( p != null ) && ( universe.planetList.queryPlanetByLocation( planet.x +
-	// dx1[i], planet.y + dy1[i] ) == null ) )
-	// {
-	// planet.jumpGateList.add( new JumpGate( p ) );
-	// p.jumpGateList.add( new JumpGate( planet ) );//---This could lead to double
-	// connections
-	// }
-	// }
-	// }
-	// }
-	// }
-	// }
-	// //---Destroy disconnected planets
-	// {
-	// for ( int i = 0; i < universe.planetList.size(); )
-	// {
-	// Planet planet = universe.planetList.get( i );
-	// if ( planet.jumpGateList.size() == 0 )
-	// {
-	// universe.planetList.remove( i );
-	// }
-	// else
-	// {
-	// i++;
-	// }
-	// }
-	// }
-	// //---Assign to sectors
-	// {
-	// //---insert the seed
-	// //---for every sector, pick one planet
-	// for ( int i = 0; i < universe.sectorList.size(); i++ )
-	// {
-	// Sector sector = universe.sectorList.get( i );
-	// Planet planet = null;
-	// do
-	// {
-	// planet = universe.planetList.get( randomGenerator.nextInt(
-	// universe.planetList.size() ) );
-	// }
-	// while ( planet.sector != null );
-	// planet.sector = sector;
-	// universe.sectorList.sectorMap[(int)( planet.x + universe.size )][(int)(
-	// planet.y + universe.size )] = sector;
-	// sector.numberOfPlanets++;
-	// }
-	// //---Spread the sector seed through the planets
-	// boolean changesExist = false;
-	// do
-	// {
-	// changesExist = false;
-	// for ( Planet planet : universe.planetList )
-	// {
-	// if ( planet.sector != null )
-	// {
-	// for ( JumpGate jumpGate : planet.jumpGateList )
-	// {
-	// if ( jumpGate.planet.sector == null )
-	// {
-	// jumpGate.planet.sector = planet.sector;
-	// universe.sectorList.sectorMap[(int)( jumpGate.planet.x + universe.size
-	// )][(int)( jumpGate.planet.y + universe.size )] = planet.sector;
-	// planet.sector.numberOfPlanets++;
-	// changesExist = true;
-	// }
-	// else
-	// {
-	// }
-	// }
-	// }
-	// else
-	// {
-	// }
-	// }
-	// {
-	// for ( int y = 0; y < aUniverseSize * 2; y++ )
-	// {
-	// for ( int x = 0; x < aUniverseSize * 2; x++ )
-	// {
-	// Sector sector = universe.sectorList.sectorMap[x][y];
-	// SectorManager sectorManager = new SectorManager();
-	// if ( sector == null )
-	// {
-	// //---west
-	// if ( x > 0 && universe.sectorList.sectorMap[x - 1][y] != null )
-	// {
-	// sectorManager.add( universe.sectorList.sectorMap[x - 1][y] );
-	// }
-	// //---north
-	// if ( y > 0 && universe.sectorList.sectorMap[x][y - 1] != null )
-	// {
-	// sectorManager.add( universe.sectorList.sectorMap[x][y - 1] );
-	// }
-	// //---east
-	// if ( x < aUniverseSize * 2 - 1 && universe.sectorList.sectorMap[x + 1][y] !=
-	// null )
-	// {
-	// sectorManager.add( universe.sectorList.sectorMap[x + 1][y] );
-	// }
-	// //---South
-	// if ( y < aUniverseSize * 2 - 1 && universe.sectorList.sectorMap[x][y + 1] !=
-	// null )
-	// {
-	// sectorManager.add( universe.sectorList.sectorMap[x][y + 1] );
-	// }
-	// // sectorMap[x][y] = sectorManager.getSector();
-	// if ( universe.sectorList.sectorMap[x][y] != null )
-	// changesExist = true;
-	// }
-	// }
-	// }
-	// }
-	// }
-	// while ( changesExist );
-	// //---Destroy disconnected planets
-	// {
-	// for ( int i = 0; i < universe.planetList.size(); )
-	// {
-	// Planet planet = universe.planetList.get( i );
-	// if ( planet.sector == null )
-	// {
-	// universe.planetList.remove( i );
-	// }
-	// else
-	// {
-	// i++;
-	// }
-	// }
-	// }
-	// }
-	// for ( Planet planet : universe.planetList )
-	// {
-	// //---Map and memorize the distance to any other planet
-	// planet.pathSeeker.mapGalaxy( planet, 999999 );
-	// if ( planet.sector == null )
-	// {
-	// int a = 0;
-	// }
-	// }
-	// }
-	private TraderList generateTraders() throws Exception {
-		final TraderList traderList = new TraderList();
-		int count = 0;
-		for (final Planet planet : planetList) {
-			planet.traderList.clear();
-			final int number = 1 + randomGenerator.nextInt(0, this, MAX_NUMBER_OF_TRADERS);
-			for (int i = 0; i < number; i++) {
-				final Trader trader = new Trader(planet, "T-" + count++, Trader.TRADER_START_CREDITS);
-				trader.create(randomGenerator);
-				planet.traderList.add(trader);
-				traderList.add(trader);
-			}
-		}
-		Tools.print(String.format("generated %d traders.\n", count));
-		return traderList;
-	}
+    private TraderList generateTraders() throws Exception {
+        final TraderList traderList = new TraderList();
+        int count = 0;
+        for (final Planet planet : planetList) {
+            planet.traderList.clear();
+            final int number = 1 + randomGenerator.nextInt(0, this, MAX_NUMBER_OF_TRADERS);
+            for (int i = 0; i < number; i++) {
+                final Trader trader = new Trader(planet, "T-" + count++, Trader.TRADER_START_CREDITS);
+                trader.create(randomGenerator);
+                planet.traderList.add(trader);
+                traderList.add(trader);
+            }
+        }
+        logger.info(String.format("generated %d traders.\n", traderList.size()));
+        return traderList;
+    }
 
-	private void mapGalaxy() {
-		// ---Map and memorize the distance to any other planet
-		for (final Planet planet : planetList) {
-			planet.pathSeeker.mapGalaxy(planet, 999999);
-			if (planet.sector == null) {
-				final int a = 0;
-			}
-		}
-	}
+    private void mapGalaxy() {
+        // ---Map and memorize the distance to any other planet
+        for (final Planet planet : planetList) {
+            planet.pathSeeker.mapGalaxy(planet, 999999);
+            if (planet.sector == null) {
+                final int a = 0;
+            }
+        }
 
-	private void removeUnconnectedSectors() {
-		// ---find biggest sector
-		Sector biggestSector = sectorList.firstElement();
-		for (final Sector sector : sectorList) {
-			if (sector.numberOfPlanets > biggestSector.numberOfPlanets)
-				biggestSector = sector;
-		}
-		planetList.clearSeed();
-		final Object seed = new Object();
-		for (final Planet planet : planetList) {
-			if (planet.sector == biggestSector) {
-				planet.seed = seed;
-			}
-		}
-		// ---let the seed distribute
-		boolean changesExist = false;
-		do {
-			changesExist = false;
-			for (final Planet planet : planetList) {
-				if (planet.seed != null) {
-					for (final JumpGate jumpGate : planet.jumpGateList) {
-						if (jumpGate.targetPlanet.seed == null) {
-							jumpGate.targetPlanet.seed = planet.seed;
-							changesExist = true;
-						} else {
-						}
-					}
+    }
+
+    private void removeUnconnectedSectors() {
+        // ---find biggest sector
+        Sector biggestSector = sectorList.firstElement();
+        for (final Sector sector : sectorList) {
+            if (sector.numberOfPlanets > biggestSector.numberOfPlanets)
+                biggestSector = sector;
+        }
+        planetList.clearSeed();
+        final Object seed = new Object();
+        for (final Planet planet : planetList) {
+            if (planet.sector == biggestSector) {
+                planet.seed = seed;
+                break;
+            }
+        }
+        for (final Planet planet : planetList) {
+            if (planet.seed != null) {
+                seed(planet);
+            }
+        }
+        // ---let the seed distribute
+        //		boolean changesExist = false;
+        //		do {
+        //			changesExist = false;
+        //			for (final Planet planet : planetList) {
+        //				if (planet.seed != null) {
+        //					for (final Path jumpGate : planet.pathList) {
+        //						if (jumpGate.target.seed == null) {
+        //							jumpGate.target.seed = planet.seed;
+        //							changesExist = true;
+        //						} else {
+        //						}
+        //					}
+        //				} else {
+        //				}
+        //			}
+        //		} while (changesExist);
+        // ---Destroy disconnected sectors
+        {
+            for (int i = 0; i < planetList.size(); ) {
+                final Planet planet = planetList.get(i);
+                if (planet.seed == null) {
+                    planetList.remove(i);
+                } else {
+                    i++;
+                }
+            }
+        }
+        logger.info(String.format("%d planets left after removeing unconnected sectors.", planetList.size()));
+    }
+
+    private void removeUnusedSectors() {
+        // ---find biggest sector
+        Sector biggestSector = sectorList.firstElement();
+        for (int i = 1; i < sectorList.size(); ) {
+            final Sector sector = sectorList.get(i);
+            if (sector.numberOfPlanets == 0) {
+                sectorList.remove(i);
+                System.out.println("Removed unused sector " + sector.name);
+            } else {
+                i++;
+            }
+        }
+        for (final Sector sector : sectorList) {
+            if (sector.numberOfPlanets > biggestSector.numberOfPlanets)
+                biggestSector = sector;
+        }
+        planetList.clearSeed();
+        final Object seed = new Object();
+        for (final Planet planet : planetList) {
+            if (planet.sector == biggestSector) {
+                planet.seed = seed;
+            }
+        }
+        for (final Planet planet : planetList) {
+            if (planet.seed != null) {
+                seed(planet);
+            }
+        }
+        // ---let the seed distribute
+        //		boolean changesExist = false;
+        //		do {
+        //			changesExist = false;
+        //			for (final Planet planet : planetList) {
+        //				if (planet.seed != null) {
+        //					for (final Path jumpGate : planet.pathList) {
+        //						if (jumpGate.target.seed == null) {
+        //							jumpGate.target.seed = planet.seed;
+        //							changesExist = true;
+        //						} else {
+        //						}
+        //					}
+        //				} else {
+        //				}
+        //			}
+        //		} while (changesExist);
+        // ---Destroy disconnected sectors
+
+        //		{
+        //			for (int i = 0; i < planetList.size();) {
+        //				final Planet planet = planetList.get(i);
+        //				if (planet.seed == null) {
+        //					planetList.remove(i);
+        //				} else {
+        //					i++;
+        //				}
+        //			}
+        //		}
+        logger.info(String.format("%d planets left after removing unused sectors.", planetList.size()));
+    }
+
+    private void seed(final Waypoint w) {
+        for (final Path path : w.pathList) {
+            if (path.target.seed == null) {
+                path.target.seed = w.seed;
+                seed(path.target);
+            } else {
+                //already seeded
+            }
+        }
+    }
+	private void addPath(final PathList pathList, final Waypoint w, final Object seed) {
+		if (w.seed == null) {
+			w.seed = seed;
+			for (final Path path : w.pathList) {
+				pathList.add(path);
+				if (path.target.seed == null) {
+					addPath(pathList, path.target, seed);
 				} else {
-				}
-			}
-		} while (changesExist);
-		// ---Destroy disconnected sectors
-		{
-			for (int i = 0; i < planetList.size();) {
-				final Planet planet = planetList.get(i);
-				if (planet.seed == null) {
-					planetList.remove(i);
-				} else {
-					i++;
+					//already seeded
 				}
 			}
 		}
 	}
 
-	private void removeUnusedSectors() {
-		// ---find biggest sector
-		Sector biggestSector = sectorList.firstElement();
-		for (int i = 1; i < sectorList.size();) {
-			final Sector sector = sectorList.get(i);
-			if (sector.numberOfPlanets == 0) {
-				sectorList.remove(i);
-				System.out.println("Removed unused sector " + sector.name);
-			} else {
-				i++;
-			}
-		}
-		for (final Sector sector : sectorList) {
-			if (sector.numberOfPlanets > biggestSector.numberOfPlanets)
-				biggestSector = sector;
-		}
-		planetList.clearSeed();
-		final Object seed = new Object();
-		for (final Planet planet : planetList) {
-			if (planet.sector == biggestSector) {
-				planet.seed = seed;
-			}
-		}
-		// ---let the seed distribute
-		boolean changesExist = false;
-		do {
-			changesExist = false;
-			for (final Planet planet : planetList) {
-				if (planet.seed != null) {
-					for (final JumpGate jumpGate : planet.jumpGateList) {
-						if (jumpGate.targetPlanet.seed == null) {
-							jumpGate.targetPlanet.seed = planet.seed;
-							changesExist = true;
-						} else {
-						}
-					}
-				} else {
-				}
-			}
-		} while (changesExist);
-		// ---Destroy disconnected sectors
-		{
-			for (int i = 0; i < planetList.size();) {
-				final Planet planet = planetList.get(i);
-				if (planet.seed == null) {
-					planetList.remove(i);
-				} else {
-					i++;
-				}
-			}
-		}
-	}
 }

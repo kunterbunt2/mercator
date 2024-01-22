@@ -2,22 +2,22 @@ package com.abdalla.bushnaq.mercator.universe.sim;
 
 import java.util.Collections;
 
-import de.bushnaq.abdalla.mercator.renderer.ObjectRenderer;
-import de.bushnaq.abdalla.mercator.renderer.Renderable;
+import renderer.de.bushnaq.abdalla.mercator.ObjectRenderer;
+import renderer.de.bushnaq.abdalla.mercator.Renderable;
 import com.abdalla.bushnaq.mercator.renderer.Sim2DRenderer;
-import factory.de.bushnaq.abdalla.mercator.universe.ProductionFacility;
-import good.de.bushnaq.abdalla.mercator.universe.Good;
-import good.de.bushnaq.abdalla.mercator.universe.GoodList;
-import good.de.bushnaq.abdalla.mercator.universe.GoodType;
-import planet.de.bushnaq.abdalla.mercator.universe.Planet;
-import tools.de.bushnaq.abdalla.mercator.universe.Tools;
-import de.bushnaq.abdalla.mercator.util.HistoryManager;
-import de.bushnaq.abdalla.mercator.util.MercatorRandomGenerator;
-import de.bushnaq.abdalla.mercator.universe.event.SimEventManager;
-import de.bushnaq.abdalla.mercator.universe.event.SimEventType;
-import de.bushnaq.abdalla.mercator.util.TimeUnit;
-import de.bushnaq.abdalla.mercator.util.TradingPartner;
-import de.bushnaq.abdalla.mercator.util.Transaction;
+import factory.universe.de.bushnaq.abdalla.mercator.ProductionFacility;
+import good.universe.de.bushnaq.abdalla.mercator.Good;
+import good.universe.de.bushnaq.abdalla.mercator.GoodList;
+import good.universe.de.bushnaq.abdalla.mercator.GoodType;
+import planet.universe.de.bushnaq.abdalla.mercator.Planet;
+import tools.universe.de.bushnaq.abdalla.mercator.Tools;
+import util.de.bushnaq.abdalla.mercator.HistoryManager;
+import util.de.bushnaq.abdalla.mercator.MercatorRandomGenerator;
+import com.abdalla.bushnaq.mercator.util.SimEventManager;
+import com.abdalla.bushnaq.mercator.util.SimEventType;
+import util.de.bushnaq.abdalla.mercator.TimeUnit;
+import util.de.bushnaq.abdalla.mercator.TradingPartner;
+import util.de.bushnaq.abdalla.mercator.Transaction;
 
 public class Sim extends Renderable implements TradingPartner {
 	static final long BUYS_GOODS_EVERY = 5 * TimeUnit.TICKS_PER_DAY;

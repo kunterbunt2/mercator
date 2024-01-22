@@ -5,11 +5,15 @@ import de.bushnaq.abdalla.mercator.renderer.ScreenListener;
 import de.bushnaq.abdalla.mercator.renderer.reports.GraphChartData;
 import de.bushnaq.abdalla.mercator.renderer.reports.PieChartData;
 import de.bushnaq.abdalla.mercator.universe.event.Event;
+import de.bushnaq.abdalla.mercator.universe.event.EventLevel;
+import de.bushnaq.abdalla.mercator.universe.event.EventManager;
 import de.bushnaq.abdalla.mercator.universe.factory.ProductionFacility;
 import de.bushnaq.abdalla.mercator.universe.good.Good;
+import de.bushnaq.abdalla.mercator.universe.land.LandList;
+import de.bushnaq.abdalla.mercator.universe.path.PathList;
 import de.bushnaq.abdalla.mercator.universe.planet.Planet;
 import de.bushnaq.abdalla.mercator.universe.planet.PlanetList;
-import de.bushnaq.abdalla.mercator.universe.sector.Sector;
+import de.bushnaq.abdalla.mercator.universe.ring.Ring;
 import de.bushnaq.abdalla.mercator.universe.sector.SectorList;
 import de.bushnaq.abdalla.mercator.universe.sim.Sim;
 import de.bushnaq.abdalla.mercator.universe.sim.SimList;
@@ -17,8 +21,6 @@ import de.bushnaq.abdalla.mercator.universe.sim.trader.Trader;
 import de.bushnaq.abdalla.mercator.universe.sim.trader.TraderList;
 import de.bushnaq.abdalla.mercator.universe.tools.Tools;
 import de.bushnaq.abdalla.mercator.util.CreditUnit;
-import de.bushnaq.abdalla.mercator.universe.event.EventLevel;
-import de.bushnaq.abdalla.mercator.universe.event.EventManager;
 import de.bushnaq.abdalla.mercator.util.HistoryManager;
 import de.bushnaq.abdalla.mercator.util.MercatorRandomGenerator;
 import de.bushnaq.abdalla.mercator.util.NumberUnit;
@@ -35,7 +37,8 @@ public class Universe {
 	private static final String ADVANCE_IN_TIME_PLANET_DURATION = "planet   AIT";
 	private static final String ADVANCE_IN_TIME_TRADER_DURATION = "trader   AIT";
 	private static final String ADVANCE_IN_TIME_UNIVERSE_DURATION = "All      AIT";
-	private static final String APPLICATION_VERSION_STRING = "0.1.0.0";
+	public static final float WORLD_SCALE = 1.0f;
+	//	private static final String APPLICATION_VERSION_STRING = "0.1.0.0";
 	public PieChartData amountPieChart = new PieChartData("volumen");
 	public PieChartData creditPieChart = new PieChartData("credits");
 	private float credits; // ---credits at creation time, should never change
@@ -50,10 +53,13 @@ public class Universe {
 	private final long fixedDelta = 20L;
 	private final GraphicsDimentions graphicsDimentions;
 	private HistoryManager historyManager;
+	public LandList landList = new LandList();
 	private long lastTime = 0;
 	private String name;
+	public PathList pathList = new PathList();
 	public PieChartData planetDeadReasonPieChart = new PieChartData("planet death");
 	public PlanetList planetList = new PlanetList();
+	public Ring ring;
 	public PieChartData satisfactionPieChart = new PieChartData("satisfaction");
 	private ScreenListener ScreenListener;
 	public SectorList sectorList = new SectorList();
@@ -78,7 +84,7 @@ public class Universe {
 	public MercatorRandomGenerator universeRG;
 	boolean useFixedDelta = false;
 
-	public Universe(final String name, final GraphicsDimentions graphicsDimentions, final EventLevel level, final Class eventFilter) {
+	public Universe(final String name, final GraphicsDimentions graphicsDimentions, final EventLevel level, final Class<?> eventFilter) {
 		setName(name);
 		this.graphicsDimentions = graphicsDimentions;
 		eventManager = new EventManager(level, eventFilter);
@@ -201,12 +207,12 @@ public class Universe {
 	}
 
 	private void calculateSectorValue() {
-		for (final Sector sector : sectorList) {
-			sector.credits = 0;
-		}
-		for (final Planet planet : planetList) {
-			planet.sector.credits += planet.getCredits();
-		}
+		//		for (final Sector sector : sectorList) {
+		//			sector.credits = 0;
+		//		}
+		//		for (final Planet planet : planetList) {
+		//			planet.sector.credits += planet.getCredits();
+		//		}
 	}
 
 	public void create(final int randomGeneratorSeed, final int aUniverseSize, final long age) throws Exception {
@@ -235,8 +241,8 @@ public class Universe {
 		Planet planet = null;
 		float minDistance = Float.MAX_VALUE;
 		for (final Planet p : planetList) {
-			if (p.jumpGateList.size() > 3) {
-				final float distance = p.x + p.y;
+			if (p.pathList.size() > 3) {
+				final float distance = p.x * p.x + p.z * p.z;
 				if (distance < minDistance) {
 					minDistance = distance;
 					planet = p;
@@ -484,16 +490,20 @@ public class Universe {
 		if (selected != null) {
 			if (Planet.class.isInstance(selected)) {
 				selectedPlanet = (Planet) selected;
-				ScreenListener.setCamera(selectedPlanet.x, selectedPlanet.y, setDirty);
+				if (ScreenListener != null)
+					ScreenListener.setCamera(selectedPlanet.x, selectedPlanet.z, setDirty);
 			} else if (Trader.class.isInstance(selected)) {
 				selectedTrader = (Trader) selected;
-				ScreenListener.setCamera(selectedTrader.x, selectedTrader.z, setDirty);
+				if (ScreenListener != null)
+					ScreenListener.setCamera(selectedTrader.x, selectedTrader.z, setDirty);
 			} else if (Sim.class.isInstance(selected)) {
 				selectedSim = (Sim) selected;
-				ScreenListener.setCamera(selectedSim.planet.x, selectedSim.planet.y, setDirty);
+				if (ScreenListener != null)
+					ScreenListener.setCamera(selectedSim.planet.x, selectedSim.planet.z, setDirty);
 			} else if (ProductionFacility.class.isInstance(selected)) {
 				selectedProductionFacility = (ProductionFacility) selected;
-				ScreenListener.setCamera(selectedProductionFacility.planet.x, selectedProductionFacility.planet.y, setDirty);
+				if (ScreenListener != null)
+					ScreenListener.setCamera(selectedProductionFacility.planet.x, selectedProductionFacility.planet.z, setDirty);
 			} else if (Good.class.isInstance(selected)) {
 				selectedGood = (Good) selected;
 			}

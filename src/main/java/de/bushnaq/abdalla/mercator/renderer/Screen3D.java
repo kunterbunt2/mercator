@@ -6,17 +6,20 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import de.bushnaq.abdalla.mercator.audio.synthesis.Mp3Player;
 import de.bushnaq.abdalla.mercator.audio.synthesis.OpenAlException;
 import de.bushnaq.abdalla.mercator.universe.Universe;
 import de.bushnaq.abdalla.mercator.universe.good.Good;
-import de.bushnaq.abdalla.mercator.universe.jumpgate.JumpGate;
+import de.bushnaq.abdalla.mercator.universe.land.Land;
+import de.bushnaq.abdalla.mercator.universe.path.Path;
 import de.bushnaq.abdalla.mercator.universe.planet.Planet;
 import de.bushnaq.abdalla.mercator.universe.planet.Planet3DRenderer;
 import de.bushnaq.abdalla.mercator.universe.sim.trader.Trader;
+import net.mgsx.gltf.scene3d.model.ModelInstanceHack;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import de.bushnaq.abdalla.mercator.desktop.LaunchMode;
 import de.bushnaq.abdalla.mercator.util.TimeAccuracy;
 import de.bushnaq.abdalla.mercator.util.TimeUnit;
 import com.badlogic.gdx.ApplicationListener;
@@ -31,8 +34,6 @@ import com.badlogic.gdx.graphics.profiling.GLProfiler;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.utils.Align;
-
-import net.mgsx.gltf.scene3d.model.ModelInstanceHack;
 
 public class Screen3D implements ScreenListener, ApplicationListener, InputProcessor {
 	class DemoString {
@@ -64,7 +65,7 @@ public class Screen3D implements ScreenListener, ApplicationListener, InputProce
 	public static final float SIM_HEIGHT = 0.3f;
 	public static final float SIM_WIDTH = 0.3f;
 	public static final float SOOM_SPEED = 8.0f * 10;
-	public static final float SPACE_BETWEEN_OBJECTS = 0.1f;
+	public static final float SPACE_BETWEEN_OBJECTS = 0.1f / Universe.WORLD_SCALE;
 	public static final Color TEXT_COLOR = Color.WHITE; // 0xffffffff;
 	//	private static final Color trafficEndColor = new Color(0xffff0000);
 	//	private static final Color trafficStartColor = new Color(0xff55ff55);
@@ -73,7 +74,6 @@ public class Screen3D implements ScreenListener, ApplicationListener, InputProce
 	private static final Color TIME_MACHINE_SUB_MARKER_COLOR = new Color(0.7f, 0.7f, 0.7f, 1.0f);
 	private float centerXD;
 	private float centerYD;
-	private boolean demoMode = false;
 	List<DemoString> demoText = new ArrayList<>();
 	float demoTextX = 100;
 	float demoTextY = 0;
@@ -86,6 +86,7 @@ public class Screen3D implements ScreenListener, ApplicationListener, InputProce
 	private boolean hrtfEnabled = true;
 	private final List<Label> labels = new ArrayList<>();
 	private long lastCameraDirty = 0;
+	public LaunchMode launchMode;
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 	//	private FPSLogger fPSLogger = new FPSLogger();
 	//	private float time;
@@ -105,13 +106,13 @@ public class Screen3D implements ScreenListener, ApplicationListener, InputProce
 	private final Universe universe;
 	private boolean vsyncEnabled = true;
 
-	public Screen3D(final Universe universe, final boolean demoMode) throws Exception {
+	public Screen3D(final Universe universe, final LaunchMode launchMode) throws Exception {
 		this.universe = universe;
-		this.demoMode = demoMode;
+		this.launchMode = launchMode;
 		universe.setScreenListener(this);
 		//		this.config = config;
 		//		this.frame = frame;
-		renderMaster = new Render3DMaster(universe, this);
+		renderMaster = new Render3DMaster(universe, this, launchMode);
 		render2DMaster = new Render2DMaster(universe);
 		//		renderMaster.centerX = 0;
 		//		renderMaster.centerY = 0;
@@ -131,12 +132,14 @@ public class Screen3D implements ScreenListener, ApplicationListener, InputProce
 			}
 			createStage();
 			createTraders();
+//			createRing();
 			createWater();
 			createPlanets();
+//			createLand();
 			createJumpGates();
 
-			if (demoMode) {
-//				renderMaster.sceneManager.setEnableDepthOfField(true);
+			if (launchMode == LaunchMode.demo) {
+				//				renderMaster.sceneManager.setEnableDepthOfField(true);
 				//				renderMaster.sceneManager.setAlwaysDay(false);
 				//				mp3Player = renderMaster.sceneClusterManager.audioEngine.createAudioProducer(Mp3Player.class);
 				//				mp3Player.setFile(Gdx.files.internal("02-methodica.ogg"));
@@ -144,25 +147,58 @@ public class Screen3D implements ScreenListener, ApplicationListener, InputProce
 				//				mp3Player.play();
 				//				AudioEngine.checkAlError("Failed to set listener orientation with error #");
 			}
+			if (universe.selected != null) {
+				universe.setSelected(universe.selected, true);
+				followMode = true;
+			}
 		} catch (final Exception e) {
 			Gdx.app.log(this.getClass().getSimpleName(), e.getMessage(), e);
 			System.exit(1);
 		}
 	}
+	private void createWater() {
+		final float delta = (universe.size + 1) * Planet.PLANET_DISTANCE * 2;
+		//sector
+		{
+			//			final Color sectorColor = renderMaster.getDistinctiveColor(planet.sector.type);
+			final GameObject sectorInstance = new GameObject(new ModelInstanceHack(renderMaster.sector), null);
+			sectorInstance.instance.transform.setToTranslationAndScaling(0, Planet3DRenderer.SECTOR_Y, 0, delta, 8, delta);
+			sectorInstance.update();
+			renderMaster.sceneManager.addStatic(sectorInstance);
+
+		}
+		//water
+		{
+			final GameObject sectorInstance = new GameObject(new ModelInstanceHack(renderMaster.water), null);
+			sectorInstance.instance.transform.setToTranslationAndScaling(0, Planet3DRenderer.WATER_Y, 0, delta, 1, delta);
+			sectorInstance.update();
+			renderMaster.sceneManager.addStatic(sectorInstance);
+		}
+	}
 
 	private void createJumpGates() {
-		for (final Planet planet : universe.planetList) {
-			for (final JumpGate jumpGate : planet.jumpGateList) {
-				//				if(planet.getName().equals("P-1008"))
-				jumpGate.get3DRenderer().create(planet.x, planet.y, renderMaster);
+//		if (launchMode == LaunchMode.development)
+		{
+			for (final Path path : universe.pathList) {
+				path.get3DRenderer().create(path.source.x, path.source.y, path.source.z, renderMaster);
 			}
+		}
+	}
+
+	private void createLand() {
+		for (final Land land : universe.landList) {
+			land.get3DRenderer().create(renderMaster);
 		}
 	}
 
 	private void createPlanets() {
 		for (final Planet planet : universe.planetList) {
-			planet.get3DRenderer().create(0, 0, renderMaster);
+			planet.get3DRenderer().create(renderMaster);
 		}
+	}
+
+	private void createRing() {
+		universe.ring.get3DRenderer().create(renderMaster);
 	}
 
 	private void createStage() throws Exception {
@@ -181,29 +217,9 @@ public class Screen3D implements ScreenListener, ApplicationListener, InputProce
 	private void createTraders() {
 		for (final Planet planet : renderMaster.universe.planetList) {
 			for (final Trader trader : planet.traderList) {
-				trader.get3DRenderer().create(0, 0, renderMaster);
+				trader.get3DRenderer().create(renderMaster);
 			}
 
-		}
-	}
-
-	private void createWater() {
-		final float delta = (universe.size + 1) * Planet.PLANET_DISTANCE * 2;
-		//sector
-		{
-			//			final Color sectorColor = renderMaster.getDistinctiveColor(planet.sector.type);
-			final GameObject sectorInstance = new GameObject(new ModelInstanceHack(renderMaster.sector), null);
-			sectorInstance.instance.transform.setToTranslationAndScaling(0, Planet3DRenderer.SECTOR_Y, 0, delta, 8, delta);
-			sectorInstance.update();
-			renderMaster.sceneManager.addStatic(sectorInstance);
-
-		}
-		//water
-		{
-			final GameObject sectorInstance = new GameObject(new ModelInstanceHack(renderMaster.water), null);
-			sectorInstance.instance.transform.setToTranslationAndScaling(0, Planet3DRenderer.WATER_Y, 0, delta, 1, delta);
-			sectorInstance.update();
-			renderMaster.sceneManager.addStatic(sectorInstance);
 		}
 	}
 
@@ -242,10 +258,6 @@ public class Screen3D implements ScreenListener, ApplicationListener, InputProce
 
 	public int getMaxFramesPerSecond() {
 		return maxFramesPerSecond;
-	}
-
-	public boolean isDemoMode() {
-		return demoMode;
 	}
 
 	@Override
@@ -307,7 +319,8 @@ public class Screen3D implements ScreenListener, ApplicationListener, InputProce
 			}
 			return true;
 		case Input.Keys.NUM_2:
-			demoMode = !demoMode;
+			if (launchMode == LaunchMode.demo)
+				launchMode = LaunchMode.normal;
 			return true;
 		case Input.Keys.F:
 			followMode = !followMode;
@@ -492,14 +505,6 @@ public class Screen3D implements ScreenListener, ApplicationListener, InputProce
 
 	private void render(final long currentTime) throws Exception {
 		final float deltaTime = Gdx.graphics.getDeltaTime();
-		//		time += deltaTime;
-		// universe.timeStatisticManager.start( DRAW_DURATION );
-		//		renderMaster.camera.position.setFromSpherical(MathUtils.PI/4, time * .3f).scl(.02f);
-		//		renderMaster.camera.up.set(Vector3.Y);
-		//		renderMaster.camera.lookAt(Vector3.Zero);
-		//		renderMaster.camera.update();
-
-		// universe.timeStatisticManager.start( BATCH_END_DURATION );
 		renderMaster.sceneManager.updateCamera(centerXD, 0f, centerYD);
 		if (followMode && universe.selected != null) {
 			if (System.currentTimeMillis() - lastCameraDirty > 1000) {
@@ -509,12 +514,10 @@ public class Screen3D implements ScreenListener, ApplicationListener, InputProce
 				universe.setSelected(universe.selected, false);
 			}
 		}
-		// drawGoodTraffic();
 		renderJumpGates(currentTime);
 		renderPlanets(currentTime);
 		renderGoods(currentTime);
 		renderTraders(currentTime);
-		//				renderCube();
 
 		renderMaster.sceneManager.render(currentTime, deltaTime, takeScreenShot);
 		renderMaster.sceneManager.postProcessRender();
@@ -524,34 +527,17 @@ public class Screen3D implements ScreenListener, ApplicationListener, InputProce
 		renderDemo();
 		render2DMaster.batch.end();
 		renderStage();
-
-		// System.out.printf( "batch calls %d\n", renderMaster.batch.renderCalls );
-		//		fPSLogger.log();
-		//		performanceLogger.log();
-		// universe.timeStatisticManager.stop( BATCH_END_DURATION );
-		// universe.timeStatisticManager.stop( DRAW_DURATION );
-		//		printStatistics();
-
 		renderMaster.sceneManager.handleQueuedScreenshot(takeScreenShot);
 		takeScreenShot = false;
 	}
 
-	private void renderCube() {
-		//		if (ocean == null) {
-		//			ocean = new GameObject(new ModelInstanceHack(renderMaster.NormalTangentTest.scene.model), null);
-		//			ocean.instance.transform.setToTranslationAndScaling(0, 500, 0, 256, 256, 256);
-		//			renderMaster.sceneClusterManager.addStatic(ocean);
-		//			//				renderMaster.sceneClusterManager.ocean = ocean;
-		//		}
-	}
-
 	private void renderDemo() throws IOException {
-		if (demoMode) {
+		if (launchMode == LaunchMode.demo) {
 			final float lineHeightFactor = 2f;
 			if (demoText.isEmpty()) {
 				demoText.add(new DemoString("Mercator", render2DMaster.atlasManager.demoBigFont));
 				demoText.add(new DemoString("A computer game implementation of a closed economical simulation.", render2DMaster.atlasManager.demoMidFont));
-				demoText.add(new DemoString(String.format("The current world is generated procedurally and includes %d cities, %d factories, %d traders and %d sims.", universe.planetList.size(), universe.planetList.size() * 2, universe.traderList.size(), universe.simList.size()), render2DMaster.atlasManager.demoMidFont));
+				demoText.add(new DemoString(String.format("The current world is generated proceduraly and includes %d cities, %d factories, %d traders and %d sims.", universe.planetList.size(), universe.planetList.size() * 2, universe.traderList.size(), universe.simList.size()), render2DMaster.atlasManager.demoMidFont));
 				demoText.add(new DemoString("The amount of wealth in the system, including products and money is constant at all times. ", render2DMaster.atlasManager.demoMidFont));
 				demoText.add(new DemoString("Factories pay wages to sims to produce goods that are sold on a free market.", render2DMaster.atlasManager.demoMidFont));
 				demoText.add(new DemoString("Some sims are traders that buy products in one city and sell them with profit in another city.", render2DMaster.atlasManager.demoMidFont));
@@ -610,22 +596,25 @@ public class Screen3D implements ScreenListener, ApplicationListener, InputProce
 		for (final Planet planet : universe.planetList) {
 			int index = 0;
 			for (final Good good : planet.getGoodList()) {
-				good.get3DRenderer().update(planet.x, planet.y, renderMaster, currentTime, renderMaster.sceneManager.getTimeOfDay(), index++, false);
+				good.get3DRenderer().update(planet.x, planet.y, planet.z, renderMaster, currentTime, renderMaster.sceneManager.getTimeOfDay(), index++, false);
 			}
 		}
 	}
 
 	private void renderJumpGates(final long currentTime) throws Exception {
-		for (final Planet planet : universe.planetList) {
-			for (final JumpGate jumpGate : planet.jumpGateList) {
-				jumpGate.get3DRenderer().update(planet.x, planet.y, renderMaster, currentTime, renderMaster.sceneManager.getTimeOfDay(), 0, jumpGate.selected);
-			}
+		for (final Path path : universe.pathList) {
+			path.get3DRenderer().update(path.source.x, path.source.y, path.source.z, renderMaster, currentTime, renderMaster.sceneManager.getTimeOfDay(), 0, path.selected);
 		}
+		//		for (final Planet planet : universe.planetList) {
+		//			for (final Path jumpGate : planet.pathList) {
+		//				jumpGate.get3DRenderer().update(planet.x, planet.y, planet.z, renderMaster, currentTime, renderMaster.sceneManager.getTimeOfDay(), 0, jumpGate.selected);
+		//			}
+		//		}
 	}
 
 	private void renderPlanets(final long currentTime) throws Exception {
 		for (final Planet planet : universe.planetList) {
-			planet.get3DRenderer().update(0, 0, renderMaster, currentTime, renderMaster.sceneManager.getTimeOfDay(), 0, planet == renderMaster.universe.selectedPlanet);
+			planet.get3DRenderer().update(renderMaster, currentTime, renderMaster.sceneManager.getTimeOfDay(), 0, planet == renderMaster.universe.selectedPlanet);
 		}
 	}
 
@@ -634,13 +623,23 @@ public class Screen3D implements ScreenListener, ApplicationListener, InputProce
 		// fps
 		{
 			stringBuilder.setLength(0);
-			stringBuilder.append(" FPS: ").append(Gdx.graphics.getFramesPerSecond());
+			stringBuilder.append(" FPS ").append(Gdx.graphics.getFramesPerSecond());
 			labels.get(labelIndex++).setText(stringBuilder);
 		}
 		//audio sources
+		//		{
+		//			stringBuilder.setLength(0);
+		//			stringBuilder.append(" audio sources: ").append(renderMaster.sceneManager.audioEngine.getEnabledAudioSourceCount() + " / " + renderMaster.sceneManager.audioEngine.getDisabledAudioSourceCount());
+		//			labels.get(labelIndex++).setText(stringBuilder);
+		//		}
+		//time
 		{
 			stringBuilder.setLength(0);
-			stringBuilder.append(" audio sources: ").append(renderMaster.sceneManager.audioEngine.getEnabledAudioSourceCount() + " / " + renderMaster.sceneManager.audioEngine.getDisabledAudioSourceCount());
+
+			final float time = renderMaster.sceneManager.currentDayTime;
+			final int hours = (int) time;
+			final int minutes = (int) (60 * ((time - (int) time) * 100) / 100);
+			stringBuilder.append(" time ").append(hours).append(":").append(minutes);
 			labels.get(labelIndex++).setText(stringBuilder);
 		}
 		stage.draw();
@@ -650,7 +649,7 @@ public class Screen3D implements ScreenListener, ApplicationListener, InputProce
 		for (final Planet planet : renderMaster.universe.planetList) {
 			int index = 0;
 			for (final Trader trader : planet.traderList) {
-				trader.get3DRenderer().update(0, 0, renderMaster, currentTime, renderMaster.sceneManager.getTimeOfDay(), index++, trader == renderMaster.universe.selectedTrader);
+				trader.get3DRenderer().update(renderMaster, currentTime, renderMaster.sceneManager.getTimeOfDay(), index++, trader == renderMaster.universe.selectedTrader);
 			}
 
 		}

@@ -31,6 +31,11 @@ public class SinOscillator implements Oscilator {
 		return value;
 	}
 
+	@Override
+	public double getFrequency() {
+		return oscFreq;
+	}
+
 	/**
 	 * Vibrato control of the Oscillator
 	 * @param lfoFreq in Hz
@@ -50,5 +55,10 @@ public class SinOscillator implements Oscilator {
 	@Override
 	public void setSampleRate(final int samplerate) {
 		this.samplerate = samplerate;
+	}
+
+	@Override
+	public void setFrequency(float frequency) {
+		this.oscFreq = frequency;
 	}
 }

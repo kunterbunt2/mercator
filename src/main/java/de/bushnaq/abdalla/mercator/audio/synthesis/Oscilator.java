@@ -6,6 +6,8 @@ public interface Oscilator {
 
 	public double gen(long i);
 
+	public double getFrequency();
+
 	/**
 	 * Vibrato control of the Oscillator
 	 * @param lfoFreq in Hz
@@ -20,4 +22,6 @@ public interface Oscilator {
 	void setOscillator(float oscFreq);
 
 	public void setSampleRate(int samplerate);
+
+	void setFrequency(float frequency);
 }

@@ -61,6 +61,14 @@ public abstract class AbstractAudioProducer implements AudioProducer {
 		return enabled;
 	}
 
+	public boolean isKeepCopy() throws OpenAlcException {
+		if (isEnabled()) {
+			return source.isKeepCopy();
+		} else {
+			throw new OpenAlcException("Synth is disabled");
+		}
+	}
+
 	@Override
 	public boolean isPlaying() throws OpenAlException {
 		return play;
@@ -98,10 +106,18 @@ public abstract class AbstractAudioProducer implements AudioProducer {
 
 	@Override
 	public void setGain(final float gain) throws OpenAlException {
-		if (this.gain != gain && isEnabled()) {
+		if (Math.abs(this.gain - gain) > 0.1f && isEnabled()) {
 			source.setGain(gain);
 		}
 		this.gain = gain;
+	}
+
+	public void setKeepCopy(final boolean enable) throws OpenAlcException {
+		if (isEnabled()) {
+			source.setKeepCopy(enable);
+		} else {
+			throw new OpenAlcException("Synth is disabled");
+		}
 	}
 
 	@Override
@@ -111,13 +127,14 @@ public abstract class AbstractAudioProducer implements AudioProducer {
 		}
 		if (isEnabled()) {
 			source.setPosition(position);
+			//			source.setPosition(new float[] {0,0,0});
 		}
 		if (this.velocity.x != velocity[0] || this.velocity.y != velocity[1] || this.velocity.z != velocity[2]) {
 			this.velocity.set(velocity[0], velocity[1], velocity[2]);
 			adaptToVelocity(this.velocity.len());
 		}
 		if (isEnabled()) {
-			source.setVelocity(position, velocity);
+			//			source.setVelocity(position, velocity);
 		}
 	}
 

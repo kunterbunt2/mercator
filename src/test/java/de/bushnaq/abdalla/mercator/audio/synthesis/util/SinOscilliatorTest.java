@@ -1,4 +1,4 @@
-package de.bushnaq.abdalla.mercator.audio.synthesis;
+package de.bushnaq.abdalla.mercator.audio.synthesis.util;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -7,13 +7,15 @@ import static org.hamcrest.Matchers.lessThan;
 import java.util.ArrayList;
 import java.util.List;
 
+import de.bushnaq.abdalla.mercator.audio.synthesis.Synthesizer;
 import de.bushnaq.abdalla.mercator.audio.synthesis.util.SinAudioEngine;
 import de.bushnaq.abdalla.mercator.audio.synthesis.util.SinSynthesizer;
+import de.bushnaq.abdalla.mercator.renderer.camera.MovingCamera;
+import de.bushnaq.abdalla.mercator.universe.sim.trader.Trader;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.bushnaq.abdalla.mercator.renderer.camera.MovingCamera;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Files;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3NativesLoader;
@@ -22,6 +24,10 @@ public class SinOscilliatorTest {
 	private static final int SECONDS_2 = 2000;
 	private MovingCamera camera;
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
+
+	private float calcualteSpeed(final float frequency) {
+		return Trader.MIN_ENGINE_SPEED + (((frequency - 220) / (500 - 220)) * (Trader.MAX_ENGINE_SPEED - Trader.MIN_ENGINE_SPEED));
+	}
 
 	private void createCamera() throws Exception {
 		Gdx.files = new Lwjgl3Files();
@@ -57,6 +63,52 @@ public class SinOscilliatorTest {
 		audioEngine.dispose();
 		logger.info(String.format("Rendered %d buffers each %d samples in %dms", numberOfSources, SinAudioEngine.samples, delta));
 		assertThat(String.format("expected to render %d buffers each %d samples in less than 1s", numberOfSources, SinAudioEngine.samples), delta, is(lessThan(1000L)));
+	}
+
+	@Test
+	public void renderSpeedTest() throws Exception {
+		final SinAudioEngine audioEngine = new SinAudioEngine();
+		audioEngine.create();
+		createCamera();
+		{
+			final SinSynthesizer synth = audioEngine.createAudioProducer(SinSynthesizer.class);
+			synth.setGain(5);
+
+			float frequency = 220.0f;
+			float speed = calcualteSpeed(frequency);
+			synth.sin1.setFrequency(frequency);
+
+			synth.setPositionAndVelocity(new float[] { frequency, 0, 0 }, new float[] { speed, 0, 0 });
+			synth.play();
+			audioEngine.begin(camera);
+			final long time1 = System.currentTimeMillis();
+			long lastTime = 0;
+			long time2;
+			float delta = 2;
+			synth.sin1.setOscillator(frequency);
+			synth.setGain(20.0f);
+			//						synth.setKeepCopy(true);
+			do {
+				time2 = System.currentTimeMillis();
+				if (time2 - lastTime > 20) {
+					frequency += delta;
+					lastTime = time2;
+					if (frequency > 500 || frequency < 220) {
+						delta *= -1f;
+					}
+
+				} else {
+					Thread.sleep(10);
+				}
+				speed = calcualteSpeed(frequency);
+				//				logger.info(String.format("speed = %f", speed));
+				synth.setPositionAndVelocity(new float[] { frequency, 0, 0 }, new float[] { speed, 0, 0 });
+			} while (time2 - time1 < 6000);
+			synth.writeWav("target/sinSpeed");
+			synth.setKeepCopy(false);
+			audioEngine.end();
+		}
+		audioEngine.dispose();
 	}
 
 	@Test

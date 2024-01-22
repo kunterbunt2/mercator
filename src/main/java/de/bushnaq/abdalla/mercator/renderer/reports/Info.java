@@ -40,22 +40,21 @@ public class Info {
 	private static final String NAME_LABEL = "nameLabel";
 	private static final String STATIC_LABEL = "staticLabel";
 	private static final String VARIABLE_LABEL = "variableLabel";
-	AtlasManager atlasManager;
-	Batch batch;
+	private final AtlasManager atlasManager;
+	private final Batch batch;
 	private final TimeStatistic debugTimer;
-	InputMultiplexer inputMultiplexer;
+	private final InputMultiplexer inputMultiplexer;
 	// private TextButton closeButton;
-	int labelIndex = 0;
+	private int labelIndex = 0;
 	private final List<LabelData> labels = new ArrayList<LabelData>();
 	private SceneManager sceneClusterManager;
-	float screenHeight = 0;
+	private float screenHeight = 0;
 	private Skin skin;
 	private Stage stage;
 	private final StringBuilder stringBuilder = new StringBuilder();
 	private final String title = "info";
-	Class<?> type;
-	private final Universe universe;
-
+	private Class<?> type;
+	//	private final Universe universe;
 	private Window window;
 
 	//	public Info(Render2DMaster renderMaster, InputMultiplexer inputMultiplexer) {
@@ -63,8 +62,8 @@ public class Info {
 	//		this.inputMultiplexer = inputMultiplexer;
 	//	}
 
-	public Info(final Universe universe, final AtlasManager atlasManager, final Batch batch, final InputMultiplexer inputMultiplexer) throws Exception {
-		this.universe = universe;
+	public Info(/*final Universe universe,*/ final AtlasManager atlasManager, final Batch batch, final InputMultiplexer inputMultiplexer) throws Exception {
+		//		this.universe = universe;
 		this.atlasManager = atlasManager;
 		this.batch = batch;
 		this.inputMultiplexer = inputMultiplexer;
@@ -331,10 +330,11 @@ public class Info {
 					numberOfGoods++;
 				}
 			}
-			final int size = 15 + 1 + numberOfGoods + 1 + 1 + trader.simNeedsList.size();
+			final int size = 18 + 1 + numberOfGoods + 1 + 1 + trader.simNeedsList.size();
 			clearUnmatchedSizeAndType(size, Trader.class);
 			updateNameAndValue("name", trader.getName(), NAME_LABEL);
 			updateNameAndValue("status", trader.status.getName(), VARIABLE_LABEL);
+			updateNameAndValue("traderStatus", trader.traderStatus.getName(), VARIABLE_LABEL);
 			updateNameAndValue("start credits", Sim.SIM_START_CREDITS, STATIC_LABEL);
 			updateNameAndValue("cargo size", trader.goodSpace, STATIC_LABEL);
 			updateNameAndValue("speed", trader.getMaxEngineSpeed(), STATIC_LABEL);
@@ -347,6 +347,8 @@ public class Info {
 			updateNameAndValue("source", trader.sourcePlanet != null ? trader.sourcePlanet.getName() : "-", NAME_LABEL);
 			updateNameAndValue("planet", trader.planet != null ? trader.planet.getName() : "-", NAME_LABEL);
 			updateNameAndValue("destination", trader.destinationPlanet != null ? trader.destinationPlanet.getName() : "-", NAME_LABEL);
+			updateNameAndValue("sourceWaypoint", trader.sourceWaypoint != null ? trader.sourceWaypoint.getName() : "-", NAME_LABEL);
+			updateNameAndValue("targetWaypoint", trader.targetWaypoint != null ? trader.targetWaypoint.getName() : "-", NAME_LABEL);
 			updateNameAndValue("", "", VARIABLE_LABEL);
 			updateGood("good", CAPTION_LABEL, "price", CAPTION_LABEL, "average", CAPTION_LABEL, "amount", CAPTION_LABEL, "average", CAPTION_LABEL);
 			for (final Good good : trader.getGoodList()) {

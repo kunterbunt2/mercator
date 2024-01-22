@@ -13,8 +13,10 @@ import de.bushnaq.abdalla.mercator.renderer.ObjectRenderer;
 import de.bushnaq.abdalla.mercator.renderer.Render3DMaster;
 import de.bushnaq.abdalla.mercator.renderer.SceneManager;
 import de.bushnaq.abdalla.mercator.renderer.Screen3D;
+import de.bushnaq.abdalla.mercator.universe.Universe;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.PolygonSpriteBatch;
 import com.badlogic.gdx.graphics.g3d.Attribute;
 import com.badlogic.gdx.graphics.g3d.Material;
@@ -28,12 +30,13 @@ public class Good3DRenderer extends ObjectRenderer {
 
 	public static final int CONTAINER_EDGE_SIZE = 4;
 	private static Color DIAMON_BLUE_COLOR = new Color(0x006ab6ff);
+	private static final int GOOD_AMOUNT_DRAWING_FACTOR = 5;
 	public static final float GOOD_HEIGHT = 8f;
 	private static final Color GOOD_NAME_COLOR = new Color(0.596f, 0.08f, 0.247f, 0.8f);
 	//	public static final Color GOOD_COLOR = Color.RED; // 0xff000000;
-	public static final float GOOD_X = 8f;
-	public static final float GOOD_Y = 8f;
-	public static final float GOOD_Z = 8f;
+	public static final float GOOD_X = 8f / Universe.WORLD_SCALE;
+	public static final float GOOD_Y = 8f / Universe.WORLD_SCALE;
+	public static final float GOOD_Z = 8f / Universe.WORLD_SCALE;
 	private static Color GRAY_COLOR = new Color(0x404853ff);
 	//	private static Color magentaColor = new Color(1.0f, 0.0f, 1.0f, 1f);
 	//	private static Color cyanColor = new Color(0.0f, 1.0f, 1.0f, 1f);
@@ -41,7 +44,7 @@ public class Good3DRenderer extends ObjectRenderer {
 	private static Color POST_GREEN_COLOR = new Color(0x00614eff);
 	private static Color SCARLET_COLOR = new Color(0xb00233ff);
 	public static final Color SELECTED_GOOD_COLOR = Color.LIGHT_GRAY; // 0xffeeeeee;
-	public static final float SPACE_BETWEEN_GOOD = Screen3D.SPACE_BETWEEN_OBJECTS * 4;
+	public static final float SPACE_BETWEEN_GOOD = Screen3D.SPACE_BETWEEN_OBJECTS * 2;
 
 	public static Color getColor(final int index) {
 		switch (index) {
@@ -88,40 +91,71 @@ public class Good3DRenderer extends ObjectRenderer {
 	}
 
 	@Override
-	public void renderText(final float aX, final float aY, final SceneManager sceneManager, final int index) {
+	public void renderText(final float aX, final float aY, final float aZ, final SceneManager sceneManager, final int index) {
 		{
-			final float size = 4;
-			final float x = aX;
-			final float z = aY;
-			//draw text
-			final PolygonSpriteBatch batch = sceneManager.batch2D;
-			final BitmapFont font = sceneManager.getAtlasManager().modelFont;
-			{
-				final Matrix4 m = new Matrix4();
-				final float fontSize = font.getLineHeight();
-				final float scaling = size / fontSize;
-				//				m.setToTranslationAndScaling(x - Planet3DRenderer.PLANET_SIZE / 2 + (CONTAINER_EDGE_SIZE) * (GOOD_X + SPACE_BETWEEN_GOOD) + size, 1, z + Planet3DRenderer.PLANET_SIZE / 2 - index * (CONTAINER_EDGE_SIZE + 1) * (GOOD_Y + SPACE_BETWEEN_GOOD) - size / 5, scaling, 1f, scaling);
-				m.setToTranslation(x - Planet3DRenderer.PLANET_SIZE / 2 + (CONTAINER_EDGE_SIZE) * (GOOD_X + SPACE_BETWEEN_GOOD) + size, 1, z + Planet3DRenderer.PLANET_SIZE / 2 - index * (CONTAINER_EDGE_SIZE + 1) * (GOOD_Y + SPACE_BETWEEN_GOOD) - size / 5);
-				final Vector3 xVector = new Vector3(1, 0, 0);
-				final Vector3 yVector = new Vector3(0, 1, 0);
-				m.rotate(yVector, 90);
-				m.rotate(xVector, -90);
-				m.scale(scaling, scaling, 1f);
-				batch.setTransformMatrix(m);
-				font.setColor(GOOD_NAME_COLOR);
-				font.draw(batch, good.type.getName(), 0, 0);
-			}
+			final float dy = -Planet3DRenderer.PLANET_SIZE / 2 + index * (CONTAINER_EDGE_SIZE + 1) * (GOOD_Y + SPACE_BETWEEN_GOOD);
+			final float dx = Planet3DRenderer.PLANET_SIZE / 2 - (CONTAINER_EDGE_SIZE) * (GOOD_X + SPACE_BETWEEN_GOOD);
+			renderTextOnTop(aX, aY, aZ, sceneManager, dy, 0, dx, good.type.getName(), GOOD_X);
+			//			final float size = 8;
+			//			final float x = aX;
+			//			final float y = aY;
+			//			final float z = aZ;
+			//			//draw text
+			//			final PolygonSpriteBatch batch = sceneManager.batch2D;
+			//			final BitmapFont font = sceneManager.getAtlasManager().modelFont;
+			//			{
+			//				final Matrix4 m = new Matrix4();
+			//				final float fontSize = font.getLineHeight();
+			//				final float scaling = size / fontSize;
+			//				m.setToTranslation(x - Planet3DRenderer.PLANET_SIZE / 2 + (CONTAINER_EDGE_SIZE) * (GOOD_X + SPACE_BETWEEN_GOOD) + size, y + 1, z + Planet3DRenderer.PLANET_SIZE / 2 - index * (CONTAINER_EDGE_SIZE + 1) * (GOOD_Y + SPACE_BETWEEN_GOOD) - size / 5);
+			//				final Vector3 xVector = new Vector3(1, 0, 0);
+			//				final Vector3 yVector = new Vector3(0, 1, 0);
+			//				m.rotate(yVector, 90);
+			//				m.rotate(xVector, -90);
+			//				m.scale(scaling, scaling, 1f);
+			//				batch.setTransformMatrix(m);
+			//				font.setColor(GOOD_NAME_COLOR);
+			//				font.draw(batch, good.type.getName(), 0, 0);
+			//			}
 
 		}
 
 	}
 
-	@Override
-	public void update(final float x, final float y, final Render3DMaster renderMaster, final long currentTime, final float timeOfDay, final int index, final boolean selected) {
-		updateGood(x, y, renderMaster, currentTime, index, false);
+	private void renderTextOnTop(final float aX, final float aY, final float aZ, final SceneManager sceneManager, final float dx, final float dy, final float dz, final String text, final float size) {
+		//draw text
+		final PolygonSpriteBatch batch = sceneManager.batch2D;
+		final BitmapFont font = sceneManager.getAtlasManager().modelFont;
+		{
+			final Matrix4 m = new Matrix4();
+			final float fontSize = font.getLineHeight();
+			final float scaling = size / fontSize;
+			final GlyphLayout layout = new GlyphLayout();
+			layout.setText(font, text);
+			final float width = layout.width;// contains the width of the current set text
+			final float height = layout.height; // contains the height of the current set text
+			//on top
+			{
+				final Vector3 xVector = new Vector3(1, 0, 0);
+				final Vector3 yVector = new Vector3(0, 1, 0);
+				m.setToTranslation(aX - height * scaling / 2.0f + size - dz, aY + 0.2f, aZ + width * scaling / 2.0f - size - dx);
+				m.rotate(yVector, 90);
+				m.rotate(xVector, -90);
+				m.scale(scaling, scaling, 1f);
+
+			}
+			batch.setTransformMatrix(m);
+			font.setColor(GOOD_NAME_COLOR);
+			font.draw(batch, text, 0, 0);
+		}
 	}
 
-	private void updateGood(final float aX, final float aY, final Render3DMaster renderMaster, final long currentTime, final int index, final boolean selected) {
+	@Override
+	public void update(final float x, final float y, final float z, final Render3DMaster renderMaster, final long currentTime, final float timeOfDay, final int index, final boolean selected) {
+		updateGood(x, y, z, renderMaster, currentTime, index, false);
+	}
+
+	private void updateGood(final float aX, final float aY, final float aZ, final Render3DMaster renderMaster, final long currentTime, final int index, final boolean selected) {
 		//		Color color;
 		//		if (selected) {
 		//			color = SELECTED_GOOD_COLOR;
@@ -134,7 +168,7 @@ public class Good3DRenderer extends ObjectRenderer {
 		// universe.currentTime ) )
 		// System.out.printf( "planet %s last time %d now %d\n", planet.name,
 		// good.lastBuyInterest, universe.currentTime );
-		final int delta = usedMls.size() - good.getAmount() / 5;
+		final int delta = usedMls.size() - good.getAmount() / GOOD_AMOUNT_DRAWING_FACTOR;
 		if (delta > 0) {
 			for (int i = 0; i < delta; i++) {
 				final GameObject scene = usedMls.remove(usedMls.size() - 1);
@@ -156,11 +190,11 @@ public class Good3DRenderer extends ObjectRenderer {
 				final int xEdgeSize = edgeSize;
 				final int yEdgeSize = edgeSize;
 				final int xContainer = usedMls.size() % xEdgeSize;
-				final int yContainer = (int) Math.floor(usedMls.size() / xEdgeSize) % yEdgeSize;
-				final int zContainer = (int) Math.floor(usedMls.size() / (xEdgeSize * yEdgeSize));
+				final int zContainer = (int) Math.floor(usedMls.size() / xEdgeSize) % yEdgeSize;
+				final int yContainer = (int) Math.floor(usedMls.size() / (xEdgeSize * yEdgeSize));
 				final float x = aX - Planet3DRenderer.PLANET_SIZE / 2 + GOOD_X / 2 + xContainer * (GOOD_X);
-				final float z = aY + Planet3DRenderer.PLANET_SIZE / 2 - GOOD_Y / 2 - yContainer * (GOOD_Y) - index * (edgeSize + 1) * (GOOD_Y);
-				final float y = GOOD_Z / 2 + zContainer * (GOOD_Z);
+				final float z = aZ + Planet3DRenderer.PLANET_SIZE / 2 - GOOD_Z / 2 - zContainer * (GOOD_Z) - index * (edgeSize + 1) * (GOOD_Z);
+				final float y = aY + GOOD_Y / 2 + yContainer * (GOOD_Y);
 				final GameObject go = instanciateGoodGameObject(good, renderMaster);
 				go.instance.transform.setToTranslationAndScaling(x, y, z, GOOD_X - SPACE_BETWEEN_GOOD, GOOD_Y - SPACE_BETWEEN_GOOD, GOOD_Z - SPACE_BETWEEN_GOOD);
 				go.update();

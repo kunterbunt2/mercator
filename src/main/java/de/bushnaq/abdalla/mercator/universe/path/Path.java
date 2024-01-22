@@ -1,21 +1,29 @@
 package de.bushnaq.abdalla.mercator.universe.path;
 
-import de.bushnaq.abdalla.mercator.universe.planet.Planet;
+import de.bushnaq.abdalla.mercator.renderer.Renderable;
 
-public class Path {
-	public float distance = 999992; // ---Used by pathseeker algorithm temporary. This is the accumulation of
-									// distance over all planets from the current port.
-	public Planet pathSeekerNextWaypoint; // ---Used by the pathseeker algorithm temporary. This is the next planet on
-											// the calculated route to the current port.
-	public Planet planet;
+/**
+ * @author bushnaq Created 13.02.2005
+ */
+/**
+ * A path is a connection between two Waypoints
+ *
+ */
+public class Path extends Renderable {
+	public boolean closed = false;
+	public boolean selected = false;
+	public Waypoint source = null;
+	public Waypoint target = null;
+	public float usage = 0;
 
-	public Path(final Planet planet) {
-		this.planet = planet;
+	public Path(final Waypoint planet, final Waypoint targetPlanet) {
+		this.source = planet;
+		this.target = targetPlanet;
+		selected = false;
+		closed = false;
+		usage = 1;
+		set2DRenderer(new JumpGate2DRenderer(this));
+		set3DRenderer(new JumpGate3DRenderer(this));
 	}
 
-	public Path(final Planet planet, final int pathSeekerDistance, final Planet pathSeekerNextWaypoint) {
-		this.planet = planet;
-		this.distance = pathSeekerDistance;
-		this.pathSeekerNextWaypoint = pathSeekerNextWaypoint;
-	}
 }

@@ -1,8 +1,8 @@
 package de.bushnaq.abdalla.mercator.util;
 
-import de.bushnaq.abdalla.mercator.universe.event.EventManager;
-
 import java.util.Random;
+
+import de.bushnaq.abdalla.mercator.universe.event.EventManager;
 
 public class MercatorRandomGenerator {
 	EventManager eventManager;

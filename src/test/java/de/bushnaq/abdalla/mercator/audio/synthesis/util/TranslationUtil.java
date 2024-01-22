@@ -5,12 +5,12 @@ import java.util.List;
 
 import de.bushnaq.abdalla.mercator.audio.synthesis.MercatorSynthesizer;
 import de.bushnaq.abdalla.mercator.audio.synthesis.Synthesizer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import de.bushnaq.abdalla.mercator.renderer.GameObject;
 import de.bushnaq.abdalla.mercator.universe.sim.trader.Trader;
 import de.bushnaq.abdalla.mercator.util.ModelCreator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -285,8 +285,4 @@ public abstract class TranslationUtil<T extends Translation> extends AudioUtil {
 
 	protected abstract void updateTranslation();
 
-	@Override
-	public boolean touchCancelled(int screenX, int screenY, int pointer, int button) {
-		return false;
-	}
 }

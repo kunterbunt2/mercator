@@ -65,8 +65,8 @@ public class TradersTableModel extends AbstractTableModel {
 					return "-";
 				}
 			case 10:
-				if (traderList.get(row).destinationWaypointPlanet != null) {
-					return traderList.get(row).destinationWaypointPlanet.getName();
+				if (traderList.get(row).targetWaypoint != null && traderList.get(row).targetWaypoint.city != null) {
+					return traderList.get(row).targetWaypoint.city.getName();
 				} else {
 					return "-";
 				}

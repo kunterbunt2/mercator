@@ -22,4 +22,6 @@ public interface TradingPartner {
 	Planet getPlanet();
 
 	void setCredits(float credits);
+
+	void setLastTransaction(long currentTime);
 }

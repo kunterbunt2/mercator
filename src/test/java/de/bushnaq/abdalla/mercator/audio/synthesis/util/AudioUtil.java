@@ -4,15 +4,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 import de.bushnaq.abdalla.mercator.audio.synthesis.OpenAlException;
+import de.bushnaq.abdalla.mercator.desktop.GraphicsDimentions;
+import de.bushnaq.abdalla.mercator.desktop.LaunchMode;
+import de.bushnaq.abdalla.mercator.renderer.SceneManager;
+import de.bushnaq.abdalla.mercator.universe.Universe;
+import de.bushnaq.abdalla.mercator.universe.event.EventLevel;
+import de.bushnaq.abdalla.mercator.universe.sim.Sim;
+import de.bushnaq.abdalla.mercator.util.MercatorRandomGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.bushnaq.abdalla.mercator.desktop.GraphicsDimentions;
-import de.bushnaq.abdalla.mercator.renderer.SceneManager;
-import de.bushnaq.abdalla.mercator.universe.Universe;
-import de.bushnaq.abdalla.mercator.universe.sim.Sim;
-import de.bushnaq.abdalla.mercator.universe.event.EventLevel;
-import de.bushnaq.abdalla.mercator.util.MercatorRandomGenerator;
 import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Graphics.DisplayMode;
@@ -48,7 +49,7 @@ public abstract class AudioUtil implements ApplicationListener, InputProcessor {
 			final GraphicsDimentions gd = GraphicsDimentions.D3;
 			universe = new Universe("U-0", gd, EventLevel.warning, Sim.class);
 			createStage();
-			sceneManager = new SceneManager(universe, this);
+			sceneManager = new SceneManager(universe, this, LaunchMode.development);
 			sceneManager.setAlwaysDay(true);
 		} catch (final Exception e) {
 			logger.error(e.getMessage(), e);
@@ -228,4 +229,8 @@ public abstract class AudioUtil implements ApplicationListener, InputProcessor {
 
 	protected abstract void update() throws Exception;
 
+	@Override
+	public boolean touchCancelled(int screenX, int screenY, int pointer, int button) {
+		return false;
+	}
 }

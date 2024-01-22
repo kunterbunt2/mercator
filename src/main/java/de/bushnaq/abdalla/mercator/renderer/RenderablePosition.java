@@ -7,6 +7,10 @@ public class RenderablePosition extends Location3D {
 	public ObjectRenderer renderer2D;
 	public ObjectRenderer renderer3D;
 
+	public RenderablePosition(final float x, final float y, final float z) {
+		super(x, y, z);
+	}
+
 	public ObjectRenderer get2DRenderer() {
 		return renderer2D;
 	}

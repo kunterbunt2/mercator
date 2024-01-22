@@ -2,14 +2,13 @@ package de.bushnaq.abdalla.mercator.universe;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.jupiter.api.Test;
-
 import de.bushnaq.abdalla.mercator.desktop.GraphicsDimentions;
+import de.bushnaq.abdalla.mercator.universe.event.EventLevel;
 import de.bushnaq.abdalla.mercator.universe.planet.Planet;
 import de.bushnaq.abdalla.mercator.universe.sim.Sim;
 import de.bushnaq.abdalla.mercator.universe.sim.SimStatus;
-import de.bushnaq.abdalla.mercator.universe.event.EventLevel;
 import de.bushnaq.abdalla.mercator.util.TimeUnit;
+import org.junit.jupiter.api.Test;
 
 /**
  * @author abdalla 2015.09.17 in year 58,00 all sims where starving in year

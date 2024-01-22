@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import de.bushnaq.abdalla.mercator.desktop.LaunchMode;
 import de.bushnaq.abdalla.mercator.universe.Universe;
 import de.bushnaq.abdalla.mercator.universe.good.Good;
 import de.bushnaq.abdalla.mercator.universe.planet.Planet;
@@ -29,7 +30,6 @@ import net.mgsx.gltf.scene3d.attributes.PBRTextureAttribute;
 import net.mgsx.gltf.scene3d.scene.SceneAsset;
 
 public class Render3DMaster {
-	//	public SceneAsset cubeAluminiumBrushed;
 	//	public SceneAsset cubeWhitePowderCoatingTexture;
 	//	public SceneAsset cubeRed;
 	//	public SceneAsset cubeBlack;
@@ -42,11 +42,12 @@ public class Render3DMaster {
 	//	public Model building1;
 	//	public SceneAsset animatedCube;
 	public SceneAsset cube;
+	public SceneAsset cubeAluminiumBrushed;
 	//	public SceneAsset cube1;
 	public Model cubeBase1;
 	public Model cubeEmissive;
 	//	public SceneAsset Cracked_ice;
-	//	public SceneAsset cubeGoldLeaves;
+	public SceneAsset cubeGoldLeaves;
 	//	public SceneAsset cubeGoldNatural;
 	public Model cubeGood;
 	//	public SceneAsset cubeMetalBaseGrungy;
@@ -66,6 +67,9 @@ public class Render3DMaster {
 	private Color[] distinctiveColor;
 	private final InputProcessor inputProcessor;
 	public Model jumpGate;
+	public Model land;
+	//	Model postScreenQuad;
+	private final LaunchMode launchMode;
 	//	public SceneAsset Metal_Floor_01;
 	//	public SceneAsset MetalRoughSpheres;
 	//	public SceneAsset NormalTangentTest;
@@ -85,11 +89,11 @@ public class Render3DMaster {
 	public Universe universe;
 	public Model water;
 	public SceneAsset wheel;
-	//	Model postScreenQuad;
 
-	public Render3DMaster(final Universe universe, final InputProcessor inputProcessor) {
+	public Render3DMaster(final Universe universe, final InputProcessor inputProcessor, final LaunchMode launchMode) {
 		this.universe = universe;
 		this.inputProcessor = inputProcessor;
+		this.launchMode = launchMode;
 	}
 
 	Color amountColor(final Good good) {
@@ -107,12 +111,12 @@ public class Render3DMaster {
 	}
 
 	public void create() throws Exception {
-		//		cubeGoldLeaves = new GLTFLoader().load(Gdx.files.internal("models/glTF/cube-Gold_leafs/cube-Gold_leafs.gltf"));
+		cubeGoldLeaves = new GLTFLoader().load(Gdx.files.internal("models/glTF/cube-Gold_leafs/cube-Gold_leafs.gltf"));
 		//		NormalTangentTest = new GLTFLoader().load(Gdx.files.internal("models/glTF/NormalTangentTest/glTF/NormalTangentTest.gltf"));
 		//		initTextures();
 		//		this.sceneBox.set(new Vector3(-3, -3, -3), new Vector3(3, 3, 3));
 
-		sceneManager = new SceneManager(universe, inputProcessor);
+		sceneManager = new SceneManager(universe, inputProcessor, launchMode);
 
 		initColors();
 		final Texture texture = new Texture(Gdx.files.internal("tiles.png"));
@@ -129,7 +133,7 @@ public class Render3DMaster {
 		//		whietBoxModel = modelCreator.createBox(tiles[1][3],	new Material(TextureAttribute.createDiffuse(texture), ColorAttribute.createDiffuse(Color.WHITE)),Usage.Position | Usage.Normal | Usage.TextureCoordinates);
 		//		cubeGoldNatural = new GLTFLoader().load(Gdx.files.internal("models/glTF/cube-gold_natural/cube-gold_natural.gltf"));
 		//		cubeWhitePowderCoatingTexture = new GLTFLoader().load(Gdx.files.internal("models/glTF/cube-White Powder Coating Texture/cube-White Powder Coating Texture.gltf"));
-		//		cubeAluminiumBrushed = new GLTFLoader().load(Gdx.files.internal("models/glTF/cube-Aluminium_brushed/cube-Aluminium_brushed.gltf"));
+		cubeAluminiumBrushed = new GLTFLoader().load(Gdx.files.internal("models/glTF/cube-Aluminium_brushed/cube-Aluminium_brushed.gltf"));
 		//		cubeMetalBaseGrungy = new GLTFLoader().load(Gdx.files.internal("models/glTF/cube-Metal_Base_Grungy/cube-Metal_Base_Grungy.gltf"));
 
 		//		cubeRed = new GLTFLoader().load(Gdx.files.internal("models/glTF/cube-red.gltf"));
@@ -156,8 +160,8 @@ public class Render3DMaster {
 			cubeBase1 = modelCreator.createBox(material);
 		}
 		{
-			final Attribute metallic = PBRFloatAttribute.createMetallic(0.5f);
-			final Attribute roughness = PBRFloatAttribute.createRoughness(0.5f);
+			final Attribute metallic = PBRFloatAttribute.createMetallic(0.9f);
+			final Attribute roughness = PBRFloatAttribute.createRoughness(0.2f);
 			final Attribute color = PBRColorAttribute.createBaseColorFactor(Color.BLACK);
 			//			Attribute normal = PBRFloatAttribute.createNormalScale(0.0f);
 			//			Attribute occlusion = PBRFloatAttribute.createOcclusionStrength(0.0f);
@@ -226,6 +230,13 @@ public class Render3DMaster {
 			planet = modelCreator.createBox(material);
 		}
 		{
+			final Attribute color = new PBRColorAttribute(PBRColorAttribute.BaseColorFactor, Color.DARK_GRAY);
+			final Attribute metallic = PBRFloatAttribute.createMetallic(0.0f);
+			final Attribute roughness = PBRFloatAttribute.createRoughness(1.0f);
+			final Material material = new Material(metallic, roughness, color);
+			land = modelCreator.createBox(material);
+		}
+		{
 			final Attribute color = new PBRColorAttribute(PBRColorAttribute.BaseColorFactor, Color.WHITE);
 			final Attribute metallic = PBRFloatAttribute.createMetallic(0.5f);
 			final Attribute roughness = PBRFloatAttribute.createRoughness(0.5f);
@@ -260,7 +271,7 @@ public class Render3DMaster {
 		//		Cracked_ice = new GLTFLoader().load(Gdx.files.internal("models/glTF/Cracked_ice/Cracked_ice.gltf"));
 		{
 			final Attribute metallic = PBRFloatAttribute.createMetallic(0.0f);
-			final Attribute roughness = PBRFloatAttribute.createRoughness(0.3f);
+			final Attribute roughness = PBRFloatAttribute.createRoughness(1.0f);
 			final Attribute color = PBRColorAttribute.createBaseColorFactor(new Color(Color.WHITE));
 			final Material material = new Material(metallic, roughness, color);
 			sector = modelCreator.createBox(material);

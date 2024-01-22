@@ -4,32 +4,31 @@ import java.util.HashMap;
 import java.util.Map;
 
 import de.bushnaq.abdalla.mercator.universe.good.GoodType;
-import de.bushnaq.abdalla.mercator.universe.jumpgate.JumpGate;
 import de.bushnaq.abdalla.mercator.universe.planet.Planet;
 
 public class PathSeeker {
 	GoodType destinationGoodType = null;
 	public float goodPrice; // ---used by queryBestPlanetToSell
-	Map<Planet, Path> pathMap = new HashMap<Planet, Path>();
+	Map<Waypoint, ShortestPath> pathMap = new HashMap<Waypoint, ShortestPath>();
 	public float planetValue; // ---used by queryBestPlanetToSell
 	public float time; // ---used by queryBestPlanetToSell
 
 	public PathSeeker() {
 	}
 
-	void findDestination(final Planet sourcePlanet, final Planet aDestinationPlanet, final int aMaxDistance) {
-		for (final JumpGate jumpGate : sourcePlanet.jumpGateList) {
-			final float distance = get(sourcePlanet).distance + sourcePlanet.queryDistance(jumpGate.targetPlanet);
+	void findDestination(final Waypoint sourcePlanet, final Waypoint aDestinationPlanet, final int aMaxDistance) {
+		for (final Path jumpGate : sourcePlanet.pathList) {
+			final float distance = get(sourcePlanet).distance + sourcePlanet.queryDistance(jumpGate.target);
 			// if( distance < aMaxDistance )
 			{
-				if (distance < get(jumpGate.targetPlanet).distance) {
-					get(jumpGate.targetPlanet).distance = distance;
-					get(jumpGate.targetPlanet).pathSeekerNextWaypoint = sourcePlanet;
+				if (distance < get(jumpGate.target).distance) {
+					get(jumpGate.target).distance = distance;
+					get(jumpGate.target).pathSeekerNextWaypoint = sourcePlanet;
 					/*
 					 * if( jumpGate->Planet == aDestinationPlanet ) { } else
 					 */
 					{
-						findDestination(jumpGate.targetPlanet, aDestinationPlanet, aMaxDistance);
+						findDestination(jumpGate.target, aDestinationPlanet, aMaxDistance);
 					}
 				} else {
 					// ---Someone else was already here
@@ -38,10 +37,10 @@ public class PathSeeker {
 		}
 	}
 
-	public Path get(final Planet planet) {
-		Path path = pathMap.get(planet);
+	public ShortestPath get(final Waypoint planet) {
+		ShortestPath path = pathMap.get(planet);
 		if (path == null) {
-			path = new Path(planet);
+			path = new ShortestPath(planet);
 			pathMap.put(planet, path);
 		}
 		return path;
@@ -54,20 +53,20 @@ public class PathSeeker {
 	 * @param portPlanet
 	 * @param aMaxDistance
 	 */
-	public void mapGalaxy(final Planet portPlanet, final int aMaxDistance) {
+	public void mapGalaxy(final Waypoint portPlanet, final int aMaxDistance) {
 		put(portPlanet, 0);
 		markNeighborDistance(portPlanet, aMaxDistance);
 	}
 
-	void markNeighborDistance(final Planet planet, final int aMaxDistance) {
+	void markNeighborDistance(final Waypoint planet, final int aMaxDistance) {
 		// ---For every jumpgate
-		for (final JumpGate jumpGate : planet.jumpGateList) {
-			final float distance = get(planet).distance + planet.queryDistance(jumpGate.targetPlanet);
+		for (final Path jumpGate : planet.pathList) {
+			final float distance = get(planet).distance + planet.queryDistance(jumpGate.target);
 			if (distance < aMaxDistance) {
-				if (distance < get(jumpGate.targetPlanet).distance) {
-					get(jumpGate.targetPlanet).distance = distance;
-					get(jumpGate.targetPlanet).pathSeekerNextWaypoint = planet;
-					markNeighborDistance(jumpGate.targetPlanet, aMaxDistance);
+				if (distance < get(jumpGate.target).distance) {
+					get(jumpGate.target).distance = distance;
+					get(jumpGate.target).pathSeekerNextWaypoint = planet;
+					markNeighborDistance(jumpGate.target, aMaxDistance);
 				} else {
 					// ---Someone else was already here
 				}
@@ -75,8 +74,8 @@ public class PathSeeker {
 		}
 	}
 
-	private void put(final Planet portPlanet, final int i) {
-		pathMap.put(portPlanet, new Path(portPlanet, i, null));
+	private void put(final Waypoint portPlanet, final int i) {
+		pathMap.put(portPlanet, new ShortestPath(portPlanet, i, null));
 	}
 
 	float queryDistance(final Planet aSourcePlanet, final Planet aDestinationPlanet, final int aMaxDistance) {
@@ -84,7 +83,7 @@ public class PathSeeker {
 		return get(aDestinationPlanet).distance;
 	}
 
-	Planet queryFirstWaypoint(final Planet sourcePlanet, final Planet destinationPlanet, final int maxDistance) {
+	Waypoint queryFirstWaypoint(final Planet sourcePlanet, final Planet destinationPlanet, final int maxDistance) {
 		// ---We start from the source
 		// ---Reset the distance
 		// Sleep(1000);
@@ -110,7 +109,7 @@ public class PathSeeker {
 		}
 	}
 
-	Planet queryNextWaypoint(final Planet sourcePlanet, Planet aDestinationPlanet) {
+	Waypoint queryNextWaypoint(final Waypoint sourcePlanet, Waypoint aDestinationPlanet) {
 		while (get(aDestinationPlanet).pathSeekerNextWaypoint != sourcePlanet) {
 			aDestinationPlanet = get(aDestinationPlanet).pathSeekerNextWaypoint;
 		}

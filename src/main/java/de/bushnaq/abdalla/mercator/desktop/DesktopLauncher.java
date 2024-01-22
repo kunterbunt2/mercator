@@ -13,9 +13,10 @@ public class DesktopLauncher {
 	boolean useOGL3 = true;
 
 	public DesktopLauncher(final Universe universe, final Screen2D screen, final boolean demoMode) throws Exception {
-		final MercatorFrame frame = new MercatorFrame(universe);
-		if (!demoMode)
+		if (!demoMode) {
+			final MercatorFrame frame = new MercatorFrame(universe);
 			frame.setVisible(true);
+		}
 		final Lwjgl3ApplicationConfiguration config = createConfig();
 		new Lwjgl3Application(screen, config);
 		System.out.println("DesktopLauncher constructed");
@@ -23,9 +24,10 @@ public class DesktopLauncher {
 	}
 
 	public DesktopLauncher(final Universe universe, final Screen3D screen) throws Exception {
-		final MercatorFrame frame = new MercatorFrame(universe);
-		if (!screen.isDemoMode())
+		if (screen.launchMode != LaunchMode.demo && screen.launchMode != LaunchMode.development) {
+			final MercatorFrame frame = new MercatorFrame(universe);
 			frame.setVisible(true);
+		}
 		final Lwjgl3ApplicationConfiguration config = createConfig();
 		new Lwjgl3Application(screen, config);
 		System.out.println("DesktopLauncher constructed");

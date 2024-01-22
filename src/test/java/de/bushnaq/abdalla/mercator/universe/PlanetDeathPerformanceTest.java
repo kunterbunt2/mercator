@@ -2,11 +2,10 @@ package de.bushnaq.abdalla.mercator.universe;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
-import org.junit.jupiter.api.Test;
-
 import de.bushnaq.abdalla.mercator.desktop.GraphicsDimentions;
 import de.bushnaq.abdalla.mercator.universe.event.EventLevel;
 import de.bushnaq.abdalla.mercator.util.TimeUnit;
+import org.junit.jupiter.api.Test;
 
 /**
  * @author abdalla 2015.09.17 in year 58,00 all sims where starving in year
@@ -37,11 +36,13 @@ public class PlanetDeathPerformanceTest {
 				}
 			}
 		}
-		bestUniverse.deadPlanetList.get(0).eventManager.print(System.out);
-		for (final Universe universe : universeList) {
-			System.out.printf("%s\n", TimeUnit.toString(universe.deadPlanetList.get(0).lastTimeAdvancement));
-			// System.out.printf( "%s\n", TimeUnit.toString( universe.deadTraderList.get(
-			// universe.deadTraderList.size() - 1 ).lastTimeAdvancement ) );
+		if(!bestUniverse.deadPlanetList.isEmpty()) {
+			bestUniverse.deadPlanetList.get(0).eventManager.print(System.out);
+			for (final Universe universe : universeList) {
+				System.out.printf("%s\n", TimeUnit.toString(universe.deadPlanetList.get(0).lastTimeAdvancement));
+				// System.out.printf( "%s\n", TimeUnit.toString( universe.deadTraderList.get(
+				// universe.deadTraderList.size() - 1 ).lastTimeAdvancement ) );
+			}
 		}
 		fail(String.format("Best result was %s in %s", bestUniverse.getName(), TimeUnit.toString(bestTime)));
 	}

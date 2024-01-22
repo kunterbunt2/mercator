@@ -1,6 +1,5 @@
 package de.bushnaq.abdalla.mercator.universe.planet;
 
-import de.bushnaq.abdalla.mercator.renderer.RenderablePosition;
 import de.bushnaq.abdalla.mercator.universe.Universe;
 import de.bushnaq.abdalla.mercator.universe.factory.Factory;
 import de.bushnaq.abdalla.mercator.universe.factory.ProductionFacility;
@@ -8,9 +7,9 @@ import de.bushnaq.abdalla.mercator.universe.factory.ProductionFacilityList;
 import de.bushnaq.abdalla.mercator.universe.good.Good;
 import de.bushnaq.abdalla.mercator.universe.good.GoodList;
 import de.bushnaq.abdalla.mercator.universe.good.GoodType;
-import de.bushnaq.abdalla.mercator.universe.jumpgate.JumpGateList;
 import de.bushnaq.abdalla.mercator.universe.path.PathSeeker;
-import de.bushnaq.abdalla.mercator.universe.sector.Sector;
+import de.bushnaq.abdalla.mercator.universe.path.Waypoint;
+import de.bushnaq.abdalla.mercator.universe.path.WaypointList;
 import de.bushnaq.abdalla.mercator.universe.sim.Sim;
 import de.bushnaq.abdalla.mercator.universe.sim.SimList;
 import de.bushnaq.abdalla.mercator.universe.sim.trader.TraderList;
@@ -23,25 +22,23 @@ import de.bushnaq.abdalla.mercator.util.TradingPartner;
 /**
  * @author bushnaq Created 13.02.2005
  */
-public class Planet extends RenderablePosition implements TradingPartner {
+public class Planet extends Waypoint implements TradingPartner {
+	public static final float CHANNEL_SIZE = 32 / Universe.WORLD_SCALE;
 	public final static float MIN_PLANET_DISTANCE = 30;
-	public static final int PLANET_DISTANCE = 1024;
-	public static final float PLANET_MAX_JUMP_GATE_DISTANCE = (float) Math.sqrt((PLANET_DISTANCE + Planet3DRenderer.PLANET_MAX_SHIFT) * (PLANET_DISTANCE + Planet3DRenderer.PLANET_MAX_SHIFT)) + 10;
+	public static final int PLANET_DISTANCE = 2048;
 	public final static int PLANET_MAX_SIMS = 10;
-	public final static float PLANET_START_CREDITS = 200000;
+	public final static float PLANET_START_CREDITS = 20000;
 	private float credits = PLANET_START_CREDITS;
 	public SimList deadSimList = new SimList(this);
 	public PlanetEventManager eventManager;
 	private GoodList goodList = new GoodList();
 	private HistoryManager historyManager;
-	public JumpGateList jumpGateList = new JumpGateList();
 	public long lastTimeAdvancement = 0;
-	private String name = null;
+	public long lastTransaction = 0;
+	//	private String name = null;
 	public float orbitAngle = 0.0f;
 	public PathSeeker pathSeeker = new PathSeeker();
 	public ProductionFacilityList productionFacilityList = new ProductionFacilityList();
-	public Sector sector = null;
-	public Object seed = null;
 	public SimList simList = new SimList(this);
 	public PlanetStatisticManager statisticManager = new PlanetStatisticManager();
 	public PlanetStatus status = PlanetStatus.LIVING;
@@ -49,14 +46,14 @@ public class Planet extends RenderablePosition implements TradingPartner {
 	public TraderList traderList = new TraderList();
 	public Universe universe;
 
-	public Planet(final String name, final float x, final float y, final Universe universe) {
-		this.setName(name);
-		this.x = x;
-		this.y = y;
+	public Planet(final String name, final float x, final float y, final float z, final Universe universe) {
+		super(name, x, y, z);
+		//		this.setName(name);
 		this.universe = universe;
 		set2DRenderer(new Planet2DRenderer(this));
 		set3DRenderer(new Planet3DRenderer(this));
 		eventManager = new PlanetEventManager(this);
+		city = this;
 	}
 
 	public void advanceInTime(final long currentTime, final MercatorRandomGenerator randomGenerator)// OK
@@ -66,7 +63,7 @@ public class Planet extends RenderablePosition implements TradingPartner {
 		lastTimeAdvancement = currentTime;
 		orbitAngle -= (Math.PI * ((float) timeDelta / TimeUnit.TICKS_PER_DAY)) / 360f;
 		if (TimeUnit.isInt(currentTime)/* ( currentTime - (int)currentTime ) == 0.0f */ ) {
-			jumpGateList.reduceUsage();
+			pathList.reduceUsage();
 			getGoodList().calculatePrice(currentTime);
 			distributeEnigneers();
 			productionFacilityList.advanceInTime(currentTime);
@@ -225,11 +222,6 @@ public class Planet extends RenderablePosition implements TradingPartner {
 	}
 
 	@Override
-	public String getName() {
-		return name;
-	}
-
-	@Override
 	public Planet getPlanet() {
 		return this;
 	}
@@ -271,6 +263,18 @@ public class Planet extends RenderablePosition implements TradingPartner {
 		return goodList.getByType(GoodType.FOOD).getAveragePrice();
 	}
 
+	public float queryDistance(final WaypointList waypointList) {
+		//ignore first and last waypoint, as they only mark a city, but not an actual waypoint
+		float distance = 0.0f;
+		Waypoint source = waypointList.get(0).waypoint;
+		for (int i = 1; i < waypointList.size(); i++) {
+			final Waypoint target = waypointList.get(i).waypoint;
+			distance += source.queryDistance(target);
+			source = target;
+		}
+		return distance;
+	}
+
 	public void remove(final Sim sim) {
 		for (final ProductionFacility ProductionFacility : productionFacilityList) {
 			ProductionFacility.removeEngineer(sim);
@@ -288,12 +292,17 @@ public class Planet extends RenderablePosition implements TradingPartner {
 		this.goodList = goodList;
 	}
 
+	//	public void setName(final String name) {
+	//		this.name = name;
+	//	}
+
 	public void setHistoryManager(final HistoryManager historyManager) {
 		this.historyManager = historyManager;
 	}
 
-	public void setName(final String name) {
-		this.name = name;
+	@Override
+	public void setLastTransaction(final long currentTime) {
+		lastTransaction = currentTime;
 	}
 
 	public void transported(final Planet from, final int amount) {
@@ -305,10 +314,5 @@ public class Planet extends RenderablePosition implements TradingPartner {
 			from.statisticManager.transported(this, -amount2);
 			statisticManager.transported(from, amount - amount2);
 		}
-	}
-
-	@Override
-	public String toString() {
-		return getName();
 	}
 }

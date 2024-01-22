@@ -8,11 +8,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import de.bushnaq.abdalla.mercator.audio.synthesis.util.SawAudioEngine;
+import de.bushnaq.abdalla.mercator.renderer.camera.MovingCamera;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.bushnaq.abdalla.mercator.renderer.camera.MovingCamera;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Files;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3NativesLoader;
@@ -72,7 +72,7 @@ public class MercatorOscillatorTest {
 			do {
 			} while (System.currentTimeMillis() - time1 < SECONDS_2);
 			synth.renderBuffer();
-			synth.writeWav("target/mercator.wav");
+			synth.writeWav("target/mercator");
 			audioEngine.end();
 		}
 		audioEngine.dispose();

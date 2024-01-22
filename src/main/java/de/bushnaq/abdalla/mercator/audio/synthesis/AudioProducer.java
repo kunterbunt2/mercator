@@ -29,7 +29,7 @@ public interface AudioProducer {
 
 	public void play() throws OpenAlException;
 
-	public void processBuffer(ByteBuffer byteBuffer);
+	public void processBuffer(ByteBuffer byteBuffer) throws OpenAlcException;
 
 	public void setGain(final float gain) throws OpenAlException;
 

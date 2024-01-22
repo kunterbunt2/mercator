@@ -3,6 +3,7 @@ package de.bushnaq.abdalla.mercator.renderer.camera;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import de.bushnaq.abdalla.mercator.universe.Universe;
 import com.badlogic.gdx.Input.Buttons;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.g3d.utils.CameraInputController;
@@ -20,6 +21,7 @@ public class MyCameraInputController extends CameraInputController {
 		//		this.cameraInputControllerListener = cameraInputControllerListener;
 		rotateButton = Buttons.MIDDLE;
 		//		notifyListener(camera);
+		pinchZoomFactor = 1 / Universe.WORLD_SCALE;
 	}
 
 	//	public void notifyListener(final Camera camera) throws Exception {
@@ -71,7 +73,7 @@ public class MyCameraInputController extends CameraInputController {
 			if (!alwaysScroll && activateKey != 0 && !activatePressed)
 				return false;
 			final MovingCamera myCamera = (MovingCamera) camera;
-			myCamera.translate(0, -amount, 0);
+			myCamera.translate(0, -amount * pinchZoomFactor, 0);
 			myCamera.setDirty(true);
 			//			notifyListener(myCamera);
 			if (autoUpdate)

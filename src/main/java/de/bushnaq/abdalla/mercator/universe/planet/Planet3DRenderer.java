@@ -1,17 +1,5 @@
 package de.bushnaq.abdalla.mercator.universe.planet;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import de.bushnaq.abdalla.mercator.renderer.GameObject;
-import de.bushnaq.abdalla.mercator.renderer.ObjectRenderer;
-import de.bushnaq.abdalla.mercator.renderer.Render3DMaster;
-import de.bushnaq.abdalla.mercator.renderer.SceneManager;
-import de.bushnaq.abdalla.mercator.renderer.Screen3D;
-import de.bushnaq.abdalla.mercator.universe.factory.ProductionFacility;
-import de.bushnaq.abdalla.mercator.universe.factory.ProductionFacilityStatus;
-import de.bushnaq.abdalla.mercator.universe.good.Good3DRenderer;
-import de.bushnaq.abdalla.mercator.universe.sim.Sim;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -20,9 +8,16 @@ import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.PointLight;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
-
+import de.bushnaq.abdalla.mercator.renderer.*;
+import de.bushnaq.abdalla.mercator.universe.factory.ProductionFacility;
+import de.bushnaq.abdalla.mercator.universe.factory.ProductionFacilityStatus;
+import de.bushnaq.abdalla.mercator.universe.good.Good3DRenderer;
+import de.bushnaq.abdalla.mercator.universe.sim.Sim;
 import net.mgsx.gltf.scene3d.animation.AnimationControllerHack;
 import net.mgsx.gltf.scene3d.model.ModelInstanceHack;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class Planet3DRenderer extends ObjectRenderer {
 
@@ -53,7 +48,7 @@ public class Planet3DRenderer extends ObjectRenderer {
 	public static final float SECTOR_SIZE = Planet.PLANET_DISTANCE - Screen3D.SPACE_BETWEEN_OBJECTS;
 	public static final float SECTOR_Y = -500;
 	private static final Color SKY_BLUE = new Color(0x3980c2ff);
-	private static final float TURBINE_SIZE = 2;
+	private static final float TURBINE_SIZE = 4;
 	public static final float WATER_HIGHT = 1;
 	public static final float WATER_SIZE = SECTOR_SIZE;
 	public static final float WATER_Y = -10;
@@ -96,7 +91,7 @@ public class Planet3DRenderer extends ObjectRenderer {
 	}
 
 	@Override
-	public void create(final float x, final float y, final Render3DMaster renderMaster) {
+	public void create( final Render3DMaster renderMaster) {
 		createPlanet(renderMaster);
 	}
 
@@ -175,14 +170,14 @@ public class Planet3DRenderer extends ObjectRenderer {
 
 	private void createFactories(final Render3DMaster renderMaster) {
 		final float x = planet.x;
-		final float z = planet.y;
+		final float z = planet.z;
 		//turbine
 		final ColorAttribute emissiveAttribute = ColorAttribute.createEmissive(Color.RED);
 		final int edgeSize = Good3DRenderer.CONTAINER_EDGE_SIZE;
-		final float fx = x - Planet3DRenderer.PLANET_SIZE / 2;
+		final float fx = x - Planet3DRenderer.PLANET_SIZE / 2-4;
 		for (final ProductionFacility productionFacility : planet.productionFacilityList) {
 			final int index = productionFacility.producedGood.type.ordinal();
-			final float fz = z + Planet3DRenderer.PLANET_SIZE / 2 - edgeSize / 2 * (Good3DRenderer.GOOD_Y) - index * (edgeSize + 1) * (Good3DRenderer.GOOD_Y);
+			final float fz = z + Planet3DRenderer.PLANET_SIZE / 2 - edgeSize/2 * (Good3DRenderer.GOOD_Y) - index * (edgeSize + 1) * (Good3DRenderer.GOOD_Y);
 			GameObject go = new GameObject(new ModelInstanceHack(renderMaster.turbine.scene.model), productionFacility);
 			go.instance.transform.setToTranslationAndScaling(fx, 0, fz, TURBINE_SIZE, TURBINE_SIZE, TURBINE_SIZE);
 			go.instance.transform.rotate(Vector3.Y, 90);
@@ -193,7 +188,7 @@ public class Planet3DRenderer extends ObjectRenderer {
 			renderMaster.sceneManager.addDynamic(go);
 			go = new GameObject(new ModelInstanceHack(renderMaster.cubeEmissive), planet);
 			go.instance.materials.get(0).set(emissiveAttribute);
-			go.instance.transform.setToTranslationAndScaling(fx, 60f, fz, 1.0f, 1.0f, 1.0f);
+			go.instance.transform.setToTranslationAndScaling(fx, 0f, fz, 1.0f, 1.0f, 1.0f);
 			pointLightObjects.add(go);
 			renderMaster.sceneManager.addStatic(go);
 		}
@@ -201,7 +196,7 @@ public class Planet3DRenderer extends ObjectRenderer {
 
 	private void createPlanet(final Render3DMaster renderMaster) {
 		final float x = planet.x;
-		final float z = planet.y;
+		final float z = planet.z;
 		//planet
 		{
 			instance = new GameObject(new ModelInstanceHack(renderMaster.planet), null);
@@ -348,10 +343,10 @@ public class Planet3DRenderer extends ObjectRenderer {
 	//		}
 	//	}
 	@Override
-	public void renderText(final float aX, final float aY, final SceneManager sceneManager, final int index) {
+	public void renderText( final SceneManager sceneManager, final int index, final boolean selected) {
 		final float size = 32;
 		final float x = planet.x;
-		final float z = planet.y;
+		final float z = planet.z;
 		//draw text
 		final PolygonSpriteBatch batch = sceneManager.batch2D;
 		final BitmapFont font = sceneManager.getAtlasManager().modelFont;
@@ -375,7 +370,7 @@ public class Planet3DRenderer extends ObjectRenderer {
 	}
 
 	@Override
-	public void update(final float px, final float py, final Render3DMaster renderMaster, final long currentTime, final float timeOfDay, final int index, final boolean selected) {
+	public void update( final Render3DMaster renderMaster, final long currentTime, final float timeOfDay, final int index, final boolean selected) {
 		renderPlanet(renderMaster, currentTime, timeOfDay, planet == renderMaster.universe.selectedPlanet);
 	}
 

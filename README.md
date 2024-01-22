@@ -1,4 +1,6 @@
-# mercator
+# mercator.ships
+This is a version where trqaders look like ships traveling between ilands.
+
 A computer game implementation of a ***closed economical simulation***.<br>
 The current world is generated procedurally and includes %d cities, %d factories, %d traders and %d sims.<br>   
 The amount of wealth in the system, including products and money is constant at all times.<br>

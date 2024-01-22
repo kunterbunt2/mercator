@@ -22,6 +22,7 @@ public class Transaction {
 				good.price = price;// ---remember the price we bought this good
 			}
 			to.setCredits(to.getCredits() - transactionAmount * price);
+			to.setLastTransaction(currentTime);
 			if (to.getPlanet().universe.eventManager.isEnabled())
 				to.getPlanet().universe.eventManager.add(EventLevel.trace, currentTime, to, String.format("buys %s from %s produced at %s", goodType.getName(), from.getName(), producer.getName()));
 			to.getHistoryManager().get(currentTime).buy(good, price * transactionAmount, transactionAmount, from);
@@ -32,6 +33,7 @@ public class Transaction {
 			good.sell(transactionAmount);
 			good.indicateBuyInterest(currentTime);
 			from.setCredits(from.getCredits() + transactionAmount * price);
+			from.setLastTransaction(currentTime);
 			// from.getPlanet().universe.eventManager.add( currentTime, from, String.format(
 			// "%s sells %s to %s", from.getName(), goodType.getName(), to.getName() ) );
 			from.getHistoryManager().get(currentTime).sell(good, price * transactionAmount, transactionAmount, to);

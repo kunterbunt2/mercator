@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.lwjgl.openal.AL10;
+import org.lwjgl.system.libc.LibCStdlib;
 
 public class Synthesizer extends AbstractAudioProducer {
 
@@ -16,16 +17,12 @@ public class Synthesizer extends AbstractAudioProducer {
 	private boolean enableFilter;
 	//	private float gain = 1.0f;
 	private float highGain = 0.0f;
+	volatile double lastFrequency = 0.0;
 	long lastIndex;
 	private final List<Lfo> lfos = new ArrayList<>();
 	private float lowGain = 1.0f;
-	private final List<Oscilator> oscillators = new ArrayList<>();
 
-	//	private boolean play = false;//is the source playing?
-	//	private final Vector3 position = new Vector3();//position of the audio source
-	private final int samplerate;
-	//	private OpenAlSource source = null;//if enabled, this will hold the attached openal source, otherwise null
-	//	private final Vector3 velocity = new Vector3();//velocity of the audio source
+	private final List<Oscilator> oscillators = new ArrayList<>();
 
 	//	/**
 	//	 * adapt synthesizer to the current source velocity
@@ -34,6 +31,12 @@ public class Synthesizer extends AbstractAudioProducer {
 	//	 */
 	//	public void adaptToVelocity(final float speed) throws OpenAlException {
 	//	}
+
+	//	private boolean play = false;//is the source playing?
+	//	private final Vector3 position = new Vector3();//position of the audio source
+	private final int samplerate;
+	//	private OpenAlSource source = null;//if enabled, this will hold the attached openal source, otherwise null
+	//	private final Vector3 velocity = new Vector3();//velocity of the audio source
 
 	public Synthesizer(final int samplerate) throws OpenAlException {
 		this.samplerate = samplerate;
@@ -44,11 +47,6 @@ public class Synthesizer extends AbstractAudioProducer {
 		lfos.add(lfo);
 	}
 
-	public void add(final Oscilator generator) {
-		generator.setSampleRate(samplerate);
-		oscillators.add(generator);
-	}
-
 	//	public OpenAlSource disable() throws OpenAlException {
 	//		enabled = false;
 	//		source.pause();
@@ -57,21 +55,13 @@ public class Synthesizer extends AbstractAudioProducer {
 	//		return sourceBuffer;
 	//	}
 
-	protected void createBassBoost() {
-		bassBoost = new BassBoost(bassBoostFrequency, bassBoostDbGain, samplerate);
+	public void add(final Oscilator generator) {
+		generator.setSampleRate(samplerate);
+		oscillators.add(generator);
 	}
 
-	@Override
-	public void dispose() throws OpenAlException {
-		super.dispose();
-		//		if (isEnabled())
-		//			source.dispose();
-		for (final Oscilator osc : oscillators) {
-			osc.dispose();
-		}
-		for (final Lfo lfo : lfos) {
-			lfo.dispose();
-		}
+	protected void createBassBoost() {
+		bassBoost = new BassBoost(bassBoostFrequency, bassBoostDbGain, samplerate);
 	}
 
 	//	public Vector3 getPosition() {
@@ -103,6 +93,19 @@ public class Synthesizer extends AbstractAudioProducer {
 	//	}
 
 	@Override
+	public void dispose() throws OpenAlException {
+		super.dispose();
+		//		if (isEnabled())
+		//			source.dispose();
+		for (final Oscilator osc : oscillators) {
+			osc.dispose();
+		}
+		for (final Lfo lfo : lfos) {
+			lfo.dispose();
+		}
+	}
+
+	@Override
 	public void enable(final OpenAlSource source) throws OpenAlException {
 		enabled = true;
 		this.source = source;
@@ -128,6 +131,7 @@ public class Synthesizer extends AbstractAudioProducer {
 		double value = 0;
 		for (final Oscilator osc : oscillators) {
 			value += osc.gen(i) / oscillators.size();
+			lastFrequency = osc.getFrequency();
 		}
 		for (final Lfo lfo : lfos) {
 			value *= (1 + lfo.gen(i)) / (1 + lfo.getFactor());
@@ -154,9 +158,28 @@ public class Synthesizer extends AbstractAudioProducer {
 	//	}
 
 	@Override
-	public void processBuffer(final ByteBuffer byteBuffer) {
+	public void processBuffer(final ByteBuffer byteBuffer) throws OpenAlcException {
+		double f1 = -1;
+		double f2 = 0.0;
+		ByteBufferContainer byteBufferContainer = null;
+		if (isKeepCopy()) {
+			byteBufferContainer = new ByteBufferContainer();
+			byteBufferContainer.byteBuffer = LibCStdlib.malloc(source.getBuffersize());
+			source.byteBufferCopyList.add(byteBufferContainer);
+		}
 		for (int sampleIndex = 0, bufferIndex = 0; sampleIndex < source.getSamples(); sampleIndex++, bufferIndex += 2) {
-			byteBuffer.putShort(bufferIndex, process(lastIndex + sampleIndex));
+			final Short value = process(lastIndex + sampleIndex);
+			f2 = lastFrequency;
+			if (f1 == -1)
+				f1 = f2;
+			byteBuffer.putShort(bufferIndex, value);
+			if (isKeepCopy()) {
+				byteBufferContainer.byteBuffer.putShort(bufferIndex, value);
+			}
+		}
+		if (isKeepCopy()) {
+			byteBufferContainer.startFrequency = f1;
+			byteBufferContainer.endFrequency = f2;
 		}
 		lastIndex += source.getSamples();
 	}

@@ -12,7 +12,7 @@ com.badlogic.gdx.scenes.scene2d.ui.Skin$TintedDrawable: {
 	dialogDim: { name: white, color: { r: 0, g: 0, b: 0, a: 0.45 } },
 },
 com.badlogic.gdx.scenes.scene2d.ui.Skin$TintedDrawable: {
-	windowsBack: { name: default-window, color: { r: 0.9, g: 0.9, b: 0.9, a: 0.45 } },
+	windowsBack: { name: default-window, color: { r: 0.9, g: 0.9, b: 0.9, a: 0.95 } },
 },
 com.badlogic.gdx.scenes.scene2d.ui.Button$ButtonStyle: {
 	default: { down: default-round-down, up: default-round },

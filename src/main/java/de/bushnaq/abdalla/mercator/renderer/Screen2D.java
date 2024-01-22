@@ -7,16 +7,16 @@ import java.util.LinkedList;
 import java.util.List;
 
 import de.bushnaq.abdalla.mercator.renderer.reports.Info;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import de.bushnaq.abdalla.mercator.universe.Universe;
 import de.bushnaq.abdalla.mercator.universe.factory.ProductionFacility;
 import de.bushnaq.abdalla.mercator.universe.good.Good;
-import de.bushnaq.abdalla.mercator.universe.jumpgate.JumpGate;
+import de.bushnaq.abdalla.mercator.universe.path.Path;
 import de.bushnaq.abdalla.mercator.universe.planet.Planet;
 import de.bushnaq.abdalla.mercator.universe.sim.Sim;
 import de.bushnaq.abdalla.mercator.universe.sim.trader.Trader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.bushnaq.abdalla.mercator.util.Message;
 import de.bushnaq.abdalla.mercator.util.TimeAccuracy;
 import de.bushnaq.abdalla.mercator.util.TimeStatistic;
@@ -118,7 +118,7 @@ public class Screen2D implements ScreenListener, ApplicationListener, InputProce
 	public void create() {
 		try {
 			render2DMaster.create();
-			info = new Info(universe, render2DMaster.atlasManager, render2DMaster.batch, inputMultiplexer);
+			info = new Info(render2DMaster.atlasManager, render2DMaster.batch, inputMultiplexer);
 			//		info = new Info(render2DMaster, inputMultiplexer);
 			info.createStage();
 			inputMultiplexer.addProcessor(this);
@@ -142,7 +142,7 @@ public class Screen2D implements ScreenListener, ApplicationListener, InputProce
 	}
 
 	private void createStage() throws Exception {
-		info = new Info(universe, render2DMaster.atlasManager, render2DMaster.batch, inputMultiplexer);
+		info = new Info(render2DMaster.atlasManager, render2DMaster.batch, inputMultiplexer);
 		info.createStage();
 		final int height = 12;
 		stage = new Stage();
@@ -498,17 +498,20 @@ public class Screen2D implements ScreenListener, ApplicationListener, InputProce
 		for (final Planet planet : universe.planetList) {
 			int index = 0;
 			for (final Good good : planet.getGoodList()) {
-				good.get2DRenderer().render(planet.x, planet.y, render2DMaster, index++, universe.selectedGood == good);
+				good.get2DRenderer().render(planet.x, planet.z, render2DMaster, index++, universe.selectedGood == good);
 			}
 		}
 	}
 
 	private void renderJumpGates() {
-		for (final Planet planet : universe.planetList) {
-			for (final JumpGate jumpGate : planet.jumpGateList) {
-				jumpGate.get2DRenderer().render(planet.x, planet.y, render2DMaster, 0, false);
-			}
+		for (final Path path : universe.pathList) {
+			path.get2DRenderer().render(path.source.x, path.source.z,  render2DMaster, 0, path.selected);
 		}
+//		for (final Planet planet : universe.planetList) {
+//			for (final Path jumpGate : planet.pathList) {
+//				jumpGate.get2DRenderer().render(planet.x, planet.z, render2DMaster, 0, false);
+//			}
+//		}
 	}
 
 	private void renderPlanets() {

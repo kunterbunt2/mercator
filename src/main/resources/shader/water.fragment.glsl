@@ -10,7 +10,7 @@ uniform float u_moveFactor;
 varying vec4 v_clipSpace;
 varying vec2 v_texCoord0;
 varying vec3 v_toCamera;
-const float waveStrength = 0.01;
+uniform float u_waveStrength;
 const float shineDamper = 20.0;
 const float reflectivity = 0.5;
 
@@ -38,7 +38,7 @@ void main(void) {
 	distortedTexCoords = v_texCoord0
 			+ vec2(distortedTexCoords.x, distortedTexCoords.y + u_moveFactor);
 	vec2 totalDistortion = (texture(u_dudvMapTexture, distortedTexCoords).rg
-			* 2.0 - 1.0) * waveStrength * clamp(waterDepth/100.0, 0.0, 1.0);
+			* 2.0 - 1.0) * u_waveStrength * clamp(waterDepth/100.0, 0.0, 1.0);
 
 	refractionCoords += totalDistortion;
 	refractionCoords = clamp(refractionCoords, 0.001, 0.999);
@@ -65,7 +65,7 @@ void main(void) {
 			vec3 reflectedLight = reflect(u_dirLights[i].direction, normal);
 			float specular = max( dot( reflectedLight, viewVector), 0.0);
 			specular = pow(specular, shineDamper);
-			specularHighlights = u_dirLights[i].color * 10.0*waveStrength*specular * reflectivity*clamp(waterDepth/100.0, 0.0, 1.0);
+			specularHighlights = u_dirLights[i].color * 10.0*u_waveStrength*specular * reflectivity*clamp(waterDepth/100.0, 0.0, 1.0);
 		}
 	#else
 	specularHighlights = vec3(0.0, 0.0, 0.0);
@@ -74,7 +74,7 @@ void main(void) {
 
 	refractiveFactor = pow(refractiveFactor, 2);
 	vec4 diffuse = mix(reflectColor, refractColor, refractiveFactor) + vec4(specularHighlights, 0.0);
-	gl_FragColor = diffuse;
+	gl_FragColor = diffuse;//mix( diffuse, vec4(0.1, 0.5, 0.3, 1.0), 0.3);
 //	gl_FragColor = vec4(waterDepth/1000.0);
 	gl_FragColor.a = clamp(waterDepth/100.0, 0.0, 1.0);
 }

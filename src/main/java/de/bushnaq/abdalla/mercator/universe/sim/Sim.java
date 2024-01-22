@@ -3,6 +3,8 @@ package de.bushnaq.abdalla.mercator.universe.sim;
 import java.util.Collections;
 
 import de.bushnaq.abdalla.mercator.renderer.Renderable;
+import de.bushnaq.abdalla.mercator.universe.event.SimEventManager;
+import de.bushnaq.abdalla.mercator.universe.event.SimEventType;
 import de.bushnaq.abdalla.mercator.universe.factory.ProductionFacility;
 import de.bushnaq.abdalla.mercator.universe.good.Good;
 import de.bushnaq.abdalla.mercator.universe.good.GoodList;
@@ -10,8 +12,6 @@ import de.bushnaq.abdalla.mercator.universe.good.GoodType;
 import de.bushnaq.abdalla.mercator.universe.planet.Planet;
 import de.bushnaq.abdalla.mercator.util.HistoryManager;
 import de.bushnaq.abdalla.mercator.util.MercatorRandomGenerator;
-import de.bushnaq.abdalla.mercator.universe.event.SimEventManager;
-import de.bushnaq.abdalla.mercator.universe.event.SimEventType;
 import de.bushnaq.abdalla.mercator.util.TimeUnit;
 import de.bushnaq.abdalla.mercator.util.TradingPartner;
 import de.bushnaq.abdalla.mercator.util.Transaction;
@@ -32,6 +32,7 @@ public class Sim extends Renderable implements TradingPartner {
 	private GoodList goodList = new GoodList();
 	private HistoryManager historyManager;
 	public long lastTimeAdvancement = 0;
+	public long lastTransaction = 0;
 	public int lastYearConsumedAmount;
 	private String name = null;
 	public Planet planet = null;
@@ -336,6 +337,11 @@ public class Sim extends Renderable implements TradingPartner {
 		this.historyManager = historyManager;
 	}
 
+	@Override
+	public void setLastTransaction(final long currentTime) {
+		lastTransaction = currentTime;
+	}
+
 	public void setName(final String name) {
 		this.name = name;
 	}
@@ -343,9 +349,5 @@ public class Sim extends Renderable implements TradingPartner {
 	private SimNeedList sortGoodList() {
 		final SimNeedList sortedSimNeedsList = simNeedsList.clone();
 		return sortedSimNeedsList;
-	}
-	@Override
-	public String toString() {
-		return getName();
 	}
 }

@@ -2,9 +2,10 @@ package de.bushnaq.abdalla.mercator.universe.planet;
 
 import java.util.Vector;
 
-import de.bushnaq.abdalla.mercator.universe.jumpgate.JumpGate;
+import de.bushnaq.abdalla.mercator.universe.path.Path;
+import de.bushnaq.abdalla.mercator.universe.path.Waypoint;
+import de.bushnaq.abdalla.mercator.universe.path.WaypointProxy;
 import de.bushnaq.abdalla.mercator.universe.sim.trader.Trader;
-import de.bushnaq.abdalla.mercator.universe.sim.trader.Waypoint;
 
 /**
  * @author bushnaq Created 13.02.2005
@@ -15,6 +16,19 @@ public class PlanetList extends Vector<Planet> {
 	public void clearSeed() {
 		for (final Planet planet : this) {
 			planet.seed = null;
+			//			for (Path p : planet.pathList)
+			crearSeed(planet);
+		}
+	}
+
+	private void crearSeed(final Waypoint w) {
+		for (final Path path : w.pathList) {
+			if (path.target.seed != null) {
+				path.target.seed = null;
+				crearSeed(path.target);
+			} else {
+				//already seeded
+			}
 		}
 	}
 
@@ -32,18 +46,18 @@ public class PlanetList extends Vector<Planet> {
 		if (aTrader != null) {
 			// ---Deselect all jump gates
 			for (final Planet planet : this) {
-				for (final JumpGate jumpGate : planet.jumpGateList) {
+				for (final Path jumpGate : planet.pathList) {
 					jumpGate.selected = false;
 				}
 			}
 			int waypointIndex = 0;
 			while (waypointIndex < aTrader.waypointList.size()) {
-				final Waypoint waypoint = aTrader.waypointList.get(waypointIndex);
+				final WaypointProxy waypoint = aTrader.waypointList.get(waypointIndex);
 				// ---For each waypoint, mark the jumppoint to the next one
-				for (final JumpGate jumpGate : waypoint.planet.jumpGateList) {
-					if ((waypointIndex + 1 < aTrader.waypointList.size()) && (jumpGate.targetPlanet == aTrader.waypointList.get(waypointIndex + 1).planet)) {
+				for (final Path jumpGate : waypoint.waypoint.pathList) {
+					if ((waypointIndex + 1 < aTrader.waypointList.size()) && (jumpGate.target == aTrader.waypointList.get(waypointIndex + 1).waypoint)) {
 						jumpGate.selected = true;
-					} else if ((waypointIndex > 0) && (jumpGate.targetPlanet == aTrader.waypointList.get(waypointIndex - 1).planet)) {
+					} else if ((waypointIndex > 0) && (jumpGate.target == aTrader.waypointList.get(waypointIndex - 1).waypoint)) {
 						jumpGate.selected = true;
 					} else {
 					}
@@ -53,9 +67,11 @@ public class PlanetList extends Vector<Planet> {
 		}
 	}
 
-	public Planet queryPlanetByLocation(final float x, final float y) {
+	public Planet queryPlanetByLocation(final float x, final float z) {
 		for (final Planet planet : this) {
-			if (planet.x == x && planet.y == y)
+			final float x1 = (float) Math.floor(planet.x / Planet.PLANET_DISTANCE);
+			final float x2 = (float) Math.floor(x / Planet.PLANET_DISTANCE);
+			if (Math.floor(planet.x / Planet.PLANET_DISTANCE) == Math.floor(x / Planet.PLANET_DISTANCE) && Math.floor(planet.z / Planet.PLANET_DISTANCE) == Math.floor(z / Planet.PLANET_DISTANCE))
 				return planet;
 		}
 		return null;

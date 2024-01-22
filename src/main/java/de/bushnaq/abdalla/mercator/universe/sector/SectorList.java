@@ -2,13 +2,15 @@ package de.bushnaq.abdalla.mercator.universe.sector;
 
 import java.util.Vector;
 
-import de.bushnaq.abdalla.mercator.universe.tools.Tools;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author bushnaq Created 13.02.2005
  */
 public class SectorList extends Vector<Sector> {
 	public static final int ABANDONED_SECTOR_INDEX = 0;
+	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
 	// private static final long serialVersionUID = 4497410859034679358L;
 	public Sector[][] sectorMap;
@@ -22,7 +24,7 @@ public class SectorList extends Vector<Sector> {
 				count++;
 				add(new Sector(i, "S-" + i));
 			}
-			Tools.print(String.format("generated %d sectors.\n", count));
+			logger.info(String.format("generated %d sectors.", count));
 		}
 		sectorMap = new Sector[numberOfSectors * 2][numberOfSectors * 2];
 	}

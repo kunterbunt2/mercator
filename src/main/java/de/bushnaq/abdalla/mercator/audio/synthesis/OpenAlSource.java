@@ -29,11 +29,15 @@ public class OpenAlSource extends Thread {
 	private final int[] bufferId = new int[BUFFER_COUNT];
 	private final List<Integer> bufferQueue = new ArrayList<>(); // A quick and dirty queue of buffer objects
 	private long buffersize;
+
 	private final List<Integer> buffersUnqueued = new ArrayList<>(); // A quick and dirty queue of buffer objects
+
 	private ByteBuffer byteBuffer;
+	List<ByteBufferContainer> byteBufferCopyList = new ArrayList<>();
 	private final int channels;
 	private volatile boolean end = false;
 	private int filter;
+	boolean keepCopy = false;
 	//	private long lastIndex = 0;
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 	private boolean play;//source should be in play state
@@ -131,12 +135,20 @@ public class OpenAlSource extends Thread {
 		removeBuffers();
 	}
 
+	public long getBuffersize() {
+		return buffersize;
+	}
+
 	public int getRestartedSourceCount() {
 		return restartedSourceCount;
 	}
 
 	public long getSamples() {
 		return samples;
+	}
+
+	public boolean isKeepCopy() {
+		return keepCopy;
 	}
 
 	boolean isPlay() throws OpenAlException {
@@ -215,11 +227,20 @@ public class OpenAlSource extends Thread {
 		buffersUnqueued.clear();
 	}
 
+	//	void renderBuffer() {
+	//		for (int sampleIndex = 0, bufferIndex = 0; sampleIndex < samples; sampleIndex++, bufferIndex += 2) {
+	//			byteBuffer.putShort(bufferIndex, audio.process(lastIndex + sampleIndex));
+	//		}
+	//		lastIndex += samples;
+	//	}
+
 	private void removeBuffers() throws OpenAlException {
 		//TODO unqueing and delete buffers fails
 		//		unqueueAllBuffers();
 		//		AL10.alDeleteBuffers(bufferId);
 		//		AudioEngine.checkAlError("Openal error #");
+		for (final ByteBufferContainer b : byteBufferCopyList)
+			LibCStdlib.free(b.byteBuffer);
 		LibCStdlib.free(byteBuffer);
 	}
 
@@ -234,13 +255,6 @@ public class OpenAlSource extends Thread {
 		}
 	}
 
-	//	void renderBuffer() {
-	//		for (int sampleIndex = 0, bufferIndex = 0; sampleIndex < samples; sampleIndex++, bufferIndex += 2) {
-	//			byteBuffer.putShort(bufferIndex, audio.process(lastIndex + sampleIndex));
-	//		}
-	//		lastIndex += samples;
-	//	}
-
 	private void removeSource() throws OpenAlException {
 		final int state = AL10.alGetSourcei(source, AL10.AL_SOURCE_STATE);
 		AL10.alSourceStop(source);
@@ -251,7 +265,7 @@ public class OpenAlSource extends Thread {
 		AudioEngine.checkAlError("Openal error #");
 	}
 
-	public void renderBuffer() {
+	public void renderBuffer() throws OpenAlcException {
 		audio.processBuffer(byteBuffer);
 	}
 
@@ -301,7 +315,6 @@ public class OpenAlSource extends Thread {
 					// Queue the buffer
 					AL10.alSourceQueueBuffers(source, myBuff);
 					AudioEngine.checkAlError("Failed alSourceQueueBuffers with error #");
-
 					if (play) {
 						// Restart the source if needed (if we take too long and the queue dries up, the source stops playing).
 						final int state = AL10.alGetSourcei(source, AL10.AL_SOURCE_STATE);
@@ -323,6 +336,10 @@ public class OpenAlSource extends Thread {
 	void setGain(final float gain) throws OpenAlException {
 		AL10.alSourcef(source, AL10.AL_GAIN, gain);
 		AudioEngine.checkAlError("Failed alSourcef AL_GAIN with error #");
+	}
+
+	public void setKeepCopy(final boolean keepCopy) {
+		this.keepCopy = keepCopy;
 	}
 
 	public void setPosition(final float[] position) throws OpenAlException {
@@ -381,19 +398,30 @@ public class OpenAlSource extends Thread {
 		}
 	}
 
-	void writeWav(final String fileName) throws IOException {
+	private void writeByteBufferToDisk(final ByteBuffer byteBuffer, final String fileName) throws IOException {
 		final byte[] buffer = new byte[byteBuffer.capacity()];
 		for (int i = 0; i < buffer.length; i++) {
 			final int x = byteBuffer.getShort(i);
 			buffer[i++] = (byte) x;
 			buffer[i] = (byte) (x >>> 8);
 		}
-		final File out = new File(fileName);
+		final File out = new File(fileName + ".wav");
 		final AudioFormat format = new AudioFormat(samplerate, bits, channels, true, false);
 		final ByteArrayInputStream bais = new ByteArrayInputStream(buffer);
 		final AudioInputStream audioInputStream = new AudioInputStream(bais, format, buffer.length);
 		AudioSystem.write(audioInputStream, AudioFileFormat.Type.WAVE, out);
 		audioInputStream.close();
+	}
+
+	void writeWav(final String fileName) throws IOException {
+		if (isKeepCopy()) {
+			for (int i = 0; i < byteBufferCopyList.size(); i++) {
+				final ByteBuffer b = byteBufferCopyList.get(i).byteBuffer;
+				writeByteBufferToDisk(b, fileName + i + "-" + byteBufferCopyList.get(i).startFrequency + "-" + byteBufferCopyList.get(i).endFrequency);
+			}
+		} else {
+			writeByteBufferToDisk(byteBuffer, fileName);
+		}
 	}
 
 }

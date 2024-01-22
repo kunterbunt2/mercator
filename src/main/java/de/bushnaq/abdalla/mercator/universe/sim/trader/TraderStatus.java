@@ -1,7 +1,7 @@
 package de.bushnaq.abdalla.mercator.universe.sim.trader;
 
 public enum TraderStatus {
-	TRADER_STATUS_BUYING("Buy", true), TRADER_STATUS_CANNOT_BUY("X buy", false), TRADER_STATUS_CANNOT_SELL("X sell", false), TRADER_STATUS_RESTING("Rest", true), TRADER_STATUS_SELLING("Sell", true), TRADER_STATUS_UNKNOWN("Unknown", false), TRADER_STATUS_WAITING_FOR_GOOD_PRICE_TO_BUY("Waiting for a good price to buy...", true), TRADER_STATUS_WAITING_TO_SELL("Waiting to sell...", true);
+	TRADER_STATUS_BUYING("Buy", true), TRADER_STATUS_CANNOT_BUY("X buy", false), TRADER_STATUS_CANNOT_SELL("X sell", false), TRADER_STATUS_RESTING("Rest", true), TRADER_STATUS_SELLING("Sell", true), TRADER_STATUS_UNKNOWN("Unknown", false), TRADER_STATUS_WAITING_FOR_GOOD_PRICE_TO_BUY("Waiting for a good price to buy...", true), TRADER_STATUS_WAITING_FOR_WAYPOINT("Waiting for waypoint to become free...", true), TRADER_STATUS_WAITING_TO_SELL("Waiting to sell...", true);
 
 	private boolean good;
 	private String name;

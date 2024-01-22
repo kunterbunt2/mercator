@@ -3,8 +3,11 @@ package de.bushnaq.abdalla.mercator.renderer;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.badlogic.gdx.Gdx;
+import de.bushnaq.abdalla.mercator.renderer.camera.MovingCamera;
 import de.bushnaq.abdalla.mercator.universe.Universe;
 import de.bushnaq.abdalla.mercator.universe.good.Good;
+import de.bushnaq.abdalla.mercator.universe.planet.Planet;
 import de.bushnaq.abdalla.mercator.universe.sim.trader.Trader2DRenderer;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -97,7 +100,10 @@ public class Render2DMaster {
 
 	public void create() {
 		camera = new OrthographicCamera(300, 300 * (600 / 800));
-		camera.position.set(camera.viewportWidth / 2f, camera.viewportHeight / 2f, 0);
+		Planet planet = universe.findBusyCenterPlanet();
+		if (planet == null)
+			planet = universe.planetList.get(0);
+		camera.position.set(planet.x, planet.z, 0);
 		camera.zoom = 1.0f;
 		camera.update();
 		batch = new CustomizedSpriteBatch(5460);

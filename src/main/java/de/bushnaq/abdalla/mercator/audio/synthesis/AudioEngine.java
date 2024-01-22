@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import de.bushnaq.abdalla.mercator.renderer.camera.MovingCamera;
 import org.lwjgl.openal.AL;
 import org.lwjgl.openal.AL10;
 import org.lwjgl.openal.ALC;
@@ -18,7 +19,6 @@ import org.lwjgl.openal.SOFTHRTF;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.bushnaq.abdalla.mercator.renderer.camera.MovingCamera;
 import com.badlogic.gdx.math.Vector3;
 import com.scottlogic.util.UnsortedList;
 

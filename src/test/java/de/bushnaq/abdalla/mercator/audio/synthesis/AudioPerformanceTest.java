@@ -7,11 +7,11 @@ import static org.hamcrest.Matchers.lessThan;
 import java.util.ArrayList;
 import java.util.List;
 
+import de.bushnaq.abdalla.mercator.renderer.camera.MovingCamera;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.bushnaq.abdalla.mercator.renderer.camera.MovingCamera;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Files;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3NativesLoader;

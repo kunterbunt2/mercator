@@ -2,8 +2,8 @@ package de.bushnaq.abdalla.mercator.desktop;
 
 import de.bushnaq.abdalla.mercator.renderer.Screen2D;
 import de.bushnaq.abdalla.mercator.universe.Universe;
-import de.bushnaq.abdalla.mercator.universe.sim.Sim;
 import de.bushnaq.abdalla.mercator.universe.event.EventLevel;
+import de.bushnaq.abdalla.mercator.universe.sim.Sim;
 import de.bushnaq.abdalla.mercator.util.TimeUnit;
 
 public class Launcher2D {

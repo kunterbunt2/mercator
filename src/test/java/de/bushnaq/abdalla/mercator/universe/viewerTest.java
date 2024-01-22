@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test;
 
 import de.bushnaq.abdalla.mercator.desktop.GraphicsDimentions;
 import de.bushnaq.abdalla.mercator.renderer.Screen3D;
-import de.bushnaq.abdalla.mercator.util.EventLevel;
+import de.bushnaq.abdalla.mercator.universe.event.EventLevel;
 import de.bushnaq.abdalla.mercator.util.ModelCreator;
 import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Gdx;

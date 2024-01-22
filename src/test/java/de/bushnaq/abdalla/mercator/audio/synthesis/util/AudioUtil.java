@@ -11,7 +11,7 @@ import de.bushnaq.abdalla.mercator.desktop.GraphicsDimentions;
 import de.bushnaq.abdalla.mercator.renderer.SceneManager;
 import de.bushnaq.abdalla.mercator.universe.Universe;
 import de.bushnaq.abdalla.mercator.universe.sim.Sim;
-import de.bushnaq.abdalla.mercator.util.EventLevel;
+import de.bushnaq.abdalla.mercator.universe.event.EventLevel;
 import de.bushnaq.abdalla.mercator.util.MercatorRandomGenerator;
 import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Gdx;

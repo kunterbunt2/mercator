@@ -6,9 +6,9 @@ import de.bushnaq.abdalla.mercator.universe.jumpgate.JumpGate;
 import de.bushnaq.abdalla.mercator.universe.planet.Planet;
 import de.bushnaq.abdalla.mercator.universe.planet.PlanetList;
 import de.bushnaq.abdalla.mercator.universe.sim.Sim;
-import de.bushnaq.abdalla.mercator.util.EventLevel;
+import de.bushnaq.abdalla.mercator.universe.event.EventLevel;
 import de.bushnaq.abdalla.mercator.util.MercatorRandomGenerator;
-import de.bushnaq.abdalla.mercator.util.SimEventType;
+import de.bushnaq.abdalla.mercator.universe.event.SimEventType;
 import de.bushnaq.abdalla.mercator.util.TimeUnit;
 import de.bushnaq.abdalla.mercator.util.Transaction;
 
@@ -259,9 +259,6 @@ public class Trader extends Sim {
 			for (final Good g : getGoodList()) {
 				amount += g.getAmount();
 			}
-			//		if (amount < 10)
-			//			currentMaxEngineSpeed = MAX_ENGINE_SPEED;
-			//		else
 			if (progress <= 0.20f) {
 				currentMaxEngineSpeed = MIN_ENGINE_SPEED + (float) Math.sin((Math.PI / 2) * progress / 0.2f) * (MAX_ENGINE_SPEED - MIN_ENGINE_SPEED) * (1 - (amount / MAX_GOOD_SPACE));
 			} else if (progress >= 0.80f) {
@@ -471,5 +468,9 @@ public class Trader extends Sim {
 		traderStatus = TraderStatus.TRADER_STATUS_RESTING;
 		planet.universe.eventManager.add(EventLevel.trace, currentTime, this, String.format("waiting at %s for %s", planet.getName(), TimeUnit.toString(portRestingTime)));
 		eventManager.add(currentTime, getVolume(), SimEventType.resting, getCredits(), String.format("resting %s on %s after selling.", TimeUnit.toString(portRestingTime), planet.getName()));
+	}
+	@Override
+	public String toString() {
+		return getName();
 	}
 }

@@ -4,12 +4,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.List;
 
+import de.bushnaq.abdalla.mercator.universe.event.Event;
 import org.junit.jupiter.api.Test;
 
 import de.bushnaq.abdalla.mercator.desktop.GraphicsDimentions;
-import de.bushnaq.abdalla.mercator.util.Event;
-import de.bushnaq.abdalla.mercator.util.EventLevel;
-import de.bushnaq.abdalla.mercator.util.EventManager;
+import de.bushnaq.abdalla.mercator.universe.event.EventLevel;
+import de.bushnaq.abdalla.mercator.universe.event.EventManager;
 import de.bushnaq.abdalla.mercator.util.MercatorRandomGenerator;
 import de.bushnaq.abdalla.mercator.util.TimeUnit;
 

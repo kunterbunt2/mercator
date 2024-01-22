@@ -17,7 +17,7 @@ public class SinOscillator implements Oscilator {
 
 	@Override
 	public void dispose() {
-		logger.info(String.format("minFrequency=%f oscFreq=%f maxFrequency=%f", minFrequency, oscFreq, maxFrequency));
+//		logger.info(String.format("minFrequency=%f oscFreq=%f maxFrequency=%f", minFrequency, oscFreq, maxFrequency));
 	}
 
 	@Override

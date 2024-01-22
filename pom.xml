@@ -50,6 +50,17 @@
 			<version>2.1.0</version>
 		</dependency>
 		<dependency>
+			<groupId>com.crashinvaders.vfx</groupId>
+			<artifactId>gdx-vfx-core</artifactId>
+			<version>0.5.4</version>
+		</dependency>
+		<dependency>
+			<groupId>com.crashinvaders.vfx</groupId>
+			<artifactId>gdx-vfx-effects</artifactId>
+			<version>0.5.4</version>
+		</dependency>
+
+		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-math3</artifactId>
 			<version>3.6.1</version>
@@ -69,16 +80,6 @@
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
 			<version>1.4.14</version>
-		</dependency>
-		<dependency>
-			<groupId>com.crashinvaders.vfx</groupId>
-			<artifactId>gdx-vfx-core</artifactId>
-			<version>0.5.0</version>
-		</dependency>
-		<dependency>
-			<groupId>com.crashinvaders.vfx</groupId>
-			<artifactId>gdx-vfx-effects</artifactId>
-			<version>0.5.0</version>
 		</dependency>
 	</dependencies>
 

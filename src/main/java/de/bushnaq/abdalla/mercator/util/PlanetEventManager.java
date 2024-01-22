@@ -6,6 +6,8 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
+import de.bushnaq.abdalla.mercator.universe.event.SimEvent;
+import de.bushnaq.abdalla.mercator.universe.event.SimEventType;
 import de.bushnaq.abdalla.mercator.universe.planet.Planet;
 
 public class PlanetEventManager {

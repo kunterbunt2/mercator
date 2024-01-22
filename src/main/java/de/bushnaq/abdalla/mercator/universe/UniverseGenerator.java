@@ -11,6 +11,8 @@ import de.bushnaq.abdalla.mercator.universe.sim.trader.Trader;
 import de.bushnaq.abdalla.mercator.universe.sim.trader.TraderList;
 import de.bushnaq.abdalla.mercator.universe.tools.Tools;
 import de.bushnaq.abdalla.mercator.util.MercatorRandomGenerator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author bushnaq Created 13.02.2005
@@ -19,9 +21,15 @@ public class UniverseGenerator {
 	public static final int PLANET_CHANCE_DICE_PORLTION = 6;
 	//	public static final float PLANET_MAX_JUMP_GATE_DISTANCE = 1610;// TODO adapt to 2D 1636
 	public static final int PLANET_CHANCE_DICE_SIZE = 10;
+	
+	
+	
 	public GoodList goodList;
 	final int MAX_NUMBER_OF_TRADERS = 1;
 	PlanetList planetList;
+	private final Logger logger = LoggerFactory.getLogger(this.getClass());
+	
+	
 	public MercatorRandomGenerator randomGenerator;
 	// public int randomGeneratorSeed = 5;
 	SectorList sectorList;
@@ -66,42 +74,6 @@ public class UniverseGenerator {
 					} else {
 					}
 				}
-				// {
-				// for ( int y = 0; y < size * 2; y++ )
-				// {
-				// for ( int x = 0; x < size * 2; x++ )
-				// {
-				// Sector sector = sectorList.sectorMap[x][y];
-				// SectorManager sectorManager = new SectorManager();
-				// if ( sector == null )
-				// {
-				// //---west
-				// if ( x > 0 && sectorList.sectorMap[x - 1][y] != null )
-				// {
-				// sectorManager.add( sectorList.sectorMap[x - 1][y] );
-				// }
-				// //---north
-				// if ( y > 0 && sectorList.sectorMap[x][y - 1] != null )
-				// {
-				// sectorManager.add( sectorList.sectorMap[x][y - 1] );
-				// }
-				// //---east
-				// if ( x < size * 2 - 1 && sectorList.sectorMap[x + 1][y] != null )
-				// {
-				// sectorManager.add( sectorList.sectorMap[x + 1][y] );
-				// }
-				// //---South
-				// if ( y < size * 2 - 1 && sectorList.sectorMap[x][y + 1] != null )
-				// {
-				// sectorManager.add( sectorList.sectorMap[x][y + 1] );
-				// }
-				// // sectorMap[x][y] = sectorManager.getSector();
-				// if ( sectorList.sectorMap[x][y] != null )
-				// changesExist = true;
-				// }
-				// }
-				// }
-				// }
 			} while (changesExist);
 			// ---Destroy disconnected planets
 			{
@@ -115,6 +87,38 @@ public class UniverseGenerator {
 				}
 			}
 		}
+        logger.info(String.format("%d planets left after assigning sectors.", planetList.size()));
+	}
+	// ---Create the planets
+	private PlanetList generatePlanetList(final Universe universe) {
+		final PlanetList planetList = new PlanetList();
+		int count = 0;
+		do {
+			planetList.clear();
+			int index = 0;
+			count = 0;
+			for (int y = -size; y <= size; y++) {
+				for (int x = -size; x <= size; x++) {
+					if (randomGenerator.nextInt(0, this, PLANET_CHANCE_DICE_SIZE) < PLANET_CHANCE_DICE_PORLTION) {
+						// ---Create planet
+						index++;
+						final String name = generatePlanetName(index, x, y);
+						final float tx = x * Planet.PLANET_DISTANCE /*+ Planet3DRenderer.PLANET_BORDER*/ + randomGenerator.nextInt(0, this, Planet3DRenderer.PLANET_MAX_SHIFT);
+						final float ty = y * Planet.PLANET_DISTANCE /*+ Planet3DRenderer.PLANET_BORDER*/ + randomGenerator.nextInt(0, this, Planet3DRenderer.PLANET_MAX_SHIFT);
+						final Planet planet = new Planet(name, tx, ty, universe);
+						planet.create(randomGenerator);
+						count++;
+						planetList.add(planet);
+
+					}
+				}
+			}
+		} while (planetList.size() < ((size * 2 + 1) * (size * 2 + 1)) / 2);
+		Tools.print(String.format("generated %d planets.\n", count));
+//		for (Planet planet : planetList) {
+//			logger.info(String.format("%s.", planet.getName()));
+//		}
+		return planetList;
 	}
 
 	public void generate(final Universe universe) throws Exception {
@@ -181,34 +185,6 @@ public class UniverseGenerator {
 		Tools.print(String.format("%d planets left.\n", planetList.size()));
 	}
 
-	// ---Create the planets
-	private PlanetList generatePlanetList(final Universe universe) {
-		final PlanetList planetList = new PlanetList();
-		int count = 0;
-		do {
-			planetList.clear();
-			int index = 0;
-			count = 0;
-			for (int y = -size; y <= size; y++) {
-				for (int x = -size; x <= size; x++) {
-					if (randomGenerator.nextInt(0, this, PLANET_CHANCE_DICE_SIZE) < PLANET_CHANCE_DICE_PORLTION) {
-						// ---Create planet
-						index++;
-						final String name = generatePlanetName(index, x, y);
-						final float tx = x * Planet.PLANET_DISTANCE /*+ Planet3DRenderer.PLANET_BORDER*/ + randomGenerator.nextInt(0, this, Planet3DRenderer.PLANET_MAX_SHIFT);
-						final float ty = y * Planet.PLANET_DISTANCE /*+ Planet3DRenderer.PLANET_BORDER*/ + randomGenerator.nextInt(0, this, Planet3DRenderer.PLANET_MAX_SHIFT);
-						final Planet planet = new Planet(name, tx, ty, universe);
-						planet.create(randomGenerator);
-						count++;
-						planetList.add(planet);
-
-					}
-				}
-			}
-		} while (planetList.size() < ((size * 2 + 1) * (size * 2 + 1)) / 2);
-		Tools.print(String.format("generated %d planets.\n", count));
-		return planetList;
-	}
 
 	private String generatePlanetName(final int index, final int x, final int y) {
 		//		return "P-" + index;

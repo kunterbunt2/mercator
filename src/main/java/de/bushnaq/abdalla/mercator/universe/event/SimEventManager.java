@@ -1,10 +1,11 @@
-package de.bushnaq.abdalla.mercator.util;
+package de.bushnaq.abdalla.mercator.universe.event;
 
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 
 import de.bushnaq.abdalla.mercator.universe.sim.Sim;
+import de.bushnaq.abdalla.mercator.util.TimeUnit;
 
 public class SimEventManager {
 	public boolean enabled = false;

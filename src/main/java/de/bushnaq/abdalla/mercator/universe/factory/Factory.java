@@ -5,8 +5,8 @@ import de.bushnaq.abdalla.mercator.universe.good.GoodList;
 import de.bushnaq.abdalla.mercator.universe.planet.Planet;
 import de.bushnaq.abdalla.mercator.universe.sim.Sim;
 import de.bushnaq.abdalla.mercator.universe.tools.Tools;
-import de.bushnaq.abdalla.mercator.util.EventLevel;
-import de.bushnaq.abdalla.mercator.util.SimEventType;
+import de.bushnaq.abdalla.mercator.universe.event.EventLevel;
+import de.bushnaq.abdalla.mercator.universe.event.SimEventType;
 import de.bushnaq.abdalla.mercator.util.TimeUnit;
 import de.bushnaq.abdalla.mercator.util.Transaction;
 

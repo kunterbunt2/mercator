@@ -10,8 +10,8 @@ import de.bushnaq.abdalla.mercator.universe.good.GoodType;
 import de.bushnaq.abdalla.mercator.universe.planet.Planet;
 import de.bushnaq.abdalla.mercator.util.HistoryManager;
 import de.bushnaq.abdalla.mercator.util.MercatorRandomGenerator;
-import de.bushnaq.abdalla.mercator.util.SimEventManager;
-import de.bushnaq.abdalla.mercator.util.SimEventType;
+import de.bushnaq.abdalla.mercator.universe.event.SimEventManager;
+import de.bushnaq.abdalla.mercator.universe.event.SimEventType;
 import de.bushnaq.abdalla.mercator.util.TimeUnit;
 import de.bushnaq.abdalla.mercator.util.TradingPartner;
 import de.bushnaq.abdalla.mercator.util.Transaction;
@@ -343,5 +343,9 @@ public class Sim extends Renderable implements TradingPartner {
 	private SimNeedList sortGoodList() {
 		final SimNeedList sortedSimNeedsList = simNeedsList.clone();
 		return sortedSimNeedsList;
+	}
+	@Override
+	public String toString() {
+		return getName();
 	}
 }

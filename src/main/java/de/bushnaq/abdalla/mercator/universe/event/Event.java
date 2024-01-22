@@ -1,4 +1,4 @@
-package de.bushnaq.abdalla.mercator.util;
+package de.bushnaq.abdalla.mercator.universe.event;
 
 import de.bushnaq.abdalla.mercator.universe.UniverseGenerator;
 import de.bushnaq.abdalla.mercator.universe.factory.ProductionFacility;
@@ -6,6 +6,7 @@ import de.bushnaq.abdalla.mercator.universe.good.Good;
 import de.bushnaq.abdalla.mercator.universe.planet.Planet;
 import de.bushnaq.abdalla.mercator.universe.sim.Sim;
 import de.bushnaq.abdalla.mercator.universe.sim.trader.Trader;
+import de.bushnaq.abdalla.mercator.util.MercatorRandomGenerator;
 
 public class Event {
 	public EventLevel level;

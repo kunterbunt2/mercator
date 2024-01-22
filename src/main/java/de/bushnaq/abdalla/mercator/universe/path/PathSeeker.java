@@ -1,10 +1,11 @@
-package de.bushnaq.abdalla.mercator.universe.planet;
+package de.bushnaq.abdalla.mercator.universe.path;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import de.bushnaq.abdalla.mercator.universe.good.GoodType;
 import de.bushnaq.abdalla.mercator.universe.jumpgate.JumpGate;
+import de.bushnaq.abdalla.mercator.universe.planet.Planet;
 
 public class PathSeeker {
 	GoodType destinationGoodType = null;

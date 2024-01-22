@@ -5,7 +5,7 @@ import java.util.List;
 import javax.swing.table.AbstractTableModel;
 
 import de.bushnaq.abdalla.mercator.universe.Universe;
-import de.bushnaq.abdalla.mercator.util.Event;
+import de.bushnaq.abdalla.mercator.universe.event.Event;
 import de.bushnaq.abdalla.mercator.util.TimeUnit;
 
 public class EventTableModel extends AbstractTableModel {

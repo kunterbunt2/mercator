@@ -1,4 +1,4 @@
-package de.bushnaq.abdalla.mercator.util;
+package de.bushnaq.abdalla.mercator.universe.event;
 
 public class SimEvent {
 	public float credits;

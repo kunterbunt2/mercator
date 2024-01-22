@@ -1,4 +1,4 @@
-package de.bushnaq.abdalla.mercator.util;
+package de.bushnaq.abdalla.mercator.universe.event;
 
 public enum SimEventType {
 	arive("arived"), buy("bought"), consue("consumed"), die("died"), ern("erned"), payJump("jumped"), produce("produced"), resting("resting"), sell("sold"), travel("traveled");

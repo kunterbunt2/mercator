@@ -9,6 +9,7 @@ import de.bushnaq.abdalla.mercator.universe.good.Good;
 import de.bushnaq.abdalla.mercator.universe.good.GoodList;
 import de.bushnaq.abdalla.mercator.universe.good.GoodType;
 import de.bushnaq.abdalla.mercator.universe.jumpgate.JumpGateList;
+import de.bushnaq.abdalla.mercator.universe.path.PathSeeker;
 import de.bushnaq.abdalla.mercator.universe.sector.Sector;
 import de.bushnaq.abdalla.mercator.universe.sim.Sim;
 import de.bushnaq.abdalla.mercator.universe.sim.SimList;
@@ -304,5 +305,10 @@ public class Planet extends RenderablePosition implements TradingPartner {
 			from.statisticManager.transported(this, -amount2);
 			statisticManager.transported(from, amount - amount2);
 		}
+	}
+
+	@Override
+	public String toString() {
+		return getName();
 	}
 }

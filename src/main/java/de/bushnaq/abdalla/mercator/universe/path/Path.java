@@ -1,4 +1,6 @@
-package de.bushnaq.abdalla.mercator.universe.planet;
+package de.bushnaq.abdalla.mercator.universe.path;
+
+import de.bushnaq.abdalla.mercator.universe.planet.Planet;
 
 public class Path {
 	public float distance = 999992; // ---Used by pathseeker algorithm temporary. This is the accumulation of

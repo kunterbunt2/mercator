@@ -6,7 +6,7 @@ import org.apache.commons.math3.util.Precision;
 import org.junit.jupiter.api.Test;
 
 import de.bushnaq.abdalla.mercator.desktop.GraphicsDimentions;
-import de.bushnaq.abdalla.mercator.util.EventLevel;
+import de.bushnaq.abdalla.mercator.universe.event.EventLevel;
 import de.bushnaq.abdalla.mercator.util.TimeUnit;
 
 /**

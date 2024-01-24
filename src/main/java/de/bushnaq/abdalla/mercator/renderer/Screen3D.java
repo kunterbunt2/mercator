@@ -207,6 +207,7 @@ public class Screen3D implements ScreenListener, ApplicationListener, InputProce
 		font = new BitmapFont();
 		for (int i = 0; i < 8; i++) {
 			final Label label = new Label(" ", new Label.LabelStyle(font, Color.WHITE));
+
 			label.setPosition(0, i * height);
 			stage.addActor(label);
 			labels.add(label);
@@ -321,6 +322,8 @@ public class Screen3D implements ScreenListener, ApplicationListener, InputProce
 		case Input.Keys.NUM_2:
 			if (launchMode == LaunchMode.demo)
 				launchMode = LaunchMode.normal;
+			else
+				launchMode = LaunchMode.demo;
 			return true;
 		case Input.Keys.F:
 			followMode = !followMode;

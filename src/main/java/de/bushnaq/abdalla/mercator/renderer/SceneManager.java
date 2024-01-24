@@ -78,6 +78,8 @@ import net.mgsx.gltf.scene3d.shaders.PBRShaderConfig;
 import net.mgsx.gltf.scene3d.shaders.PBRShaderProvider;
 import net.mgsx.gltf.scene3d.utils.EnvironmentCache;
 import net.mgsx.gltf.scene3d.utils.EnvironmentUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SceneManager {
 	private static final float DAY_AMBIENT_INTENSITY_B = 1.0f;
@@ -89,6 +91,7 @@ public class SceneManager {
 	private static final float NIGHT_AMBIENT_INTENSITY_G = 0f;
 	private static final float NIGHT_AMBIENT_INTENSITY_R = 0f;
 	private static final float NIGHT_SHADOW_INTENSITY = 0.2f;
+	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 	private boolean alwaysDay = true;
 	private ColorAttribute ambientLight;
 	private float angle;
@@ -185,7 +188,7 @@ public class SceneManager {
 		vfxManager = new VfxManager(Pixmap.Format.RGBA8888);
 		vfxEffect = new DepthOfFieldEffect(postFbo, camera);
 		vfxManager.addEffect(vfxEffect);
-		vfxManager.addEffect(new FxaaEffect());
+//		vfxManager.addEffect(new FxaaEffect());
 	}
 
 	public void add(final PointLight pointLight, final boolean dynamic) {
@@ -500,6 +503,7 @@ public class SceneManager {
 
 	private void handleFrameBufferScreenshot(boolean takeScreenShot, final FrameBuffer frameBuffer, final String name) {
 		if (takeScreenShot) {
+			logger.info("handleFrameBufferScreenshot");
 			final Date date = new Date();
 			final String fileName = createFileName(date, name);
 			writeFrameBufferToDisk(fileName, frameBuffer);
@@ -510,6 +514,7 @@ public class SceneManager {
 
 	void handleQueuedScreenshot(final boolean takeScreenShot) {
 		if (takeScreenShot) {
+			logger.info("handleQueuedScreenshot");
 			final Date date = new Date();
 			final String fileName = createFileName(date, "mercator");
 			final byte[] pixels = ScreenUtils.getFrameBufferPixels(0, 0, Gdx.graphics.getBackBufferWidth(), Gdx.graphics.getBackBufferHeight(), true);

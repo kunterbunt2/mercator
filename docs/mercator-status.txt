@@ -4,12 +4,6 @@ MEMORY
 PERFORMANCE
  - do not call update bounding box for every frame
 
-ISSUES
-- form selecting an item does not show info in the lower pane
-- renderer statistics missing
-- unierse statistics never showing up
-- Q dose not end the application
-- cluster bounding box not working
 
 
 TASKS
@@ -47,7 +41,7 @@ TASKS
 			- investigate light bloom
 			
 
-gdx-are
+gdx-are (audio render engine)
 Openal based Audio Render Engine for libgdx supporting procedurally generated audio.
 Openal audio effect including Doppler effect, hall, bass boosting and filtering are supported.
 Openal listener position in space and velocity attribute are supported.

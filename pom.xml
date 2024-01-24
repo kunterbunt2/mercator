@@ -14,6 +14,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.build.timestamp.format>yyyy-MM-dd-HH-mm</maven.build.timestamp.format>
 		<libgdxVersion>1.12.1</libgdxVersion>
+		<gdx.vfx.version>0.5.4</gdx.vfx.version>
 	</properties>
 
 	<dependencies>
@@ -73,12 +74,19 @@
 		<dependency>
 			<groupId>com.crashinvaders.vfx</groupId>
 			<artifactId>gdx-vfx-core</artifactId>
-			<version>0.5.0</version>
+			<version>${gdx.vfx.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.crashinvaders.vfx</groupId>
 			<artifactId>gdx-vfx-effects</artifactId>
-			<version>0.5.0</version>
+			<version>${gdx.vfx.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.badlogicgames.gdx</groupId>
+			<artifactId>gdx-tools</artifactId>
+			<version>${libgdxVersion}</version>
+			<scope>test</scope>
 		</dependency>
 	</dependencies>
 

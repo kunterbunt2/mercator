@@ -52,57 +52,57 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
-public class Screen2D implements ScreenListener, ApplicationListener, InputProcessor, Message {
+public class GameEngine2D implements ScreenListener, ApplicationListener, InputProcessor, Message {
     //	private static final String BATCH_END_DURATION = "batch.end()";
-    public static final  int                      CHART_FONT_SIZE                 = 10;
-    public static final  Color                    DARK_RED_COLOR                  = new Color(0.475f, 0.035f, 0.027f, 1.0f);
-    public static final  Color                    DEAD_COLOR                      = Color.GRAY;
+    public static final  int                          CHART_FONT_SIZE                 = 10;
+    public static final  Color                        DARK_RED_COLOR                  = new Color(0.475f, 0.035f, 0.027f, 1.0f);
+    public static final  Color                        DEAD_COLOR                      = Color.GRAY;
     //	private static final String DRAW_DURATION = "draw()";
-    public static final  int                      FONT_SIZE                       = 14;
-    public static final  int                      MENU_FONT_SIZE                  = 12;
+    public static final  int                          FONT_SIZE                       = 14;
+    public static final  int                          MENU_FONT_SIZE                  = 12;
     //    public static final  float                    PLANET_DISTANCE                 = 512;
     //	private static final String RENDER_DURATION = "render()";
-    public static final  Color                    SELECTED_COLOR                  = Color.GOLDENROD;
+    public static final  Color                        SELECTED_COLOR                  = Color.GOLDENROD;
     //    public static final  int                      SOOMIN_FONT_SIZE                = 10;
     // private static final float SCROLL_SPEED = 16.0f;
     // static final float SPACE_BETWEEN_OBJECTS = 1 * 4;
 //    public static final  float                    SOOM_SPEED                      = 8.0f;
-    public static final  Color                    TEXT_COLOR                      = Color.WHITE; // 0xffffffff;
-    public static final  int                      TIME_MACHINE_FONT_SIZE          = 10;
+    public static final  Color                        TEXT_COLOR                      = Color.WHITE; // 0xffffffff;
+    public static final  int                          TIME_MACHINE_FONT_SIZE          = 10;
     //    static final         Color                    BACKGROUND_COLOR                = new Color(35.0f / 255, 135.0f / 255, 159.5f / 255, 1.0f);
-    static final         Color                    DEBUG_GRID_BORDER_COLOR         = new Color(1f, 1f, 1f, 0.2f);
-    static final         Color                    DEBUG_GRID_COLOR                = new Color(.0f, .0f, .0f, 0.2f);
-    private static final float                    SCROLL_SPEED                    = 100f;
-    private static final Color                    TIME_MACHINE_BACKGROUND_COLOR   = new Color(0.0f, 0.0f, 0.0f, 0.9f);
-    private static final Color                    TIME_MACHINE_SUB_MARKER_COLOR   = new Color(0.7f, 0.7f, 0.7f, 1.0f);
-    public final         Universe                 universe;
-    private final        IContextFactory          contextFactory;
+    static final         Color                        DEBUG_GRID_BORDER_COLOR         = new Color(1f, 1f, 1f, 0.2f);
+    static final         Color                        DEBUG_GRID_COLOR                = new Color(.0f, .0f, .0f, 0.2f);
+    private static final float                        SCROLL_SPEED                    = 100f;
+    private static final Color                        TIME_MACHINE_BACKGROUND_COLOR   = new Color(0.0f, 0.0f, 0.0f, 0.9f);
+    private static final Color                        TIME_MACHINE_SUB_MARKER_COLOR   = new Color(0.7f, 0.7f, 0.7f, 1.0f);
+    public final         Universe                     universe;
+    private final        IContextFactory              contextFactory;
     //	private static final Color trafficEndColor = new Color(0xffff0000);
     //	private static final Color trafficStartColor = new Color(0xff55ff55);
     // static final int WORLD_HEIGHT = 100;
     // static final int WORLD_WIDTH = 100;
     // private float centerXD;
     // private float centerYD;
-    private final        TimeStatistic            debugTimer;
-    private final        InputMultiplexer         inputMultiplexer                = new InputMultiplexer();
-    private final        List<Label>              labels                          = new ArrayList<>();
-    private final        LaunchMode               launchMode;
-    private final        Logger                   logger                          = LoggerFactory.getLogger(this.getClass());
-    private final        List<MercatorMessage>    messageQueue                    = new LinkedList<MercatorMessage>();
-    public               AtlasManager             atlasManager;
-    public               OrthographicCamera       camera;
-    public               List<Color>              distinctiveColorlist            = new ArrayList<Color>();
-    public               List<Color>              distinctiveTransparentColorlist = new ArrayList<Color>();
-    public               RenderEngine2D<Screen2D> renderEngine;
-    public               ShowGood                 showGood                        = ShowGood.Name;
-    private              Context                  context;
+    private final        TimeStatistic                debugTimer;
+    private final        InputMultiplexer             inputMultiplexer                = new InputMultiplexer();
+    private final        List<Label>                  labels                          = new ArrayList<>();
+    private final        LaunchMode                   launchMode;
+    private final        Logger                       logger                          = LoggerFactory.getLogger(this.getClass());
+    private final        List<MercatorMessage>        messageQueue                    = new LinkedList<MercatorMessage>();
+    public               AtlasManager                 atlasManager;
+    public               OrthographicCamera           camera;
+    public               List<Color>                  distinctiveColorlist            = new ArrayList<Color>();
+    public               List<Color>                  distinctiveTransparentColorlist = new ArrayList<Color>();
+    public               RenderEngine2D<GameEngine2D> renderEngine;
+    public               ShowGood                     showGood                        = ShowGood.Name;
+    private              Context                      context;
     //	private MyCanvas myCanvas;
 //	public Render2DMaster render2DMaster;
-    private              int                      defaultFontSize                 = Screen2D.FONT_SIZE;
-    private              BitmapFont               font;
+    private              int                          defaultFontSize                 = GameEngine2D.FONT_SIZE;
+    private              BitmapFont                   font;
     //	private Environment environment;
-    private              Info                     info;
-    private              boolean                  infoVisible;
+    private              Info                         info;
+    private              boolean                      infoVisible;
     //	private void drawBackground() {
     //		float d = 10;
     //		float z = 10;
@@ -112,17 +112,17 @@ public class Screen2D implements ScreenListener, ApplicationListener, InputProce
     //		float ty2 = universe.size * UniverseGenerator.PLANET_DISTANCE / d;
     //		render2DMaster.bar(render2DMaster.atlasManager.background, tx1, ty1, tx2, ty2, z, BACKGROUND_COLOR);
     //	}
-    private int           lastDragX    = -1;
-    private int           lastDragY    = -1;
-    private int           maxFramesPerSecond;
-    private GLProfiler    profiler;
-    private Stage         stage;
-    private StringBuilder stringBuilder;
-    private boolean       takeScreenShot;
-    private              int                      timeMachineFontSize             = Screen2D.TIME_MACHINE_FONT_SIZE;
-    private boolean       vsyncEnabled = true;
+    private              int                          lastDragX                       = -1;
+    private              int                          lastDragY                       = -1;
+    private              int                          maxFramesPerSecond;
+    private              GLProfiler                   profiler;
+    private              Stage                        stage;
+    private              StringBuilder                stringBuilder;
+    private              boolean                      takeScreenShot;
+    private              int                          timeMachineFontSize             = GameEngine2D.TIME_MACHINE_FONT_SIZE;
+    private              boolean                      vsyncEnabled                    = true;
 
-    public Screen2D(final IContextFactory contextFactory, final Universe universe, final LaunchMode launchMode) throws Exception {
+    public GameEngine2D(final IContextFactory contextFactory, final Universe universe, final LaunchMode launchMode) throws Exception {
         this.contextFactory = contextFactory;
         this.universe       = universe;
         this.launchMode     = launchMode;
@@ -143,7 +143,7 @@ public class Screen2D implements ScreenListener, ApplicationListener, InputProce
         } else if (amount >= 0.3 * maxAmount) {
             return Color.ORANGE;
         } else {
-            return Screen2D.DARK_RED_COLOR;
+            return GameEngine2D.DARK_RED_COLOR;
         }
     }
 
@@ -163,7 +163,7 @@ public class Screen2D implements ScreenListener, ApplicationListener, InputProce
             atlasManager.init();
             initColors();
 //			render2DMaster.create(null);
-            renderEngine = new RenderEngine2D<Screen2D>(this, camera);
+            renderEngine = new RenderEngine2D<GameEngine2D>(this, camera);
 //            info = new Info(null, atlasManager, renderEngine.batch, camera, inputMultiplexer);
             //		info = new Info(render2DMaster, inputMultiplexer);
 //			info.createStage();
@@ -787,7 +787,7 @@ public class Screen2D implements ScreenListener, ApplicationListener, InputProce
     private void renderUniverse() {
         {
             final float x1 = renderEngine.untransformX(0);
-            final float y1 = renderEngine.untransformY(renderEngine.height - Screen2D.FONT_SIZE - 2);
+            final float y1 = renderEngine.untransformY(renderEngine.height - GameEngine2D.FONT_SIZE - 2);
             renderEngine.batch.setColor(TIME_MACHINE_BACKGROUND_COLOR);
             renderEngine.batch.draw(atlasManager.factoryTextureRegion, x1, y1, renderEngine.width * renderEngine.camera.zoom, renderEngine.height * renderEngine.camera.zoom);
         }
@@ -850,7 +850,7 @@ public class Screen2D implements ScreenListener, ApplicationListener, InputProce
         } else if (satisfactionFactor >= 30) {
             return Color.ORANGE;
         } else {
-            return Screen2D.DARK_RED_COLOR;
+            return GameEngine2D.DARK_RED_COLOR;
         }
     }
 

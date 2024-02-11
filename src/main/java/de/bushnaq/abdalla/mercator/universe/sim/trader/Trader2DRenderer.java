@@ -21,12 +21,12 @@ import com.badlogic.gdx.math.Circle;
 import com.badlogic.gdx.math.Vector3;
 import de.bushnaq.abdalla.engine.ObjectRenderer;
 import de.bushnaq.abdalla.engine.RenderEngine2D;
-import de.bushnaq.abdalla.mercator.renderer.Screen2D;
+import de.bushnaq.abdalla.mercator.renderer.GameEngine2D;
 import de.bushnaq.abdalla.mercator.universe.Universe;
 import de.bushnaq.abdalla.mercator.universe.planet.Planet2DRenderer;
 import de.bushnaq.abdalla.mercator.universe.planet.Planet3DRenderer;
 
-public class Trader2DRenderer extends ObjectRenderer<Screen2D> {
+public class Trader2DRenderer extends ObjectRenderer<GameEngine2D> {
     // static final Color SELECTED_TRADER_COLOR = Color.ORANGE; //0xffff0000;
     public static final  Color   TADER_COLOR_IS_GOOD     = Color.LIGHT_GRAY; // 0xaaaaaa
     public static final  Color   TRADER_COLOR            = new Color(.7f, .7f, .7f, 0.45f); // 0xffcc5555;
@@ -56,7 +56,7 @@ public class Trader2DRenderer extends ObjectRenderer<Screen2D> {
         circle      = new Circle(0, 0, TRADER_WIDTH + 1);
     }
 
-    private void drawTrader(final Trader trader, final RenderEngine2D<Screen2D> renderEngine, final int index, final boolean selected) {
+    private void drawTrader(final Trader trader, final RenderEngine2D<GameEngine2D> renderEngine, final int index, final boolean selected) {
 //		Color color;
 //		if (selected) {
 //			color = Screen2D.SELECTED_COLOR;
@@ -187,7 +187,7 @@ public class Trader2DRenderer extends ObjectRenderer<Screen2D> {
         }
         Color color;
         if (selected) {
-            color = Screen2D.SELECTED_COLOR;
+            color = GameEngine2D.SELECTED_COLOR;
         } else {
             color = TRADER_COLOR;
         }
@@ -208,7 +208,7 @@ public class Trader2DRenderer extends ObjectRenderer<Screen2D> {
     }
 
     @Override
-    public void render(final float px, final float py, final RenderEngine2D<Screen2D> renderEngine, final int index, final boolean selected) {
+    public void render(final float px, final float py, final RenderEngine2D<GameEngine2D> renderEngine, final int index, final boolean selected) {
         drawTrader(trader, renderEngine, index, selected);
     }
 

@@ -26,7 +26,7 @@ import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration.GLEmulati
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import de.bushnaq.abdalla.engine.util.logger.Logger;
 import de.bushnaq.abdalla.engine.util.logger.LoggerFactory;
-import de.bushnaq.abdalla.mercator.renderer.Screen3D;
+import de.bushnaq.abdalla.mercator.renderer.GameEngine3D;
 import de.bushnaq.abdalla.mercator.universe.Universe;
 import de.bushnaq.abdalla.mercator.universe.event.EventLevel;
 import de.bushnaq.abdalla.mercator.universe.sim.Sim;
@@ -150,7 +150,7 @@ public class DesktopLauncher3D implements ApplicationListener {
             final Universe           universe = new Universe("U-0", gd, EventLevel.warning, Sim.class);
             universe.create(UNIVERSE_GENERATION_RANDOM_SEED, UNIVERSE_SIZE, 10L * TimeUnit.TICKS_PER_DAY);
 
-            final Screen3D                       gameEngine = new Screen3D(contextFactory, universe, launchMode);
+            final GameEngine3D                   gameEngine = new GameEngine3D(contextFactory, universe, launchMode);
             final Lwjgl3ApplicationConfiguration config     = createConfig(contextFactory.getContext());
             try {
                 contextFactory.getContext().restart = false;

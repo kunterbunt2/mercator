@@ -63,41 +63,41 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Screen3D implements ScreenListener, ApplicationListener, InputProcessor {
+public class GameEngine3D implements ScreenListener, ApplicationListener, InputProcessor {
     //	private static final String BATCH_END_DURATION = "batch.end()";
     //	private static final String DRAW_DURATION = "draw()";
-    public static final  Color                    FACTORY_COLOR                 = Color.DARK_GRAY; // 0xff000000;
-    public static final  float                    FACTORY_HEIGHT                = 1.2f;
-    public static final  float                    FACTORY_WIDTH                 = 2.4f;
-    public static final  int                      FONT_SIZE                     = 9;
+    public static final  Color                        FACTORY_COLOR                 = Color.DARK_GRAY; // 0xff000000;
+    public static final  float                        FACTORY_HEIGHT                = 1.2f;
+    public static final  float                        FACTORY_WIDTH                 = 2.4f;
+    public static final  int                          FONT_SIZE                     = 9;
     // private static final float MAX_VOXEL_DIMENSION = 20;
-    public static final  Color                    NOT_PRODUCING_FACTORY_COLOR   = Color.RED; // 0xffFF0000;
-    public static final  int                      RAYS_NUM                      = 128;
-    public static final  Color                    SELECTED_PLANET_COLOR         = Color.BLUE;
-    public static final  Color                    SELECTED_TRADER_COLOR         = Color.RED; // 0xffff0000;
-    public static final  float                    SIM_HEIGHT                    = 0.3f;
-    public static final  float                    SIM_WIDTH                     = 0.3f;
-    public static final  float                    SOOM_SPEED                    = 8.0f * 10;
-    public static final  float                    SPACE_BETWEEN_OBJECTS         = 0.1f / Universe.WORLD_SCALE;
-    public static final  Color                    TEXT_COLOR                    = Color.WHITE; // 0xffffffff;
+    public static final  Color                        NOT_PRODUCING_FACTORY_COLOR   = Color.RED; // 0xffFF0000;
+    public static final  int                          RAYS_NUM                      = 128;
+    public static final  Color                        SELECTED_PLANET_COLOR         = Color.BLUE;
+    public static final  Color                        SELECTED_TRADER_COLOR         = Color.RED; // 0xffff0000;
+    public static final  float                        SIM_HEIGHT                    = 0.3f;
+    public static final  float                        SIM_WIDTH                     = 0.3f;
+    public static final  float                        SOOM_SPEED                    = 8.0f * 10;
+    public static final  float                        SPACE_BETWEEN_OBJECTS         = 0.1f / Universe.WORLD_SCALE;
+    public static final  Color                        TEXT_COLOR                    = Color.WHITE; // 0xffffffff;
     //	private static final String RENDER_DURATION = "render()";
     //	private static final String RENDER_LIGHT = "light";
-    private static final float                    SCROLL_SPEED                  = 100f;
+    private static final float                        SCROLL_SPEED                  = 100f;
     //	private static final Color trafficEndColor = new Color(0xffff0000);
     //	private static final Color trafficStartColor = new Color(0xff55ff55);
     //	private static final float VOXEL_SIZE = 0.5f;
-    private static final Color                    TIME_MACHINE_BACKGROUND_COLOR = new Color(0.0f, 0.0f, 0.0f, 0.9f);
-    private static final Color                    TIME_MACHINE_SUB_MARKER_COLOR = new Color(0.7f, 0.7f, 0.7f, 1.0f);
+    private static final Color                        TIME_MACHINE_BACKGROUND_COLOR = new Color(0.0f, 0.0f, 0.0f, 0.9f);
+    private static final Color                        TIME_MACHINE_SUB_MARKER_COLOR = new Color(0.7f, 0.7f, 0.7f, 1.0f);
     //	private ModelInstance uberModelInstance;
-    public final         Universe                 universe;
-    private final        IContextFactory          contextFactory;
-    private final        InputMultiplexer         inputMultiplexer              = new InputMultiplexer();
-    private final        List<Label>              labels                        = new ArrayList<>();
-    private final        Logger                   logger                        = LoggerFactory.getLogger(this.getClass());
-    public               AudioEngine              audioEngine                   = new MercatorAudioEngine();
-    public               LaunchMode               launchMode;
-    public               RenderEngine3D<Screen3D> renderEngine;
-    public               Render3DMaster           renderMaster;
+    public final         Universe                     universe;
+    private final        IContextFactory              contextFactory;
+    private final        InputMultiplexer             inputMultiplexer              = new InputMultiplexer();
+    private final        List<Label>                  labels                        = new ArrayList<>();
+    private final        Logger                       logger                        = LoggerFactory.getLogger(this.getClass());
+    public               AudioEngine                  audioEngine                   = new MercatorAudioEngine();
+    public               LaunchMode                   launchMode;
+    public               RenderEngine3D<GameEngine3D> renderEngine;
+    public               Render3DMaster               renderMaster;
     List<DemoString> demoText        = new ArrayList<>();
     float            demoTextX       = 100;
     float            demoTextY       = 0;
@@ -138,7 +138,7 @@ public class Screen3D implements ScreenListener, ApplicationListener, InputProce
     private boolean                 takeScreenShot;
     private boolean                 vsyncEnabled    = true;
 
-    public Screen3D(final IContextFactory contextFactory, final Universe universe, final LaunchMode launchMode) throws Exception {
+    public GameEngine3D(final IContextFactory contextFactory, final Universe universe, final LaunchMode launchMode) throws Exception {
         this.contextFactory = contextFactory;
         this.universe       = universe;
         this.launchMode     = launchMode;
@@ -173,7 +173,7 @@ public class Screen3D implements ScreenListener, ApplicationListener, InputProce
             createInputProcessor(this);
             atlasManager = new AtlasManager();
             atlasManager.init();
-            renderEngine = new RenderEngine3D<Screen3D>(context, this, this, camera, camera2D, getAtlasManager().menuFont, getAtlasManager().systemTextureRegion);
+            renderEngine = new RenderEngine3D<GameEngine3D>(context, this, this, camera, camera2D, getAtlasManager().menuFont, getAtlasManager().systemTextureRegion);
             renderEngine.getWater().setTiling(universe.size * 2 * 4 * 2 / Universe.WORLD_SCALE);
             renderEngine.getWater().setPresent(true);
             renderEngine.getWater().setWaveStrength(0.01f / Universe.WORLD_SCALE);
@@ -944,7 +944,7 @@ public class Screen3D implements ScreenListener, ApplicationListener, InputProce
     private void renderUniverse() {
         {
             final float x1 = render2DMaster.untransformX(0);
-            final float y1 = render2DMaster.untransformY(render2DMaster.height - Screen2D.FONT_SIZE - 2);
+            final float y1 = render2DMaster.untransformY(render2DMaster.height - GameEngine2D.FONT_SIZE - 2);
             render2DMaster.batch.setColor(TIME_MACHINE_BACKGROUND_COLOR);
             render2DMaster.batch.draw(render2DMaster.atlasManager.factoryTextureRegion, x1, y1, render2DMaster.width * render2DMaster.camera.zoom, render2DMaster.height * render2DMaster.camera.zoom);
         }

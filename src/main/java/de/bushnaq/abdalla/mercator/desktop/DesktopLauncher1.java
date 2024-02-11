@@ -21,14 +21,14 @@ import com.badlogic.gdx.Graphics.Monitor;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import de.bushnaq.abdalla.mercator.gui.frame.MercatorFrame;
-import de.bushnaq.abdalla.mercator.renderer.Screen2D;
-import de.bushnaq.abdalla.mercator.renderer.Screen3D;
+import de.bushnaq.abdalla.mercator.renderer.GameEngine2D;
+import de.bushnaq.abdalla.mercator.renderer.GameEngine3D;
 import de.bushnaq.abdalla.mercator.universe.Universe;
 
 public class DesktopLauncher1 {
     boolean useOGL3 = true;
 
-    public DesktopLauncher1(final Universe universe, final Screen2D screen, final boolean demoMode) throws Exception {
+    public DesktopLauncher1(final Universe universe, final GameEngine2D screen, final boolean demoMode) throws Exception {
         if (!demoMode) {
             final MercatorFrame frame = new MercatorFrame(universe);
             frame.setVisible(true);
@@ -39,7 +39,7 @@ public class DesktopLauncher1 {
         System.exit(0);
     }
 
-    public DesktopLauncher1(final Universe universe, final Screen3D screen) throws Exception {
+    public DesktopLauncher1(final Universe universe, final GameEngine3D screen) throws Exception {
         if (screen.launchMode != LaunchMode.demo && screen.launchMode != LaunchMode.development) {
             final MercatorFrame frame = new MercatorFrame(universe);
             frame.setVisible(true);

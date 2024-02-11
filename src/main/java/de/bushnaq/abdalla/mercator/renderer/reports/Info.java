@@ -32,8 +32,8 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import de.bushnaq.abdalla.engine.RenderEngine3D;
 import de.bushnaq.abdalla.mercator.renderer.AtlasManager;
-import de.bushnaq.abdalla.mercator.renderer.Screen2D;
-import de.bushnaq.abdalla.mercator.renderer.Screen3D;
+import de.bushnaq.abdalla.mercator.renderer.GameEngine3D;
+import de.bushnaq.abdalla.mercator.renderer.GameEngine2D;
 import de.bushnaq.abdalla.mercator.universe.Universe;
 import de.bushnaq.abdalla.mercator.universe.factory.Factory;
 import de.bushnaq.abdalla.mercator.universe.factory.ProductionFacility;
@@ -49,33 +49,33 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Info {
-    private static final String                   CAPTION_LABEL  = "captionLabel";
-    private static final String                   NAME_LABEL     = "nameLabel";
-    private static final String                   STATIC_LABEL   = "staticLabel";
-    private static final String                   VARIABLE_LABEL = "variableLabel";
-    private final        AtlasManager             atlasManager;
-    private final        Batch                    batch;
-    private final        TimeStatistic            debugTimer;
-    private final        InputMultiplexer         inputMultiplexer;
-    private final        List<LabelData>          labels         = new ArrayList<LabelData>();
-    private final        StringBuilder            stringBuilder  = new StringBuilder();
-    private final        String                   title          = "info";
+    private static final String                       CAPTION_LABEL  = "captionLabel";
+    private static final String                       NAME_LABEL     = "nameLabel";
+    private static final String                       STATIC_LABEL   = "staticLabel";
+    private static final String                       VARIABLE_LABEL = "variableLabel";
+    private final        AtlasManager                 atlasManager;
+    private final        Batch                        batch;
+    private final        TimeStatistic                debugTimer;
+    private final        InputMultiplexer             inputMultiplexer;
+    private final        List<LabelData>              labels         = new ArrayList<LabelData>();
+    private final        StringBuilder                stringBuilder  = new StringBuilder();
+    private final        String                       title          = "info";
     // private TextButton closeButton;
-    private              int                      labelIndex     = 0;
-    private              RenderEngine3D<Screen3D> renderEngine;
-    private              float                    screenHeight   = 0;
-    private              Skin                     skin;
-    private              Stage                    stage;
-    private              Class<?>                 type;
+    private              int                          labelIndex     = 0;
+    private              RenderEngine3D<GameEngine3D> renderEngine;
+    private              float                        screenHeight   = 0;
+    private              Skin                         skin;
+    private              Stage                        stage;
+    private              Class<?>                     type;
     //	private final Universe universe;
-    private              Window                   window;
+    private              Window                       window;
 
     //	public Info(Render2DMaster renderMaster, InputMultiplexer inputMultiplexer) {
     //		this.renderMaster = renderMaster;
     //		this.inputMultiplexer = inputMultiplexer;
     //	}
 
-    public Info(RenderEngine3D<Screen3D> renderEngine, final AtlasManager atlasManager, final Batch batch, final InputMultiplexer inputMultiplexer) throws Exception {
+    public Info(RenderEngine3D<GameEngine3D> renderEngine, final AtlasManager atlasManager, final Batch batch, final InputMultiplexer inputMultiplexer) throws Exception {
         this.renderEngine = renderEngine;
         //		this.universe = universe;
         this.atlasManager     = atlasManager;
@@ -156,7 +156,7 @@ public class Info {
 
     private void positionWindow() {
         if (window != null)
-            window.setPosition(0, screenHeight - window.getHeight() - Screen2D.FONT_SIZE - 2);
+            window.setPosition(0, screenHeight - window.getHeight() - GameEngine2D.FONT_SIZE - 2);
     }
 
     public void resize(final float w, final float h) {
@@ -248,7 +248,7 @@ public class Info {
         checkSize(size);
     }
 
-    public void update(final Universe universe, final Object selected, final RenderEngine3D<Screen3D> renderEngine) throws Exception {
+    public void update(final Universe universe, final Object selected, final RenderEngine3D<GameEngine3D> renderEngine) throws Exception {
         this.renderEngine = renderEngine;
         if (Planet.class.isInstance(selected)) {
             update(universe, (Planet) selected);

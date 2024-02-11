@@ -46,11 +46,11 @@ public class Render2DMaster {
     public Universe              universe;
     float       centerX;
     float       centerY;
-    int         defaultFontSize     = Screen2D.FONT_SIZE;
+    int         defaultFontSize     = GameEngine2D.FONT_SIZE;
     //	public FontData[] fontDataList = { new FontData("default-font", "fonts/Roboto-Bold.ttf", Screen2D.FONT_SIZE), new FontData("zoomin-default-font", "fonts/Roboto-Bold.ttf", Screen2D.FONT_SIZE), new FontData("time-machine-font", "fonts/Roboto-Bold.ttf", Screen2D.TIME_MACHINE_FONT_SIZE), new FontData("chart-font", "fonts/Roboto-Bold.ttf", Screen2D.CHART_FONT_SIZE), new FontData("menu-font", "fonts/Roboto-Regular.ttf", Screen2D.MENU_FONT_SIZE) };
     int         height;
     GlyphLayout layout              = new GlyphLayout();
-    int         timeMachineFontSize = Screen2D.TIME_MACHINE_FONT_SIZE;
+    int         timeMachineFontSize = GameEngine2D.TIME_MACHINE_FONT_SIZE;
     int         width;
 
     public Render2DMaster(final Universe universe) {
@@ -67,7 +67,7 @@ public class Render2DMaster {
         } else if (amount >= 0.3 * maxAmount) {
             return Color.ORANGE;
         } else {
-            return Screen2D.DARK_RED_COLOR;
+            return GameEngine2D.DARK_RED_COLOR;
         }
     }
 
@@ -318,7 +318,7 @@ public class Render2DMaster {
                 (float) rotation);
     }
 
-    void moveCenter(final Screen2D screen, final int aX, final int aY) {
+    void moveCenter(final GameEngine2D screen, final int aX, final int aY) {
         //		System.out.println("------------------------------------------");
         // System.out.printf( "mouse x=%d, y=%d\n", aX, aY );
         // System.out.printf( "canvas x=%d, y=%d\n", myCanvas.getCanvas().getX(),
@@ -354,32 +354,32 @@ public class Render2DMaster {
         } else if (satisfactionFactor >= 30) {
             return Color.ORANGE;
         } else {
-            return Screen2D.DARK_RED_COLOR;
+            return GameEngine2D.DARK_RED_COLOR;
         }
     }
 
-    void soomIn(final Screen2D screen, final int aX, final int aY) {
+    void soomIn(final GameEngine2D screen, final int aX, final int aY) {
         if (camera.zoom > 1.0) {
             camera.zoom /= 1.2f;
             camera.update();
             batch.setProjectionMatrix(camera.combined);
             atlasManager.defaultFont.getData().setScale(camera.zoom, camera.zoom);
-            defaultFontSize = (int) (Screen2D.FONT_SIZE * camera.zoom);
+            defaultFontSize = (int) (GameEngine2D.FONT_SIZE * camera.zoom);
             atlasManager.timeMachineFont.getData().setScale(camera.zoom, camera.zoom);
-            timeMachineFontSize = (int) (Screen2D.TIME_MACHINE_FONT_SIZE * camera.zoom);
+            timeMachineFontSize = (int) (GameEngine2D.TIME_MACHINE_FONT_SIZE * camera.zoom);
             //			System.out.printf("Zoom = %f\n", camera.zoom);
         }
     }
 
-    void soomOut(final Screen2D screen, final int aX, final int aY) {
+    void soomOut(final GameEngine2D screen, final int aX, final int aY) {
         if (camera.zoom < 8.0) {
             camera.zoom *= 1.2f;
             camera.update();
             batch.setProjectionMatrix(camera.combined);
             atlasManager.defaultFont.getData().setScale(camera.zoom, camera.zoom);
-            defaultFontSize = (int) (Screen2D.FONT_SIZE * camera.zoom);
+            defaultFontSize = (int) (GameEngine2D.FONT_SIZE * camera.zoom);
             atlasManager.timeMachineFont.getData().setScale(camera.zoom, camera.zoom);
-            timeMachineFontSize = (int) (Screen2D.TIME_MACHINE_FONT_SIZE * camera.zoom);
+            timeMachineFontSize = (int) (GameEngine2D.TIME_MACHINE_FONT_SIZE * camera.zoom);
             //			System.out.printf("Zoom = %f\n", camera.zoom);
         }
     }

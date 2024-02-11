@@ -19,11 +19,11 @@ package de.bushnaq.abdalla.mercator.universe.sim;
 import com.badlogic.gdx.graphics.Color;
 import de.bushnaq.abdalla.engine.ObjectRenderer;
 import de.bushnaq.abdalla.engine.RenderEngine2D;
-import de.bushnaq.abdalla.mercator.renderer.Screen2D;
+import de.bushnaq.abdalla.mercator.renderer.GameEngine2D;
 import de.bushnaq.abdalla.mercator.universe.planet.Planet2DRenderer;
 import de.bushnaq.abdalla.mercator.util.AnnulusSegment;
 
-public class Sim2DRenderer extends ObjectRenderer<Screen2D> {
+public class Sim2DRenderer extends ObjectRenderer<GameEngine2D> {
     static final         Color BAD_COLOR    = new Color(0.8f, 0.0f, 0.0f, 0.8f);
     static final         Color GOOD_COLOR   = new Color(0.0f, 0.1f, 0.0f, 0.8f); // 0xff000000;
     private static final float ANGLE_BORDER = (float) Math.PI / 256;
@@ -38,7 +38,7 @@ public class Sim2DRenderer extends ObjectRenderer<Screen2D> {
     }
 
     @Override
-    public void render(final float x, final float y, final RenderEngine2D<Screen2D> renderEngine, final int index, final boolean selected) {
+    public void render(final float x, final float y, final RenderEngine2D<GameEngine2D> renderEngine, final int index, final boolean selected) {
         // Color color = renderMaster.satesfactionColor( sim.getSatisfactionFactor(
         // renderMaster.universe.currentTime ) );
         final Color color1   = Color.RED;
@@ -50,7 +50,7 @@ public class Sim2DRenderer extends ObjectRenderer<Screen2D> {
         if (renderEngine.getGameEngine().renderEngine.camera.zoom < 7.0f) {
             final Color color = new Color(color1);
             color.lerp(color2, sim.getSatisfactionFactor(renderEngine.getGameEngine().universe.currentTime) / (100f));
-            renderEngine.getGameEngine().renderEngine.fillPie(renderEngine.getGameEngine().atlasManager.simTextureRegion, tx, ty, MIN_RADIUS, MAX_RADIUS, minAngle, maxAngle, color, 4, renderEngine.getGameEngine().atlasManager.zoominDefaultFont, Screen2D.TEXT_COLOR, "");
+            renderEngine.getGameEngine().renderEngine.fillPie(renderEngine.getGameEngine().atlasManager.simTextureRegion, tx, ty, MIN_RADIUS, MAX_RADIUS, minAngle, maxAngle, color, 4, renderEngine.getGameEngine().atlasManager.zoominDefaultFont, GameEngine2D.TEXT_COLOR, "");
         }
         annulusSegment = new AnnulusSegment(tx, ty, MIN_RADIUS, MAX_RADIUS, minAngle, maxAngle);
     }

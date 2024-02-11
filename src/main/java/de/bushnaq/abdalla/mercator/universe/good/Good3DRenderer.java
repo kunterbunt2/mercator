@@ -27,7 +27,7 @@ import com.badlogic.gdx.math.Vector3;
 import de.bushnaq.abdalla.engine.GameObject;
 import de.bushnaq.abdalla.engine.ObjectRenderer;
 import de.bushnaq.abdalla.engine.RenderEngine3D;
-import de.bushnaq.abdalla.mercator.renderer.Screen3D;
+import de.bushnaq.abdalla.mercator.renderer.GameEngine3D;
 import de.bushnaq.abdalla.mercator.universe.Universe;
 import de.bushnaq.abdalla.mercator.universe.planet.Planet3DRenderer;
 import net.mgsx.gltf.scene3d.attributes.PBRColorAttribute;
@@ -39,7 +39,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-public class Good3DRenderer extends ObjectRenderer<Screen3D> {
+public class Good3DRenderer extends ObjectRenderer<GameEngine3D> {
 
     public static final  int              CONTAINER_EDGE_SIZE        = 4;
     public static final  float            GOOD_HEIGHT                = 8f;
@@ -51,7 +51,7 @@ public class Good3DRenderer extends ObjectRenderer<Screen3D> {
     //	private static Color cyanColor = new Color(0.0f, 1.0f, 1.0f, 1f);
     public static final  Color            NOT_TRADED_GOOD_COLOR      = Color.LIGHT_GRAY; // 0xffbbbbbb;
     public static final  Color            SELECTED_GOOD_COLOR        = Color.LIGHT_GRAY; // 0xffeeeeee;
-    public static final  float            SPACE_BETWEEN_GOOD         = Screen3D.SPACE_BETWEEN_OBJECTS * 2;
+    public static final  float            SPACE_BETWEEN_GOOD         = GameEngine3D.SPACE_BETWEEN_OBJECTS * 2;
     private static final int              GOOD_AMOUNT_DRAWING_FACTOR = 5;
     private static final Color            GOOD_NAME_COLOR            = new Color(0.596f, 0.08f, 0.247f, 0.8f);
     private static       Color            DIAMON_BLUE_COLOR          = new Color(0x006ab6ff);
@@ -84,7 +84,7 @@ public class Good3DRenderer extends ObjectRenderer<Screen3D> {
         }
     }
 
-    public static GameObject instanciateGoodGameObject(final Good good, final RenderEngine3D<Screen3D> renderEngine) {
+    public static GameObject instanciateGoodGameObject(final Good good, final RenderEngine3D<GameEngine3D> renderEngine) {
         GameObject     scene     = null;
         final Material material1 = renderEngine.getGameEngine().renderMaster.cubeGood.materials.get(0);
         scene = new GameObject(new ModelInstanceHack(renderEngine.getGameEngine().renderMaster.cubeGood), good);
@@ -101,7 +101,7 @@ public class Good3DRenderer extends ObjectRenderer<Screen3D> {
     }
 
     @Override
-    public void renderText(final float aX, final float aY, final float aZ, final RenderEngine3D<Screen3D> renderEngine, final int index) {
+    public void renderText(final float aX, final float aY, final float aZ, final RenderEngine3D<GameEngine3D> renderEngine, final int index) {
 //	public void renderText(final RenderEngine<Screen3D> renderEngine, final int index) {
         {
             final float dy = -Planet3DRenderer.PLANET_SIZE / 2 + index * (CONTAINER_EDGE_SIZE + 1) * (GOOD_Y + SPACE_BETWEEN_GOOD);
@@ -134,11 +134,11 @@ public class Good3DRenderer extends ObjectRenderer<Screen3D> {
     }
 
     @Override
-    public void update(final float x, final float y, final float z, final RenderEngine3D<Screen3D> renderEngine, final long currentTime, final float timeOfDay, final int index, final boolean selected) {
+    public void update(final float x, final float y, final float z, final RenderEngine3D<GameEngine3D> renderEngine, final long currentTime, final float timeOfDay, final int index, final boolean selected) {
         updateGood(x, y, z, renderEngine, currentTime, index, false);
     }
 
-    private void renderTextOnTop(final float aX, final float aY, final float aZ, final RenderEngine3D<Screen3D> renderEngine, final float dx, final float dy, final float dz, final String text, final float size) {
+    private void renderTextOnTop(final float aX, final float aY, final float aZ, final RenderEngine3D<GameEngine3D> renderEngine, final float dx, final float dy, final float dz, final String text, final float size) {
         //draw text
         final PolygonSpriteBatch batch = renderEngine.batch2D;
         final BitmapFont         font  = renderEngine.getGameEngine().getAtlasManager().modelFont;
@@ -166,7 +166,7 @@ public class Good3DRenderer extends ObjectRenderer<Screen3D> {
         }
     }
 
-    private void updateGood(final float aX, final float aY, final float aZ, final RenderEngine3D<Screen3D> renderEngine, final long currentTime, final int index, final boolean selected) {
+    private void updateGood(final float aX, final float aY, final float aZ, final RenderEngine3D<GameEngine3D> renderEngine, final long currentTime, final int index, final boolean selected) {
         //		Color color;
         //		if (selected) {
         //			color = SELECTED_GOOD_COLOR;

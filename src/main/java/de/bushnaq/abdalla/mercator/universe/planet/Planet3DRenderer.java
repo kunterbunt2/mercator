@@ -27,7 +27,7 @@ import com.badlogic.gdx.math.Vector3;
 import de.bushnaq.abdalla.engine.GameObject;
 import de.bushnaq.abdalla.engine.ObjectRenderer;
 import de.bushnaq.abdalla.engine.RenderEngine3D;
-import de.bushnaq.abdalla.mercator.renderer.Screen3D;
+import de.bushnaq.abdalla.mercator.renderer.GameEngine3D;
 import de.bushnaq.abdalla.mercator.universe.factory.ProductionFacility;
 import de.bushnaq.abdalla.mercator.universe.factory.ProductionFacilityStatus;
 import de.bushnaq.abdalla.mercator.universe.good.Good;
@@ -39,7 +39,7 @@ import net.mgsx.gltf.scene3d.model.ModelInstanceHack;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Planet3DRenderer extends ObjectRenderer<Screen3D> {
+public class Planet3DRenderer extends ObjectRenderer<GameEngine3D> {
 
     public static final  float            CIRCLE_SIZE            = 512;
     public static final  float            CITY_SIZE              = 360;
@@ -54,7 +54,7 @@ public class Planet3DRenderer extends ObjectRenderer<Screen3D> {
     public static final  float            PLANET_SIZE            = 512;
     public static final  int              PLANET_SPAN_SPACE      = Planet.PLANET_DISTANCE + PLANET_BORDER;
     public static final  float            SECTOR_HIGHT           = 8;
-    public static final  float            SECTOR_SIZE            = Planet.PLANET_DISTANCE - Screen3D.SPACE_BETWEEN_OBJECTS;
+    public static final  float            SECTOR_SIZE            = Planet.PLANET_DISTANCE - GameEngine3D.SPACE_BETWEEN_OBJECTS;
     public static final  float            SECTOR_Y               = -500;
     public static final  float            WATER_HIGHT            = 1;
     public static final  float            WATER_SIZE             = SECTOR_SIZE;
@@ -106,7 +106,7 @@ public class Planet3DRenderer extends ObjectRenderer<Screen3D> {
     }
 
     @Override
-    public void create(final RenderEngine3D<Screen3D> renderEngine) {
+    public void create(final RenderEngine3D<GameEngine3D> renderEngine) {
         createPlanet(renderEngine);
     }
 
@@ -121,7 +121,7 @@ public class Planet3DRenderer extends ObjectRenderer<Screen3D> {
     //		}
     //	}
     @Override
-    public void renderText(final RenderEngine3D<Screen3D> renderEngine, final int index, final boolean selected) {
+    public void renderText(final RenderEngine3D<GameEngine3D> renderEngine, final int index, final boolean selected) {
         final float size = 32;
         final float x    = planet.x;
         final float z    = planet.z;
@@ -152,11 +152,11 @@ public class Planet3DRenderer extends ObjectRenderer<Screen3D> {
     }
 
     @Override
-    public void update(final RenderEngine3D<Screen3D> renderEngine, final long currentTime, final float timeOfDay, final int index, final boolean selected) {
+    public void update(final RenderEngine3D<GameEngine3D> renderEngine, final long currentTime, final float timeOfDay, final int index, final boolean selected) {
         renderPlanet(renderEngine, currentTime, timeOfDay, planet == renderEngine.getGameEngine().universe.selectedPlanet);
     }
 
-    private void createCity(final RenderEngine3D<Screen3D> renderEngine, final float x, final float z) {
+    private void createCity(final RenderEngine3D<GameEngine3D> renderEngine, final float x, final float z) {
         final int   iteration             = 20;
         final float scale                 = (CITY_SIZE / 2) / (iteration - 1);
         final float averrageBuildingHight = 16f;
@@ -164,7 +164,7 @@ public class Planet3DRenderer extends ObjectRenderer<Screen3D> {
         createCity(renderEngine, x, z, iteration, scale, averrageBuildingHight);
     }
 
-    private void createCity(final RenderEngine3D<Screen3D> renderEngine, final float x, final float z, int iteration, final float scale, float averrageBuildingHight) {
+    private void createCity(final RenderEngine3D<GameEngine3D> renderEngine, final float x, final float z, int iteration, final float scale, float averrageBuildingHight) {
         //we are responsible for the 4 corners
         final float screetSize = 6;
         iteration /= 2;
@@ -229,7 +229,7 @@ public class Planet3DRenderer extends ObjectRenderer<Screen3D> {
         }
     }
 
-    private void createFactories(final RenderEngine3D<Screen3D> renderEngine) {
+    private void createFactories(final RenderEngine3D<GameEngine3D> renderEngine) {
         final float x = planet.x;
         final float z = planet.z;
         //turbine
@@ -255,12 +255,12 @@ public class Planet3DRenderer extends ObjectRenderer<Screen3D> {
         }
     }
 
-    private void createPlanet(final RenderEngine3D<Screen3D> renderEngine) {
+    private void createPlanet(final RenderEngine3D<GameEngine3D> renderEngine) {
         final float x = planet.x;
         final float z = planet.z;
         //planet
         {
-            instance = new GameObject<Screen3D>(new ModelInstanceHack(renderEngine.getGameEngine().renderMaster.planet), null, this);
+            instance = new GameObject<GameEngine3D>(new ModelInstanceHack(renderEngine.getGameEngine().renderMaster.planet), null, this);
             instance.instance.transform.setToTranslationAndScaling(x, -PLANET_HIGHT / 2, z, PLANET_SIZE, PLANET_HIGHT, PLANET_SIZE);
             instance.update();
             renderEngine.addStatic(instance);
@@ -320,14 +320,14 @@ public class Planet3DRenderer extends ObjectRenderer<Screen3D> {
         //		}
     }
 
-    private GameObject instanciateBuilding(final RenderEngine3D<Screen3D> renderEngine, final int index) {
+    private GameObject instanciateBuilding(final RenderEngine3D<GameEngine3D> renderEngine, final int index) {
         final GameObject go = new GameObject(new ModelInstanceHack(renderEngine.getGameEngine().renderMaster.buildingCube), planet);
         //		final Material material = go.instance.materials.get(0);
         //		material.set(new PBRColorAttribute(PBRColorAttribute.BaseColorFactor, getBuildingColor(index)));
         return go;
     }
 
-    private void renderPlanet(final RenderEngine3D<Screen3D> renderEngine, final long currentTime, final float timeOfDay, final boolean selected) {
+    private void renderPlanet(final RenderEngine3D<GameEngine3D> renderEngine, final long currentTime, final float timeOfDay, final boolean selected) {
         //		float x = planet.x;
         //		float z = planet.y;
         //		float hps = PLANET_SIZE / 2;
@@ -384,7 +384,7 @@ public class Planet3DRenderer extends ObjectRenderer<Screen3D> {
         //		renderFactory(planet, renderMaster);
     }
 
-    private void renderSims(final Planet planet, final RenderEngine3D<Screen3D> renderEngine, final float x, final float y, final float hps) {
+    private void renderSims(final Planet planet, final RenderEngine3D<GameEngine3D> renderEngine, final float x, final float y, final float hps) {
         {
             final int simIndex = 0;
             for (final Sim sim : planet.simList) {
@@ -394,7 +394,7 @@ public class Planet3DRenderer extends ObjectRenderer<Screen3D> {
         }
     }
 
-    private void updatePlanet(final RenderEngine3D<Screen3D> renderEngine) {
+    private void updatePlanet(final RenderEngine3D<GameEngine3D> renderEngine) {
         for (final GameObject go : animatedObjects) {
             if (ProductionFacility.class.isInstance(go.interactive)) {
                 final ProductionFacility pf = (ProductionFacility) go.interactive;

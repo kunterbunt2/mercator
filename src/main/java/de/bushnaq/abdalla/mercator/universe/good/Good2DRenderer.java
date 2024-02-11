@@ -19,11 +19,11 @@ package de.bushnaq.abdalla.mercator.universe.good;
 import com.badlogic.gdx.graphics.Color;
 import de.bushnaq.abdalla.engine.ObjectRenderer;
 import de.bushnaq.abdalla.engine.RenderEngine2D;
-import de.bushnaq.abdalla.mercator.renderer.Screen2D;
+import de.bushnaq.abdalla.mercator.renderer.GameEngine2D;
 import de.bushnaq.abdalla.mercator.universe.planet.Planet2DRenderer;
 import de.bushnaq.abdalla.mercator.util.AnnulusSegment;
 
-public class Good2DRenderer extends ObjectRenderer<Screen2D> {
+public class Good2DRenderer extends ObjectRenderer<GameEngine2D> {
     static final         Color GOOD_COLOR            = new Color(0.09f, 0.388f, 0.69f, 0.8f); // 0xff000000;
     static final         float GOOD_HEIGHT           = 12 * 4;
     static final         float GOOD_WIDTH            = 24 * 4;
@@ -40,10 +40,10 @@ public class Good2DRenderer extends ObjectRenderer<Screen2D> {
         this.good = good;
     }
 
-    private void drawGood(final float aX, final float aY, final Good good, final RenderEngine2D<Screen2D> renderEngine, final int index, final boolean selected) {
+    private void drawGood(final float aX, final float aY, final Good good, final RenderEngine2D<GameEngine2D> renderEngine, final int index, final boolean selected) {
         Color color;
         if (selected) {
-            color = Screen2D.SELECTED_COLOR;
+            color = GameEngine2D.SELECTED_COLOR;
         } else if (good.isTraded(renderEngine.getGameEngine().universe.currentTime)) {
             color = GOOD_COLOR;
         } else {
@@ -89,14 +89,14 @@ public class Good2DRenderer extends ObjectRenderer<Screen2D> {
         // name = null;
         // }
         if (renderEngine.getGameEngine().renderEngine.camera.zoom < 7.0f) {
-            renderEngine.getGameEngine().renderEngine.fillPie(renderEngine.getGameEngine().atlasManager.factoryTextureRegion, tx, ty, MIN_RADIUS, MAX_RADIUS, minAngle, maxAngle, color, 8, renderEngine.getGameEngine().atlasManager.zoominDefaultFont, Screen2D.TEXT_COLOR, name);
-            renderEngine.getGameEngine().renderEngine.fillPie(renderEngine.getGameEngine().atlasManager.gaugeTextureRegion, tx, ty, MAX_RADIUS - 5, MAX_RADIUS, maxAngle - deltaRadius, maxAngle, barColor, 8, renderEngine.getGameEngine().atlasManager.zoominDefaultFont, Screen2D.TEXT_COLOR, "");
+            renderEngine.getGameEngine().renderEngine.fillPie(renderEngine.getGameEngine().atlasManager.factoryTextureRegion, tx, ty, MIN_RADIUS, MAX_RADIUS, minAngle, maxAngle, color, 8, renderEngine.getGameEngine().atlasManager.zoominDefaultFont, GameEngine2D.TEXT_COLOR, name);
+            renderEngine.getGameEngine().renderEngine.fillPie(renderEngine.getGameEngine().atlasManager.gaugeTextureRegion, tx, ty, MAX_RADIUS - 5, MAX_RADIUS, maxAngle - deltaRadius, maxAngle, barColor, 8, renderEngine.getGameEngine().atlasManager.zoominDefaultFont, GameEngine2D.TEXT_COLOR, "");
         }
         annulusSegment = new AnnulusSegment(tx, ty, MIN_RADIUS, MAX_RADIUS, minAngle, maxAngle);
     }
 
     @Override
-    public void render(final float x, final float y, final RenderEngine2D<Screen2D> renderEngine, final int index, final boolean selected) {
+    public void render(final float x, final float y, final RenderEngine2D<GameEngine2D> renderEngine, final int index, final boolean selected) {
         drawGood(x, y, good, renderEngine, index, selected);
     }
 

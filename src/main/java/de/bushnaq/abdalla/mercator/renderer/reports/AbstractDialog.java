@@ -37,7 +37,7 @@ import com.kotcrab.vis.ui.widget.VisTextButton;
 import de.bushnaq.abdalla.engine.util.logger.Logger;
 import de.bushnaq.abdalla.engine.util.logger.LoggerFactory;
 import de.bushnaq.abdalla.mercator.desktop.Context;
-import de.bushnaq.abdalla.mercator.renderer.Screen3D;
+import de.bushnaq.abdalla.mercator.renderer.GameEngine3D;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -63,14 +63,14 @@ public abstract class AbstractDialog {
     protected              Camera               camera;
     protected              boolean              modal               = false;
     private                VisDialog            dialog;
-    private                Screen3D             gameEngine;
+    private                GameEngine3D         gameEngine;
     private                List<InputProcessor> inputProcessorCache = new ArrayList<>();
     private                AbstractDialog       parent;
     private                Stage                stage;
     private                VisTable             table               = new VisTable(true);
     private                boolean              visible             = false;
 
-    public AbstractDialog(Screen3D gameEngine, final Batch batch, Camera camera, final InputMultiplexer inputMultiplexer) throws Exception {
+    public AbstractDialog(GameEngine3D gameEngine, final Batch batch, Camera camera, final InputMultiplexer inputMultiplexer) throws Exception {
         this.gameEngine       = gameEngine;
         this.batch            = batch;
         this.camera           = camera;
@@ -200,7 +200,7 @@ public abstract class AbstractDialog {
         return dialog;
     }
 
-    public Screen3D getGameEngine() {
+    public GameEngine3D getGameEngine() {
         return gameEngine;
     }
 
@@ -227,7 +227,7 @@ public abstract class AbstractDialog {
     }
 
     protected void positionWindow() {
-        dialog.setPosition(Gdx.graphics.getWidth() / 2 - dialog.getWidth() / 2, Gdx.graphics.getHeight() / 2 - (dialog.getHeight() - Screen3D.FONT_SIZE - 2) / 2);
+        dialog.setPosition(Gdx.graphics.getWidth() / 2 - dialog.getWidth() / 2, Gdx.graphics.getHeight() / 2 - (dialog.getHeight() - GameEngine3D.FONT_SIZE - 2) / 2);
     }
 
     /**

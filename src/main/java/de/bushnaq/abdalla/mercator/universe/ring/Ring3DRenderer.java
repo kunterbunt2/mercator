@@ -19,12 +19,12 @@ package de.bushnaq.abdalla.mercator.universe.ring;
 import de.bushnaq.abdalla.engine.GameObject;
 import de.bushnaq.abdalla.engine.ObjectRenderer;
 import de.bushnaq.abdalla.engine.RenderEngine3D;
-import de.bushnaq.abdalla.mercator.renderer.Screen3D;
+import de.bushnaq.abdalla.mercator.renderer.GameEngine3D;
 import de.bushnaq.abdalla.mercator.universe.planet.Planet;
 import de.bushnaq.abdalla.mercator.universe.planet.Planet3DRenderer;
 import net.mgsx.gltf.scene3d.model.ModelInstanceHack;
 
-public class Ring3DRenderer extends ObjectRenderer<Screen3D> {
+public class Ring3DRenderer extends ObjectRenderer<GameEngine3D> {
 
     private final Ring ring;
 
@@ -33,7 +33,7 @@ public class Ring3DRenderer extends ObjectRenderer<Screen3D> {
     }
 
     @Override
-    public void create(final RenderEngine3D<Screen3D> renderEngine) {
+    public void create(final RenderEngine3D<GameEngine3D> renderEngine) {
         final float delta  = (ring.universe.size + 1) * Planet.PLANET_DISTANCE * 2;
         final float deltaA = 360.0f / ring.segments;
         //sector

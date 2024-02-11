@@ -19,13 +19,13 @@ package de.bushnaq.abdalla.mercator.universe.factory;
 import com.badlogic.gdx.graphics.Color;
 import de.bushnaq.abdalla.engine.ObjectRenderer;
 import de.bushnaq.abdalla.engine.RenderEngine2D;
-import de.bushnaq.abdalla.mercator.renderer.Screen2D;
+import de.bushnaq.abdalla.mercator.renderer.GameEngine2D;
 import de.bushnaq.abdalla.mercator.universe.good.Good;
 import de.bushnaq.abdalla.mercator.universe.planet.Planet2DRenderer;
 import de.bushnaq.abdalla.mercator.universe.sim.Sim;
 import de.bushnaq.abdalla.mercator.util.AnnulusSegment;
 
-public class Factory2DRenderer extends ObjectRenderer<Screen2D> {
+public class Factory2DRenderer extends ObjectRenderer<GameEngine2D> {
     static final         Color              FACTORY_COLOR               = new Color(0.09f, 0.388f, 0.69f, 0.5f);
     static final         Color              NOT_PRODUCING_FACTORY_COLOR = new Color(0.475f, 0.035f, 0.027f, 0.8f);
     private static final float              ANGLE_BORDER                = (float) Math.PI / 256;
@@ -40,10 +40,10 @@ public class Factory2DRenderer extends ObjectRenderer<Screen2D> {
         this.productionFacility = productionFacility;
     }
 
-    private void drawFactory(final float x, final float y, final ProductionFacility productionFacility, final int index, final RenderEngine2D<Screen2D> renderEngine, final boolean selected) {
+    private void drawFactory(final float x, final float y, final ProductionFacility productionFacility, final int index, final RenderEngine2D<GameEngine2D> renderEngine, final boolean selected) {
         Color color;
         if (selected) {
-            color = Screen2D.SELECTED_COLOR;
+            color = GameEngine2D.SELECTED_COLOR;
         } else if (productionFacility.status != ProductionFacilityStatus.PRODUCING) {
             color = NOT_PRODUCING_FACTORY_COLOR;
         } else {
@@ -60,7 +60,7 @@ public class Factory2DRenderer extends ObjectRenderer<Screen2D> {
         // }
         name = productionFacility.getName();
         if (renderEngine.getGameEngine().renderEngine.camera.zoom < 7.0f) {
-            renderEngine.getGameEngine().renderEngine.fillPie(renderEngine.getGameEngine().atlasManager.factoryTextureRegion, tx, ty, MIN_RADIUS, MAX_RADIUS, minAngle, maxAngle, color, 8, renderEngine.getGameEngine().atlasManager.zoominDefaultFont, Screen2D.TEXT_COLOR, name);
+            renderEngine.getGameEngine().renderEngine.fillPie(renderEngine.getGameEngine().atlasManager.factoryTextureRegion, tx, ty, MIN_RADIUS, MAX_RADIUS, minAngle, maxAngle, color, 8, renderEngine.getGameEngine().atlasManager.zoominDefaultFont, GameEngine2D.TEXT_COLOR, name);
             // renderSims( productionFacility, renderMaster, tx, ty );
             float amount = 0;
             float max    = 0;
@@ -75,7 +75,7 @@ public class Factory2DRenderer extends ObjectRenderer<Screen2D> {
                     if (good != null) {
                         final Color barColor    = renderEngine.getGameEngine().availabilityColor(amount, max);
                         final float deltaRadius = (maxAngle - minAngle) * (max - amount) / max;
-                        renderEngine.getGameEngine().renderEngine.fillPie(renderEngine.getGameEngine().atlasManager.gaugeTextureRegion, tx, ty, Planet2DRenderer.PLANET_SIZE * 4 - 5, Planet2DRenderer.PLANET_SIZE * 4, maxAngle - deltaRadius, maxAngle, barColor, 8, renderEngine.getGameEngine().atlasManager.zoominDefaultFont, Screen2D.TEXT_COLOR, productionFacility.getName());
+                        renderEngine.getGameEngine().renderEngine.fillPie(renderEngine.getGameEngine().atlasManager.gaugeTextureRegion, tx, ty, Planet2DRenderer.PLANET_SIZE * 4 - 5, Planet2DRenderer.PLANET_SIZE * 4, maxAngle - deltaRadius, maxAngle, barColor, 8, renderEngine.getGameEngine().atlasManager.zoominDefaultFont, GameEngine2D.TEXT_COLOR, productionFacility.getName());
                     }
                 }
             }
@@ -84,7 +84,7 @@ public class Factory2DRenderer extends ObjectRenderer<Screen2D> {
     }
 
     @Override
-    public void render(final float x, final float y, final RenderEngine2D<Screen2D> renderEngine, final int index, final boolean selected) {
+    public void render(final float x, final float y, final RenderEngine2D<GameEngine2D> renderEngine, final int index, final boolean selected) {
         drawFactory(x, y, productionFacility, index, renderEngine, selected);
     }
 
@@ -96,7 +96,7 @@ public class Factory2DRenderer extends ObjectRenderer<Screen2D> {
         return annulusSegment.contains(x, y);
     }
 
-    private void renderSims(final ProductionFacility productionFacility, final RenderEngine2D<Screen2D> renderEngine, final float tx, final float ty) {
+    private void renderSims(final ProductionFacility productionFacility, final RenderEngine2D<GameEngine2D> renderEngine, final float tx, final float ty) {
         int simIndex = 0;
         for (final Sim sim : productionFacility.engineers) {
             sim.get2DRenderer().render(tx, ty, renderEngine, simIndex++, false);

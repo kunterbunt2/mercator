@@ -20,12 +20,12 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Circle;
 import de.bushnaq.abdalla.engine.ObjectRenderer;
 import de.bushnaq.abdalla.engine.RenderEngine2D;
-import de.bushnaq.abdalla.mercator.renderer.Screen2D;
+import de.bushnaq.abdalla.mercator.renderer.GameEngine2D;
 import de.bushnaq.abdalla.mercator.universe.factory.ProductionFacility;
 import de.bushnaq.abdalla.mercator.universe.sim.Sim;
 import de.bushnaq.abdalla.mercator.universe.sim.trader.Trader2DRenderer;
 
-public class Planet2DRenderer extends ObjectRenderer<Screen2D> {
+public class Planet2DRenderer extends ObjectRenderer<GameEngine2D> {
     public static final float  PLANET_SIZE = 33;
     private final       Planet planet;
     // static final Color PLANET_COLOR = new Color( 0.8f, 0.8f, 0.8f, 1.0f );
@@ -42,7 +42,7 @@ public class Planet2DRenderer extends ObjectRenderer<Screen2D> {
     }
 
     @Override
-    public void render(final float px, final float py, final RenderEngine2D<Screen2D> renderEngine, final int index, final boolean selected) {
+    public void render(final float px, final float py, final RenderEngine2D<GameEngine2D> renderEngine, final int index, final boolean selected) {
         renderPlanet(planet, renderEngine, planet == renderEngine.getGameEngine().universe.selectedPlanet);
     }
 
@@ -51,14 +51,14 @@ public class Planet2DRenderer extends ObjectRenderer<Screen2D> {
         return circle.contains(x, y);
     }
 
-    private void renderFactory(final Planet planet, final RenderEngine2D<Screen2D> renderEngine) {
+    private void renderFactory(final Planet planet, final RenderEngine2D<GameEngine2D> renderEngine) {
         for (final ProductionFacility productionFacility : planet.productionFacilityList) {
             int index = productionFacility.producedGood.type.ordinal();
             productionFacility.get2DRenderer().render(planet.x, planet.z, renderEngine, index++, planet.universe.selectedProductionFacility == productionFacility);
         }
     }
 
-    private void renderPlanet(final Planet planet, final RenderEngine2D<Screen2D> renderEngine, final boolean selected) {
+    private void renderPlanet(final Planet planet, final RenderEngine2D<GameEngine2D> renderEngine, final boolean selected) {
         final float x   = planet.x;
         final float y   = planet.z;
         final float hps = PLANET_SIZE / 2;
@@ -74,9 +74,9 @@ public class Planet2DRenderer extends ObjectRenderer<Screen2D> {
         // planetDistance - 1 - 1, aPlanet.y * PLANET_DISTANCE + planetDistance
         // - 1 - 1, Color.black.getRGB() ); } }
         if (selected) {
-            color = Screen2D.SELECTED_COLOR;
+            color = GameEngine2D.SELECTED_COLOR;
         } else if (planet.status.getName().equals("Dead")) {
-            color = Screen2D.DEAD_COLOR;
+            color = GameEngine2D.DEAD_COLOR;
         } else {
             color = renderEngine.getGameEngine().distinctiveColorlist.get(planet.sector.type);
         }
@@ -132,7 +132,7 @@ public class Planet2DRenderer extends ObjectRenderer<Screen2D> {
         renderFactory(planet, renderEngine);
     }
 
-    private void renderSims(final Planet planet, final RenderEngine2D<Screen2D> renderEngine, final float x, final float y, final float hps) {
+    private void renderSims(final Planet planet, final RenderEngine2D<GameEngine2D> renderEngine, final float x, final float y, final float hps) {
         {
             int simIndex = 0;
             for (final Sim sim : planet.simList) {

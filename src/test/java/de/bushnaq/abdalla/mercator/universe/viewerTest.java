@@ -27,7 +27,7 @@ import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.IntAttribute;
 import de.bushnaq.abdalla.mercator.desktop.GraphicsDimentions;
-import de.bushnaq.abdalla.mercator.renderer.Screen3D;
+import de.bushnaq.abdalla.mercator.renderer.GameEngine3D;
 import de.bushnaq.abdalla.mercator.universe.event.EventLevel;
 import de.bushnaq.abdalla.mercator.util.ModelCreator;
 import net.mgsx.gltf.loaders.gltf.GLTFLoader;
@@ -37,7 +37,7 @@ import net.mgsx.gltf.scene3d.scene.SceneAsset;
 import org.junit.jupiter.api.Test;
 
 public class viewerTest implements ApplicationListener {
-    Screen3D screen;
+    GameEngine3D screen;
 
     @Override
     public void create() {

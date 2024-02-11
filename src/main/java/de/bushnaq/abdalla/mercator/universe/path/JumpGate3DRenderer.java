@@ -26,13 +26,13 @@ import com.badlogic.gdx.math.Vector3;
 import de.bushnaq.abdalla.engine.GameObject;
 import de.bushnaq.abdalla.engine.ObjectRenderer;
 import de.bushnaq.abdalla.engine.RenderEngine3D;
-import de.bushnaq.abdalla.mercator.renderer.Screen3D;
+import de.bushnaq.abdalla.mercator.renderer.GameEngine3D;
 import de.bushnaq.abdalla.mercator.universe.Universe;
 import de.bushnaq.abdalla.mercator.universe.sim.trader.Trader;
 import net.mgsx.gltf.scene3d.attributes.PBRColorAttribute;
 import net.mgsx.gltf.scene3d.model.ModelInstanceHack;
 
-public class JumpGate3DRenderer extends ObjectRenderer<Screen3D> {
+public class JumpGate3DRenderer extends ObjectRenderer<GameEngine3D> {
     public static final  float JUMP_GATE_SIZE  = 16 / Universe.WORLD_SCALE;
     private static final float JUMPGATE_DEPTH  = 0 / Universe.WORLD_SCALE /*+ Planet3DRenderer.WATER_Y*/;
     private static final float JUMP_GATE_HIGHT = 16 / Universe.WORLD_SCALE;
@@ -55,12 +55,12 @@ public class JumpGate3DRenderer extends ObjectRenderer<Screen3D> {
     }
 
     @Override
-    public void create(final float x, final float y, final float z, final RenderEngine3D<Screen3D> renderEngine) {
+    public void create(final float x, final float y, final float z, final RenderEngine3D<GameEngine3D> renderEngine) {
         createJumpGate(x, y, z, renderEngine);
     }
 
     @Override
-    public void renderText(final RenderEngine3D<Screen3D> renderEngine, final int index, final boolean selected) {
+    public void renderText(final RenderEngine3D<GameEngine3D> renderEngine, final int index, final boolean selected) {
         final String text1 = jumpGate.target.getName();
         renderTextOnTop(renderEngine, 0f, 0f, text1, JUMP_GATE_SIZE / 4);
 //		if (jumpGate.source.trader != null) {
@@ -70,7 +70,7 @@ public class JumpGate3DRenderer extends ObjectRenderer<Screen3D> {
     }
 
     @Override
-    public void update(final float x, final float y, final float z, final RenderEngine3D<Screen3D> renderEngine, final long currentTime, final float timeOfDay, final int index, final boolean selected) {
+    public void update(final float x, final float y, final float z, final RenderEngine3D<GameEngine3D> renderEngine, final long currentTime, final float timeOfDay, final int index, final boolean selected) {
         drawJumpGate(x, y, z, renderEngine, currentTime, selected);
     }
 
@@ -107,7 +107,7 @@ public class JumpGate3DRenderer extends ObjectRenderer<Screen3D> {
     //		}
     //	}
 
-    private void createJumpGate(final float x, final float y, final float z, final RenderEngine3D<Screen3D> renderEngine) {
+    private void createJumpGate(final float x, final float y, final float z, final RenderEngine3D<GameEngine3D> renderEngine) {
         //jump gate
         //			Vector2 target = new Vector2(jumpGate.targetPlanet.x, jumpGate.targetPlanet.y);
         //			Vector2 start = new Vector2(x, y);
@@ -165,7 +165,7 @@ public class JumpGate3DRenderer extends ObjectRenderer<Screen3D> {
         //		final Color sectorColor = renderMaster.getDistinctiveColor(jumpGate.planet.sector.type);
         //		instance.instance.materials.get(0).set(new PBRColorAttribute(PBRColorAttribute.BaseColorFactor, sectorColor));
         renderEngine.addStatic(instance);
-        final float directionLength = direction.len() + Screen3D.SPACE_BETWEEN_OBJECTS;
+        final float directionLength = direction.len() + GameEngine3D.SPACE_BETWEEN_OBJECTS;
 
         //		final Vector3 shift = new Vector3(-direction.z, direction.y, direction.x);
         //		shift.nor();
@@ -175,12 +175,12 @@ public class JumpGate3DRenderer extends ObjectRenderer<Screen3D> {
         //		direction.nor();
         final Vector3 targetVector = new Vector3(tx, ty, tz /*- sign * Planet3DRenderer.PLANET_SIZE / 2*/);
         instance.instance.transform.rotateTowardTarget(targetVector, Vector3.Y);
-        instance.instance.transform.translate(0, /*-sign*JUMP_GATE_HIGHT / 2 -*/ Screen3D.SPACE_BETWEEN_OBJECTS, -directionLength / 2);
+        instance.instance.transform.translate(0, /*-sign*JUMP_GATE_HIGHT / 2 -*/ GameEngine3D.SPACE_BETWEEN_OBJECTS, -directionLength / 2);
         instance.instance.transform.scale(JUMP_GATE_SIZE, JUMP_GATE_HIGHT, directionLength);
         instance.update();
     }
 
-    private void drawJumpGate(final float x, final float y, final float z, final RenderEngine3D<Screen3D> renderEngine, final long currentTime, final boolean selected) {
+    private void drawJumpGate(final float x, final float y, final float z, final RenderEngine3D<GameEngine3D> renderEngine, final long currentTime, final boolean selected) {
         if (instance != null && (selected != lastSelected || jumpGate.source.trader != lastTrader)) {
             if (selected) {
 //				if (jumpGate.source.trader != null) {
@@ -205,7 +205,7 @@ public class JumpGate3DRenderer extends ObjectRenderer<Screen3D> {
         }
     }
 
-    private void renderTextOnTop(final RenderEngine3D<Screen3D> renderEngine, final float dx, final float dy, final String text, final float size) {
+    private void renderTextOnTop(final RenderEngine3D<GameEngine3D> renderEngine, final float dx, final float dy, final String text, final float size) {
         final float x = jumpGate.target.x;
         final float y = jumpGate.target.y + JUMP_GATE_HIGHT / 2/*- 10 / Universe.WORLD_SCALE*/;
         final float z = jumpGate.target.z;

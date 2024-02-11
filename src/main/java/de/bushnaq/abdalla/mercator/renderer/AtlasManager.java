@@ -42,11 +42,11 @@ public class AtlasManager {
     public              AtlasRegion  dottedLineTextureRegion;
     public              AtlasRegion  factoryTextureRegion;
     public              FontData[]   fontDataList     = {
-            new FontData("default-font", "fonts/Roboto-Bold.ttf", Screen2D.FONT_SIZE),//
+            new FontData("default-font", "fonts/Roboto-Bold.ttf", GameEngine2D.FONT_SIZE),//
             new FontData("zoomin-default-font", "fonts/Roboto-Bold.ttf", SOOMIN_FONT_SIZE),//
-            new FontData("time-machine-font", "fonts/Roboto-Bold.ttf", Screen2D.TIME_MACHINE_FONT_SIZE),//
-            new FontData("chart-font", "fonts/Roboto-bold.ttf", Screen2D.CHART_FONT_SIZE),//
-            new FontData("menu-font", "fonts/Roboto-Regular.ttf", Screen2D.MENU_FONT_SIZE),//
+            new FontData("time-machine-font", "fonts/Roboto-Bold.ttf", GameEngine2D.TIME_MACHINE_FONT_SIZE),//
+            new FontData("chart-font", "fonts/Roboto-bold.ttf", GameEngine2D.CHART_FONT_SIZE),//
+            new FontData("menu-font", "fonts/Roboto-Regular.ttf", GameEngine2D.MENU_FONT_SIZE),//
             new FontData("model-font", "fonts/Roboto-Bold.ttf", 64),//
             new FontData("demo-big-font", "fonts/Roboto-Bold.ttf", 128),//
             new FontData("demo-mid-font", "fonts/Roboto-Regular.ttf", 32)//

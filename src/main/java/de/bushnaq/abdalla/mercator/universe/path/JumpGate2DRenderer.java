@@ -20,10 +20,10 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Vector2;
 import de.bushnaq.abdalla.engine.ObjectRenderer;
 import de.bushnaq.abdalla.engine.RenderEngine2D;
-import de.bushnaq.abdalla.mercator.renderer.Screen2D;
+import de.bushnaq.abdalla.mercator.renderer.GameEngine2D;
 import de.bushnaq.abdalla.mercator.universe.planet.Planet2DRenderer;
 
-public class JumpGate2DRenderer extends ObjectRenderer<Screen2D> {
+public class JumpGate2DRenderer extends ObjectRenderer<GameEngine2D> {
     static final         Color JUMPGATE_COLOR = new Color(0.275f, 0.314f, 0.314f, 1.0f);
     private static final float MIN_RADIUS     = Planet2DRenderer.PLANET_SIZE * 4.0f + 3;
     // static final Color SELECTED_JUMPGATE_COLOR = Color.ORANGE;
@@ -33,7 +33,7 @@ public class JumpGate2DRenderer extends ObjectRenderer<Screen2D> {
         this.jumpGate = jumpGate;
     }
 
-    private void drawJumpGate(final float x, final float z, final Path jumpGate, final RenderEngine2D<Screen2D> renderEngine) {
+    private void drawJumpGate(final float x, final float z, final Path jumpGate, final RenderEngine2D<GameEngine2D> renderEngine) {
         final Vector2 target = new Vector2(jumpGate.target.x, jumpGate.target.z);
         final Vector2 start  = new Vector2(jumpGate.source.x, jumpGate.source.z);
 //		final Vector2 line = target.sub(start);
@@ -50,7 +50,7 @@ public class JumpGate2DRenderer extends ObjectRenderer<Screen2D> {
         if (jumpGate.closed) {
             color = Color.RED;
         } else if (jumpGate.selected) {
-            color     = Screen2D.SELECTED_COLOR;
+            color     = GameEngine2D.SELECTED_COLOR;
             thickness = 3.3f * renderEngine.getGameEngine().renderEngine.camera.zoom;
             //		} else if ( jumpGate.planet.sector == jumpGate.targetPlanet.sector) {
             //			color = renderMaster.distinctiveTransparentColorlist.get(jumpGate.planet.sector.type);
@@ -64,7 +64,7 @@ public class JumpGate2DRenderer extends ObjectRenderer<Screen2D> {
     }
 
     @Override
-    public void render(final float x, final float z, final RenderEngine2D<Screen2D> renderEngine, final int index, final boolean selected) {
+    public void render(final float x, final float z, final RenderEngine2D<GameEngine2D> renderEngine, final int index, final boolean selected) {
         drawJumpGate(x, z, jumpGate, renderEngine);
     }
 

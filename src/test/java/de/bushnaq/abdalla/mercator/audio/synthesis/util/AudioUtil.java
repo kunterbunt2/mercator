@@ -34,7 +34,7 @@ import de.bushnaq.abdalla.mercator.audio.synthesis.OpenAlException;
 import de.bushnaq.abdalla.mercator.desktop.DesktopContextFactory;
 import de.bushnaq.abdalla.mercator.desktop.GraphicsDimentions;
 import de.bushnaq.abdalla.mercator.desktop.LaunchMode;
-import de.bushnaq.abdalla.mercator.renderer.Screen3D;
+import de.bushnaq.abdalla.mercator.renderer.GameEngine3D;
 import de.bushnaq.abdalla.mercator.universe.Universe;
 import de.bushnaq.abdalla.mercator.universe.event.EventLevel;
 import de.bushnaq.abdalla.mercator.universe.sim.Sim;
@@ -50,7 +50,7 @@ public abstract class AudioUtil implements ApplicationListener, InputProcessor {
     private final List<Label>             labels            = new ArrayList<>();
     private final Logger                  logger            = LoggerFactory.getLogger(this.getClass());
     protected     MercatorRandomGenerator rg                = new MercatorRandomGenerator(1, null);
-    protected     Screen3D                sceneManager;
+    protected     GameEngine3D            sceneManager;
     protected     boolean                 simulateBassBoost = true;
     protected     Universe                universe;
     DesktopContextFactory contextFactory = new DesktopContextFactory();
@@ -67,7 +67,7 @@ public abstract class AudioUtil implements ApplicationListener, InputProcessor {
             contextFactory.create();
             universe = new Universe("U-0", gd, EventLevel.warning, Sim.class);
             createStage();
-            sceneManager = new Screen3D(contextFactory, universe, LaunchMode.development);
+            sceneManager = new GameEngine3D(contextFactory, universe, LaunchMode.development);
             sceneManager.renderEngine.setAlwaysDay(true);
         } catch (final Exception e) {
             logger.error(e.getMessage(), e);

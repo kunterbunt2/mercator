@@ -1,6 +1,6 @@
 package de.bushnaq.abdalla.mercator.audio.synthesis;
 
-import de.bushnaq.abdalla.mercator.renderer.camera.MovingCamera;
+import de.bushnaq.abdalla.engine.camera.MovingCamera;
 import de.bushnaq.abdalla.mercator.universe.sim.trader.Trader;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;

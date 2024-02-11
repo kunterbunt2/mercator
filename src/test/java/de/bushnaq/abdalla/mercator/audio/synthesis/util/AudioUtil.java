@@ -4,9 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import de.bushnaq.abdalla.mercator.audio.synthesis.OpenAlException;
+import de.bushnaq.abdalla.mercator.desktop.DesktopContextFactory;
 import de.bushnaq.abdalla.mercator.desktop.GraphicsDimentions;
 import de.bushnaq.abdalla.mercator.desktop.LaunchMode;
-import de.bushnaq.abdalla.mercator.renderer.SceneManager;
+import de.bushnaq.abdalla.mercator.renderer.Screen3D;
 import de.bushnaq.abdalla.mercator.universe.Universe;
 import de.bushnaq.abdalla.mercator.universe.event.EventLevel;
 import de.bushnaq.abdalla.mercator.universe.sim.Sim;
@@ -36,21 +37,22 @@ public abstract class AudioUtil implements ApplicationListener, InputProcessor {
 	private final List<Label> labels = new ArrayList<>();
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 	protected MercatorRandomGenerator rg = new MercatorRandomGenerator(1, null);
-	protected SceneManager sceneManager;
+	protected Screen3D sceneManager;
 	protected boolean simulateBassBoost = true;
 	private Stage stage;
 	private StringBuilder stringBuilder;
 	private boolean takeScreenShot = false;
 	protected Universe universe;
-
+	DesktopContextFactory contextFactory = new DesktopContextFactory();
 	@Override
 	public void create() {
 		try {
 			final GraphicsDimentions gd = GraphicsDimentions.D3;
+			contextFactory.create();
 			universe = new Universe("U-0", gd, EventLevel.warning, Sim.class);
 			createStage();
-			sceneManager = new SceneManager(universe, this, LaunchMode.development);
-			sceneManager.setAlwaysDay(true);
+			sceneManager = new Screen3D(contextFactory,universe, LaunchMode.development);
+			sceneManager.renderEngine.setAlwaysDay(true);
 		} catch (final Exception e) {
 			logger.error(e.getMessage(), e);
 		}
@@ -156,18 +158,18 @@ public abstract class AudioUtil implements ApplicationListener, InputProcessor {
 		try {
 			universe.advanceInTime();
 			update();
-			sceneManager.render(universe.currentTime, Gdx.graphics.getDeltaTime(), takeScreenShot);
-			sceneManager.postProcessRender();
+			sceneManager.renderEngine.render(universe.currentTime, Gdx.graphics.getDeltaTime(), takeScreenShot);
+			sceneManager.renderEngine.postProcessRender();
 
 			Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
 			//			Gdx.gl.glEnable(GL20.GL_BLEND);
-			sceneManager.batch2D.enableBlending();
-			sceneManager.batch2D.begin();
+			sceneManager.renderEngine.batch2D.enableBlending();
+			sceneManager.renderEngine.batch2D.begin();
 			//			Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
-			sceneManager.batch2D.setProjectionMatrix(sceneManager.getCamera().combined);
+			sceneManager.renderEngine.batch2D.setProjectionMatrix(sceneManager.renderEngine.getCamera().combined);
 			renderText();
-			sceneManager.batch2D.end();
-			sceneManager.batch2D.setTransformMatrix(identityMatrix);//fix transformMatrix
+			sceneManager.renderEngine.batch2D.end();
+			sceneManager.renderEngine.batch2D.setTransformMatrix(identityMatrix);//fix transformMatrix
 			//			renderStage();
 			takeScreenShot = false;
 		} catch (final Exception e) {

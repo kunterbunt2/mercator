@@ -1,13 +1,14 @@
 package de.bushnaq.abdalla.mercator.universe.good;
 
-import de.bushnaq.abdalla.mercator.renderer.ObjectRenderer;
-import de.bushnaq.abdalla.mercator.renderer.Render2DMaster;
+import de.bushnaq.abdalla.engine.ObjectRenderer;
+import de.bushnaq.abdalla.engine.RenderEngine2D;
+import de.bushnaq.abdalla.engine.RenderEngine3D;
 import de.bushnaq.abdalla.mercator.renderer.Screen2D;
 import de.bushnaq.abdalla.mercator.universe.planet.Planet2DRenderer;
 import de.bushnaq.abdalla.mercator.util.AnnulusSegment;
 import com.badlogic.gdx.graphics.Color;
 
-public class Good2DRenderer extends ObjectRenderer {
+public class Good2DRenderer extends ObjectRenderer<Screen2D> {
 	private static final float ANGLE_BORDER = (float) Math.PI / 256;
 	static final Color GOOD_COLOR = new Color(0.09f, 0.388f, 0.69f, 0.8f); // 0xff000000;
 	static final float GOOD_HEIGHT = 12 * 4;
@@ -24,11 +25,11 @@ public class Good2DRenderer extends ObjectRenderer {
 		this.good = good;
 	}
 
-	private void drawGood(final float aX, final float aY, final Good good, final Render2DMaster renderMaster, final int index, final boolean selected) {
+	private void drawGood(final float aX, final float aY, final Good good, final RenderEngine2D<Screen2D> renderEngine, final int index, final boolean selected) {
 		Color color;
 		if (selected) {
 			color = Screen2D.SELECTED_COLOR;
-		} else if (good.isTraded(renderMaster.universe.currentTime)) {
+		} else if (good.isTraded(renderEngine.getGameEngine().universe.currentTime)) {
 			color = GOOD_COLOR;
 		} else {
 			color = NOT_TRADED_GOOD_COLOR;
@@ -51,20 +52,20 @@ public class Good2DRenderer extends ObjectRenderer {
 		String name = null;
 		float deltaRadius = 0;
 		Color barColor = null;
-		switch (renderMaster.showGood) {
+		switch (renderEngine.getGameEngine().showGood) {
 		case Price:
 			name = String.format("%.0f", good.price);
-			barColor = renderMaster.priceColor(good);
+			barColor = renderEngine.getGameEngine().priceColor(good);
 			deltaRadius = (maxAngle - minAngle) * good.price / good.getMaxPrice();
 			break;
 		case Name:
 			name = good.type.getName();
-			barColor = renderMaster.amountColor(good);
+			barColor = renderEngine.getGameEngine().amountColor(good);
 			deltaRadius = (maxAngle - minAngle) * good.getAmount() / good.getMaxAmount();
 			break;
 		case Volume:
 			name = String.format("%.0f", good.getAmount());
-			barColor = renderMaster.amountColor(good);
+			barColor = renderEngine.getGameEngine().amountColor(good);
 			deltaRadius = (maxAngle - minAngle) * good.getAmount() / good.getMaxAmount();
 			break;
 		}
@@ -72,16 +73,16 @@ public class Good2DRenderer extends ObjectRenderer {
 		// {
 		// name = null;
 		// }
-		if (renderMaster.camera.zoom < 7.0f) {
-			renderMaster.fillPie(renderMaster.atlasManager.factoryTextureRegion, tx, ty, MIN_RADIUS, MAX_RADIUS, minAngle, maxAngle, color, 8, renderMaster.atlasManager.zoominDefaultFont, Screen2D.TEXT_COLOR, name);
-			renderMaster.fillPie(renderMaster.atlasManager.gaugeTextureRegion, tx, ty, MAX_RADIUS - 5, MAX_RADIUS, maxAngle - deltaRadius, maxAngle, barColor, 8, renderMaster.atlasManager.zoominDefaultFont, Screen2D.TEXT_COLOR, "");
+		if (renderEngine.getGameEngine().renderEngine.camera.zoom < 7.0f) {
+			renderEngine.getGameEngine().renderEngine.fillPie(renderEngine.getGameEngine().atlasManager.factoryTextureRegion, tx, ty, MIN_RADIUS, MAX_RADIUS, minAngle, maxAngle, color, 8, renderEngine.getGameEngine().atlasManager.zoominDefaultFont, Screen2D.TEXT_COLOR, name);
+			renderEngine.getGameEngine().renderEngine.fillPie(renderEngine.getGameEngine().atlasManager.gaugeTextureRegion, tx, ty, MAX_RADIUS - 5, MAX_RADIUS, maxAngle - deltaRadius, maxAngle, barColor, 8, renderEngine.getGameEngine().atlasManager.zoominDefaultFont, Screen2D.TEXT_COLOR, "");
 		}
 		annulusSegment = new AnnulusSegment(tx, ty, MIN_RADIUS, MAX_RADIUS, minAngle, maxAngle);
 	}
 
 	@Override
-	public void render(final float x, final float y, final Render2DMaster renderMaster, final int index, final boolean selected) {
-		drawGood(x, y, good, renderMaster, index, selected);
+	public void render(final float x, final float y, final RenderEngine2D<Screen2D> renderEngine, final int index, final boolean selected) {
+		drawGood(x, y, good, renderEngine, index, selected);
 	}
 
 	@Override

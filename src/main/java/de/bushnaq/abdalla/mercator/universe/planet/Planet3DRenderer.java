@@ -8,9 +8,13 @@ import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.PointLight;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
+import de.bushnaq.abdalla.engine.GameObject;
+import de.bushnaq.abdalla.engine.ObjectRenderer;
+import de.bushnaq.abdalla.engine.RenderEngine3D;
 import de.bushnaq.abdalla.mercator.renderer.*;
 import de.bushnaq.abdalla.mercator.universe.factory.ProductionFacility;
 import de.bushnaq.abdalla.mercator.universe.factory.ProductionFacilityStatus;
+import de.bushnaq.abdalla.mercator.universe.good.Good;
 import de.bushnaq.abdalla.mercator.universe.good.Good3DRenderer;
 import de.bushnaq.abdalla.mercator.universe.sim.Sim;
 import net.mgsx.gltf.scene3d.animation.AnimationControllerHack;
@@ -19,7 +23,7 @@ import net.mgsx.gltf.scene3d.model.ModelInstanceHack;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Planet3DRenderer extends ObjectRenderer {
+public class Planet3DRenderer extends ObjectRenderer<Screen3D> {
 
 	private static final Color BRIGHT_WHITE = new Color(0xfefefeff);
 	private static final int BUILDING_BLOCK_SIZE = 13;
@@ -51,7 +55,7 @@ public class Planet3DRenderer extends ObjectRenderer {
 	private static final float TURBINE_SIZE = 4;
 	public static final float WATER_HIGHT = 1;
 	public static final float WATER_SIZE = SECTOR_SIZE;
-	public static final float WATER_Y = -10;
+	public static final float WATER_Y = -10;//TODO should use context.getWaterLevel()
 
 	public static Color getBuildingColor(final int index) {
 		switch (index % 6) {
@@ -91,25 +95,25 @@ public class Planet3DRenderer extends ObjectRenderer {
 	}
 
 	@Override
-	public void create( final Render3DMaster renderMaster) {
-		createPlanet(renderMaster);
+	public void create( final RenderEngine3D<Screen3D> renderEngine) {
+		createPlanet(renderEngine);
 	}
 
-	private void createCity(final Render3DMaster renderMaster, final float x, final float z) {
+	private void createCity(final RenderEngine3D<Screen3D> renderEngine, final float x, final float z) {
 		final int iteration = 20;
 		final float scale = (CITY_SIZE / 2) / (iteration - 1);
 		final float averrageBuildingHight = 16f;
 		//		if (planet.getName().equals("P-0202"))
-		createCity(renderMaster, x, z, iteration, scale, averrageBuildingHight);
+		createCity(renderEngine, x, z, iteration, scale, averrageBuildingHight);
 	}
 
-	private void createCity(final Render3DMaster renderMaster, final float x, final float z, int iteration, final float scale, float averrageBuildingHight) {
+	private void createCity(final RenderEngine3D<Screen3D> renderEngine, final float x, final float z, int iteration, final float scale, float averrageBuildingHight) {
 		//we are responsible for the 4 corners
 		final float screetSize = 6;
 		iteration /= 2;
 		//		System.out.println(String.format("iteration=%d scale=%f x=%f z=%f", iteration, scale, x, z));
 		//		int i = 0;
-		averrageBuildingHight = averrageBuildingHight + averrageBuildingHight * (0.5f - renderMaster.createRG.nextFloat());
+		averrageBuildingHight = averrageBuildingHight + averrageBuildingHight * (0.5f - renderEngine.getGameEngine().renderMaster.createRG.nextFloat());
 		final TwinBuilding twinChances[][] = { { new TwinBuilding(0.3f, 0.0f, 1, 1)/*0,0*/, new TwinBuilding(0.0f, 0.3f, 1, -1) }/*0,1*/, { new TwinBuilding(0.0f, 0.3f, -1, 1)/*1,0*/, new TwinBuilding(0.3f, 0.0f, -1, -1) }/*1,1*/ };
 		//		z=1, x=1, x=0
 		//		0,0
@@ -127,15 +131,15 @@ public class Planet3DRenderer extends ObjectRenderer {
 					//the bigger the block, the lower the change for it to be one building
 					final float changceOfOneBuilding = 0.5f / iteration;
 					final float changceOfNoBuilding = 0.0f / iteration;
-					if (renderMaster.createRG.nextFloat() < changceOfNoBuilding) {
+					if (renderEngine.getGameEngine().renderMaster.createRG.nextFloat() < changceOfNoBuilding) {
 
-					} else if (iteration > 1f && renderMaster.createRG.nextFloat() > changceOfOneBuilding)
+					} else if (iteration > 1f && renderEngine.getGameEngine().renderMaster.createRG.nextFloat() > changceOfOneBuilding)
 						//create smaller buildings
-						createCity(renderMaster, xx, zz, iteration, scale, averrageBuildingHight);
+						createCity(renderEngine, xx, zz, iteration, scale, averrageBuildingHight);
 					else {
 						float twinFactorXs = 1f;
 						float twinFactorZs = 1f;
-						if (renderMaster.createRG.nextFloat() < twinChance.chanceHorizontal) {
+						if (renderEngine.getGameEngine().renderMaster.createRG.nextFloat() < twinChance.chanceHorizontal) {
 							final TwinBuilding twin = twinChances[xi + twinChance.deltaX][zi];
 							if (!twin.occupided) {
 								twinFactorXs = 2f;
@@ -143,7 +147,7 @@ public class Planet3DRenderer extends ObjectRenderer {
 								twin.occupided = true;
 							}
 						}
-						if (renderMaster.createRG.nextFloat() < twinChance.chanceVertical) {
+						if (renderEngine.getGameEngine().renderMaster.createRG.nextFloat() < twinChance.chanceVertical) {
 							final TwinBuilding twin = twinChances[xi][zi + twinChance.deltaZ];
 							if (!twin.occupided) {
 								twinFactorZs = 2f;
@@ -152,15 +156,15 @@ public class Planet3DRenderer extends ObjectRenderer {
 							}
 						}
 
-						final GameObject inst = instanciateBuilding(renderMaster, index++);
+						final GameObject inst = instanciateBuilding(renderEngine, index++);
 						final float xs = iteration * 2 * scale * twinFactorXs - screetSize;
 						//the bigger the building, the lower the change for it to get big
-						final float ys = /*(5 - iteration) * 16;//*/averrageBuildingHight * (0.1f + 3 * renderMaster.createRG.nextFloat());
+						final float ys = /*(5 - iteration) * 16;//*/averrageBuildingHight * (0.1f + 3 * renderEngine.getGameEngine().renderMaster.createRG.nextFloat());
 						final float zs = iteration * 2 * scale * twinFactorZs - screetSize;
 						//					System.out.println(String.format("  xx=%f zz=%f xs=%f", xx, zz, xs));
 						inst.instance.transform.setToTranslationAndScaling(xx, ys / 2, zz, xs, ys, zs);
 						inst.update();
-						renderMaster.sceneManager.addStatic(inst);
+						renderEngine.addStatic(inst);
 					}
 				}
 				//				i++;
@@ -168,7 +172,7 @@ public class Planet3DRenderer extends ObjectRenderer {
 		}
 	}
 
-	private void createFactories(final Render3DMaster renderMaster) {
+	private void createFactories(final RenderEngine3D<Screen3D> renderEngine) {
 		final float x = planet.x;
 		final float z = planet.z;
 		//turbine
@@ -178,31 +182,32 @@ public class Planet3DRenderer extends ObjectRenderer {
 		for (final ProductionFacility productionFacility : planet.productionFacilityList) {
 			final int index = productionFacility.producedGood.type.ordinal();
 			final float fz = z + Planet3DRenderer.PLANET_SIZE / 2 - edgeSize/2 * (Good3DRenderer.GOOD_Y) - index * (edgeSize + 1) * (Good3DRenderer.GOOD_Y);
-			GameObject go = new GameObject(new ModelInstanceHack(renderMaster.turbine.scene.model), productionFacility);
+			GameObject go = new GameObject(new ModelInstanceHack(renderEngine.getGameEngine().renderMaster.turbine.scene.model), productionFacility);
 			go.instance.transform.setToTranslationAndScaling(fx, 0, fz, TURBINE_SIZE, TURBINE_SIZE, TURBINE_SIZE);
 			go.instance.transform.rotate(Vector3.Y, 90);
 			go.update();
 			go.controller = new AnimationControllerHack(go.instance);
 			go.controller.setAnimation(go.instance.getAnimation("rotate"), -1);
 			animatedObjects.add(go);
-			renderMaster.sceneManager.addDynamic(go);
-			go = new GameObject(new ModelInstanceHack(renderMaster.cubeEmissive), planet);
+			renderEngine.addDynamic(go);
+			go = new GameObject(new ModelInstanceHack(renderEngine.getGameEngine().renderMaster.cubeEmissive), planet);
 			go.instance.materials.get(0).set(emissiveAttribute);
 			go.instance.transform.setToTranslationAndScaling(fx, 0f, fz, 1.0f, 1.0f, 1.0f);
 			pointLightObjects.add(go);
-			renderMaster.sceneManager.addStatic(go);
+			renderEngine.addStatic(go);
 		}
 	}
 
-	private void createPlanet(final Render3DMaster renderMaster) {
+	private void createPlanet(final RenderEngine3D<Screen3D> renderEngine) {
 		final float x = planet.x;
 		final float z = planet.z;
 		//planet
 		{
-			instance = new GameObject(new ModelInstanceHack(renderMaster.planet), null);
+			instance = new GameObject<Screen3D>(new ModelInstanceHack(renderEngine.getGameEngine().renderMaster.planet), null, this);
 			instance.instance.transform.setToTranslationAndScaling(x, -PLANET_HIGHT / 2, z, PLANET_SIZE, PLANET_HIGHT, PLANET_SIZE);
 			instance.update();
-			renderMaster.sceneManager.addStatic(instance);
+			renderEngine.addStatic(instance);
+
 			final PointLight light = new PointLight().set(Color.WHITE, x, LIGHT_HIGHT, z, LIGHT_DAY_INTENSITY);
 			pointLight.add(light);
 			//			renderMaster.sceneClusterManager.add(light, false);
@@ -237,9 +242,9 @@ public class Planet3DRenderer extends ObjectRenderer {
 		//																	controller.setAnimation(ganeObject.instance.getAnimation("CubeAction"), -1);
 		//																	renderMaster.sceneClusterManager.addDynamic(ganeObject);
 		//																}
-		createFactories(renderMaster);
+		createFactories(renderEngine);
 		//city
-		createCity(renderMaster, x, z);
+		createCity(renderEngine, x, z);
 		//sector
 		//		{
 		//			//			final Color sectorColor = renderMaster.getDistinctiveColor(planet.sector.type);
@@ -258,14 +263,14 @@ public class Planet3DRenderer extends ObjectRenderer {
 		//		}
 	}
 
-	private GameObject instanciateBuilding(final Render3DMaster renderMaster, final int index) {
-		final GameObject go = new GameObject(new ModelInstanceHack(renderMaster.buildingCube), planet);
+	private GameObject instanciateBuilding(final RenderEngine3D<Screen3D> renderEngine, final int index) {
+		final GameObject go = new GameObject(new ModelInstanceHack(renderEngine.getGameEngine().renderMaster.buildingCube), planet);
 		//		final Material material = go.instance.materials.get(0);
 		//		material.set(new PBRColorAttribute(PBRColorAttribute.BaseColorFactor, getBuildingColor(index)));
 		return go;
 	}
 
-	private void renderPlanet(final Render3DMaster renderMaster, final long currentTime, final float timeOfDay, final boolean selected) {
+	private void renderPlanet(final RenderEngine3D<Screen3D> renderEngine, final long currentTime, final float timeOfDay, final boolean selected) {
 		//		float x = planet.x;
 		//		float z = planet.y;
 		//		float hps = PLANET_SIZE / 2;
@@ -277,7 +282,7 @@ public class Planet3DRenderer extends ObjectRenderer {
 		} else {
 			//			color = Planet3DRenderer.PLANET_COLOR;
 		}
-		updatePlanet(renderMaster);
+		updatePlanet(renderEngine);
 		//		renderMaster.text(x - hps, y - hps, color, Screen3D.TEXT_COLOR, planet.getName());
 		//		float height = y - hps + Trader3DRenderer.TRADER_Y_SIZE;
 		// {
@@ -322,7 +327,7 @@ public class Planet3DRenderer extends ObjectRenderer {
 		//		renderFactory(planet, renderMaster);
 	}
 
-	private void renderSims(final Planet planet, final Render3DMaster renderMaster, final float x, final float y, final float hps) {
+	private void renderSims(final Planet planet, final RenderEngine3D<Screen3D> renderEngine, final float x, final float y, final float hps) {
 		{
 			final int simIndex = 0;
 			for (final Sim sim : planet.simList) {
@@ -343,13 +348,13 @@ public class Planet3DRenderer extends ObjectRenderer {
 	//		}
 	//	}
 	@Override
-	public void renderText( final SceneManager sceneManager, final int index, final boolean selected) {
+	public void renderText(final RenderEngine3D<Screen3D> renderEngine, final int index, final boolean selected) {
 		final float size = 32;
 		final float x = planet.x;
 		final float z = planet.z;
 		//draw text
-		final PolygonSpriteBatch batch = sceneManager.batch2D;
-		final BitmapFont font = sceneManager.getAtlasManager().modelFont;
+		final PolygonSpriteBatch batch = renderEngine.batch2D;
+		final BitmapFont font = renderEngine.getGameEngine().getAtlasManager().modelFont;
 		{
 			final Matrix4 m = new Matrix4();
 			final float fontSize = font.getLineHeight();
@@ -367,14 +372,18 @@ public class Planet3DRenderer extends ObjectRenderer {
 			font.setColor(PLANET_NAME_COLOR);
 			font.draw(batch, planet.getName(), 0, 0);
 		}
+		int i = 0;
+		for (final Good good : planet.getGoodList()) {
+			good.get3DRenderer().renderText(planet.x, planet.y, planet.z, renderEngine, i++);
+		}
 	}
 
 	@Override
-	public void update( final Render3DMaster renderMaster, final long currentTime, final float timeOfDay, final int index, final boolean selected) {
-		renderPlanet(renderMaster, currentTime, timeOfDay, planet == renderMaster.universe.selectedPlanet);
+	public void update(final RenderEngine3D<Screen3D> renderEngine, final long currentTime, final float timeOfDay, final int index, final boolean selected) {
+		renderPlanet(renderEngine, currentTime, timeOfDay, planet == renderEngine.getGameEngine().universe.selectedPlanet);
 	}
 
-	private void updatePlanet(final Render3DMaster renderMaster) {
+	private void updatePlanet(final RenderEngine3D<Screen3D> renderEngine) {
 		for (final GameObject go : animatedObjects) {
 			if (ProductionFacility.class.isInstance(go.interactive)) {
 				final ProductionFacility pf = (ProductionFacility) go.interactive;
@@ -382,12 +391,12 @@ public class Planet3DRenderer extends ObjectRenderer {
 					go.controller.update(Gdx.graphics.getDeltaTime());
 			}
 		}
-		if (renderMaster.sceneManager.isNight() && dayMode) {
+		if (renderEngine.getGameEngine().renderEngine.isNight() && dayMode) {
 			for (final PointLight l : pointLight) {
 				l.intensity = LIGHT_NIGHT_INTENSITY;
 			}
 			dayMode = false;
-		} else if (renderMaster.sceneManager.isDay() && !dayMode) {
+		} else if (renderEngine.getGameEngine().renderEngine.isDay() && !dayMode) {
 			for (final PointLight l : pointLight) {
 				l.intensity = LIGHT_DAY_INTENSITY;
 			}

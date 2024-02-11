@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import de.bushnaq.abdalla.mercator.renderer.camera.MovingCamera;
+import de.bushnaq.abdalla.engine.camera.MovingCamera;
 import org.lwjgl.openal.AL;
 import org.lwjgl.openal.AL10;
 import org.lwjgl.openal.ALC;

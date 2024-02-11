@@ -1,5 +1,9 @@
 package de.bushnaq.abdalla.mercator.renderer;
 
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Colors;
+import com.kotcrab.vis.ui.VisUI;
+import de.bushnaq.abdalla.mercator.desktop.Context;
 import de.bushnaq.abdalla.mercator.renderer.generator.FontData;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Pixmap.Format;
@@ -14,13 +18,13 @@ import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFont
 public class AtlasManager {
     public static final int SOOMIN_FONT_SIZE = 10;
     public TextureAtlas atlas;
-    public TextureRegion barTextureRegion;
+    public AtlasRegion barTextureRegion;
     public BitmapFont chartFont;
     public BitmapFont defaultFont;
     public BitmapFont demoBigFont;
     public BitmapFont demoMidFont;
-    public TextureRegion dottedLineTextureRegion;
-    public TextureRegion factoryTextureRegion;
+    public AtlasRegion dottedLineTextureRegion;
+    public AtlasRegion factoryTextureRegion;
     public FontData[] fontDataList = {
             new FontData("default-font", "fonts/Roboto-Bold.ttf", Screen2D.FONT_SIZE),//
             new FontData("zoomin-default-font", "fonts/Roboto-Bold.ttf", SOOMIN_FONT_SIZE),//
@@ -31,7 +35,7 @@ public class AtlasManager {
             new FontData("demo-big-font", "fonts/Roboto-Bold.ttf", 128),//
             new FontData("demo-mid-font", "fonts/Roboto-Regular.ttf", 32)//
     };
-    public TextureRegion gaugeTextureRegion;
+    public AtlasRegion gaugeTextureRegion;
     //	public Texture good_baseColor;
     //	public AtlasRegion good_baseColorRegion;
     //	public Texture good_normal;
@@ -40,13 +44,18 @@ public class AtlasManager {
     //	public AtlasRegion good_occlusionRoughnessMetallicRegion;
     public BitmapFont menuFont;
     public BitmapFont modelFont;
-    public TextureRegion planetTextureRegion;
-    public TextureRegion simTextureRegion;
-    public TextureRegion systemTextureRegion;
+    public AtlasRegion planetTextureRegion;
+    public AtlasRegion simTextureRegion;
+    public AtlasRegion systemTextureRegion;
     public BitmapFont timeMachineFont;
-    public TextureRegion traderTextureRegion;
+    public AtlasRegion traderTextureRegion;
     public BitmapFont zoominDefaultFont;
 
+    private static String assetsFolderName;
+
+    public static String getAssetsFolderName() {
+        return assetsFolderName;
+    }
     public AtlasManager() {
     }
 
@@ -58,6 +67,7 @@ public class AtlasManager {
     }
 
     public void init() {
+        assetsFolderName = Context.getAppFolderName() + "/assets";
         initTextures();
         initFonts();
     }
@@ -105,5 +115,9 @@ public class AtlasManager {
         //		good_baseColor = new Texture(Gdx.files.internal("models/glTF/Metal_Floor_01/Metal_Floor_01_basecolor.jpg"));
         //		good_occlusionRoughnessMetallic = new Texture(Gdx.files.internal("models/glTF/Metal_Floor_01/Metal_Floor_01_metallic-Metal_Floor_01_roughness.png"));
         //		good_normal = new Texture(Gdx.files.internal("models/glTF/Metal_Floor_01/Metal_Floor_01_normal.jpg"));
+        VisUI.load(VisUI.SkinScale.X2);
+        VisUI.getSkin().getFont("default-font").getData().markupEnabled = true;
+        VisUI.getSkin().getFont("small-font").getData().markupEnabled = true;
+        Colors.put("BOLD", new Color(0x1BA1E2FF));
     }
 }

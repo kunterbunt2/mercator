@@ -50,3 +50,4 @@ Then you can start mercator by one of its starting classes
 1. Cluster bounding box not working.
 2. Camera movement is still bad.
 3. Economy is not stable, all sims eventually die of hunger.
+1. skybox top not oriented correctly (see reflection screenshot)

@@ -13,12 +13,12 @@ public class Launcher2D {
 		final GraphicsDimentions gd = GraphicsDimentions.D2;
 		final Universe universe = new Universe("U-0", gd, EventLevel.warning, Sim.class);
 		universe.create(UNIVERSE_GENERATION_RANDOM_SEED, 10, 10L * TimeUnit.TICKS_PER_DAY);
-		final Screen2D screen = new Screen2D(universe);
-		final DesktopLauncher launcher = new DesktopLauncher(universe, screen, false);
-		synchronized (launcher) {
-			launcher.wait();
-		}
-		System.out.println("DesktopLauncher exiting");
+//		final Screen2D screen = new Screen2D(universe);
+//		final DesktopLauncher1 launcher = new DesktopLauncher1(universe, screen, false);
+//		synchronized (launcher) {
+//			launcher.wait();
+//		}
+//		System.out.println("DesktopLauncher exiting");
 	}
 
 }

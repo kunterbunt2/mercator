@@ -16,7 +16,6 @@
 
 package de.bushnaq.abdalla.mercator.shader;
 
-import de.bushnaq.abdalla.mercator.renderer.camera.MovingCamera;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
@@ -29,6 +28,7 @@ import com.crashinvaders.vfx.effects.ShaderVfxEffect;
 import com.crashinvaders.vfx.framebuffer.VfxFrameBuffer;
 import com.crashinvaders.vfx.framebuffer.VfxPingPongWrapper;
 import com.crashinvaders.vfx.gl.VfxGLUtils;
+import de.bushnaq.abdalla.engine.camera.MovingCamera;
 
 public class DepthOfFieldEffect extends ShaderVfxEffect implements ChainVfxEffect {
 
@@ -45,7 +45,7 @@ public class DepthOfFieldEffect extends ShaderVfxEffect implements ChainVfxEffec
 	private final int vertical = 0;
 
 	public DepthOfFieldEffect(final FrameBuffer postFbo, final MovingCamera camera) {
-		super(MyVfxGLUtils.compileShader(Gdx.files.classpath("shader/screenspace.vert"), Gdx.files.classpath("shader/depthOfField.fragment.glsl"), ""));
+		super(MyVfxGLUtils.compileShader(Gdx.files.classpath("shader/depthOfField.vs.glsl"), Gdx.files.classpath("shader/depthOfField.fs.glsl"), ""));
 		this.postFbo = postFbo;
 		this.camera = camera;
 		rebind();

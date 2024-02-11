@@ -1,6 +1,6 @@
 package de.bushnaq.abdalla.mercator.renderer.reports;
 
-import de.bushnaq.abdalla.mercator.renderer.CustomizedSpriteBatch;
+import de.bushnaq.abdalla.engine.CustomizedSpriteBatch;
 import de.bushnaq.abdalla.mercator.universe.sim.trader.Trader2DRenderer;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;

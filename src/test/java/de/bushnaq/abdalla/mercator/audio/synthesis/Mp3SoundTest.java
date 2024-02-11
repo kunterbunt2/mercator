@@ -1,8 +1,8 @@
 package de.bushnaq.abdalla.mercator.audio.synthesis;
 
+import de.bushnaq.abdalla.engine.camera.MovingCamera;
 import de.bushnaq.abdalla.mercator.audio.synthesis.util.LiniarTranslation;
 import de.bushnaq.abdalla.mercator.audio.synthesis.util.TranslationUtil;
-import de.bushnaq.abdalla.mercator.renderer.camera.MovingCamera;
 import de.bushnaq.abdalla.mercator.universe.sim.trader.Trader;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -29,7 +29,7 @@ public class Mp3SoundTest extends TranslationUtil<LiniarTranslation> {
 			mp3Player.setFile(Gdx.files.internal("06-abyss(m).ogg"));
 			mp3Player.setGain(5.0f);
 			mp3Player.play();
-			sceneManager.audioEngine.begin(sceneManager.getCamera());
+			sceneManager.audioEngine.begin(sceneManager.renderEngine.getCamera());
 			final long time1 = System.currentTimeMillis();
 			do {
 			} while (System.currentTimeMillis() - time1 < SECONDS_2);
@@ -47,7 +47,7 @@ public class Mp3SoundTest extends TranslationUtil<LiniarTranslation> {
 	private void createCamera() {
 		Gdx.files = new Lwjgl3Files();
 		Lwjgl3NativesLoader.load();
-		final MovingCamera camera = sceneManager.getCamera();
+		final MovingCamera camera = sceneManager.renderEngine.getCamera();
 		camera.position.set(0f, 200f, 200f);
 		camera.up.set(0f, 1f, 0f);
 		camera.lookAt(0, 0, 0);

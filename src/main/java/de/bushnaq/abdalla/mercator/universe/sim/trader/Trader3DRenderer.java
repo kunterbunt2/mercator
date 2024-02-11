@@ -8,6 +8,9 @@ import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.PointLight;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
+import de.bushnaq.abdalla.engine.GameObject;
+import de.bushnaq.abdalla.engine.ObjectRenderer;
+import de.bushnaq.abdalla.engine.RenderEngine3D;
 import de.bushnaq.abdalla.mercator.audio.synthesis.MercatorSynthesizer;
 import de.bushnaq.abdalla.mercator.renderer.*;
 import de.bushnaq.abdalla.mercator.universe.Universe;
@@ -25,7 +28,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class Trader3DRenderer extends ObjectRenderer {
+public class Trader3DRenderer extends ObjectRenderer<Screen3D> {
 
 	private static final float LIGHT_DISTANCE = 5f;
 	private static final float LIGHT_INTENSITY = 10000f;
@@ -65,18 +68,18 @@ public class Trader3DRenderer extends ObjectRenderer {
 	}
 
 	@Override
-	public void create( final Render3DMaster renderMaster) {
+	public void create( final RenderEngine3D<Screen3D> renderEngine) {
 		try {
-			createTader(renderMaster);
-			createLights(renderMaster);
-			createGoods(renderMaster);
-			synth = renderMaster.sceneManager.audioEngine.createAudioProducer(MercatorSynthesizer.class);
+			createTader(renderEngine);
+			createLights(renderEngine);
+			createGoods(renderEngine);
+			synth = renderEngine.getGameEngine().audioEngine.createAudioProducer(MercatorSynthesizer.class);
 		} catch (final Exception e) {
 			e.printStackTrace();
 		}
 	}
 
-	private void createGoods(final Render3DMaster renderMaster) {
+	private void createGoods(final RenderEngine3D<Screen3D> renderEngine) {
 		goodInstances.clear();
 		for (final Good g : trader.getGoodList()) {
 			final List<GameObject> unused = getUnusedGoodList(g.type);
@@ -86,7 +89,7 @@ public class Trader3DRenderer extends ObjectRenderer {
 				for (int i = 0; i < usedDelta; i++) {
 					final GameObject go = used.remove(used.size() - 1);
 					unused.add(go);
-					if (!renderMaster.sceneManager.removeDynamic(go))
+					if (!renderEngine.removeDynamic(go))
 						logger.error("Game engine logic error: Expected dynamic GameObject to exist.");
 				}
 			} else if (usedDelta < 0) {
@@ -98,13 +101,13 @@ public class Trader3DRenderer extends ObjectRenderer {
 					final GameObject go = unused.remove(unused.size() - 1);
 					used.add(go);
 					//					goodInstances.add(go);
-					renderMaster.sceneManager.addDynamic(go);
+					renderEngine.addDynamic(go);
 				}
 				for (int i = 0; i < createNr; i++) {
-					final GameObject go = Good3DRenderer.instanciateGoodGameObject(g, renderMaster);
+					final GameObject go = Good3DRenderer.instanciateGoodGameObject(g, renderEngine);
 					used.add(go);
 					//					goodInstances.add(go);
-					renderMaster.sceneManager.addDynamic(go);
+					renderEngine.addDynamic(go);
 				}
 			}
 			for (final GameObject go : used) {
@@ -113,23 +116,23 @@ public class Trader3DRenderer extends ObjectRenderer {
 		}
 	}
 
-	private void createLights(final Render3DMaster renderMaster) {
+	private void createLights(final RenderEngine3D<Screen3D> renderEngine) {
 		//TODO reuse instances
 		final ColorAttribute emissiveAttribute = ColorAttribute.createEmissive(Good3DRenderer.getColor(getColorIndex()));
 		for (int i = 0; i < NUMBER_OF_LIGHTS; i++) {
 			pointLights.add(new PointLight());
-			renderMaster.sceneManager.add(pointLights.get(i), true);
-			final GameObject go = new GameObject(new ModelInstanceHack(renderMaster.cubeEmissive), trader);
+			renderEngine.add(pointLights.get(i), true);
+			final GameObject go = new GameObject(new ModelInstanceHack(renderEngine.getGameEngine().renderMaster.cubeEmissive), trader);
 			go.instance.materials.get(0).set(emissiveAttribute);
 			lightGameObjects.add(go);
-			renderMaster.sceneManager.addDynamic(lightGameObjects.get(i));
+			renderEngine.addDynamic(lightGameObjects.get(i));
 		}
 
 	}
 
-	private void createTader(final Render3DMaster renderMaster) {
-		instance = new GameObject(new ModelInstanceHack(renderMaster.trader), trader);
-		renderMaster.sceneManager.addDynamic(instance);
+	private void createTader(final RenderEngine3D<Screen3D> renderEngine) {
+		instance = new GameObject(new ModelInstanceHack(renderEngine.getGameEngine().renderMaster.trader), trader, this);
+		renderEngine.addDynamic(instance);
 	}
 
 	private int getColorIndex() {
@@ -149,8 +152,8 @@ public class Trader3DRenderer extends ObjectRenderer {
 		return usedMls.get(type);
 	}
 
-	private boolean nearListener(final Render3DMaster renderMaster) {
-		final Vector3 v = renderMaster.sceneManager.getCamera().position;
+	private boolean nearListener(final RenderEngine3D<Screen3D> renderEngine) {
+		final Vector3 v = renderEngine.getCamera().position;
 		if ((trader.x - v.x) + (trader.z - v.z) > 1000)
 			return false;
 		else
@@ -158,20 +161,20 @@ public class Trader3DRenderer extends ObjectRenderer {
 	}
 
 	@Override
-	public void renderText( final SceneManager sceneManager, final int index, final boolean selected) {
-		renderTextOnTop(sceneManager, 0, 0, trader.getName().substring(2), 16);
-		renderTextOnTop(sceneManager, -6, -7, "" + (int) velocity[0], 3);//x speed
-		renderTextOnTop(sceneManager, 6, -7, "" + (int) velocity[2], 3);//z speed
-		renderTextOnTop(sceneManager, 0, -7, "" + Float.toString(toOneDigitPrecision(synth.getGain())), 3);//bass gain
+	public void renderText(final RenderEngine3D<Screen3D> renderEngine, final int index, final boolean selected) {
+		renderTextOnTop(renderEngine, 0, 0, trader.getName().substring(2), 16);
+		renderTextOnTop(renderEngine, -6, -7, "" + (int) velocity[0], 3);//x speed
+		renderTextOnTop(renderEngine, 6, -7, "" + (int) velocity[2], 3);//z speed
+		renderTextOnTop(renderEngine, 0, -7, "" + Float.toString(toOneDigitPrecision(synth.getGain())), 3);//bass gain
 	}
 
-	private void renderTextOnTop(final SceneManager sceneManager, final float dx, final float dy, final String text, final float size) {
+	private void renderTextOnTop(final RenderEngine3D<Screen3D> renderEngine, final float dx, final float dy, final String text, final float size) {
 		final float x = translation.x;
 		final float y = translation.y;
 		final float z = translation.z;
 		//draw text
-		final PolygonSpriteBatch batch = sceneManager.batch2D;
-		final BitmapFont font = sceneManager.getAtlasManager().modelFont;
+		final PolygonSpriteBatch batch = renderEngine.batch2D;
+		final BitmapFont font = renderEngine.getGameEngine().getAtlasManager().modelFont;
 		{
 			final Matrix4 m = new Matrix4();
 			final float fontSize = font.getLineHeight();
@@ -201,22 +204,22 @@ public class Trader3DRenderer extends ObjectRenderer {
 	}
 
 	@Override
-	public void update( final Render3DMaster renderMaster, final long currentTime, final float timeOfDay, final int index, final boolean selected) throws Exception {
-		update(renderMaster, currentTime, index, selected);
+	public void update(final RenderEngine3D<Screen3D> renderEngine, final long currentTime, final float timeOfDay, final int index, final boolean selected) throws Exception {
+		update(renderEngine, currentTime, index, selected);
 	}
 
-	private void update(final Render3DMaster renderMaster, final long currentTime, final int index, final boolean selected) throws Exception {
-		updateTrader(renderMaster, index, selected);
+	private void update(final RenderEngine3D<Screen3D> renderEngine, final long currentTime, final int index, final boolean selected) throws Exception {
+		updateTrader(renderEngine, index, selected);
 		updateLights(currentTime);
 		if (lastTransaction != trader.lastTransaction) {
-			createGoods(renderMaster);
-			updateLightColor(renderMaster);
+			createGoods(renderEngine);
+			updateLightColor(renderEngine);
 			lastTransaction = trader.lastTransaction;
 		}
-		updateGoods(renderMaster);
+		updateGoods(renderEngine);
 	}
 
-	private void updateGoods(final Render3DMaster renderMaster) {
+	private void updateGoods(final RenderEngine3D<Screen3D> renderEngine) {
 
 		for (int i = 0; i < goodInstances.size(); i++) {
 			final GameObject go = goodInstances.get(i);
@@ -237,7 +240,7 @@ public class Trader3DRenderer extends ObjectRenderer {
 		}
 	}
 
-	private void updateLightColor(final Render3DMaster renderMaster) {
+	private void updateLightColor(final RenderEngine3D<Screen3D> renderEngine) {
 		//TODO reuse instances
 		final ColorAttribute emissiveAttribute = ColorAttribute.createEmissive(Good3DRenderer.getColor(getColorIndex()));
 		for (final GameObject go : lightGameObjects) {
@@ -272,7 +275,7 @@ public class Trader3DRenderer extends ObjectRenderer {
 		}
 	}
 
-	private void updateTrader(final Render3DMaster renderMaster, final int index, final boolean selected) throws Exception {
+	private void updateTrader(final RenderEngine3D<Screen3D> renderEngine, final int index, final boolean selected) throws Exception {
 		if (trader.targetWaypoint != null) {
 
 			position[0] = translation.x;

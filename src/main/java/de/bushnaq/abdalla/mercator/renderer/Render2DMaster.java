@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.badlogic.gdx.Gdx;
-import de.bushnaq.abdalla.mercator.renderer.camera.MovingCamera;
+import de.bushnaq.abdalla.engine.CustomizedSpriteBatch;
 import de.bushnaq.abdalla.mercator.universe.Universe;
 import de.bushnaq.abdalla.mercator.universe.good.Good;
 import de.bushnaq.abdalla.mercator.universe.planet.Planet;
@@ -17,6 +17,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
 
+//TODO should be deleted
 public class Render2DMaster {
 	public AtlasManager atlasManager;
 	//	TextureAtlas atlas;
@@ -98,7 +99,7 @@ public class Render2DMaster {
 		}
 	}
 
-	public void create() {
+	public void create(AtlasManager atlasManager) {
 		camera = new OrthographicCamera(300, 300 * (600 / 800));
 		Planet planet = universe.findBusyCenterPlanet();
 		if (planet == null)
@@ -107,8 +108,12 @@ public class Render2DMaster {
 		camera.zoom = 1.0f;
 		camera.update();
 		batch = new CustomizedSpriteBatch(5460);
-		atlasManager = new AtlasManager();
-		atlasManager.init();
+		if(atlasManager!=null)
+			this.atlasManager=atlasManager;
+		else {
+			atlasManager = new AtlasManager();
+			atlasManager.init();
+		}
 		//		initTextures();
 		//		initFonts();
 		initColors();

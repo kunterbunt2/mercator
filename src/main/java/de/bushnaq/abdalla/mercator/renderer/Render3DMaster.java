@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import de.bushnaq.abdalla.mercator.desktop.Context;
 import de.bushnaq.abdalla.mercator.desktop.LaunchMode;
 import de.bushnaq.abdalla.mercator.universe.Universe;
 import de.bushnaq.abdalla.mercator.universe.good.Good;
@@ -23,6 +24,7 @@ import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 
+import net.mgsx.gltf.loaders.glb.GLBLoader;
 import net.mgsx.gltf.loaders.gltf.GLTFLoader;
 import net.mgsx.gltf.scene3d.attributes.PBRColorAttribute;
 import net.mgsx.gltf.scene3d.attributes.PBRFloatAttribute;
@@ -30,6 +32,7 @@ import net.mgsx.gltf.scene3d.attributes.PBRTextureAttribute;
 import net.mgsx.gltf.scene3d.scene.SceneAsset;
 
 public class Render3DMaster {
+	private final Context context;
 	//	public SceneAsset cubeWhitePowderCoatingTexture;
 	//	public SceneAsset cubeRed;
 	//	public SceneAsset cubeBlack;
@@ -80,7 +83,7 @@ public class Render3DMaster {
 	//	private List<ModelInstance> instances = new ArrayList<ModelInstance>();
 	//	private final BoundingBox sceneBox = new BoundingBox();
 	//	private TextureRegion planetTexture;
-	public SceneManager sceneManager;
+//	public RenderEngine<GameEngine> sceneManager;
 	public Model sector;
 	public ShowGood showGood = ShowGood.Name;
 	public Model trader;
@@ -90,7 +93,8 @@ public class Render3DMaster {
 	public Model water;
 	public SceneAsset wheel;
 
-	public Render3DMaster(final Universe universe, final InputProcessor inputProcessor, final LaunchMode launchMode) {
+	public Render3DMaster(Context context, final Universe universe, final InputProcessor inputProcessor, final LaunchMode launchMode) {
+		this.context=context;
 		this.universe = universe;
 		this.inputProcessor = inputProcessor;
 		this.launchMode = launchMode;
@@ -109,14 +113,13 @@ public class Render3DMaster {
 			return Color.RED;
 		}
 	}
-
 	public void create() throws Exception {
 		cubeGoldLeaves = new GLTFLoader().load(Gdx.files.internal("models/glTF/cube-Gold_leafs/cube-Gold_leafs.gltf"));
 		//		NormalTangentTest = new GLTFLoader().load(Gdx.files.internal("models/glTF/NormalTangentTest/glTF/NormalTangentTest.gltf"));
 		//		initTextures();
 		//		this.sceneBox.set(new Vector3(-3, -3, -3), new Vector3(3, 3, 3));
 
-		sceneManager = new SceneManager(universe, inputProcessor, launchMode);
+//		sceneManager = new RenderEngine<GameEngine>(context, inputProcessor, null, null, null);
 
 		initColors();
 		final Texture texture = new Texture(Gdx.files.internal("tiles.png"));
@@ -339,6 +342,9 @@ public class Render3DMaster {
 		//			material.id = "post";
 		//			postScreenQuad = createSquare(modelBuilder, 1920f / 2, 1080f / 2, material);
 		//		}
+		{
+			cube = new GLBLoader().load(Gdx.files.internal(String.format(AtlasManager.getAssetsFolderName() + "/models/turtle.glb")));
+		}
 	}
 
 	private Model createSquare(final ModelBuilder modelBuilder, final float sx, final float sz, final Material material) {
@@ -346,7 +352,7 @@ public class Render3DMaster {
 	}
 
 	public void dispose() throws Exception {
-		sceneManager.dispose();
+//		sceneManager.dispose();
 		//		manager.dispose();
 		//		font.dispose();
 		//		atlas.dispose();

@@ -7,10 +7,8 @@ import static org.hamcrest.Matchers.lessThan;
 import java.util.ArrayList;
 import java.util.List;
 
+import de.bushnaq.abdalla.engine.camera.MovingCamera;
 import de.bushnaq.abdalla.mercator.audio.synthesis.Synthesizer;
-import de.bushnaq.abdalla.mercator.audio.synthesis.util.SawAudioEngine;
-import de.bushnaq.abdalla.mercator.audio.synthesis.util.SawSynthesizer;
-import de.bushnaq.abdalla.mercator.renderer.camera.MovingCamera;
 import de.bushnaq.abdalla.mercator.universe.sim.trader.Trader;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;

@@ -6,8 +6,21 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.badlogic.gdx.*;
+import com.badlogic.gdx.assets.loaders.resolvers.InternalFileHandleResolver;
+import com.badlogic.gdx.graphics.*;
+import com.badlogic.gdx.math.Vector3;
+import de.bushnaq.abdalla.engine.GameObject;
+import de.bushnaq.abdalla.engine.IContextFactory;
+import de.bushnaq.abdalla.engine.RenderEngine3D;
+import de.bushnaq.abdalla.engine.camera.MovingCamera;
+import de.bushnaq.abdalla.mercator.audio.synthesis.AudioEngine;
+import de.bushnaq.abdalla.mercator.audio.synthesis.MercatorAudioEngine;
 import de.bushnaq.abdalla.mercator.audio.synthesis.Mp3Player;
 import de.bushnaq.abdalla.mercator.audio.synthesis.OpenAlException;
+import de.bushnaq.abdalla.mercator.desktop.Context;
+import de.bushnaq.abdalla.mercator.renderer.camera.MyCameraInputController;
+import de.bushnaq.abdalla.mercator.renderer.reports.Info;
 import de.bushnaq.abdalla.mercator.universe.Universe;
 import de.bushnaq.abdalla.mercator.universe.good.Good;
 import de.bushnaq.abdalla.mercator.universe.land.Land;
@@ -15,18 +28,18 @@ import de.bushnaq.abdalla.mercator.universe.path.Path;
 import de.bushnaq.abdalla.mercator.universe.planet.Planet;
 import de.bushnaq.abdalla.mercator.universe.planet.Planet3DRenderer;
 import de.bushnaq.abdalla.mercator.universe.sim.trader.Trader;
+import net.mgsx.gltf.scene3d.attributes.PBRCubemapAttribute;
+import net.mgsx.gltf.scene3d.attributes.PBRFloatAttribute;
+import net.mgsx.gltf.scene3d.attributes.PBRTextureAttribute;
 import net.mgsx.gltf.scene3d.model.ModelInstanceHack;
+import net.mgsx.gltf.scene3d.scene.SceneSkybox;
+import net.mgsx.gltf.scene3d.utils.EnvironmentUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.bushnaq.abdalla.mercator.desktop.LaunchMode;
 import de.bushnaq.abdalla.mercator.util.TimeAccuracy;
 import de.bushnaq.abdalla.mercator.util.TimeUnit;
-import com.badlogic.gdx.ApplicationListener;
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
-import com.badlogic.gdx.InputProcessor;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.profiling.GLErrorListener;
@@ -36,6 +49,16 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.utils.Align;
 
 public class Screen3D implements ScreenListener, ApplicationListener, InputProcessor {
+	private final IContextFactory contextFactory;
+	private Context context;
+	private MovingCamera camera;
+	private Camera camera2D;
+	public AudioEngine audioEngine = new MercatorAudioEngine();
+	private AtlasManager atlasManager;
+	private MyCameraInputController camController;
+	private final InputMultiplexer inputMultiplexer = new InputMultiplexer();
+	private GameObject instance;//TODO
+
 	class DemoString {
 		BitmapFont font;
 
@@ -96,24 +119,25 @@ public class Screen3D implements ScreenListener, ApplicationListener, InputProce
 	//	private MyCanvas myCanvas;
 	//	private PerformanceLogger performanceLogger = new PerformanceLogger();
 	private GLProfiler profiler;
-	private final Render2DMaster render2DMaster;
+	private Render2DMaster render2DMaster;
 
 	public Render3DMaster renderMaster;
+	public RenderEngine3D<Screen3D> renderEngine;
+
 	private Stage stage;
 	private StringBuilder stringBuilder;
 	private boolean takeScreenShot;
 	//	private ModelInstance uberModelInstance;
-	private final Universe universe;
+	public final Universe universe;
 	private boolean vsyncEnabled = true;
 
-	public Screen3D(final Universe universe, final LaunchMode launchMode) throws Exception {
+	public Screen3D(final IContextFactory contextFactory, final Universe universe, final LaunchMode launchMode) throws Exception {
+		this.contextFactory = contextFactory;
 		this.universe = universe;
 		this.launchMode = launchMode;
 		universe.setScreenListener(this);
 		//		this.config = config;
 		//		this.frame = frame;
-		renderMaster = new Render3DMaster(universe, this, launchMode);
-		render2DMaster = new Render2DMaster(universe);
 		//		renderMaster.centerX = 0;
 		//		renderMaster.centerY = 0;
 		//		myCanvas = new MyCanvas(this, config);
@@ -122,15 +146,51 @@ public class Screen3D implements ScreenListener, ApplicationListener, InputProce
 	@Override
 	public void create() {
 		try {
-			renderMaster.create();
-			render2DMaster.create();
+			if (context == null)// ios
+			{
+				context = (Context) contextFactory.create();
+			}
+//			showFps = context.getShowFpsProperty();//TODO
 			profiler = new GLProfiler(Gdx.graphics);
 			profiler.setListener(GLErrorListener.LOGGING_LISTENER);// ---enable exception throwing in case of error
 			profiler.setListener(new MyGLErrorListener());
 			if (enableProfiling) {
 				profiler.enable();
 			}
+			try {
+				context.setSelected(profiler, false);
+			} catch (final Exception e) {
+				logger.error(e.getMessage(), e);
+			}
+			createCamera();
+			createInputProcessor(this);
+			atlasManager = new AtlasManager();
+			atlasManager.init();
+			renderEngine = new RenderEngine3D<Screen3D>(context,this, this,camera, camera2D, getAtlasManager().menuFont, getAtlasManager().systemTextureRegion);
+			renderEngine.getWater().setTiling(universe.size * 2 * 4 * 2 / Universe.WORLD_SCALE);
+			renderEngine.getWater().setPresent(true);
+			renderEngine.getWater().setWaveStrength(0.01f / Universe.WORLD_SCALE);
+			renderEngine.getWater().setWaveSpeed(0.03f);
+			renderEngine.getWater().setRefractiveMultiplicator(1f);
+			renderEngine.setReflectionClippingPlane(-(Planet3DRenderer.WATER_Y - 2));
+			renderEngine.setRefractionClippingPlane((Planet3DRenderer.WATER_Y - 2));
+			renderEngine.setShadowEnabled(true);
+			renderEngine.setSkyBox(true);
+			renderEngine.getFog().setColor(Color.WHITE);
+			renderEngine.getFog().setBeginDistance(3000f);
+			renderEngine.getFog().setFullDistance(5000f);
+			renderEngine.setDynamicDayTime(true);
+
+			renderMaster = new Render3DMaster(context,universe, this, launchMode);
+			render2DMaster = new Render2DMaster(universe);
+			renderMaster.create();
+			render2DMaster.create(atlasManager);
+			createEnvironment();
 			createStage();
+			audioEngine.create();
+			audioEngine.enableHrtf(0);
+
+			createStone();
 			createTraders();
 //			createRing();
 			createWater();
@@ -156,6 +216,105 @@ public class Screen3D implements ScreenListener, ApplicationListener, InputProce
 			System.exit(1);
 		}
 	}
+	private Cubemap environmentDayCubemap;
+	private Cubemap					environmentNightCubemap;
+	private Cubemap					diffuseCubemap;
+	private Texture					brdfLUT;
+	private Cubemap					specularCubemap;
+	private void createEnvironment() {
+		// setup IBL (image based lighting)
+		if (renderEngine.isPbr()) {
+//			setupImageBasedLightingByFaceNames("ruins", "jpg", "png", "jpg", 10);
+			setupImageBasedLightingByFaceNames("clouds", "jpg", "jpg", "jpg", 10);
+//			setupImageBasedLightingByFaceNames("moonless_golf_2k", "jpg", "jpg", "jpg", 10);
+			// setup skybox
+			renderEngine.setDaySkyBox(new SceneSkybox(environmentDayCubemap));
+			renderEngine.setSkyBox(true);
+			renderEngine.setNightSkyBox(new SceneSkybox(environmentNightCubemap));
+			renderEngine.environment.set(PBRCubemapAttribute.createDiffuseEnv(diffuseCubemap));
+			renderEngine.environment.set(PBRCubemapAttribute.createSpecularEnv(specularCubemap));
+			renderEngine.environment.set(new PBRTextureAttribute(PBRTextureAttribute.BRDFLUTTexture, brdfLUT));
+			renderEngine.environment.set(new PBRFloatAttribute(PBRFloatAttribute.ShadowBias, 0f));
+		} else {
+		}
+	}
+	private void setupImageBasedLightingByFaceNames(final String name, final String diffuseExtension, final String environmentExtension, final String specularExtension, final int specularIterations) {
+		diffuseCubemap = EnvironmentUtil.createCubemap(new InternalFileHandleResolver(), AtlasManager.getAssetsFolderName() + "/textures/" + name + "/diffuse/diffuse_", "_0." + diffuseExtension,
+				EnvironmentUtil.FACE_NAMES_FULL);
+		environmentDayCubemap = EnvironmentUtil.createCubemap(new InternalFileHandleResolver(), AtlasManager.getAssetsFolderName() + "/textures/" + name + "/environmentDay/environment_", "_0." + environmentExtension,
+				EnvironmentUtil.FACE_NAMES_FULL);
+		environmentNightCubemap = EnvironmentUtil.createCubemap(new InternalFileHandleResolver(), AtlasManager.getAssetsFolderName() + "/textures/" + name + "/environmentNight/environment_", "_0." + environmentExtension,
+				EnvironmentUtil.FACE_NAMES_FULL);
+		specularCubemap = EnvironmentUtil.createCubemap(new InternalFileHandleResolver(), AtlasManager.getAssetsFolderName() + "/textures/" + name + "/specular/specular_", "_", "." + specularExtension,
+				specularIterations, EnvironmentUtil.FACE_NAMES_FULL);
+		brdfLUT = new Texture(Gdx.files.classpath("net/mgsx/gltf/shaders/brdfLUT.png"));
+
+		// // setup quick IBL (image based lighting)
+		// DirectionalLightEx light = new DirectionalLightEx();
+		// light.direction.set(1, -3, 1).nor();
+		// light.color.set(Color.WHITE);
+		// IBLBuilder iblBuilder = IBLBuilder.createOutdoor(light);
+		// environmentCubemap = iblBuilder.buildEnvMap(1024);
+		// diffuseCubemap = iblBuilder.buildIrradianceMap(256);
+		// specularCubemap = iblBuilder.buildRadianceMap(10);
+		// iblBuilder.dispose();
+	}
+	private void createStone() {
+		{
+			instance = new GameObject(new ModelInstanceHack(renderEngine.getGameEngine().renderMaster.cube.scene.model), null);
+			instance.instance.transform.setToTranslationAndScaling(0, 0, 0, 16, 16, 16);
+			instance.update();
+			renderEngine.addStatic(instance);
+		}
+		{
+			instance = new GameObject(new ModelInstanceHack(renderEngine.getGameEngine().renderMaster.cube.scene.model), null);
+			instance.instance.transform.setToTranslationAndScaling(0, 0, 0, 32, 1, 32);
+			instance.update();
+			renderEngine.addStatic(instance);
+		}
+	}
+
+	private void createInputProcessor(final InputProcessor inputProcessor) throws Exception {
+		camController = new MyCameraInputController(camera);
+		camController.scrollFactor = -0.1f;
+		camController.translateUnits = 1000f;
+		inputMultiplexer.addProcessor(inputProcessor);
+		inputMultiplexer.addProcessor(camController);
+		Gdx.input.setInputProcessor(inputMultiplexer);
+	}
+	public AtlasManager getAtlasManager() {
+		return atlasManager;
+	}
+
+//	private void createCamera() {
+//		camera = new MovingCamera(67f, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+//		final Vector3 lookat = new Vector3(0, 0, 0);
+//		camera.position.set(lookat.x + 0f / 2, lookat.y + 0f / 2, lookat.z + 8);
+//		camera.up.set(0, 1, 0);
+//		camera.lookAt(lookat);
+//		camera.near = 2f;
+//		camera.far = 100f;
+//		camera.update();
+//		camera.setDirty(true);
+//
+//	}
+	private void createCamera() throws Exception {
+		camera = new MovingCamera(67f, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+		Planet planet = universe.findBusyCenterPlanet();
+		if (planet == null)
+			planet = universe.planetList.get(0);
+
+		final Vector3 lookat = new Vector3(planet.x, 0, planet.z);
+//		final Vector3 lookat = new Vector3(0, 0, 0);
+		camera.position.set(lookat.x + 300f / Universe.WORLD_SCALE, lookat.y + 500f / Universe.WORLD_SCALE, lookat.z + 400f / Universe.WORLD_SCALE);
+		camera.up.set(0, 1, 0);
+		camera.lookAt(lookat);
+		camera.near = 8f;
+		camera.far = 8000f;
+		camera.update();
+		camera.setDirty(true);
+		camera2D = new OrthographicCamera();
+	}
 	private void createWater() {
 		final float delta = (universe.size + 1) * Planet.PLANET_DISTANCE * 2;
 		//sector
@@ -164,7 +323,7 @@ public class Screen3D implements ScreenListener, ApplicationListener, InputProce
 			final GameObject sectorInstance = new GameObject(new ModelInstanceHack(renderMaster.sector), null);
 			sectorInstance.instance.transform.setToTranslationAndScaling(0, Planet3DRenderer.SECTOR_Y, 0, delta, 8, delta);
 			sectorInstance.update();
-			renderMaster.sceneManager.addStatic(sectorInstance);
+			renderEngine.addStatic(sectorInstance);
 
 		}
 		//water
@@ -172,7 +331,7 @@ public class Screen3D implements ScreenListener, ApplicationListener, InputProce
 			final GameObject sectorInstance = new GameObject(new ModelInstanceHack(renderMaster.water), null);
 			sectorInstance.instance.transform.setToTranslationAndScaling(0, Planet3DRenderer.WATER_Y, 0, delta, 1, delta);
 			sectorInstance.update();
-			renderMaster.sceneManager.addStatic(sectorInstance);
+			renderEngine.addStatic(sectorInstance);
 		}
 	}
 
@@ -180,28 +339,31 @@ public class Screen3D implements ScreenListener, ApplicationListener, InputProce
 //		if (launchMode == LaunchMode.development)
 		{
 			for (final Path path : universe.pathList) {
-				path.get3DRenderer().create(path.source.x, path.source.y, path.source.z, renderMaster);
+				path.get3DRenderer().create(path.source.x, path.source.y, path.source.z, renderEngine);
 			}
 		}
 	}
 
 	private void createLand() {
 		for (final Land land : universe.landList) {
-			land.get3DRenderer().create(renderMaster);
+			land.get3DRenderer().create(renderEngine);
 		}
 	}
 
 	private void createPlanets() {
 		for (final Planet planet : universe.planetList) {
-			planet.get3DRenderer().create(renderMaster);
+			planet.get3DRenderer().create(renderEngine);
 		}
 	}
 
 	private void createRing() {
-		universe.ring.get3DRenderer().create(renderMaster);
+		universe.ring.get3DRenderer().create(renderEngine);
 	}
+	Info info;
 
 	private void createStage() throws Exception {
+		info = new Info(renderEngine, getAtlasManager(), renderEngine.batch2D, inputMultiplexer);
+		info.createStage();
 		final int height = 12;
 		stage = new Stage();
 		font = new BitmapFont();
@@ -218,9 +380,8 @@ public class Screen3D implements ScreenListener, ApplicationListener, InputProce
 	private void createTraders() {
 		for (final Planet planet : renderMaster.universe.planetList) {
 			for (final Trader trader : planet.traderList) {
-				trader.get3DRenderer().create(renderMaster);
+				trader.get3DRenderer().create(renderEngine);
 			}
-
 		}
 	}
 
@@ -229,6 +390,7 @@ public class Screen3D implements ScreenListener, ApplicationListener, InputProce
 		try {
 			//			if (mp3Player != null)
 			//				mp3Player.dispose();
+			audioEngine.dispose();
 			if (profiler.isEnabled()) {
 				profiler.disable();
 			}
@@ -290,22 +452,22 @@ public class Screen3D implements ScreenListener, ApplicationListener, InputProce
 			queueScreenshot();
 			return true;
 		case Input.Keys.NUM_1:
-			renderMaster.sceneManager.setAlwaysDay(!renderMaster.sceneManager.isAlwaysDay());
+			renderEngine.setAlwaysDay(!renderEngine.isAlwaysDay());
 			return true;
 		case Input.Keys.V:
 			vsyncEnabled = !vsyncEnabled;
 			Gdx.graphics.setVSync(vsyncEnabled);
 			return true;
 		case Input.Keys.M:
-			renderMaster.sceneManager.setInfoVisible(!renderMaster.sceneManager.isInfoVisible());
+			setInfoVisible(!isInfoVisible());
 			return true;
 		case Input.Keys.H:
 			try {
 				if (hrtfEnabled) {
-					renderMaster.sceneManager.audioEngine.disableHrtf(0);
+					audioEngine.disableHrtf(0);
 					hrtfEnabled = false;
 				} else {
-					renderMaster.sceneManager.audioEngine.enableHrtf(0);
+					audioEngine.enableHrtf(0);
 					hrtfEnabled = true;
 				}
 			} catch (final OpenAlException e) {
@@ -331,6 +493,13 @@ public class Screen3D implements ScreenListener, ApplicationListener, InputProce
 		}
 		return false;
 
+	}
+	private boolean infoVisible;
+	public boolean isInfoVisible() {
+		return infoVisible;
+	}
+	public void setInfoVisible(final boolean infoVisible) {
+		this.infoVisible = infoVisible;
 	}
 
 	//	Sector3DRenderer sector3DRenderer = new Sector3DRenderer();
@@ -461,6 +630,7 @@ public class Screen3D implements ScreenListener, ApplicationListener, InputProce
 	@Override
 	public void render() {
 		try {
+			renderEngine.cpuGraph.begin();
 			universe.advanceInTime();
 			if (profiler.isEnabled()) {
 				profiler.reset();// reset on each frame
@@ -508,7 +678,7 @@ public class Screen3D implements ScreenListener, ApplicationListener, InputProce
 
 	private void render(final long currentTime) throws Exception {
 		final float deltaTime = Gdx.graphics.getDeltaTime();
-		renderMaster.sceneManager.updateCamera(centerXD, 0f, centerYD);
+		renderEngine.updateCamera(centerXD, 0f, centerYD);
 		if (followMode && universe.selected != null) {
 			if (System.currentTimeMillis() - lastCameraDirty > 1000) {
 				universe.setSelected(universe.selected, true);
@@ -521,17 +691,74 @@ public class Screen3D implements ScreenListener, ApplicationListener, InputProce
 		renderPlanets(currentTime);
 		renderGoods(currentTime);
 		renderTraders(currentTime);
+		audioEngine.begin(camera);
+		audioEngine.end();
+		renderEngine.cpuGraph.end();
 
-		renderMaster.sceneManager.render(currentTime, deltaTime, takeScreenShot);
-		renderMaster.sceneManager.postProcessRender();
-		renderMaster.sceneManager.renderStage();
+		renderEngine.gpuGraph.begin();
+		renderEngine.render(currentTime, deltaTime, takeScreenShot);
+		renderEngine.postProcessRender();
 		render2DMaster.batch.begin();
 		renderUniverse();
 		renderDemo();
 		render2DMaster.batch.end();
+		renderEngine.gpuGraph.end();
 		renderStage();
-		renderMaster.sceneManager.handleQueuedScreenshot(takeScreenShot);
+		renderEngine.handleQueuedScreenshot(takeScreenShot);
 		takeScreenShot = false;
+
+	}
+	private void renderStage() throws Exception {
+		if (infoVisible) {
+			info.update(universe, universe.selected, renderEngine);
+			info.act(Gdx.graphics.getDeltaTime());
+			info.draw();
+		}
+		int labelIndex = 0;
+		// fps
+		{
+			stringBuilder.setLength(0);
+			stringBuilder.append(" FPS ").append(Gdx.graphics.getFramesPerSecond());
+			labels.get(labelIndex++).setText(stringBuilder);
+		}
+		//audio sources
+		//		{
+		//			stringBuilder.setLength(0);
+		//			stringBuilder.append(" audio sources: ").append(renderMaster.sceneManager.audioEngine.getEnabledAudioSourceCount() + " / " + renderMaster.sceneManager.audioEngine.getDisabledAudioSourceCount());
+		//			labels.get(labelIndex++).setText(stringBuilder);
+		//		}
+		//time
+		{
+			stringBuilder.setLength(0);
+
+			final float	time	= renderEngine.getCurrentDayTime();
+			final int	hours	= (int) time;
+			final int	minutes	= (int) (60 * ((time - (int) time) * 100) / 100);
+			stringBuilder.append(" time ").append(hours).append(":").append(minutes);
+			labels.get(labelIndex++).setText(stringBuilder);
+		}
+//		{
+//			stringBuilder.setLength(0);
+//
+//			final float time = renderEngine.getTimeOfDay();
+//			final int hours = (int) time;
+//			final int minutes = (int) (60 * ((time - (int) time) * 100) / 100);
+//			stringBuilder.append(" time ").append(hours).append(":").append(minutes);
+//			labels.get(labelIndex++).setText(stringBuilder);
+//		}
+		{
+			stringBuilder.setLength(0);
+			Camera camera1 = renderEngine.getShadowLight().getCamera();
+			stringBuilder.append(" x=").append(camera1.position.x).append(" y=").append(camera1.position.y).append(" z=").append(camera1.position.z);
+			labels.get(labelIndex++).setText(stringBuilder);
+		}
+		{
+			stringBuilder.setLength(0);
+			Camera camera1 = renderEngine.getCamera();
+			stringBuilder.append(" x=").append(camera1.position.x).append(" y=").append(camera1.position.y).append(" z=").append(camera1.position.z);
+			labels.get(labelIndex++).setText(stringBuilder);
+		}
+		stage.draw();
 	}
 
 	private void renderDemo() throws IOException {
@@ -554,7 +781,7 @@ public class Screen3D implements ScreenListener, ApplicationListener, InputProce
 			}
 
 			Color demoTextColor;
-			if (renderMaster.sceneManager.isNight())
+			if (renderEngine.isNight())
 				demoTextColor = new Color(1f, 1f, 1f, 0.2f);
 			else
 				demoTextColor = new Color(0f, 0f, 0f, 0.6f);
@@ -599,14 +826,15 @@ public class Screen3D implements ScreenListener, ApplicationListener, InputProce
 		for (final Planet planet : universe.planetList) {
 			int index = 0;
 			for (final Good good : planet.getGoodList()) {
-				good.get3DRenderer().update(planet.x, planet.y, planet.z, renderMaster, currentTime, renderMaster.sceneManager.getTimeOfDay(), index++, false);
+				good.get3DRenderer().update(planet.x, planet.y, planet.z, renderEngine, currentTime, renderEngine.getTimeOfDay(), index++, false);
+//				good.get3DRenderer().renderText(planet.x, planet.y, planet.z, renderEngine, index++);
 			}
 		}
 	}
 
 	private void renderJumpGates(final long currentTime) throws Exception {
 		for (final Path path : universe.pathList) {
-			path.get3DRenderer().update(path.source.x, path.source.y, path.source.z, renderMaster, currentTime, renderMaster.sceneManager.getTimeOfDay(), 0, path.selected);
+			path.get3DRenderer().update(path.source.x, path.source.y, path.source.z, renderEngine, currentTime, renderEngine.getTimeOfDay(), 0, path.selected);
 		}
 		//		for (final Planet planet : universe.planetList) {
 		//			for (final Path jumpGate : planet.pathList) {
@@ -617,44 +845,17 @@ public class Screen3D implements ScreenListener, ApplicationListener, InputProce
 
 	private void renderPlanets(final long currentTime) throws Exception {
 		for (final Planet planet : universe.planetList) {
-			planet.get3DRenderer().update(renderMaster, currentTime, renderMaster.sceneManager.getTimeOfDay(), 0, planet == renderMaster.universe.selectedPlanet);
+			planet.get3DRenderer().update(renderEngine, currentTime, renderEngine.getTimeOfDay(), 0, planet == renderMaster.universe.selectedPlanet);
 		}
 	}
 
-	private void renderStage() throws Exception {
-		int labelIndex = 0;
-		// fps
-		{
-			stringBuilder.setLength(0);
-			stringBuilder.append(" FPS ").append(Gdx.graphics.getFramesPerSecond());
-			labels.get(labelIndex++).setText(stringBuilder);
-		}
-		//audio sources
-		//		{
-		//			stringBuilder.setLength(0);
-		//			stringBuilder.append(" audio sources: ").append(renderMaster.sceneManager.audioEngine.getEnabledAudioSourceCount() + " / " + renderMaster.sceneManager.audioEngine.getDisabledAudioSourceCount());
-		//			labels.get(labelIndex++).setText(stringBuilder);
-		//		}
-		//time
-		{
-			stringBuilder.setLength(0);
-
-			final float time = renderMaster.sceneManager.currentDayTime;
-			final int hours = (int) time;
-			final int minutes = (int) (60 * ((time - (int) time) * 100) / 100);
-			stringBuilder.append(" time ").append(hours).append(":").append(minutes);
-			labels.get(labelIndex++).setText(stringBuilder);
-		}
-		stage.draw();
-	}
 
 	private void renderTraders(final long currentTime) throws Exception {
 		for (final Planet planet : renderMaster.universe.planetList) {
 			int index = 0;
 			for (final Trader trader : planet.traderList) {
-				trader.get3DRenderer().update(renderMaster, currentTime, renderMaster.sceneManager.getTimeOfDay(), index++, trader == renderMaster.universe.selectedTrader);
+				trader.get3DRenderer().update(renderEngine, currentTime, renderEngine.getTimeOfDay(), index++, trader == renderMaster.universe.selectedTrader);
 			}
-
 		}
 	}
 
@@ -734,7 +935,6 @@ public class Screen3D implements ScreenListener, ApplicationListener, InputProce
 		//		renderMaster.sceneClusterManager.info.resize(width, height);
 		render2DMaster.width = width;
 		render2DMaster.height = height;
-
 	}
 
 	//	public Planet select(int virtualX, int virtualY) throws Exception {
@@ -784,7 +984,7 @@ public class Screen3D implements ScreenListener, ApplicationListener, InputProce
 
 	@Override
 	public void setCamera(final float x, final float z, final boolean setDirty) throws Exception {
-		renderMaster.sceneManager.setCameraTo(x, z, setDirty);
+		renderEngine.setCameraTo(x, z, setDirty);
 	}
 
 	@Override
@@ -798,7 +998,7 @@ public class Screen3D implements ScreenListener, ApplicationListener, InputProce
 		case Input.Buttons.LEFT:
 			//did we select an object?
 			//			renderMaster.sceneClusterManager.createCoordinates();
-			final GameObject selected = renderMaster.sceneManager.getGameObject(screenX, screenY);
+			final GameObject selected = renderEngine.getGameObject(screenX, screenY);
 			System.out.println("selected " + selected);
 			if (selected != null)
 				try {

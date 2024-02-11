@@ -3,9 +3,9 @@ package de.bushnaq.abdalla.mercator.audio.synthesis.util;
 import java.util.ArrayList;
 import java.util.List;
 
+import de.bushnaq.abdalla.engine.GameObject;
 import de.bushnaq.abdalla.mercator.audio.synthesis.MercatorSynthesizer;
 import de.bushnaq.abdalla.mercator.audio.synthesis.Synthesizer;
-import de.bushnaq.abdalla.mercator.renderer.GameObject;
 import de.bushnaq.abdalla.mercator.universe.sim.trader.Trader;
 import de.bushnaq.abdalla.mercator.util.ModelCreator;
 import org.slf4j.Logger;
@@ -94,15 +94,15 @@ public abstract class TranslationUtil<T extends Translation> extends AudioUtil {
 			buildingGameObject = new GameObject(new ModelInstanceHack(buildingModel), null);
 			buildingGameObject.instance.transform.setToTranslationAndScaling(0, CUBE_SIZE / 2, 0, CUBE_SIZE, CUBE_SIZE, CUBE_SIZE);
 			final PointLight light = new PointLight().set(Color.WHITE, 0, CUBE_SIZE * 2, 0, 10000f);
-			sceneManager.add(light, true);
-			sceneManager.addStatic(buildingGameObject);
+			sceneManager.renderEngine.add(light, true);
+			sceneManager.renderEngine.addStatic(buildingGameObject);
 			cityGameObject = new GameObject(new ModelInstanceHack(cityModel), null);
 			cityGameObject.instance.transform.setToTranslationAndScaling(0, -CUBE_SIZE / 2, 0, MAX_CITY_SIZE, CUBE_SIZE, MAX_CITY_SIZE);
-			sceneManager.addStatic(cityGameObject);
+			sceneManager.renderEngine.addStatic(cityGameObject);
 			for (int l = 0; l < numberOfSources; l++) {
 				final GameObject go = new GameObject(new ModelInstanceHack(createCube(getColor(l))), null);
 				gameObjects.add(go);
-				sceneManager.addDynamic(go);
+				sceneManager.renderEngine.addDynamic(go);
 				final Synthesizer synth = sceneManager.audioEngine.createAudioProducer(MercatorSynthesizer.class);
 				synth.play();
 				synths.add(synth);
@@ -210,7 +210,7 @@ public abstract class TranslationUtil<T extends Translation> extends AudioUtil {
 		final float y = aY;
 		final float z = aZ;
 		//draw text
-		final PolygonSpriteBatch batch = sceneManager.batch2D;
+		final PolygonSpriteBatch batch = sceneManager.renderEngine.batch2D;
 		final BitmapFont font = sceneManager.getAtlasManager().modelFont;
 		{
 			final Matrix4 m = new Matrix4();

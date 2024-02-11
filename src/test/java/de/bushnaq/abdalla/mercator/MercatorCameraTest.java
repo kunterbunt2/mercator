@@ -1,8 +1,8 @@
 package de.bushnaq.abdalla.mercator;
 
+import de.bushnaq.abdalla.engine.camera.MovingCamera;
 import de.bushnaq.abdalla.mercator.audio.synthesis.util.LiniarTranslation;
 import de.bushnaq.abdalla.mercator.audio.synthesis.util.TranslationUtil;
-import de.bushnaq.abdalla.mercator.renderer.camera.MovingCamera;
 import de.bushnaq.abdalla.mercator.universe.sim.trader.Trader;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -44,13 +44,13 @@ public class MercatorCameraTest extends TranslationUtil<LiniarTranslation> {
 			logger.error(e.getMessage(), e);
 		}
 
-		sceneManager.setInfoVisible(false);
+//		sceneManager.setInfoVisible(false);//TODO
 	}
 
 	private void createCamera() {
 		Gdx.files = new Lwjgl3Files();
 		Lwjgl3NativesLoader.load();
-		final MovingCamera camera = sceneManager.getCamera();
+		final MovingCamera camera = sceneManager.renderEngine.getCamera();
 		camera.position.set(100f, 0f, 0f);
 		camera.up.set(0f, 1f, 0f);
 		camera.lookAt(0, 0, 0);
@@ -99,7 +99,7 @@ public class MercatorCameraTest extends TranslationUtil<LiniarTranslation> {
 	}
 
 	private void moveCamera(final float x, final float y, final float z) {
-		final MovingCamera camera = sceneManager.getCamera();
+		final MovingCamera camera = sceneManager.renderEngine.getCamera();
 		camera.position.set(x, y, z);
 		camera.up.set(0f, 1f, 0f);
 		camera.lookAt(0, 0, 0);

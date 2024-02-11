@@ -14,8 +14,8 @@ public class Launcher3DDemo {
 		final GraphicsDimentions gd = GraphicsDimentions.D3;
 		final Universe universe = new Universe("U-0", gd, EventLevel.warning, Sim.class);
 		universe.create(UNIVERSE_GENERATION_RANDOM_SEED, UNIVERSE_SIZE, 10L * TimeUnit.TICKS_PER_DAY);
-		final Screen3D screen = new Screen3D(universe, LaunchMode.demo);
-		new DesktopLauncher(universe, screen);
+//		final Screen3D screen = new Screen3D(universe, LaunchMode.demo);
+//		new DesktopLauncher(universe);
 	}
 
 }

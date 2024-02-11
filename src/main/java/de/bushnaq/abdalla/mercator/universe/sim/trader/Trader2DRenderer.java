@@ -1,22 +1,21 @@
 package de.bushnaq.abdalla.mercator.universe.sim.trader;
 
-import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.math.Vector3;
-import de.bushnaq.abdalla.mercator.renderer.ObjectRenderer;
-import de.bushnaq.abdalla.mercator.renderer.Render2DMaster;
+import de.bushnaq.abdalla.engine.ObjectRenderer;
+import de.bushnaq.abdalla.engine.RenderEngine2D;
+import de.bushnaq.abdalla.engine.RenderEngine3D;
 import de.bushnaq.abdalla.mercator.renderer.Screen2D;
 import de.bushnaq.abdalla.mercator.universe.Universe;
 import de.bushnaq.abdalla.mercator.universe.planet.Planet2DRenderer;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Circle;
 import de.bushnaq.abdalla.mercator.universe.planet.Planet3DRenderer;
-import net.mgsx.gltf.scene3d.attributes.PBRColorAttribute;
 
-public class Trader2DRenderer extends ObjectRenderer {
+public class Trader2DRenderer extends ObjectRenderer<Screen2D> {
     private static final float RADIUS = Planet2DRenderer.PLANET_SIZE * 2.0f;
     // static final Color SELECTED_TRADER_COLOR = Color.ORANGE; //0xffff0000;
-	public static final Color TADER_COLOR_IS_GOOD = Color.LIGHT_GRAY; // 0xaaaaaa
-	public static final Color TRADER_COLOR = new Color(.7f, .7f, .7f, 0.45f); // 0xffcc5555;
+    public static final Color TADER_COLOR_IS_GOOD = Color.LIGHT_GRAY; // 0xaaaaaa
+    public static final Color TRADER_COLOR = new Color(.7f, .7f, .7f, 0.45f); // 0xffcc5555;
     public static final float TRADER_HEIGHT = 17;
     private static final float TRADER_SIZE_X = 16 * 2 / Universe.WORLD_SCALE;
     private static final float TRADER_SIZE_Y = 8 * 2 / Universe.WORLD_SCALE;
@@ -42,7 +41,7 @@ public class Trader2DRenderer extends ObjectRenderer {
         circle = new Circle(0, 0, TRADER_WIDTH + 1);
     }
 
-    private void drawTrader(final Trader trader, final Render2DMaster renderMaster, final int index, final boolean selected) {
+    private void drawTrader(final Trader trader, final RenderEngine2D<Screen2D> renderEngine, final int index, final boolean selected) {
 //		Color color;
 //		if (selected) {
 //			color = Screen2D.SELECTED_COLOR;
@@ -171,32 +170,31 @@ public class Trader2DRenderer extends ObjectRenderer {
             }
             lastSelected = selected;
         }
-		Color color;
-		if (selected) {
-			color = Screen2D.SELECTED_COLOR;
-		}
-		else {
-			color = TRADER_COLOR;
-		}
-		if (!trader.traderStatus.isGood()) {
-			color = TADER_COLOR_IS_GOOD;
-		}
-		final float hps = TRADER_WIDTH / 2;
-		renderMaster.fillCircle(renderMaster.atlasManager.planetTextureRegion, trader.x, trader.z, hps + 1, 32, color);
-		// renderMaster.bar( renderMaster.fillCircle.get( TRADER_WIDTH, TRADER_HEIGHT ),
-		// x - hps, y - hps, x + hps, y + hps, color );
-		if (renderMaster.camera.zoom < 3.0f) {
-			renderMaster.lable(trader.x - hps, trader.z - hps, TRADER_WIDTH * 1, TRADER_WIDTH * 3, renderMaster.atlasManager.defaultFont, color, trader.getName(), color, String.format("%.0f", trader.getCredits()), renderMaster.queryCreditColor(trader.getCredits(), Trader.TRADER_START_CREDITS));
-		}
-		circle.setPosition(trader.x, trader.z);
-        if(trader.getName().equals("T-13") ) {
+        Color color;
+        if (selected) {
+            color = Screen2D.SELECTED_COLOR;
+        } else {
+            color = TRADER_COLOR;
+        }
+        if (!trader.traderStatus.isGood()) {
+            color = TADER_COLOR_IS_GOOD;
+        }
+        final float hps = TRADER_WIDTH / 2;
+        renderEngine.getGameEngine().renderEngine.fillCircle(renderEngine.getGameEngine().atlasManager.planetTextureRegion, trader.x, trader.z, hps + 1, 32, color);
+        // renderMaster.bar( renderMaster.fillCircle.get( TRADER_WIDTH, TRADER_HEIGHT ),
+        // x - hps, y - hps, x + hps, y + hps, color );
+        if (renderEngine.getGameEngine().renderEngine.camera.zoom < 3.0f) {
+            renderEngine.getGameEngine().renderEngine.lable(renderEngine.getGameEngine().atlasManager.dottedLineTextureRegion, trader.x - hps, trader.z - hps, Trader2DRenderer.TRADER_WIDTH,Trader2DRenderer.TRADER_HEIGHT, TRADER_WIDTH * 1, TRADER_WIDTH * 3, renderEngine.getGameEngine().atlasManager.defaultFont, color, trader.getName(), color, String.format("%.0f", trader.getCredits()), renderEngine.getGameEngine().queryCreditColor(trader.getCredits(), Trader.TRADER_START_CREDITS));
+        }
+        circle.setPosition(trader.x, trader.z);
+        if (trader.getName().equals("T-13")) {
             System.out.println(String.format("%f %f", trader.x, trader.z));
         }
     }
 
     @Override
-    public void render(final float px, final float py, final Render2DMaster renderMaster, final int index, final boolean selected) {
-        drawTrader(trader, renderMaster, index, selected);
+    public void render(final float px, final float py, final RenderEngine2D<Screen2D> renderEngine, final int index, final boolean selected) {
+        drawTrader(trader, renderEngine, index, selected);
     }
 
     @Override

@@ -1,12 +1,10 @@
 package de.bushnaq.abdalla.mercator.universe.path;
 
-import de.bushnaq.abdalla.mercator.renderer.GameObject;
-import de.bushnaq.abdalla.mercator.renderer.ObjectRenderer;
-import de.bushnaq.abdalla.mercator.renderer.Render3DMaster;
-import de.bushnaq.abdalla.mercator.renderer.SceneManager;
+import de.bushnaq.abdalla.engine.GameObject;
+import de.bushnaq.abdalla.engine.ObjectRenderer;
+import de.bushnaq.abdalla.engine.RenderEngine3D;
 import de.bushnaq.abdalla.mercator.renderer.Screen3D;
 import de.bushnaq.abdalla.mercator.universe.Universe;
-import de.bushnaq.abdalla.mercator.universe.planet.Planet3DRenderer;
 import de.bushnaq.abdalla.mercator.universe.sim.trader.Trader;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -19,7 +17,7 @@ import com.badlogic.gdx.math.Vector3;
 import net.mgsx.gltf.scene3d.attributes.PBRColorAttribute;
 import net.mgsx.gltf.scene3d.model.ModelInstanceHack;
 
-public class JumpGate3DRenderer extends ObjectRenderer {
+public class JumpGate3DRenderer extends ObjectRenderer<Screen3D> {
 	private static final float JUMP_GATE_HIGHT = 16 / Universe.WORLD_SCALE;
 	public static final float JUMP_GATE_SIZE = 16 / Universe.WORLD_SCALE;
 	private static final float JUMPGATE_DEPTH = 0 / Universe.WORLD_SCALE /*+ Planet3DRenderer.WATER_Y*/;
@@ -42,11 +40,11 @@ public class JumpGate3DRenderer extends ObjectRenderer {
 	}
 
 	@Override
-	public void create(final float x, final float y, final float z, final Render3DMaster renderMaster) {
-		createJumpGate(x, y, z, renderMaster);
+	public void create(final float x, final float y, final float z, final RenderEngine3D<Screen3D> renderEngine) {
+		createJumpGate(x, y, z, renderEngine);
 	}
 
-	private void createJumpGate(final float x, final float y, final float z, final Render3DMaster renderMaster) {
+	private void createJumpGate(final float x, final float y, final float z, final RenderEngine3D<Screen3D> renderEngine) {
 		//jump gate
 		//			Vector2 target = new Vector2(jumpGate.targetPlanet.x, jumpGate.targetPlanet.y);
 		//			Vector2 start = new Vector2(x, y);
@@ -98,12 +96,12 @@ public class JumpGate3DRenderer extends ObjectRenderer {
 		//		Vector3 up = new Vector3(0, scalez, scaley);
 		//		up.nor();
 
-		instance = new GameObject(new ModelInstanceHack(renderMaster.jumpGate), null);
+		instance = new GameObject(new ModelInstanceHack(renderEngine.getGameEngine().renderMaster.jumpGate), null, this);
 		//			instance = new ModelInstance(renderMaster.boxModel2);
 		//			instance.materials.get(0).set(ColorAttribute.createDiffuse(JUMPGATE_COLOR));
 		//		final Color sectorColor = renderMaster.getDistinctiveColor(jumpGate.planet.sector.type);
 		//		instance.instance.materials.get(0).set(new PBRColorAttribute(PBRColorAttribute.BaseColorFactor, sectorColor));
-		renderMaster.sceneManager.addStatic(instance);
+		renderEngine.addStatic(instance);
 		final float directionLength = direction.len() + Screen3D.SPACE_BETWEEN_OBJECTS;
 
 		//		final Vector3 shift = new Vector3(-direction.z, direction.y, direction.x);
@@ -119,7 +117,7 @@ public class JumpGate3DRenderer extends ObjectRenderer {
 		instance.update();
 	}
 
-	private void drawJumpGate(final float x, final float y, final float z, final Render3DMaster renderMaster, final long currentTime, final boolean selected) {
+	private void drawJumpGate(final float x, final float y, final float z, final RenderEngine3D<Screen3D> renderEngine, final long currentTime, final boolean selected) {
 		if (instance != null && (selected != lastSelected || jumpGate.source.trader != lastTrader)) {
 			if (selected) {
 //				if (jumpGate.source.trader != null) {
@@ -135,7 +133,7 @@ public class JumpGate3DRenderer extends ObjectRenderer {
 //				} else
 				{
 					instance.instance.materials.get(0).remove(ColorAttribute.Emissive);
-					final PBRColorAttribute ca = (PBRColorAttribute) renderMaster.cubeBase1.materials.get(0).get(PBRColorAttribute.BaseColorFactor);
+					final PBRColorAttribute ca = (PBRColorAttribute) renderEngine.getGameEngine().renderMaster.cubeBase1.materials.get(0).get(PBRColorAttribute.BaseColorFactor);
 					instance.instance.materials.get(0).set(new PBRColorAttribute(PBRColorAttribute.BaseColorFactor, ca.color));
 				}
 			}
@@ -145,9 +143,9 @@ public class JumpGate3DRenderer extends ObjectRenderer {
 	}
 
 	@Override
-	public void renderText(final SceneManager sceneManager, final int index, final boolean selected) {
+	public void renderText(final RenderEngine3D<Screen3D> renderEngine, final int index, final boolean selected) {
 		final String text1 = jumpGate.target.getName();
-		renderTextOnTop(sceneManager, 0f, 0f, text1, JUMP_GATE_SIZE/4);
+		renderTextOnTop(renderEngine, 0f, 0f, text1, JUMP_GATE_SIZE/4);
 //		if (jumpGate.source.trader != null) {
 //			final String text2 = jumpGate.source.trader.getName();
 //			renderTextOnTop(sceneManager, 0f, 10f, text2, JUMP_GATE_SIZE/2);
@@ -182,13 +180,13 @@ public class JumpGate3DRenderer extends ObjectRenderer {
 	//		}
 	//	}
 
-	private void renderTextOnTop(final SceneManager sceneManager, final float dx, final float dy, final String text, final float size) {
+	private void renderTextOnTop(final RenderEngine3D<Screen3D> renderEngine, final float dx, final float dy, final String text, final float size) {
 		final float x = jumpGate.target.x;
 		final float y = jumpGate.target.y +JUMP_GATE_HIGHT/2/*- 10 / Universe.WORLD_SCALE*/;
 		final float z = jumpGate.target.z;
 		//draw text
-		final PolygonSpriteBatch batch = sceneManager.batch2D;
-		final BitmapFont font = sceneManager.getAtlasManager().modelFont;
+		final PolygonSpriteBatch batch = renderEngine.batch2D;
+		final BitmapFont font = renderEngine.getGameEngine().getAtlasManager().modelFont;
 		{
 			final Matrix4 m = new Matrix4();
 			final float fontSize = font.getLineHeight();
@@ -212,8 +210,8 @@ public class JumpGate3DRenderer extends ObjectRenderer {
 	}
 
 	@Override
-	public void update(final float x, final float y, final float z, final Render3DMaster renderMaster, final long currentTime, final float timeOfDay, final int index, final boolean selected) {
-		drawJumpGate(x, y, z, renderMaster, currentTime, selected);
+	public void update(final float x, final float y, final float z, final RenderEngine3D<Screen3D> renderEngine, final long currentTime, final float timeOfDay, final int index, final boolean selected) {
+		drawJumpGate(x, y, z, renderEngine, currentTime, selected);
 	}
 
 	@Override

@@ -18,8 +18,8 @@ public class Launcher3DDeveMode {
 		universe.eventManager.setObjectFilter(trader);
 		universe.eventManager.setEnablePrintEvent(true);
 		universe.setSelected(trader, true);
-		final Screen3D screen = new Screen3D(universe, LaunchMode.development);
-		new DesktopLauncher(universe, screen);
+//		final Screen3D screen = new Screen3D(universe, LaunchMode.development);
+//		new DesktopLauncher(universe);
 	}
 
 }

@@ -1,14 +1,15 @@
 package de.bushnaq.abdalla.mercator.universe.ring;
 
-import de.bushnaq.abdalla.mercator.renderer.GameObject;
-import de.bushnaq.abdalla.mercator.renderer.ObjectRenderer;
-import de.bushnaq.abdalla.mercator.renderer.Render3DMaster;
+import de.bushnaq.abdalla.engine.GameObject;
+import de.bushnaq.abdalla.engine.ObjectRenderer;
+import de.bushnaq.abdalla.engine.RenderEngine3D;
+import de.bushnaq.abdalla.mercator.renderer.Screen3D;
 import de.bushnaq.abdalla.mercator.universe.planet.Planet;
 import de.bushnaq.abdalla.mercator.universe.planet.Planet3DRenderer;
 
 import net.mgsx.gltf.scene3d.model.ModelInstanceHack;
 
-public class Ring3DRenderer extends ObjectRenderer {
+public class Ring3DRenderer extends ObjectRenderer<Screen3D> {
 
 	private final Ring ring;
 
@@ -17,7 +18,7 @@ public class Ring3DRenderer extends ObjectRenderer {
 	}
 
 	@Override
-	public void create(final Render3DMaster renderMaster) {
+	public void create(final RenderEngine3D<Screen3D> renderEngine) {
 		final float delta = (ring.universe.size + 1) * Planet.PLANET_DISTANCE * 2;
 		final float deltaA = 360.0f / ring.segments;
 		//sector
@@ -52,18 +53,18 @@ public class Ring3DRenderer extends ObjectRenderer {
 		//		}
 		//		System.out.println("finished");
 		{
-			final GameObject sectorInstance = new GameObject(new ModelInstanceHack(renderMaster.sector), null);
+			final GameObject sectorInstance = new GameObject(new ModelInstanceHack(renderEngine.getGameEngine().renderMaster.sector), null);
 			sectorInstance.instance.transform.setToTranslationAndScaling(0, Planet3DRenderer.SECTOR_Y, 0, delta, 8, delta);
 			sectorInstance.update();
-			renderMaster.sceneManager.addStatic(sectorInstance);
+			renderEngine.addStatic(sectorInstance);
 
 		}
 		//water
 		{
-			final GameObject sectorInstance = new GameObject(new ModelInstanceHack(renderMaster.water), null);
+			final GameObject sectorInstance = new GameObject(new ModelInstanceHack(renderEngine.getGameEngine().renderMaster.water), null);
 			sectorInstance.instance.transform.setToTranslationAndScaling(0, Planet3DRenderer.WATER_Y, 0, delta, 1, delta);
 			sectorInstance.update();
-			renderMaster.sceneManager.addStatic(sectorInstance);
+			renderEngine.addStatic(sectorInstance);
 		}
 	}
 

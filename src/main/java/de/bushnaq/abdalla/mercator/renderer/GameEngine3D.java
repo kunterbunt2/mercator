@@ -64,6 +64,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class GameEngine3D implements ScreenListener, ApplicationListener, InputProcessor {
+    public static final  float                        CAMERA_OFFSET_X               = 300f;
+    public static final  float                        CAMERA_OFFSET_Y               = 500f;
+    public static final  float                        CAMERA_OFFSET_Z               = 400f;
     //	private static final String BATCH_END_DURATION = "batch.end()";
     //	private static final String DRAW_DURATION = "draw()";
     public static final  Color                        FACTORY_COLOR                 = Color.DARK_GRAY; // 0xff000000;
@@ -182,11 +185,12 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
             renderEngine.setReflectionClippingPlane(-(context.getWaterLevel() - 2));
             renderEngine.setRefractionClippingPlane((context.getWaterLevel() - 2));
             renderEngine.setShadowEnabled(true);
-            renderEngine.setSkyBox(true);
             renderEngine.getFog().setColor(Color.WHITE);
             renderEngine.getFog().setBeginDistance(3000f);
             renderEngine.getFog().setFullDistance(5000f);
             renderEngine.setDynamicDayTime(true);
+            renderEngine.setSceneBoxMin(new Vector3(-1000, -1000, -1000));
+            renderEngine.setSceneBoxMax(new Vector3(1000, 1000, 1000));
 
             renderMaster   = new Render3DMaster(context, universe, this, launchMode);
             render2DMaster = new Render2DMaster(universe);
@@ -309,7 +313,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
 
         final Vector3 lookat = new Vector3(planet.x, 0, planet.z);
 //		final Vector3 lookat = new Vector3(0, 0, 0);
-        camera.position.set(lookat.x + 300f / Universe.WORLD_SCALE, lookat.y + 500f / Universe.WORLD_SCALE, lookat.z + 400f / Universe.WORLD_SCALE);
+        camera.position.set(lookat.x + CAMERA_OFFSET_X / Universe.WORLD_SCALE, lookat.y + CAMERA_OFFSET_Y / Universe.WORLD_SCALE, lookat.z + CAMERA_OFFSET_Z / Universe.WORLD_SCALE);
         camera.up.set(0, 1, 0);
         camera.lookAt(lookat);
         camera.near = 8f;

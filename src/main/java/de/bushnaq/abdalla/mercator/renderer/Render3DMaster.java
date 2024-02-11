@@ -130,7 +130,7 @@ public class Render3DMaster {
     }
 
     public void create() throws Exception {
-        cubeGoldLeaves = new GLTFLoader().load(Gdx.files.internal("models/glTF/cube-Gold_leafs/cube-Gold_leafs.gltf"));
+        cubeGoldLeaves = new GLTFLoader().load(Gdx.files.internal(AtlasManager.getAssetsFolderName() + "/models/glTF/cube-Gold_leafs/cube-Gold_leafs.gltf"));
         //		NormalTangentTest = new GLTFLoader().load(Gdx.files.internal("models/glTF/NormalTangentTest/glTF/NormalTangentTest.gltf"));
         //		initTextures();
         //		this.sceneBox.set(new Vector3(-3, -3, -3), new Vector3(3, 3, 3));
@@ -138,7 +138,7 @@ public class Render3DMaster {
 //		sceneManager = new RenderEngine<GameEngine>(context, inputProcessor, null, null, null);
 
         initColors();
-        final Texture           texture      = new Texture(Gdx.files.internal("tiles.png"));
+        final Texture           texture      = new Texture(Gdx.files.internal(AtlasManager.getAssetsFolderName() + "/tiles.png"));
         final TextureRegion[][] tiles        = TextureRegion.split(texture, 32, 32);
         final ModelBuilder      modelBuilder = new ModelBuilder();
         final ModelCreator      modelCreator = new ModelCreator();
@@ -152,12 +152,12 @@ public class Render3DMaster {
         //		whietBoxModel = modelCreator.createBox(tiles[1][3],	new Material(TextureAttribute.createDiffuse(texture), ColorAttribute.createDiffuse(Color.WHITE)),Usage.Position | Usage.Normal | Usage.TextureCoordinates);
         //		cubeGoldNatural = new GLTFLoader().load(Gdx.files.internal("models/glTF/cube-gold_natural/cube-gold_natural.gltf"));
         //		cubeWhitePowderCoatingTexture = new GLTFLoader().load(Gdx.files.internal("models/glTF/cube-White Powder Coating Texture/cube-White Powder Coating Texture.gltf"));
-        cubeAluminiumBrushed = new GLTFLoader().load(Gdx.files.internal("models/glTF/cube-Aluminium_brushed/cube-Aluminium_brushed.gltf"));
+        cubeAluminiumBrushed = new GLTFLoader().load(Gdx.files.internal(AtlasManager.getAssetsFolderName() + "/models/glTF/cube-Aluminium_brushed/cube-Aluminium_brushed.gltf"));
         //		cubeMetalBaseGrungy = new GLTFLoader().load(Gdx.files.internal("models/glTF/cube-Metal_Base_Grungy/cube-Metal_Base_Grungy.gltf"));
 
         //		cubeRed = new GLTFLoader().load(Gdx.files.internal("models/glTF/cube-red.gltf"));
         //		cubeBlack = new GLTFLoader().load(Gdx.files.internal("models/glTF/cube-black.gltf"));
-        BoomBox = new GLTFLoader().load(Gdx.files.internal("models/glTF/BoomBox.gltf"));
+        BoomBox = new GLTFLoader().load(Gdx.files.internal(AtlasManager.getAssetsFolderName() + "/models/glTF/BoomBox.gltf"));
         //		cube1 = new GLTFLoader().load(Gdx.files.internal("models/glTF/cube-Bronze_yellow/cube-Bronze_yellow.gltf"));
         //		cubeMatalSolidPaintWhite = new GLTFLoader().load(Gdx.files.internal("models/glTF/cube-Matal_solid_paint_white/cube-Matal_solid_paint_white.gltf"));
         //		sphereMatalSolidPaintWhite = new GLTFLoader().load(Gdx.files.internal("models/glTF/sphere_Matal solid paint white/sphere_Matal solid paint white.gltf"));
@@ -165,7 +165,7 @@ public class Render3DMaster {
         //		Metal_Floor_01 = new GLTFLoader().load(Gdx.files.internal("models/glTF/Metal_Floor_01/Metal_Floor_01.gltf"));
         //		MetalRoughSpheres = new GLTFLoader().load(Gdx.files.internal("models/glTF/MetalRoughSpheres/glTF/MetalRoughSpheres.gltf"));
 
-        Rock_Alien_02 = new GLTFLoader().load(Gdx.files.internal("models/glTF/Rock_Alien_02/Rock_Alien_02.gltf"));
+        Rock_Alien_02 = new GLTFLoader().load(Gdx.files.internal(AtlasManager.getAssetsFolderName() + "/models/glTF/Rock_Alien_02/Rock_Alien_02.gltf"));
         //		rock = new GLTFLoader().load(Gdx.files.internal("models/glTF/Rock/Rock.gltf"));
         {
             final Attribute metallic  = PBRFloatAttribute.createMetallic(0.3f);
@@ -278,13 +278,13 @@ public class Render3DMaster {
             jumpGate = modelBuilder.createBox(1.0f, 1.0f, 1.0f, material, Usage.Position | Usage.Normal);
         }
         {
-            wheel = new GLTFLoader().load(Gdx.files.internal("models/glTF/wheel/wheel.gltf"));
+            wheel = new GLTFLoader().load(Gdx.files.internal(AtlasManager.getAssetsFolderName() + "/models/glTF/wheel/wheel.gltf"));
             final Material material = wheel.scene.model.materials.get(0);
             material.set(buildingCube.materials.get(0));
             set(buildingCube.materials.get(0), material);
 
         }
-        turbine = new GLTFLoader().load(Gdx.files.internal("models/glTF/turbine/turbine.gltf"));
+        turbine = new GLTFLoader().load(Gdx.files.internal(AtlasManager.getAssetsFolderName() + "/models/glTF/turbine/turbine.gltf"));
         //		animatedCube = new GLTFLoader().load(Gdx.files.internal("models/glTF/AnimatedCube/glTF/AnimatedCube.gltf"));
         //		cube = new GLTFLoader().load(Gdx.files.internal("models/glTF/cube/cube.gltf"));
         //		Cracked_ice = new GLTFLoader().load(Gdx.files.internal("models/glTF/Cracked_ice/Cracked_ice.gltf"));

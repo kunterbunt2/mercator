@@ -42,14 +42,14 @@ public class AtlasManager {
     public              AtlasRegion  dottedLineTextureRegion;
     public              AtlasRegion  factoryTextureRegion;
     public              FontData[]   fontDataList     = {
-            new FontData("default-font", "fonts/Roboto-Bold.ttf", GameEngine2D.FONT_SIZE),//
-            new FontData("zoomin-default-font", "fonts/Roboto-Bold.ttf", SOOMIN_FONT_SIZE),//
-            new FontData("time-machine-font", "fonts/Roboto-Bold.ttf", GameEngine2D.TIME_MACHINE_FONT_SIZE),//
-            new FontData("chart-font", "fonts/Roboto-bold.ttf", GameEngine2D.CHART_FONT_SIZE),//
-            new FontData("menu-font", "fonts/Roboto-Regular.ttf", GameEngine2D.MENU_FONT_SIZE),//
-            new FontData("model-font", "fonts/Roboto-Bold.ttf", 64),//
-            new FontData("demo-big-font", "fonts/Roboto-Bold.ttf", 128),//
-            new FontData("demo-mid-font", "fonts/Roboto-Regular.ttf", 32)//
+            new FontData("default-font", Context.getAppFolderName() + "/assets/fonts/Roboto-Bold.ttf", GameEngine2D.FONT_SIZE),//
+            new FontData("zoomin-default-font", Context.getAppFolderName() + "/assets/fonts/Roboto-Bold.ttf", SOOMIN_FONT_SIZE),//
+            new FontData("time-machine-font", Context.getAppFolderName() + "/assets/fonts/Roboto-Bold.ttf", GameEngine2D.TIME_MACHINE_FONT_SIZE),//
+            new FontData("chart-font", Context.getAppFolderName() + "/assets/fonts/Roboto-bold.ttf", GameEngine2D.CHART_FONT_SIZE),//
+            new FontData("menu-font", Context.getAppFolderName() + "/assets/fonts/Roboto-Regular.ttf", GameEngine2D.MENU_FONT_SIZE),//
+            new FontData("model-font", Context.getAppFolderName() + "/assets/fonts/Roboto-Bold.ttf", 64),//
+            new FontData("demo-big-font", Context.getAppFolderName() + "/assets/fonts/Roboto-Bold.ttf", 128),//
+            new FontData("demo-mid-font", Context.getAppFolderName() + "/assets/fonts/Roboto-Regular.ttf", 32)//
     };
     public              AtlasRegion  gaugeTextureRegion;
     //	public Texture good_baseColor;
@@ -115,7 +115,7 @@ public class AtlasManager {
     }
 
     private void initTextures() {
-        atlas                = new TextureAtlas(Gdx.files.internal("atlas/atlas.atlas"));
+        atlas                = new TextureAtlas(Gdx.files.internal(Context.getAppFolderName() + "/assets/atlas/atlas.atlas"));
         systemTextureRegion  = atlas.findRegion("system");
         planetTextureRegion  = atlas.findRegion("planet");
         simTextureRegion     = atlas.findRegion("sim");

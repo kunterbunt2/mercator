@@ -85,9 +85,9 @@ public class GenerateAtlasTest implements ApplicationListener {
     }
 
     private void createAtlas() {
-        (new File("src/main/resources/atlas/atlas.png")).delete();
-        (new File("src/main/resources/atlas/atlas.atlas")).delete();
-        TexturePacker.process("src/main/resources/raw", "src/main/resources/atlas/", "atlas");
+        (new File("app/assets/atlas/atlas.png")).delete();
+        (new File("app/assets/atlas/atlas.atlas")).delete();
+        TexturePacker.process("app/assets/raw", "app/assets/atlas/", "atlas");
     }
 
     @Test
@@ -120,7 +120,7 @@ public class GenerateAtlasTest implements ApplicationListener {
                         final Page   p      = pages.get(0);
                         final Pixmap pixmap = p.getPixmap();
                         System.out.println("Generating font '" + fontData.name + ".png'.");
-                        final FileHandle fh = new FileHandle("src/main/resources/raw/" + fontData.name + ".png");
+                        final FileHandle fh = new FileHandle("app/assets/raw/" + fontData.name + ".png");
                         PixmapIO.writePNG(fh, pixmap);
                         pixmap.dispose();
                         break;

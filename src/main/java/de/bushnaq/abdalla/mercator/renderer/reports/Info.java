@@ -32,8 +32,8 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import de.bushnaq.abdalla.engine.RenderEngine3D;
 import de.bushnaq.abdalla.mercator.renderer.AtlasManager;
-import de.bushnaq.abdalla.mercator.renderer.GameEngine3D;
 import de.bushnaq.abdalla.mercator.renderer.GameEngine2D;
+import de.bushnaq.abdalla.mercator.renderer.GameEngine3D;
 import de.bushnaq.abdalla.mercator.universe.Universe;
 import de.bushnaq.abdalla.mercator.universe.factory.Factory;
 import de.bushnaq.abdalla.mercator.universe.factory.ProductionFacility;
@@ -114,7 +114,7 @@ public class Info {
             skin.addRegions(atlasManager.atlas);
             skin.add("default-font", atlasManager.menuFont);
             skin.add("graph-font", atlasManager.chartFont);
-            skin.load(Gdx.files.internal("uiskin.json"));
+            skin.load(Gdx.files.internal(AtlasManager.getAssetsFolderName() + "/uiskin.json"));
         }
         window = new Window(title, skin);
         // window.setDebug( true );

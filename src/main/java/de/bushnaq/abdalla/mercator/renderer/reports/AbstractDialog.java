@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2024 Abdalla Bushnaq
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package de.bushnaq.abdalla.mercator.renderer.reports;
 
 import com.badlogic.gdx.Gdx;
@@ -34,30 +50,30 @@ import java.util.List;
  * @author kunterbunt
  */
 public abstract class AbstractDialog {
-    protected static final int BUTTON_WIDTH = 150;
-    protected static final int DIALOG_WIDTH = 150;
-    protected static final int LABEL_WIDTH = 250;
-    protected static final Color LIGHT_BLUE_COLOR = new Color(0x1BA1E2FF);
-    private final Batch batch;
-    protected Camera camera;
-    private VisDialog dialog;
-    private Screen3D gameEngine;
-    private final InputMultiplexer inputMultiplexer;
-    private List<InputProcessor> inputProcessorCache = new ArrayList<>();
+    protected static final int                  BUTTON_WIDTH        = 150;
+    protected static final int                  DIALOG_WIDTH        = 150;
+    protected static final int                  LABEL_WIDTH         = 250;
+    protected static final Color                LIGHT_BLUE_COLOR    = new Color(0x1BA1E2FF);
     // private float blurAmount = 1f;
 //	private int						blurPasses			= 1;
 //	private BlurMode				blurMode			= BlurMode.up;
-    final Logger logger = LoggerFactory.getLogger(this.getClass());
-    protected boolean modal = false;
-    private AbstractDialog parent;
-    private Stage stage;
-    private VisTable table = new VisTable(true);
-    private boolean visible = false;
+    final                  Logger               logger              = LoggerFactory.getLogger(this.getClass());
+    private final          Batch                batch;
+    private final          InputMultiplexer     inputMultiplexer;
+    protected              Camera               camera;
+    protected              boolean              modal               = false;
+    private                VisDialog            dialog;
+    private                Screen3D             gameEngine;
+    private                List<InputProcessor> inputProcessorCache = new ArrayList<>();
+    private                AbstractDialog       parent;
+    private                Stage                stage;
+    private                VisTable             table               = new VisTable(true);
+    private                boolean              visible             = false;
 
     public AbstractDialog(Screen3D gameEngine, final Batch batch, Camera camera, final InputMultiplexer inputMultiplexer) throws Exception {
-        this.gameEngine = gameEngine;
-        this.batch = batch;
-        this.camera = camera;
+        this.gameEngine       = gameEngine;
+        this.batch            = batch;
+        this.camera           = camera;
         this.inputMultiplexer = inputMultiplexer;
     }
 
@@ -166,6 +182,7 @@ public abstract class AbstractDialog {
         stage.act();
         stage.draw();
     }
+
     public void draw(final float deltaTime) {
         stage.act(deltaTime);
         stage.draw();

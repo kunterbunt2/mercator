@@ -1,8 +1,35 @@
+/*
+ * Copyright (C) 2024 Abdalla Bushnaq
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package de.bushnaq.abdalla.mercator.renderer.reports;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.InputMultiplexer;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.graphics.g3d.attributes.PointLightsAttribute;
+import com.badlogic.gdx.graphics.profiling.GLProfiler;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.*;
+import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import com.badlogic.gdx.utils.viewport.Viewport;
 import de.bushnaq.abdalla.engine.RenderEngine3D;
 import de.bushnaq.abdalla.mercator.renderer.AtlasManager;
 import de.bushnaq.abdalla.mercator.renderer.Screen2D;
@@ -17,46 +44,31 @@ import de.bushnaq.abdalla.mercator.universe.sim.SimNeed;
 import de.bushnaq.abdalla.mercator.universe.sim.trader.Trader;
 import de.bushnaq.abdalla.mercator.util.TimeStatistic;
 import de.bushnaq.abdalla.mercator.util.TimeUnit;
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.InputMultiplexer;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.Batch;
-import com.badlogic.gdx.graphics.g3d.attributes.PointLightsAttribute;
-import com.badlogic.gdx.graphics.profiling.GLProfiler;
-import com.badlogic.gdx.scenes.scene2d.InputEvent;
-import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.Cell;
-import com.badlogic.gdx.scenes.scene2d.ui.Label;
-import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle;
-import com.badlogic.gdx.scenes.scene2d.ui.Skin;
-import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
-import com.badlogic.gdx.scenes.scene2d.ui.Window;
-import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
-import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.viewport.ScreenViewport;
-import com.badlogic.gdx.utils.viewport.Viewport;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class Info {
-    private static final String CAPTION_LABEL = "captionLabel";
-    private static final String NAME_LABEL = "nameLabel";
-    private static final String STATIC_LABEL = "staticLabel";
-    private static final String VARIABLE_LABEL = "variableLabel";
-    private final AtlasManager atlasManager;
-    private final Batch batch;
-    private final TimeStatistic debugTimer;
-    private final InputMultiplexer inputMultiplexer;
-    private RenderEngine3D<Screen3D> renderEngine;
+    private static final String                   CAPTION_LABEL  = "captionLabel";
+    private static final String                   NAME_LABEL     = "nameLabel";
+    private static final String                   STATIC_LABEL   = "staticLabel";
+    private static final String                   VARIABLE_LABEL = "variableLabel";
+    private final        AtlasManager             atlasManager;
+    private final        Batch                    batch;
+    private final        TimeStatistic            debugTimer;
+    private final        InputMultiplexer         inputMultiplexer;
+    private final        List<LabelData>          labels         = new ArrayList<LabelData>();
+    private final        StringBuilder            stringBuilder  = new StringBuilder();
+    private final        String                   title          = "info";
     // private TextButton closeButton;
-    private int labelIndex = 0;
-    private final List<LabelData> labels = new ArrayList<LabelData>();
-    private float screenHeight = 0;
-    private Skin skin;
-    private Stage stage;
-    private final StringBuilder stringBuilder = new StringBuilder();
-    private final String title = "info";
-    private Class<?> type;
+    private              int                      labelIndex     = 0;
+    private              RenderEngine3D<Screen3D> renderEngine;
+    private              float                    screenHeight   = 0;
+    private              Skin                     skin;
+    private              Stage                    stage;
+    private              Class<?>                 type;
     //	private final Universe universe;
-    private Window window;
+    private              Window                   window;
 
     //	public Info(Render2DMaster renderMaster, InputMultiplexer inputMultiplexer) {
     //		this.renderMaster = renderMaster;
@@ -66,10 +78,10 @@ public class Info {
     public Info(RenderEngine3D<Screen3D> renderEngine, final AtlasManager atlasManager, final Batch batch, final InputMultiplexer inputMultiplexer) throws Exception {
         this.renderEngine = renderEngine;
         //		this.universe = universe;
-        this.atlasManager = atlasManager;
-        this.batch = batch;
+        this.atlasManager     = atlasManager;
+        this.batch            = batch;
         this.inputMultiplexer = inputMultiplexer;
-        debugTimer = new TimeStatistic();
+        debugTimer            = new TimeStatistic();
     }
 
     public void act(final float deltaTime) {
@@ -185,7 +197,7 @@ public class Info {
 
             if (renderEngine != null) {
                 {
-                    final int count = renderEngine.visibleStaticGameObjectCount;
+                    final int count      = renderEngine.visibleStaticGameObjectCount;
                     final int totalCount = renderEngine.staticModelInstances.size;
                     stringBuilder.setLength(0);
                     stringBuilder.append(count).append(" / ").append(totalCount);
@@ -193,7 +205,7 @@ public class Info {
                 }
                 {
                     stringBuilder.setLength(0);
-                    final int count = renderEngine.visibleDynamicGameObjectCount;
+                    final int count      = renderEngine.visibleDynamicGameObjectCount;
                     final int totalCount = renderEngine.dynamicModelInstances.size;
                     stringBuilder.append(count).append(" / ").append(totalCount);
                     updateNameAndValue("Dynamic Models", stringBuilder.toString(), VARIABLE_LABEL);
@@ -201,14 +213,14 @@ public class Info {
                 //			 light
                 {
                     stringBuilder.setLength(0);
-                    final int count = renderEngine.visibleStaticLightCount;
+                    final int count      = renderEngine.visibleStaticLightCount;
                     final int totalCount = renderEngine.environment.get(PointLightsAttribute.class, PointLightsAttribute.Type).lights.size;
                     stringBuilder.append(count).append(" / ").append(totalCount);
                     updateNameAndValue("Static PointLights", stringBuilder.toString(), VARIABLE_LABEL);
                 }
                 {
                     stringBuilder.setLength(0);
-                    final int count = renderEngine.visibleDynamicLightCount;
+                    final int count      = renderEngine.visibleDynamicLightCount;
                     final int totalCount = renderEngine.environment.get(PointLightsAttribute.class, PointLightsAttribute.Type).lights.size;
                     stringBuilder.append(count).append(" / ").append(totalCount);
                     updateNameAndValue("Dynamic PointLights", stringBuilder.toString(), VARIABLE_LABEL);
@@ -281,7 +293,7 @@ public class Info {
         if (productionFacility != null) {
             if (Factory.class.isInstance(productionFacility)) {
                 final Factory factory = (Factory) productionFacility;
-                final int size = 10 + 1 + factory.inputGood.size();
+                final int     size    = 10 + 1 + factory.inputGood.size();
                 clearUnmatchedSizeAndType(size, ProductionFacility.class);
                 updateNameAndValue("name", productionFacility.getName(), NAME_LABEL);
                 updateNameAndValue("planet", productionFacility.planet.getName(), NAME_LABEL);
@@ -382,8 +394,8 @@ public class Info {
             }
             window.row();
         }
-        final LabelData data = labels.get(labelIndex++);
-        int index = 0;
+        final LabelData data  = labels.get(labelIndex++);
+        int             index = 0;
         for (final PieChartData pieChartData : creditPieCharts) {
             data.pieCharts.get(index++).pieChart = pieChartData;
         }
@@ -430,8 +442,8 @@ public class Info {
             }
             window.row();
         }
-        final LabelData data = labels.get(labelIndex++);
-        int index = 0;
+        final LabelData data  = labels.get(labelIndex++);
+        int             index = 0;
         for (final GraphChartData graphChartData : graphChartDataList) {
             data.graphCharts.get(index++).graphChartData = graphChartData;
         }
@@ -440,8 +452,8 @@ public class Info {
     private LabelData updateName(final String name, final String style) {
         if (labelIndex >= labels.size()) {
             final LabelData data = new LabelData();
-            data.nameLabel = new Label("", skin, "captionLabel");
-            data.valueLabel = new Label("", skin);
+            data.nameLabel   = new Label("", skin, "captionLabel");
+            data.valueLabel  = new Label("", skin);
             data.value2Label = new Label("", skin);
             data.value3Label = new Label("", skin);
             data.value4Label = new Label("", skin);

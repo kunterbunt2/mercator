@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2024 Abdalla Bushnaq
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package de.bushnaq.abdalla.mercator.desktop;
 
 import com.badlogic.gdx.ApplicationListener;
@@ -11,7 +27,6 @@ import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import de.bushnaq.abdalla.engine.util.logger.Logger;
 import de.bushnaq.abdalla.engine.util.logger.LoggerFactory;
 import de.bushnaq.abdalla.mercator.renderer.Screen2D;
-import de.bushnaq.abdalla.mercator.renderer.Screen3D;
 import de.bushnaq.abdalla.mercator.universe.Universe;
 import de.bushnaq.abdalla.mercator.universe.event.EventLevel;
 import de.bushnaq.abdalla.mercator.universe.sim.Sim;
@@ -23,19 +38,12 @@ import de.bushnaq.abdalla.mercator.util.TimeUnit;
  */
 public class DesktopLauncher2D implements ApplicationListener {
     private static final int UNIVERSE_GENERATION_RANDOM_SEED = 1;
-    private static final int UNIVERSE_SIZE = 2;
-//    private final Universe universe;
-
-	public static void main(final String[] args) throws Exception {
-		DesktopLauncher2D desktopLauncher3D = new DesktopLauncher2D();
-		desktopLauncher3D.start();
-	}
-
+    private static final int UNIVERSE_SIZE                   = 2;
+    //    private final Universe universe;
     DesktopContextFactory contextFactory = new DesktopContextFactory();
-
+    LaunchMode            launchMode     = LaunchMode.normal;
+    boolean               useOGL3        = true;
     private Logger logger = LoggerFactory.getLogger(this.getClass());
-    boolean useOGL3 = true;
-    LaunchMode launchMode = LaunchMode.normal;
 
     /**
      * called by GameEngine to create Lwjgl3Application
@@ -54,14 +62,39 @@ public class DesktopLauncher2D implements ApplicationListener {
 //		System.exit(0);
     }
 
+    public static void main(final String[] args) throws Exception {
+        DesktopLauncher2D desktopLauncher3D = new DesktopLauncher2D();
+        desktopLauncher3D.start();
+    }
+
     @Override
     public void create() {
         contextFactory.create();
         Gdx.app.exit();// exit the gdx environment that we created just to read the options
     }
 
+    @Override
+    public void resize(int width, int height) {
+    }
+
+    @Override
+    public void render() {
+    }
+
+    @Override
+    public void pause() {
+    }
+
+    @Override
+    public void resume() {
+    }
+
+    @Override
+    public void dispose() {
+    }
+
     private Lwjgl3ApplicationConfiguration createConfig(Context context) {
-        int foregroundFPS = context.getForegroundFPSProperty();
+        int                            foregroundFPS = context.getForegroundFPSProperty();
         Lwjgl3ApplicationConfiguration config;
         config = new Lwjgl3ApplicationConfiguration();
         config.useVsync(context.getVsyncProperty());
@@ -72,7 +105,7 @@ public class DesktopLauncher2D implements ApplicationListener {
 
 //		if (Context.getOeratingSystemType() == OperatingSystem.osx)
         {
-            ShaderProgram.prependVertexCode = "#version 150\n"//
+            ShaderProgram.prependVertexCode   = "#version 150\n"//
                     + "#define GLSL3\n"//
                     + "#ifdef GLSL3\n"//
                     + "#define attribute in\n"//
@@ -90,20 +123,16 @@ public class DesktopLauncher2D implements ApplicationListener {
         config.setBackBufferConfig(8, 8, 8, 8, 24, 0, context.getMSAASamples());
         config.setTitle("Pluvia");
         config.setAutoIconify(true);
-        final Monitor[] monitors = Lwjgl3ApplicationConfiguration.getMonitors();
-        int monitor = context.getMonitorProperty();
-        final DisplayMode primaryMode = Lwjgl3ApplicationConfiguration.getDisplayMode(monitors[monitor]);
-        boolean fullScreenMode = context.getFullscreenModeProperty();
+        final Monitor[]   monitors       = Lwjgl3ApplicationConfiguration.getMonitors();
+        int               monitor        = context.getMonitorProperty();
+        final DisplayMode primaryMode    = Lwjgl3ApplicationConfiguration.getDisplayMode(monitors[monitor]);
+        boolean           fullScreenMode = context.getFullscreenModeProperty();
         if (fullScreenMode)
             config.setFullscreenMode(primaryMode);
 //		config.setWindowPosition(0, 0);
 //		config.setWindowedMode(primaryMode.width, primaryMode.height);
 //		config.setMaximized(true);
         return config;
-    }
-
-    @Override
-    public void dispose() {
     }
 
     private void loop() throws Exception, InterruptedException {
@@ -117,12 +146,12 @@ public class DesktopLauncher2D implements ApplicationListener {
                 new Lwjgl3Application(this, config);
             }
 
-            final GraphicsDimentions gd = GraphicsDimentions.D3;
-            final Universe universe = new Universe("U-0", gd, EventLevel.warning, Sim.class);
+            final GraphicsDimentions gd       = GraphicsDimentions.D3;
+            final Universe           universe = new Universe("U-0", gd, EventLevel.warning, Sim.class);
             universe.create(UNIVERSE_GENERATION_RANDOM_SEED, UNIVERSE_SIZE, 10L * TimeUnit.TICKS_PER_DAY);
 
-            final Screen2D gameEngine = new Screen2D(contextFactory, universe, launchMode);
-            final Lwjgl3ApplicationConfiguration config = createConfig(contextFactory.getContext());
+            final Screen2D                       gameEngine = new Screen2D(contextFactory, universe, launchMode);
+            final Lwjgl3ApplicationConfiguration config     = createConfig(contextFactory.getContext());
             try {
                 contextFactory.getContext().restart = false;
                 new Lwjgl3Application(gameEngine, config);
@@ -132,22 +161,6 @@ public class DesktopLauncher2D implements ApplicationListener {
             contextFactory.getContext().dispose();
             restart = contextFactory.getContext().restart;
         } while (restart);
-    }
-
-    @Override
-    public void pause() {
-    }
-
-    @Override
-    public void render() {
-    }
-
-    @Override
-    public void resize(int width, int height) {
-    }
-
-    @Override
-    public void resume() {
     }
 
     private void start() throws InterruptedException, Exception {

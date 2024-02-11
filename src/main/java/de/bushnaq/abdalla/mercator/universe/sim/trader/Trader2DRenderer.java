@@ -1,44 +1,59 @@
+/*
+ * Copyright (C) 2024 Abdalla Bushnaq
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package de.bushnaq.abdalla.mercator.universe.sim.trader;
 
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.math.Circle;
 import com.badlogic.gdx.math.Vector3;
 import de.bushnaq.abdalla.engine.ObjectRenderer;
 import de.bushnaq.abdalla.engine.RenderEngine2D;
-import de.bushnaq.abdalla.engine.RenderEngine3D;
 import de.bushnaq.abdalla.mercator.renderer.Screen2D;
 import de.bushnaq.abdalla.mercator.universe.Universe;
 import de.bushnaq.abdalla.mercator.universe.planet.Planet2DRenderer;
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.math.Circle;
 import de.bushnaq.abdalla.mercator.universe.planet.Planet3DRenderer;
 
 public class Trader2DRenderer extends ObjectRenderer<Screen2D> {
-    private static final float RADIUS = Planet2DRenderer.PLANET_SIZE * 2.0f;
     // static final Color SELECTED_TRADER_COLOR = Color.ORANGE; //0xffff0000;
-    public static final Color TADER_COLOR_IS_GOOD = Color.LIGHT_GRAY; // 0xaaaaaa
-    public static final Color TRADER_COLOR = new Color(.7f, .7f, .7f, 0.45f); // 0xffcc5555;
-    public static final float TRADER_HEIGHT = 17;
-    private static final float TRADER_SIZE_X = 16 * 2 / Universe.WORLD_SCALE;
-    private static final float TRADER_SIZE_Y = 8 * 2 / Universe.WORLD_SCALE;
-    public static final float TRADER_SIZE_Z = 32 * 2 / Universe.WORLD_SCALE;
-    private static final float TRADER_TRAVELING_HEIGHT = -TRADER_SIZE_Y / 2 + Planet3DRenderer.WATER_Y;
+    public static final  Color   TADER_COLOR_IS_GOOD     = Color.LIGHT_GRAY; // 0xaaaaaa
+    public static final  Color   TRADER_COLOR            = new Color(.7f, .7f, .7f, 0.45f); // 0xffcc5555;
+    public static final  float   TRADER_HEIGHT           = 17;
+    public static final  float   TRADER_SIZE_Z           = 32 * 2 / Universe.WORLD_SCALE;
+    public static final  float   TRADER_WIDTH            = 17;
+    private static final float   RADIUS                  = Planet2DRenderer.PLANET_SIZE * 2.0f;
+    private static final float   TRADER_SIZE_X           = 16 * 2 / Universe.WORLD_SCALE;
+    private static final float   TRADER_SIZE_Y           = 8 * 2 / Universe.WORLD_SCALE;
+    private static final float   TRADER_TRAVELING_HEIGHT = -TRADER_SIZE_Y / 2 + Planet3DRenderer.WATER_Y;
+    private final        Vector3 direction               = new Vector3();//intermediate value
+    private final        Vector3 scaling                 = new Vector3();//intermediate value
+    private final        Vector3 target                  = new Vector3();//intermediate value
+    private final        Trader  trader;
     //	public static final Color TRADER_OF_SELECTED_PLANET_COLOR1 = Color.RED; // 0xffff0000;
 //	public static final Color TRADER_OF_SELECTED_PLANET_COLOR2 = new Color(1f, .5f, 0f, 1f); // 0xffff8800;
-    private final Vector3 translation = new Vector3();//intermediate value
+    private final        Vector3 translation             = new Vector3();//intermediate value
+    Circle  circle;
     float[] lastVelocity = new float[3];
+    float[] position     = new float[3];
+    Vector3 speed        = new Vector3(0, 0, 0);
+    float[] velocity     = new float[3];
     private boolean lastSelected = false;
-    Vector3 speed = new Vector3(0, 0, 0);
-    float[] velocity = new float[3];
-    public static final float TRADER_WIDTH = 17;
-    Circle circle;
-    private final Vector3 direction = new Vector3();//intermediate value
-    private final Trader trader;
-    float[] position = new float[3];
-    private final Vector3 scaling = new Vector3();//intermediate value
-    private final Vector3 target = new Vector3();//intermediate value
 
     public Trader2DRenderer(final Trader trader) {
         this.trader = trader;
-        circle = new Circle(0, 0, TRADER_WIDTH + 1);
+        circle      = new Circle(0, 0, TRADER_WIDTH + 1);
     }
 
     private void drawTrader(final Trader trader, final RenderEngine2D<Screen2D> renderEngine, final int index, final boolean selected) {
@@ -105,7 +120,7 @@ public class Trader2DRenderer extends ObjectRenderer<Screen2D> {
                 //				if (trader.getName().equals("T-6"))
                 //					logger.info(String.format("%f %f  %f %f  %f %f", lastVelocity[0], velocity[0], lastVelocity[1], velocity[1], lastVelocity[2], velocity[2]));
                 for (int i = 0; i < 3; i++)
-                    lastVelocity[i] = velocity[i];
+                     lastVelocity[i] = velocity[i];
             }
 
             //			if (trader.getName().equals("T-6"))
@@ -184,7 +199,7 @@ public class Trader2DRenderer extends ObjectRenderer<Screen2D> {
         // renderMaster.bar( renderMaster.fillCircle.get( TRADER_WIDTH, TRADER_HEIGHT ),
         // x - hps, y - hps, x + hps, y + hps, color );
         if (renderEngine.getGameEngine().renderEngine.camera.zoom < 3.0f) {
-            renderEngine.getGameEngine().renderEngine.lable(renderEngine.getGameEngine().atlasManager.dottedLineTextureRegion, trader.x - hps, trader.z - hps, Trader2DRenderer.TRADER_WIDTH,Trader2DRenderer.TRADER_HEIGHT, TRADER_WIDTH * 1, TRADER_WIDTH * 3, renderEngine.getGameEngine().atlasManager.defaultFont, color, trader.getName(), color, String.format("%.0f", trader.getCredits()), renderEngine.getGameEngine().queryCreditColor(trader.getCredits(), Trader.TRADER_START_CREDITS));
+            renderEngine.getGameEngine().renderEngine.lable(renderEngine.getGameEngine().atlasManager.dottedLineTextureRegion, trader.x - hps, trader.z - hps, Trader2DRenderer.TRADER_WIDTH, Trader2DRenderer.TRADER_HEIGHT, TRADER_WIDTH * 1, TRADER_WIDTH * 3, renderEngine.getGameEngine().atlasManager.defaultFont, color, trader.getName(), color, String.format("%.0f", trader.getCredits()), renderEngine.getGameEngine().queryCreditColor(trader.getCredits(), Trader.TRADER_START_CREDITS));
         }
         circle.setPosition(trader.x, trader.z);
         if (trader.getName().equals("T-13")) {

@@ -1,15 +1,34 @@
+/*
+ * Copyright (C) 2024 Abdalla Bushnaq
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package de.bushnaq.abdalla.mercator.renderer;
 
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
-
+import com.badlogic.gdx.*;
+import com.badlogic.gdx.Input.Buttons;
+import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.*;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.profiling.GLErrorListener;
+import com.badlogic.gdx.graphics.profiling.GLProfiler;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.utils.BufferUtils;
+import com.badlogic.gdx.utils.ScreenUtils;
 import de.bushnaq.abdalla.engine.IContextFactory;
 import de.bushnaq.abdalla.engine.RenderEngine2D;
-import de.bushnaq.abdalla.engine.RenderEngine3D;
 import de.bushnaq.abdalla.mercator.desktop.Context;
 import de.bushnaq.abdalla.mercator.desktop.LaunchMode;
 import de.bushnaq.abdalla.mercator.renderer.reports.Info;
@@ -20,85 +39,70 @@ import de.bushnaq.abdalla.mercator.universe.path.Path;
 import de.bushnaq.abdalla.mercator.universe.planet.Planet;
 import de.bushnaq.abdalla.mercator.universe.sim.Sim;
 import de.bushnaq.abdalla.mercator.universe.sim.trader.Trader;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import de.bushnaq.abdalla.mercator.util.Message;
 import de.bushnaq.abdalla.mercator.util.TimeAccuracy;
 import de.bushnaq.abdalla.mercator.util.TimeStatistic;
 import de.bushnaq.abdalla.mercator.util.TimeUnit;
-import com.badlogic.gdx.ApplicationListener;
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
-import com.badlogic.gdx.Input.Buttons;
-import com.badlogic.gdx.InputMultiplexer;
-import com.badlogic.gdx.InputProcessor;
-import com.badlogic.gdx.files.FileHandle;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.profiling.GLErrorListener;
-import com.badlogic.gdx.graphics.profiling.GLProfiler;
-import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.Label;
-import com.badlogic.gdx.utils.BufferUtils;
-import com.badlogic.gdx.utils.ScreenUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
 
 public class Screen2D implements ScreenListener, ApplicationListener, InputProcessor, Message {
-    static final Color BACKGROUND_COLOR = new Color(35.0f / 255, 135.0f / 255, 159.5f / 255, 1.0f);
     //	private static final String BATCH_END_DURATION = "batch.end()";
-    public static final int CHART_FONT_SIZE = 10;
-    public static final Color DARK_RED_COLOR = new Color(0.475f, 0.035f, 0.027f, 1.0f);
-    public static final Color DEAD_COLOR = Color.GRAY;
-    static final Color DEBUG_GRID_BORDER_COLOR = new Color(1f, 1f, 1f, 0.2f);
-    static final Color DEBUG_GRID_COLOR = new Color(.0f, .0f, .0f, 0.2f);
+    public static final  int                      CHART_FONT_SIZE                 = 10;
+    public static final  Color                    DARK_RED_COLOR                  = new Color(0.475f, 0.035f, 0.027f, 1.0f);
+    public static final  Color                    DEAD_COLOR                      = Color.GRAY;
     //	private static final String DRAW_DURATION = "draw()";
-    public static final int FONT_SIZE = 14;
-    public static final int MENU_FONT_SIZE = 12;
-    public static final float PLANET_DISTANCE = 512;
-    private static final float SCROLL_SPEED = 100f;
+    public static final  int                      FONT_SIZE                       = 14;
+    public static final  int                      MENU_FONT_SIZE                  = 12;
+    //    public static final  float                    PLANET_DISTANCE                 = 512;
     //	private static final String RENDER_DURATION = "render()";
-    public static final Color SELECTED_COLOR = Color.GOLDENROD;
+    public static final  Color                    SELECTED_COLOR                  = Color.GOLDENROD;
+    //    public static final  int                      SOOMIN_FONT_SIZE                = 10;
     // private static final float SCROLL_SPEED = 16.0f;
     // static final float SPACE_BETWEEN_OBJECTS = 1 * 4;
-    public static final float SOOM_SPEED = 8.0f;
-    public static final int SOOMIN_FONT_SIZE = 10;
-    public static final Color TEXT_COLOR = Color.WHITE; // 0xffffffff;
-    private static final Color TIME_MACHINE_BACKGROUND_COLOR = new Color(0.0f, 0.0f, 0.0f, 0.9f);
-    public static final int TIME_MACHINE_FONT_SIZE = 10;
-    private static final Color TIME_MACHINE_SUB_MARKER_COLOR = new Color(0.7f, 0.7f, 0.7f, 1.0f);
+//    public static final  float                    SOOM_SPEED                      = 8.0f;
+    public static final  Color                    TEXT_COLOR                      = Color.WHITE; // 0xffffffff;
+    public static final  int                      TIME_MACHINE_FONT_SIZE          = 10;
+    //    static final         Color                    BACKGROUND_COLOR                = new Color(35.0f / 255, 135.0f / 255, 159.5f / 255, 1.0f);
+    static final         Color                    DEBUG_GRID_BORDER_COLOR         = new Color(1f, 1f, 1f, 0.2f);
+    static final         Color                    DEBUG_GRID_COLOR                = new Color(.0f, .0f, .0f, 0.2f);
+    private static final float                    SCROLL_SPEED                    = 100f;
+    private static final Color                    TIME_MACHINE_BACKGROUND_COLOR   = new Color(0.0f, 0.0f, 0.0f, 0.9f);
+    private static final Color                    TIME_MACHINE_SUB_MARKER_COLOR   = new Color(0.7f, 0.7f, 0.7f, 1.0f);
+    public final         Universe                 universe;
+    private final        IContextFactory          contextFactory;
     //	private static final Color trafficEndColor = new Color(0xffff0000);
     //	private static final Color trafficStartColor = new Color(0xff55ff55);
     // static final int WORLD_HEIGHT = 100;
     // static final int WORLD_WIDTH = 100;
     // private float centerXD;
     // private float centerYD;
-    private final TimeStatistic debugTimer;
-    private final IContextFactory contextFactory;
-    private final LaunchMode launchMode;
-    private Context context;
-    private BitmapFont font;
-    //	private Environment environment;
-    private Info info;
-    private boolean infoVisible;
-    private final InputMultiplexer inputMultiplexer = new InputMultiplexer();
-    private final List<Label> labels = new ArrayList<>();
-    private int lastDragX = -1;
-    private int lastDragY = -1;
-    private final Logger logger = LoggerFactory.getLogger(this.getClass());
-    private int maxFramesPerSecond;
-    private final List<MercatorMessage> messageQueue = new LinkedList<MercatorMessage>();
-    private GLProfiler profiler;
+    private final        TimeStatistic            debugTimer;
+    private final        InputMultiplexer         inputMultiplexer                = new InputMultiplexer();
+    private final        List<Label>              labels                          = new ArrayList<>();
+    private final        LaunchMode               launchMode;
+    private final        Logger                   logger                          = LoggerFactory.getLogger(this.getClass());
+    private final        List<MercatorMessage>    messageQueue                    = new LinkedList<MercatorMessage>();
+    public               AtlasManager             atlasManager;
+    public               OrthographicCamera       camera;
+    public               List<Color>              distinctiveColorlist            = new ArrayList<Color>();
+    public               List<Color>              distinctiveTransparentColorlist = new ArrayList<Color>();
+    public               RenderEngine2D<Screen2D> renderEngine;
+    public               ShowGood                 showGood                        = ShowGood.Name;
+    private              Context                  context;
     //	private MyCanvas myCanvas;
 //	public Render2DMaster render2DMaster;
-    int defaultFontSize = Screen2D.FONT_SIZE;
-
-    private Stage stage;
-
-    private StringBuilder stringBuilder;
-
-    private boolean takeScreenShot;
-
-    public final Universe universe;
-
+    private              int                      defaultFontSize                 = Screen2D.FONT_SIZE;
+    private              BitmapFont               font;
+    //	private Environment environment;
+    private              Info                     info;
+    private              boolean                  infoVisible;
     //	private void drawBackground() {
     //		float d = 10;
     //		float z = 10;
@@ -108,22 +112,44 @@ public class Screen2D implements ScreenListener, ApplicationListener, InputProce
     //		float ty2 = universe.size * UniverseGenerator.PLANET_DISTANCE / d;
     //		render2DMaster.bar(render2DMaster.atlasManager.background, tx1, ty1, tx2, ty2, z, BACKGROUND_COLOR);
     //	}
-
-    private boolean vsyncEnabled = true;
-    public AtlasManager atlasManager;
-    public ShowGood showGood = ShowGood.Name;
-
+    private int           lastDragX    = -1;
+    private int           lastDragY    = -1;
+    private int           maxFramesPerSecond;
+    private GLProfiler    profiler;
+    private Stage         stage;
+    private StringBuilder stringBuilder;
+    private boolean       takeScreenShot;
+    private              int                      timeMachineFontSize             = Screen2D.TIME_MACHINE_FONT_SIZE;
+    private boolean       vsyncEnabled = true;
 
     public Screen2D(final IContextFactory contextFactory, final Universe universe, final LaunchMode launchMode) throws Exception {
         this.contextFactory = contextFactory;
-        this.universe = universe;
-        this.launchMode = launchMode;
+        this.universe       = universe;
+        this.launchMode     = launchMode;
         universe.setScreenListener(this);
         //		this.desktopLauncher = desktopLauncher;
 //		render2DMaster = new Render2DMaster(universe);
         debugTimer = new TimeStatistic();
         //		myCanvas = new MyCanvas(this, config);
     }
+
+    public Color amountColor(final Good good) {
+        return availabilityColor(good.getAmount(), good.getMaxAmount());
+    }
+
+    public Color availabilityColor(final float amount, final float maxAmount) {
+        if (amount >= 0.5 * maxAmount) {
+            return Color.GREEN;
+        } else if (amount >= 0.3 * maxAmount) {
+            return Color.ORANGE;
+        } else {
+            return Screen2D.DARK_RED_COLOR;
+        }
+    }
+
+    //	private void enableProfiler() {
+    //		//		GLProfiler.enable();
+    //	}
 
     @Override
     public void create() {
@@ -152,80 +178,6 @@ public class Screen2D implements ScreenListener, ApplicationListener, InputProce
             System.exit(1);
         }
     }
-    public OrthographicCamera camera;
-    public void createCamera() {
-        camera = new OrthographicCamera(300, 300 * (600 / 800));
-        Planet planet = universe.findBusyCenterPlanet();
-        if (planet == null)
-            planet = universe.planetList.get(0);
-        camera.position.set(planet.x, planet.z, 0);
-        camera.zoom = 1.0f;
-        camera.update();
-    }
-
-    private String createFileName(final Date date, final String append) {
-        final String pattern = "yyyy-MM-dd-HH-mm-ss";
-        final SimpleDateFormat simpleDateFormat = new SimpleDateFormat(pattern);
-        final String dateAsString = simpleDateFormat.format(date);
-        final String fileName = "docs/pics/" + dateAsString + "-" + append + ".png";
-        return fileName;
-    }
-
-    private void createStage() throws Exception {
-        info = new Info(null, atlasManager, renderEngine.batch,  inputMultiplexer);
-//		info.createStage();
-        final int height = 12;
-        stage = new Stage();
-        font = new BitmapFont();
-        for (int i = 0; i < 8; i++) {
-            final Label label = new Label(" ", new Label.LabelStyle(font, Color.WHITE));
-            label.setPosition(0, i * height);
-            stage.addActor(label);
-            labels.add(label);
-        }
-        stringBuilder = new StringBuilder();
-    }
-
-    @Override
-    public void dispose() {
-        System.out.println("dispose() called");
-        profiler.disable();
-        // postProcessor.dispose();
-        renderEngine.dispose();
-        info.dispose();
-        //		synchronized (desktopLauncher) {
-        //			desktopLauncher.notify();
-        //		}
-    }
-
-    private void drawDebugGrid() {
-        for (int y = -universe.size; y < universe.size; y++) {
-            for (int x = -universe.size; x < universe.size; x++) {
-                {
-                    final float tx1 = x * Planet.PLANET_DISTANCE + 1;
-                    final float ty1 = y * Planet.PLANET_DISTANCE + 1;
-                    final float tx2 = x * Planet.PLANET_DISTANCE + Planet.PLANET_DISTANCE - 2;
-                    final float ty2 = y * Planet.PLANET_DISTANCE + Planet.PLANET_DISTANCE - 2;
-                    renderEngine.bar(atlasManager.systemTextureRegion, tx1, ty1, tx2, ty2, DEBUG_GRID_BORDER_COLOR);
-                }
-                {
-                    final float tx1 = x * Planet.PLANET_DISTANCE/* + Planet3DRenderer.PLANET_BORDER*/;
-                    final float ty1 = y * Planet.PLANET_DISTANCE/* + Planet3DRenderer.PLANET_BORDER*/;
-                    final float tx2 = x * Planet.PLANET_DISTANCE + Planet.PLANET_DISTANCE/* - Planet3DRenderer.PLANET_BORDER*/ - 1;
-                    final float ty2 = y * Planet.PLANET_DISTANCE + Planet.PLANET_DISTANCE/* - Planet3DRenderer.PLANET_BORDER*/ - 1;
-                    renderEngine.bar(atlasManager.systemTextureRegion, tx1, ty1, tx2, ty2, DEBUG_GRID_COLOR);
-                }
-            }
-        }
-    }
-
-    //	private void enableProfiler() {
-    //		//		GLProfiler.enable();
-    //	}
-
-    private void exit() {
-        Gdx.app.exit();
-    }
 
     //	private int getMaxFramesPerSecond() {
     //		return maxFramesPerSecond;
@@ -249,6 +201,150 @@ public class Screen2D implements ScreenListener, ApplicationListener, InputProce
     //			}
     //		}
     //	}
+
+    @Override
+    public void resize(final int width, final int height) {
+        renderEngine.width  = width;
+        renderEngine.height = height;
+        renderEngine.camera.setToOrtho(false, width, height);
+        renderEngine.camera.update();
+        renderEngine.batch.setProjectionMatrix(renderEngine.camera.combined);
+        info.resize(width, height);
+    }
+
+    @Override
+    public void render() {
+        try {
+            universe.advanceInTime();
+            if (profiler.isEnabled()) {
+                profiler.reset();// reset on each frame
+            }
+            // universe.timeStatisticManager.start( RENDER_DURATION );
+            // postProcessor.capture();
+            render(universe.currentTime);
+            // postProcessor.render();
+            // universe.timeStatisticManager.stop( RENDER_LIGHT );
+            //			GLProfiler.reset();
+            // universe.timeStatisticManager.stop( RENDER_DURATION );
+            // System.out.printf( "advance in time %d\n",
+            // universe.timeStatisticManager.getStatistic(
+            // Universe.ADVANCE_IN_TIME_UNIVERSE_DURATION ).lastTime );
+            // System.out.printf( "render time %d\n\n",
+            // universe.timeStatisticManager.getStatistic( RENDER_DURATION ).lastTime );
+            renderStage();
+        } catch (final Exception e) {
+            logger.error(e.getMessage(), e);
+            System.exit(0);
+        }
+    }
+
+    @Override
+    public void pause() {
+    }
+
+    @Override
+    public void resume() {
+        // TODO Auto-generated method stub
+    }
+
+    @Override
+    public void dispose() {
+        System.out.println("dispose() called");
+        profiler.disable();
+        // postProcessor.dispose();
+        renderEngine.dispose();
+        info.dispose();
+        //		synchronized (desktopLauncher) {
+        //			desktopLauncher.notify();
+        //		}
+    }
+
+    public void createCamera() {
+        camera = new OrthographicCamera(300, 300 * (600 / 800));
+        Planet planet = universe.findBusyCenterPlanet();
+        if (planet == null) planet = universe.planetList.get(0);
+        camera.position.set(planet.x, planet.z, 0);
+        camera.zoom = 1.0f;
+        camera.update();
+    }
+
+    private String createFileName(final Date date, final String append) {
+        final String           pattern          = "yyyy-MM-dd-HH-mm-ss";
+        final SimpleDateFormat simpleDateFormat = new SimpleDateFormat(pattern);
+        final String           dateAsString     = simpleDateFormat.format(date);
+        final String           fileName         = "docs/pics/" + dateAsString + "-" + append + ".png";
+        return fileName;
+    }
+
+    private void createStage() throws Exception {
+        info = new Info(null, atlasManager, renderEngine.batch, inputMultiplexer);
+//		info.createStage();
+        final int height = 12;
+        stage = new Stage();
+        font  = new BitmapFont();
+        for (int i = 0; i < 8; i++) {
+            final Label label = new Label(" ", new Label.LabelStyle(font, Color.WHITE));
+            label.setPosition(0, i * height);
+            stage.addActor(label);
+            labels.add(label);
+        }
+        stringBuilder = new StringBuilder();
+    }
+
+    //	private void printStatistics() throws Exception {
+    //		if (profiler.isEnabled()) {
+    //			setMaxFramesPerSecond(Math.max(getMaxFramesPerSecond(), Gdx.graphics.getFramesPerSecond()));
+    //			// once a second
+    //			if (debugTimer.getTime() > 1000) {
+    //				// for ( String statisticName : universe.timeStatisticManager.getSet() )
+    //				// {
+    //				// TimeStatistic statistic = universe.timeStatisticManager.getStatistic(
+    //				// statisticName );
+    //				// System.out.println( String.format( "%s %dms %dms %dms %dms", statisticName,
+    //				// statistic.lastTime, statistic.minTime, statistic.averageTime,
+    //				// statistic.maxTime ) );
+    //				// }
+    //				System.out.printf("----------------------------------------------------\n");
+    //				System.out.printf("profiler.textureBindings %d\n", profiler.getTextureBindings());
+    //				System.out.printf("GLProfiler.drawCalls %d\n", profiler.getDrawCalls());
+    //				System.out.printf("GLProfiler.shaderSwitches %d\n", profiler.getShaderSwitches());
+    //				System.out.printf("GLProfiler.vertexCount.min %.0f\n", profiler.getVertexCount().min);
+    //				System.out.printf("GLProfiler.vertexCount.average %.0f\n", profiler.getVertexCount().average);
+    //				System.out.printf("GLProfiler.vertexCount.max %.0f\n", profiler.getVertexCount().max);
+    //				System.out.printf("GLProfiler.calls %d\n", profiler.getCalls());
+    //				System.out.printf("Texture.getNumManagedTextures() %d\n", Texture.getNumManagedTextures());
+    //				System.out.printf("Gdx.graphics.getDeltaTime() %f\n", Gdx.graphics.getDeltaTime());
+    //				System.out.printf("batch.renderCalls %d\n", render2DMaster.batch.renderCalls);
+    //				System.out.printf(Gdx.graphics.getFramesPerSecond() + " fps\n");
+    //				System.out.printf("----------------------------------------------------\n");
+    //			}
+    //		}
+    //	}
+
+    private void drawDebugGrid() {
+        for (int y = -universe.size; y < universe.size; y++) {
+            for (int x = -universe.size; x < universe.size; x++) {
+                {
+                    final float tx1 = x * Planet.PLANET_DISTANCE + 1;
+                    final float ty1 = y * Planet.PLANET_DISTANCE + 1;
+                    final float tx2 = x * Planet.PLANET_DISTANCE + Planet.PLANET_DISTANCE - 2;
+                    final float ty2 = y * Planet.PLANET_DISTANCE + Planet.PLANET_DISTANCE - 2;
+                    renderEngine.bar(atlasManager.systemTextureRegion, tx1, ty1, tx2, ty2, DEBUG_GRID_BORDER_COLOR);
+                }
+                {
+                    final float tx1 = x * Planet.PLANET_DISTANCE/* + Planet3DRenderer.PLANET_BORDER*/;
+                    final float ty1 = y * Planet.PLANET_DISTANCE/* + Planet3DRenderer.PLANET_BORDER*/;
+                    final float tx2 = x * Planet.PLANET_DISTANCE + Planet.PLANET_DISTANCE/* - Planet3DRenderer.PLANET_BORDER*/ - 1;
+                    final float ty2 = y * Planet.PLANET_DISTANCE + Planet.PLANET_DISTANCE/* - Planet3DRenderer.PLANET_BORDER*/ - 1;
+                    renderEngine.bar(atlasManager.systemTextureRegion, tx1, ty1, tx2, ty2, DEBUG_GRID_COLOR);
+                }
+            }
+        }
+    }
+
+    private void exit() {
+        Gdx.app.exit();
+    }
 
     private Object getRendablePosition(final float x, final float y) {
         for (final Planet planet : universe.planetList) {
@@ -299,9 +395,9 @@ public class Screen2D implements ScreenListener, ApplicationListener, InputProce
 
     private void handleQueuedScreenshot(final boolean takeScreenShot) {
         if (takeScreenShot) {
-            final Date date = new Date();
+            final Date   date     = new Date();
             final String fileName = createFileName(date, "mercator");
-            final byte[] pixels = ScreenUtils.getFrameBufferPixels(0, 0, Gdx.graphics.getBackBufferWidth(), Gdx.graphics.getBackBufferHeight(), true);
+            final byte[] pixels   = ScreenUtils.getFrameBufferPixels(0, 0, Gdx.graphics.getBackBufferWidth(), Gdx.graphics.getBackBufferHeight(), true);
             // This loop makes sure the whole screenshot is opaque and looks exactly like what the user is seeing
             for (int i = 4; i < pixels.length; i += 4) {
                 pixels[i - 1] = (byte) 255;
@@ -313,6 +409,57 @@ public class Screen2D implements ScreenListener, ApplicationListener, InputProce
             pixmap.dispose();
         }
 
+    }
+
+    private void initColors() {
+        {
+            distinctiveColorlist.add(new Color(0.2f, 0.2f, 0.2f, 0.5f));
+            final float factor = (universe.sectorList.size() / 8) / 2.0f;
+            final int   c      = (int) Math.ceil(universe.sectorList.size() / 6.0);
+            for (float i = 0; i < Math.ceil(universe.sectorList.size() / 6.0); i++) {
+                final float low = 1.0f - (i + 1) * factor;
+                //				System.out.println(low * 255);
+                final float high  = 1.0f - i * factor;
+                final float alpha = 1.f;
+                // distinctiveColorlist.add( new Color( high, high, high, alpha ) );
+                distinctiveColorlist.add(new Color(high, high, low, alpha));
+                distinctiveColorlist.add(new Color(high, low, high, alpha));
+                distinctiveColorlist.add(new Color(low, high, high, alpha));
+                distinctiveColorlist.add(new Color(high, low, low, alpha));
+                distinctiveColorlist.add(new Color(low, low, high, alpha));
+                distinctiveColorlist.add(new Color(low, high, low, alpha));
+                // distinctiveColorlist.add( new Color( low, high, low, alpha ) );
+                // distinctiveColorlist.add( new Color( low, low, high, alpha ) );
+                // distinctiveColorlist.add( new Color( low, 1.0f, 1.0f, alpha ) );
+                // distinctiveColorlist.add( new Color( 1.0f, low, 1.0f, alpha ) );
+                // distinctiveColorlist.add( new Color( 1.0f, 1.0f, low, alpha ) );
+                // distinctiveColorlist.add( new Color( low, low, low, alpha ) );
+            }
+            // distinctiveColorArray = distinctiveColorlist.toArray( new Color[0] );
+        }
+        distinctiveTransparentColorlist.add(new Color(0.2f, 0.2f, 0.2f, 0.5f));
+        final float factor = (universe.sectorList.size() / 8) / 2.0f;
+        final int   c      = (int) Math.ceil(universe.sectorList.size() / 6.0);
+        for (float i = 0; i < Math.ceil(universe.sectorList.size() / 6.0); i++) {
+            final float low = 1.0f - (i + 1) * factor;
+            //			System.out.println(low * 255);
+            final float high  = 1.0f - i * factor;
+            final float alpha = 0.4f;
+            // distinctiveColorlist.add( new Color( high, high, high, alpha ) );
+            distinctiveTransparentColorlist.add(new Color(high, high, low, alpha));
+            distinctiveTransparentColorlist.add(new Color(high, low, high, alpha));
+            distinctiveTransparentColorlist.add(new Color(low, high, high, alpha));
+            distinctiveTransparentColorlist.add(new Color(high, low, low, alpha));
+            distinctiveTransparentColorlist.add(new Color(low, low, high, alpha));
+            distinctiveTransparentColorlist.add(new Color(low, high, low, alpha));
+            // distinctiveColorlist.add( new Color( low, high, low, alpha ) );
+            // distinctiveColorlist.add( new Color( low, low, high, alpha ) );
+            // distinctiveColorlist.add( new Color( low, 1.0f, 1.0f, alpha ) );
+            // distinctiveColorlist.add( new Color( 1.0f, low, 1.0f, alpha ) );
+            // distinctiveColorlist.add( new Color( 1.0f, 1.0f, low, alpha ) );
+            // distinctiveColorlist.add( new Color( low, low, low, alpha ) );
+        }
+        // distinctiveColorArray = distinctiveColorlist.toArray( new Color[0] );
     }
 
     public boolean isInfoVisible() {
@@ -385,11 +532,6 @@ public class Screen2D implements ScreenListener, ApplicationListener, InputProce
     }
 
     @Override
-    public boolean keyTyped(final char character) {
-        return false;
-    }
-
-    @Override
     public boolean keyUp(final int keycode) {
         //		switch (keycode) {
         //		case Input.Keys.A:
@@ -407,6 +549,70 @@ public class Screen2D implements ScreenListener, ApplicationListener, InputProce
         //		}
         return false;
     }
+    // private void drawSectors()
+    // {
+    // for ( int y = 0; y < universe.size * 2; y++ )
+    // {
+    // for ( int x = 0; x < universe.size * 2; x++ )
+    // {
+    // Sector sector = renderMaster.universe.sectorList.sectorMap[x][y];
+    // if ( sector != null )
+    // {
+    // sector.getRenderer().render( x - renderMaster.universe.size, y -
+    // renderMaster.universe.size, renderMaster, 0, false );
+    // }
+    // }
+    // }
+    // }
+
+    @Override
+    public boolean keyTyped(final char character) {
+        return false;
+    }
+
+    @Override
+    public boolean touchDown(final int screenX, final int screenY, final int pointer, final int button) {
+        final float x = renderEngine.centerX + (screenX - renderEngine.width / 2) * renderEngine.camera.zoom;
+        final float y = renderEngine.centerY + (screenY - renderEngine.height / 2) * renderEngine.camera.zoom;
+        // ---What did we select?
+        //		Object selected = null;
+        if (Gdx.input.isButtonPressed(Buttons.LEFT)) {
+            final Object selected = getRendablePosition(x, y);
+            try {
+                universe.setSelected(selected, true);
+            } catch (final Exception e) {
+                // TODO Auto-generated catch block
+                logger.error(e.getMessage(), e);
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public boolean touchUp(final int screenX, final int screenY, final int pointer, final int button) {
+        lastDragX = -1;
+        lastDragY = -1;
+        return true;
+    }
+
+    @Override
+    public boolean touchCancelled(int screenX, int screenY, int pointer, int button) {
+        return false;
+    }
+
+    @Override
+    public boolean touchDragged(final int screenX, final int screenY, final int pointer) {
+        if (Gdx.input.isButtonPressed(Buttons.RIGHT)) {
+            if ((lastDragX != screenX || lastDragY != screenY) && lastDragX != -1) {
+                renderEngine.centerX = renderEngine.centerX - (screenX - lastDragX) * renderEngine.camera.zoom;
+                renderEngine.centerY = renderEngine.centerY - (screenY - lastDragY) * renderEngine.camera.zoom;
+            }
+            lastDragX = screenX;
+            lastDragY = screenY;
+            return true;
+        }
+        return false;
+    }
 
     @Override
     public boolean mouseMoved(final int screenX, final int screenY) {
@@ -414,37 +620,17 @@ public class Screen2D implements ScreenListener, ApplicationListener, InputProce
     }
 
     @Override
-    public void pause() {
+    public boolean scrolled(final float amountX, final float amountY) {
+        if (amountY < 0) {
+            renderEngine.soomIn(Gdx.input.getX(), Gdx.input.getY());
+        } else {
+            renderEngine.soomOut(Gdx.input.getX(), Gdx.input.getY());
+        }
+        return false;
     }
 
-    //	private void printStatistics() throws Exception {
-    //		if (profiler.isEnabled()) {
-    //			setMaxFramesPerSecond(Math.max(getMaxFramesPerSecond(), Gdx.graphics.getFramesPerSecond()));
-    //			// once a second
-    //			if (debugTimer.getTime() > 1000) {
-    //				// for ( String statisticName : universe.timeStatisticManager.getSet() )
-    //				// {
-    //				// TimeStatistic statistic = universe.timeStatisticManager.getStatistic(
-    //				// statisticName );
-    //				// System.out.println( String.format( "%s %dms %dms %dms %dms", statisticName,
-    //				// statistic.lastTime, statistic.minTime, statistic.averageTime,
-    //				// statistic.maxTime ) );
-    //				// }
-    //				System.out.printf("----------------------------------------------------\n");
-    //				System.out.printf("profiler.textureBindings %d\n", profiler.getTextureBindings());
-    //				System.out.printf("GLProfiler.drawCalls %d\n", profiler.getDrawCalls());
-    //				System.out.printf("GLProfiler.shaderSwitches %d\n", profiler.getShaderSwitches());
-    //				System.out.printf("GLProfiler.vertexCount.min %.0f\n", profiler.getVertexCount().min);
-    //				System.out.printf("GLProfiler.vertexCount.average %.0f\n", profiler.getVertexCount().average);
-    //				System.out.printf("GLProfiler.vertexCount.max %.0f\n", profiler.getVertexCount().max);
-    //				System.out.printf("GLProfiler.calls %d\n", profiler.getCalls());
-    //				System.out.printf("Texture.getNumManagedTextures() %d\n", Texture.getNumManagedTextures());
-    //				System.out.printf("Gdx.graphics.getDeltaTime() %f\n", Gdx.graphics.getDeltaTime());
-    //				System.out.printf("batch.renderCalls %d\n", render2DMaster.batch.renderCalls);
-    //				System.out.printf(Gdx.graphics.getFramesPerSecond() + " fps\n");
-    //				System.out.printf("----------------------------------------------------\n");
-    //			}
-    //		}
+    //	private void setMaxFramesPerSecond(int maxFramesPerSecond) {
+    //		this.maxFramesPerSecond = maxFramesPerSecond;
     //	}
 
     @Override
@@ -452,37 +638,25 @@ public class Screen2D implements ScreenListener, ApplicationListener, InputProce
         messageQueue.add(message);
     }
 
-    private void queueScreenshot() {
-        takeScreenShot = true;
+    public Color priceColor(final Good good) {
+        return availabilityColor(good.price, good.getMaxPrice());
     }
 
-    @Override
-    public void render() {
-        try {
-            universe.advanceInTime();
-            if (profiler.isEnabled()) {
-                profiler.reset();// reset on each frame
-            }
-            // universe.timeStatisticManager.start( RENDER_DURATION );
-            // postProcessor.capture();
-            render(universe.currentTime);
-            // postProcessor.render();
-            // universe.timeStatisticManager.stop( RENDER_LIGHT );
-            //			GLProfiler.reset();
-            // universe.timeStatisticManager.stop( RENDER_DURATION );
-            // System.out.printf( "advance in time %d\n",
-            // universe.timeStatisticManager.getStatistic(
-            // Universe.ADVANCE_IN_TIME_UNIVERSE_DURATION ).lastTime );
-            // System.out.printf( "render time %d\n\n",
-            // universe.timeStatisticManager.getStatistic( RENDER_DURATION ).lastTime );
-            renderStage();
-        } catch (final Exception e) {
-            logger.error(e.getMessage(), e);
-            System.exit(0);
+    public Color queryCreditColor(final float creadits, final float startCredits) {
+        if (creadits < startCredits / 2) {
+            return Color.RED;
+        } else if (creadits < startCredits) {
+            return Color.ORANGE;
+        } else if (creadits > startCredits * 2) {
+            return Color.GREEN;
+        } else {
+            return Color.WHITE;
         }
     }
 
-    public RenderEngine2D<Screen2D> renderEngine;
+    private void queueScreenshot() {
+        takeScreenShot = true;
+    }
 
     private void render(final long currentTime) throws Exception {
         // universe.timeStatisticManager.start( DRAW_DURATION );
@@ -552,21 +726,6 @@ public class Screen2D implements ScreenListener, ApplicationListener, InputProce
             planet.get2DRenderer().render(0, 0, renderEngine, 0, planet == universe.selectedPlanet);
         }
     }
-    // private void drawSectors()
-    // {
-    // for ( int y = 0; y < universe.size * 2; y++ )
-    // {
-    // for ( int x = 0; x < universe.size * 2; x++ )
-    // {
-    // Sector sector = renderMaster.universe.sectorList.sectorMap[x][y];
-    // if ( sector != null )
-    // {
-    // sector.getRenderer().render( x - renderMaster.universe.size, y -
-    // renderMaster.universe.size, renderMaster, 0, false );
-    // }
-    // }
-    // }
-    // }
 
     private void renderStage() throws Exception {
         int labelIndex = 0;
@@ -644,40 +803,36 @@ public class Screen2D implements ScreenListener, ApplicationListener, InputProce
         {
             atlasManager.defaultFont.setColor(TEXT_COLOR);
             final String universeAge = String.format("%s", TimeUnit.toString(universe.currentTime, TimeAccuracy.DAY_ACCURACY));
-            final float x = renderEngine.untransformX(renderEngine.width - 50);
-            final float y = renderEngine.untransformY(renderEngine.height - 2);
+            final float  x           = renderEngine.untransformX(renderEngine.width - 50);
+            final float  y           = renderEngine.untransformY(renderEngine.height - 2);
             atlasManager.defaultFont.draw(renderEngine.batch, universeAge, x, y);
         }
         {
-            final float start = 0;
-            final float end = universe.currentTime;
+            final float start     = 0;
+            final float end       = universe.currentTime;
             final float totalDays = end - start;
-            final int digits = (int) Math.log10(totalDays);
+            final int   digits    = (int) Math.log10(totalDays);
             if (digits > 1) {
-                final long daysDelta = (long) Math.pow(10, digits - 1);
-                float lastPosition = 0;
-                float lastSubPosition = 0;
+                final long daysDelta       = (long) Math.pow(10, digits - 1);
+                float      lastPosition    = 0;
+                float      lastSubPosition = 0;
                 for (int i = 0; i * (daysDelta / totalDays) * renderEngine.width < renderEngine.width - 70; i++) {
                     final float yearPosition = i * (daysDelta / totalDays) * renderEngine.width;
-                    String yearName;
+                    String      yearName;
                     if (yearPosition - lastPosition > 256) {
                         // String yearName = String.format( "%.0f", i * daysDelta / 100 );
-                        if (i * daysDelta < TimeUnit.TICKS_PER_YEAR)
-                            yearName = TimeUnit.toString(i * daysDelta);
-                        else
-                            yearName = TimeUnit.toString(i * daysDelta, TimeAccuracy.YEAR_ACCURACY);
+                        if (i * daysDelta < TimeUnit.TICKS_PER_YEAR) yearName = TimeUnit.toString(i * daysDelta);
+                        else yearName = TimeUnit.toString(i * daysDelta, TimeAccuracy.YEAR_ACCURACY);
                         final float yX = renderEngine.untransformX(yearPosition);
                         final float yY = renderEngine.untransformY(renderEngine.height - 2);
                         atlasManager.defaultFont.setColor(TEXT_COLOR);
                         atlasManager.defaultFont.draw(renderEngine.batch, yearName, yX, yY);
-                        lastPosition = yearPosition;
+                        lastPosition    = yearPosition;
                         lastSubPosition = yearPosition;
                     } else if (yearPosition - lastSubPosition > 51.2f) {
                         // String yearName = String.format( "%.0f", i * daysDelta / 100 );
-                        if (i * daysDelta < TimeUnit.TICKS_PER_YEAR)
-                            yearName = TimeUnit.toString(i * daysDelta);
-                        else
-                            yearName = TimeUnit.toString(i * daysDelta, TimeAccuracy.YEAR_ACCURACY);
+                        if (i * daysDelta < TimeUnit.TICKS_PER_YEAR) yearName = TimeUnit.toString(i * daysDelta);
+                        else yearName = TimeUnit.toString(i * daysDelta, TimeAccuracy.YEAR_ACCURACY);
                         final float yX = renderEngine.untransformX(yearPosition);
                         final float yY = renderEngine.untransformY(renderEngine.height - 2 - (defaultFontSize - timeMachineFontSize) / (2 * renderEngine.camera.zoom));
                         atlasManager.timeMachineFont.setColor(TIME_MACHINE_SUB_MARKER_COLOR);
@@ -686,126 +841,6 @@ public class Screen2D implements ScreenListener, ApplicationListener, InputProce
                     }
                 }
             }
-        }
-    }
-
-    int timeMachineFontSize = Screen2D.TIME_MACHINE_FONT_SIZE;
-
-    @Override
-    public void resize(final int width, final int height) {
-        renderEngine.width = width;
-        renderEngine.height = height;
-        renderEngine.camera.setToOrtho(false, width, height);
-        renderEngine.camera.update();
-        renderEngine.batch.setProjectionMatrix(renderEngine.camera.combined);
-        info.resize(width, height);
-    }
-
-    @Override
-    public void resume() {
-        // TODO Auto-generated method stub
-    }
-
-    @Override
-    public boolean scrolled(final float amountX, final float amountY) {
-        if (amountY < 0) {
-            renderEngine.soomIn(Gdx.input.getX(), Gdx.input.getY());
-        } else {
-            renderEngine.soomOut(Gdx.input.getX(), Gdx.input.getY());
-        }
-        return false;
-    }
-
-    //	private void setMaxFramesPerSecond(int maxFramesPerSecond) {
-    //		this.maxFramesPerSecond = maxFramesPerSecond;
-    //	}
-
-    @Override
-    public void setCamera(final float x, final float z, final boolean setDirty) {
-        // TODO Auto-generated method stub
-    }
-
-    public Color amountColor(final Good good) {
-        return availabilityColor(good.getAmount(), good.getMaxAmount());
-    }
-
-    public Color availabilityColor(final float amount, final float maxAmount) {
-        if (amount >= 0.5 * maxAmount) {
-            return Color.GREEN;
-        } else if (amount >= 0.3 * maxAmount) {
-            return Color.ORANGE;
-        } else {
-            return Screen2D.DARK_RED_COLOR;
-        }
-    }
-
-    public List<Color> distinctiveColorlist = new ArrayList<Color>();
-    public List<Color> distinctiveTransparentColorlist = new ArrayList<Color>();
-
-    private void initColors() {
-        {
-            distinctiveColorlist.add(new Color(0.2f, 0.2f, 0.2f, 0.5f));
-            final float factor = (universe.sectorList.size() / 8) / 2.0f;
-            final int c = (int) Math.ceil(universe.sectorList.size() / 6.0);
-            for (float i = 0; i < Math.ceil(universe.sectorList.size() / 6.0); i++) {
-                final float low = 1.0f - (i + 1) * factor;
-                //				System.out.println(low * 255);
-                final float high = 1.0f - i * factor;
-                final float alpha = 1.f;
-                // distinctiveColorlist.add( new Color( high, high, high, alpha ) );
-                distinctiveColorlist.add(new Color(high, high, low, alpha));
-                distinctiveColorlist.add(new Color(high, low, high, alpha));
-                distinctiveColorlist.add(new Color(low, high, high, alpha));
-                distinctiveColorlist.add(new Color(high, low, low, alpha));
-                distinctiveColorlist.add(new Color(low, low, high, alpha));
-                distinctiveColorlist.add(new Color(low, high, low, alpha));
-                // distinctiveColorlist.add( new Color( low, high, low, alpha ) );
-                // distinctiveColorlist.add( new Color( low, low, high, alpha ) );
-                // distinctiveColorlist.add( new Color( low, 1.0f, 1.0f, alpha ) );
-                // distinctiveColorlist.add( new Color( 1.0f, low, 1.0f, alpha ) );
-                // distinctiveColorlist.add( new Color( 1.0f, 1.0f, low, alpha ) );
-                // distinctiveColorlist.add( new Color( low, low, low, alpha ) );
-            }
-            // distinctiveColorArray = distinctiveColorlist.toArray( new Color[0] );
-        }
-        distinctiveTransparentColorlist.add(new Color(0.2f, 0.2f, 0.2f, 0.5f));
-        final float factor = (universe.sectorList.size() / 8) / 2.0f;
-        final int c = (int) Math.ceil(universe.sectorList.size() / 6.0);
-        for (float i = 0; i < Math.ceil(universe.sectorList.size() / 6.0); i++) {
-            final float low = 1.0f - (i + 1) * factor;
-            //			System.out.println(low * 255);
-            final float high = 1.0f - i * factor;
-            final float alpha = 0.4f;
-            // distinctiveColorlist.add( new Color( high, high, high, alpha ) );
-            distinctiveTransparentColorlist.add(new Color(high, high, low, alpha));
-            distinctiveTransparentColorlist.add(new Color(high, low, high, alpha));
-            distinctiveTransparentColorlist.add(new Color(low, high, high, alpha));
-            distinctiveTransparentColorlist.add(new Color(high, low, low, alpha));
-            distinctiveTransparentColorlist.add(new Color(low, low, high, alpha));
-            distinctiveTransparentColorlist.add(new Color(low, high, low, alpha));
-            // distinctiveColorlist.add( new Color( low, high, low, alpha ) );
-            // distinctiveColorlist.add( new Color( low, low, high, alpha ) );
-            // distinctiveColorlist.add( new Color( low, 1.0f, 1.0f, alpha ) );
-            // distinctiveColorlist.add( new Color( 1.0f, low, 1.0f, alpha ) );
-            // distinctiveColorlist.add( new Color( 1.0f, 1.0f, low, alpha ) );
-            // distinctiveColorlist.add( new Color( low, low, low, alpha ) );
-        }
-        // distinctiveColorArray = distinctiveColorlist.toArray( new Color[0] );
-    }
-
-    public Color priceColor(final Good good) {
-        return availabilityColor(good.price, good.getMaxPrice());
-    }
-
-    public Color queryCreditColor(final float creadits, final float startCredits) {
-        if (creadits < startCredits / 2) {
-            return Color.RED;
-        } else if (creadits < startCredits) {
-            return Color.ORANGE;
-        } else if (creadits > startCredits * 2) {
-            return Color.GREEN;
-        } else {
-            return Color.WHITE;
         }
     }
 
@@ -819,8 +854,9 @@ public class Screen2D implements ScreenListener, ApplicationListener, InputProce
         }
     }
 
-    public void setInfoVisible(final boolean infoVisible) {
-        this.infoVisible = infoVisible;
+    @Override
+    public void setCamera(final float x, final float z, final boolean setDirty) {
+        // TODO Auto-generated method stub
     }
 
     @Override
@@ -828,47 +864,7 @@ public class Screen2D implements ScreenListener, ApplicationListener, InputProce
         showGood = name;
     }
 
-    @Override
-    public boolean touchDown(final int screenX, final int screenY, final int pointer, final int button) {
-        final float x = renderEngine.centerX + (screenX - renderEngine.width / 2) * renderEngine.camera.zoom;
-        final float y = renderEngine.centerY + (screenY - renderEngine.height / 2) * renderEngine.camera.zoom;
-        // ---What did we select?
-        //		Object selected = null;
-        if (Gdx.input.isButtonPressed(Buttons.LEFT)) {
-            final Object selected = getRendablePosition(x, y);
-            try {
-                universe.setSelected(selected, true);
-            } catch (final Exception e) {
-                // TODO Auto-generated catch block
-                logger.error(e.getMessage(), e);
-            }
-        }
-        return false;
-    }
-
-    @Override
-    public boolean touchDragged(final int screenX, final int screenY, final int pointer) {
-        if (Gdx.input.isButtonPressed(Buttons.RIGHT)) {
-            if ((lastDragX != screenX || lastDragY != screenY) && lastDragX != -1) {
-                renderEngine.centerX = renderEngine.centerX - (screenX - lastDragX) * renderEngine.camera.zoom;
-                renderEngine.centerY = renderEngine.centerY - (screenY - lastDragY) * renderEngine.camera.zoom;
-            }
-            lastDragX = screenX;
-            lastDragY = screenY;
-            return true;
-        }
-        return false;
-    }
-
-    @Override
-    public boolean touchUp(final int screenX, final int screenY, final int pointer, final int button) {
-        lastDragX = -1;
-        lastDragY = -1;
-        return true;
-    }
-
-    @Override
-    public boolean touchCancelled(int screenX, int screenY, int pointer, int button) {
-        return false;
+    public void setInfoVisible(final boolean infoVisible) {
+        this.infoVisible = infoVisible;
     }
 }

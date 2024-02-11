@@ -1,17 +1,33 @@
+/*
+ * Copyright (C) 2024 Abdalla Bushnaq
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package de.bushnaq.abdalla.mercator.universe.planet;
 
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.math.Circle;
 import de.bushnaq.abdalla.engine.ObjectRenderer;
 import de.bushnaq.abdalla.engine.RenderEngine2D;
-import de.bushnaq.abdalla.engine.RenderEngine3D;
 import de.bushnaq.abdalla.mercator.renderer.Screen2D;
 import de.bushnaq.abdalla.mercator.universe.factory.ProductionFacility;
 import de.bushnaq.abdalla.mercator.universe.sim.Sim;
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.math.Circle;
 import de.bushnaq.abdalla.mercator.universe.sim.trader.Trader2DRenderer;
 
 public class Planet2DRenderer extends ObjectRenderer<Screen2D> {
-    public static final float PLANET_SIZE = 33;
+    public static final float  PLANET_SIZE = 33;
+    private final       Planet planet;
     // static final Color PLANET_COLOR = new Color( 0.8f, 0.8f, 0.8f, 1.0f );
     // //0xff8888cc;
     // static final Color PLANET_RING_COLOR = new Color( 0.6f, 0.6f, 0.6f, 1.0f );
@@ -19,16 +35,20 @@ public class Planet2DRenderer extends ObjectRenderer<Screen2D> {
     // static final float PLANET_ATMOSPHARE_SIZE = 96 * 4;
     // static final Color SELECTED_PLANET_COLOR = Color.ORANGE;
     Circle circle;
-    private final Planet planet;
 
     public Planet2DRenderer(final Planet planet) {
         this.planet = planet;
-        circle = new Circle(planet.x, planet.z, PLANET_SIZE / 2 + 1);
+        circle      = new Circle(planet.x, planet.z, PLANET_SIZE / 2 + 1);
     }
 
     @Override
     public void render(final float px, final float py, final RenderEngine2D<Screen2D> renderEngine, final int index, final boolean selected) {
         renderPlanet(planet, renderEngine, planet == renderEngine.getGameEngine().universe.selectedPlanet);
+    }
+
+    @Override
+    public boolean withinBounds(final float x, final float y) {
+        return circle.contains(x, y);
     }
 
     private void renderFactory(final Planet planet, final RenderEngine2D<Screen2D> renderEngine) {
@@ -39,10 +59,10 @@ public class Planet2DRenderer extends ObjectRenderer<Screen2D> {
     }
 
     private void renderPlanet(final Planet planet, final RenderEngine2D<Screen2D> renderEngine, final boolean selected) {
-        final float x = planet.x;
-        final float y = planet.z;
+        final float x   = planet.x;
+        final float y   = planet.z;
         final float hps = PLANET_SIZE / 2;
-        Color color;
+        Color       color;
         // ---Planet color
         // if ( universe.selectedGoodIndex != -1 ) { Good good =
         // aPlanet.goodList.get( universe.selectedGoodIndex ); { // int color =
@@ -82,16 +102,16 @@ public class Planet2DRenderer extends ObjectRenderer<Screen2D> {
             final int rings = (int) (planet.getCredits() / Planet.PLANET_START_CREDITS) + 1;
             if (renderEngine.getGameEngine().renderEngine.camera.zoom < 10.0f) {
                 for (int ring = 0; ring < rings; ring++) {
-                    final int index = (ring + 1);
-                    final float x1 = x;
-                    final float y1 = y;
+                    final int   index = (ring + 1);
+                    final float x1    = x;
+                    final float y1    = y;
                     renderEngine.getGameEngine().renderEngine.circle(renderEngine.getGameEngine().atlasManager.planetTextureRegion, x1, y1, PLANET_SIZE * index, 8f, renderEngine.getGameEngine().distinctiveTransparentColorlist.get(planet.sector.type), 32);
                     // renderMaster.bar( renderMaster.circle.get( x2 - x1 + 1, y2 - y1 + 1 ), x1,
                     // y1, x2, y2, color );
                 }
-                renderEngine.getGameEngine().renderEngine.lable(renderEngine.getGameEngine().atlasManager.systemTextureRegion, x, y, Trader2DRenderer.TRADER_WIDTH,Trader2DRenderer.TRADER_HEIGHT, PLANET_SIZE * 4, PLANET_SIZE * 5, renderEngine.getGameEngine().atlasManager.defaultFont, color, planet.getName(), color, String.format("%.0f", planet.getCredits()), renderEngine.getGameEngine().queryCreditColor(planet.getCredits(), Planet.PLANET_START_CREDITS));
+                renderEngine.getGameEngine().renderEngine.lable(renderEngine.getGameEngine().atlasManager.systemTextureRegion, x, y, Trader2DRenderer.TRADER_WIDTH, Trader2DRenderer.TRADER_HEIGHT, PLANET_SIZE * 4, PLANET_SIZE * 5, renderEngine.getGameEngine().atlasManager.defaultFont, color, planet.getName(), color, String.format("%.0f", planet.getCredits()), renderEngine.getGameEngine().queryCreditColor(planet.getCredits(), Planet.PLANET_START_CREDITS));
             } else {
-                renderEngine.getGameEngine().renderEngine.lable(renderEngine.getGameEngine().atlasManager.systemTextureRegion, x, y,Trader2DRenderer.TRADER_WIDTH, Trader2DRenderer.TRADER_HEIGHT, PLANET_SIZE * 1, PLANET_SIZE * 2, renderEngine.getGameEngine().atlasManager.defaultFont, color, planet.getName(), color, String.format("%.0f", planet.getCredits()), renderEngine.getGameEngine().queryCreditColor(planet.getCredits(), Planet.PLANET_START_CREDITS));
+                renderEngine.getGameEngine().renderEngine.lable(renderEngine.getGameEngine().atlasManager.systemTextureRegion, x, y, Trader2DRenderer.TRADER_WIDTH, Trader2DRenderer.TRADER_HEIGHT, PLANET_SIZE * 1, PLANET_SIZE * 2, renderEngine.getGameEngine().atlasManager.defaultFont, color, planet.getName(), color, String.format("%.0f", planet.getCredits()), renderEngine.getGameEngine().queryCreditColor(planet.getCredits(), Planet.PLANET_START_CREDITS));
             }
             renderEngine.getGameEngine().renderEngine.text(x, y + 100, renderEngine.getGameEngine().atlasManager.defaultFont, color, color, planet.sector.name);
             renderSims(planet, renderEngine, x, y, hps);
@@ -119,11 +139,6 @@ public class Planet2DRenderer extends ObjectRenderer<Screen2D> {
                 sim.get2DRenderer().render(planet.x, planet.z, renderEngine, simIndex++, false);
             }
         }
-    }
-
-    @Override
-    public boolean withinBounds(final float x, final float y) {
-        return circle.contains(x, y);
     }
 
 }

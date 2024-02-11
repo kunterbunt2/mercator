@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2024 Abdalla Bushnaq
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package de.bushnaq.abdalla.mercator.render;
 
 import com.badlogic.gdx.ApplicationListener;
@@ -26,98 +42,98 @@ import java.io.File;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 public class GenerateAtlasTest implements ApplicationListener {
-	private static final int MAX_ITERATIONS = 20;
+    private static final int MAX_ITERATIONS = 20;
 
-	private int calculatePageSize(final int i) {
-		return 64 * i;
-	}
+    private int calculatePageSize(final int i) {
+        return 64 * i;
+    }
 
-	@Override
-	public void create() {
-		final AtlasManager atlasManager = new AtlasManager();
-		generateFonts(atlasManager.fontDataList);
-		createAtlas();
-		System.out.println("End");
-		Gdx.app.exit();
-		System.exit(0);
-	}
+    @Override
+    public void create() {
+        final AtlasManager atlasManager = new AtlasManager();
+        generateFonts(atlasManager.fontDataList);
+        createAtlas();
+        System.out.println("End");
+        Gdx.app.exit();
+        System.exit(0);
+    }
 
-	private void createAtlas() {
-		(new File("src/main/resources/atlas/atlas.png")).delete();
-		(new File("src/main/resources/atlas/atlas.atlas")).delete();
-		TexturePacker.process("src/main/resources/raw", "src/main/resources/atlas/", "atlas");
-	}
+    @Override
+    public void resize(final int width, final int height) {
+    }
 
-	@Override
-	public void dispose() {
-	}
+    @Override
+    public void render() {
+        try {
+            Thread.sleep(100);
+        } catch (final InterruptedException e) {
+            e.printStackTrace();
+        }
 
-	@Test
-	public void generateAtlas() throws Exception {
-		Gdx.files = new LwjglFiles();
-		LwjglNativesLoader.load();
-		final Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
-		new Lwjgl3Application(this, config);
-	}
+    }
 
-	private void generateFonts(final FontData[] fontDataList) {
-		for (final FontData fontData : fontDataList) {
-			int i = 1;
-			int pageSize;
-			for (; i < MAX_ITERATIONS; i++) {
-				pageSize = calculatePageSize(i);
-				try {
+    @Override
+    public void pause() {
+    }
 
-					final PixmapPacker packer = new PixmapPacker(pageSize, pageSize, Format.RGBA8888, 1, false);
-					{
-						final FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal(fontData.file));
-						final FreeTypeFontParameter parameter = new FreeTypeFontParameter();
-						parameter.size = (fontData.fontSize);
-						parameter.packer = packer;
-						generator.generateData(parameter);
-						generator.dispose(); // don't forget to dispose to avoid memory leaks!
-					}
-					final Array<Page> pages = packer.getPages();
-					if (pages.size == 1) {
-						final Page p = pages.get(0);
-						final Pixmap pixmap = p.getPixmap();
-						System.out.println("Generating font '" + fontData.name + ".png'.");
-						final FileHandle fh = new FileHandle("src/main/resources/raw/" + fontData.name + ".png");
-						PixmapIO.writePNG(fh, pixmap);
-						pixmap.dispose();
-						break;
-					}
-				} catch (final GdxRuntimeException e) {
-					if (e.getMessage().equals("Page size too small for pixmap.")) {
-						//ignore
-					} else {
-						throw e;
-					}
-				}
-			}
-			assertNotEquals(calculatePageSize(i), calculatePageSize(MAX_ITERATIONS), "Page too small for font: " + fontData.name);
-		}
-	}
+    @Override
+    public void resume() {
+    }
 
-	@Override
-	public void pause() {
-	}
+    @Override
+    public void dispose() {
+    }
 
-	@Override
-	public void render() {
-		try {
-			Thread.sleep(100);
-		} catch (final InterruptedException e) {
-			e.printStackTrace();
-		}
+    private void createAtlas() {
+        (new File("src/main/resources/atlas/atlas.png")).delete();
+        (new File("src/main/resources/atlas/atlas.atlas")).delete();
+        TexturePacker.process("src/main/resources/raw", "src/main/resources/atlas/", "atlas");
+    }
 
-	}
+    @Test
+    public void generateAtlas() throws Exception {
+        Gdx.files = new LwjglFiles();
+        LwjglNativesLoader.load();
+        final Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
+        new Lwjgl3Application(this, config);
+    }
 
-	@Override
-	public void resize(final int width, final int height) {
-	}
+    private void generateFonts(final FontData[] fontDataList) {
+        for (final FontData fontData : fontDataList) {
+            int i = 1;
+            int pageSize;
+            for (; i < MAX_ITERATIONS; i++) {
+                pageSize = calculatePageSize(i);
+                try {
 
-	@Override
-	public void resume() {
-	}
+                    final PixmapPacker packer = new PixmapPacker(pageSize, pageSize, Format.RGBA8888, 1, false);
+                    {
+                        final FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal(fontData.file));
+                        final FreeTypeFontParameter parameter = new FreeTypeFontParameter();
+                        parameter.size   = (fontData.fontSize);
+                        parameter.packer = packer;
+                        generator.generateData(parameter);
+                        generator.dispose(); // don't forget to dispose to avoid memory leaks!
+                    }
+                    final Array<Page> pages = packer.getPages();
+                    if (pages.size == 1) {
+                        final Page   p      = pages.get(0);
+                        final Pixmap pixmap = p.getPixmap();
+                        System.out.println("Generating font '" + fontData.name + ".png'.");
+                        final FileHandle fh = new FileHandle("src/main/resources/raw/" + fontData.name + ".png");
+                        PixmapIO.writePNG(fh, pixmap);
+                        pixmap.dispose();
+                        break;
+                    }
+                } catch (final GdxRuntimeException e) {
+                    if (e.getMessage().equals("Page size too small for pixmap.")) {
+                        //ignore
+                    } else {
+                        throw e;
+                    }
+                }
+            }
+            assertNotEquals(calculatePageSize(i), calculatePageSize(MAX_ITERATIONS), "Page too small for font: " + fontData.name);
+        }
+    }
 }

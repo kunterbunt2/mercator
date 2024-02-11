@@ -179,8 +179,8 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
             renderEngine.getWater().setWaveStrength(0.01f / Universe.WORLD_SCALE);
             renderEngine.getWater().setWaveSpeed(0.03f);
             renderEngine.getWater().setRefractiveMultiplicator(1f);
-            renderEngine.setReflectionClippingPlane(-(Planet3DRenderer.WATER_Y - 2));
-            renderEngine.setRefractionClippingPlane((Planet3DRenderer.WATER_Y - 2));
+            renderEngine.setReflectionClippingPlane(-(context.getWaterLevel() - 2));
+            renderEngine.setRefractionClippingPlane((context.getWaterLevel() - 2));
             renderEngine.setShadowEnabled(true);
             renderEngine.setSkyBox(true);
             renderEngine.getFog().setColor(Color.WHITE);
@@ -197,7 +197,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
             audioEngine.create();
             audioEngine.enableHrtf(0);
 
-            createStone();
+//            createStone();
             createTraders();
 //			createRing();
             createWater();

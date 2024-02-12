@@ -30,7 +30,7 @@ public class CircularTranslationTest extends TranslationUtil<CircularTranslation
 
     @Test
     public void circularTranslatingSources() throws Exception {
-        runFor = 20000;
+        runFor = 5000;
         startLwjgl();
     }
 

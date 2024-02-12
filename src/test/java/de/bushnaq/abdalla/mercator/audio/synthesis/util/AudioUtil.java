@@ -27,10 +27,11 @@ import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
-import de.bushnaq.abdalla.mercator.audio.synthesis.OpenAlException;
+import de.bushnaq.abdalla.engine.audio.OpenAlException;
 import de.bushnaq.abdalla.mercator.desktop.DesktopContextFactory;
 import de.bushnaq.abdalla.mercator.desktop.GraphicsDimentions;
 import de.bushnaq.abdalla.mercator.desktop.LaunchMode;
@@ -49,8 +50,8 @@ public abstract class AudioUtil implements ApplicationListener, InputProcessor {
     private final Matrix4                 identityMatrix    = new Matrix4();
     private final List<Label>             labels            = new ArrayList<>();
     private final Logger                  logger            = LoggerFactory.getLogger(this.getClass());
+    protected     GameEngine3D            gameEngine;
     protected     MercatorRandomGenerator rg                = new MercatorRandomGenerator(1, null);
-    protected     GameEngine3D            sceneManager;
     protected     boolean                 simulateBassBoost = true;
     protected     Universe                universe;
     DesktopContextFactory contextFactory = new DesktopContextFactory();
@@ -67,8 +68,9 @@ public abstract class AudioUtil implements ApplicationListener, InputProcessor {
             contextFactory.create();
             universe = new Universe("U-0", gd, EventLevel.warning, Sim.class);
             createStage();
-            sceneManager = new GameEngine3D(contextFactory, universe, LaunchMode.development);
-            sceneManager.renderEngine.setAlwaysDay(true);
+            gameEngine = new GameEngine3D(contextFactory, universe, LaunchMode.development);
+            gameEngine.create();
+            gameEngine.renderEngine.setAlwaysDay(true);
         } catch (final Exception e) {
             logger.error(e.getMessage(), e);
         }
@@ -83,20 +85,22 @@ public abstract class AudioUtil implements ApplicationListener, InputProcessor {
         try {
             universe.advanceInTime();
             update();
-            sceneManager.renderEngine.render(universe.currentTime, Gdx.graphics.getDeltaTime(), takeScreenShot);
-            sceneManager.renderEngine.postProcessRender();
+            gameEngine.renderEngine.render(universe.currentTime, Gdx.graphics.getDeltaTime(), takeScreenShot);
+            gameEngine.renderEngine.postProcessRender();
 
             Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
             //			Gdx.gl.glEnable(GL20.GL_BLEND);
-            sceneManager.renderEngine.batch2D.enableBlending();
-            sceneManager.renderEngine.batch2D.begin();
+            gameEngine.renderEngine.batch2D.enableBlending();
+            gameEngine.renderEngine.batch2D.begin();
             //			Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
-            sceneManager.renderEngine.batch2D.setProjectionMatrix(sceneManager.renderEngine.getCamera().combined);
+            gameEngine.renderEngine.batch2D.setProjectionMatrix(gameEngine.renderEngine.getCamera().combined);
             renderText();
-            sceneManager.renderEngine.batch2D.end();
-            sceneManager.renderEngine.batch2D.setTransformMatrix(identityMatrix);//fix transformMatrix
+            gameEngine.renderEngine.batch2D.end();
+            gameEngine.renderEngine.batch2D.setTransformMatrix(identityMatrix);//fix transformMatrix
             //			renderStage();
             takeScreenShot = false;
+            gameEngine.audioEngine.begin(gameEngine.renderEngine.getCamera());
+            gameEngine.audioEngine.end();
         } catch (final Exception e) {
             logger.error(e.getMessage(), e);
         }
@@ -113,7 +117,7 @@ public abstract class AudioUtil implements ApplicationListener, InputProcessor {
     @Override
     public void dispose() {
         try {
-            sceneManager.dispose();
+            gameEngine.dispose();
             font.dispose();
             Gdx.app.exit();
         } catch (final Exception e) {
@@ -128,9 +132,23 @@ public abstract class AudioUtil implements ApplicationListener, InputProcessor {
         config.setForegroundFPS(0);
         config.setResizable(false);
         config.setOpenGLEmulation(Lwjgl3ApplicationConfiguration.GLEmulation.GL30, 3, 2); // use GL 3.0 (emulated by OpenGL 3.2)
-//		config.useOpenGL3(true, 3, 2);
         config.setBackBufferConfig(8, 8, 8, 8, 16, 0, 4);
         config.setTitle("Mercator");
+        {
+            ShaderProgram.prependVertexCode   = "#version 150\n"//
+                    + "#define GLSL3\n"//
+                    + "#ifdef GLSL3\n"//
+                    + "#define attribute in\n"//
+                    + "#define varying out\n"//
+                    + "#endif\n";//
+            ShaderProgram.prependFragmentCode = "#version 150\n"//
+                    + "#define GLSL3\n"//
+                    + "#ifdef GLSL3\n"//
+                    + "#define textureCube texture\n"//
+                    + "#define texture2D texture\n"//
+                    + "#define varying in\n"//
+                    + "#endif\n";//
+        }
         final Monitor[]   monitors    = Lwjgl3ApplicationConfiguration.getMonitors();
         final DisplayMode primaryMode = Lwjgl3ApplicationConfiguration.getDisplayMode(monitors[1]);
         config.setFullscreenMode(primaryMode);
@@ -172,10 +190,10 @@ public abstract class AudioUtil implements ApplicationListener, InputProcessor {
             case Input.Keys.H:
                 try {
                     if (hrtfEnabled) {
-                        sceneManager.audioEngine.disableHrtf(0);
+                        gameEngine.audioEngine.disableHrtf(0);
                         hrtfEnabled = false;
                     } else {
-                        sceneManager.audioEngine.enableHrtf(0);
+                        gameEngine.audioEngine.enableHrtf(0);
                         hrtfEnabled = true;
                     }
                 } catch (final OpenAlException e) {
@@ -226,6 +244,7 @@ public abstract class AudioUtil implements ApplicationListener, InputProcessor {
         return false;
     }
 
+
     private void renderStage() throws Exception {
         int labelIndex = 0;
         // fps
@@ -237,7 +256,7 @@ public abstract class AudioUtil implements ApplicationListener, InputProcessor {
         //audio sources
         {
             stringBuilder.setLength(0);
-            stringBuilder.append(" audio sources: ").append(sceneManager.audioEngine.getEnabledAudioSourceCount() + " / " + sceneManager.audioEngine.getDisabledAudioSourceCount());
+            stringBuilder.append(" audio sources: ").append(gameEngine.audioEngine.getEnabledAudioSourceCount() + " / " + gameEngine.audioEngine.getDisabledAudioSourceCount());
             labels.get(labelIndex++).setText(stringBuilder);
         }
         stage.draw();

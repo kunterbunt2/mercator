@@ -16,7 +16,8 @@
 
 package de.bushnaq.abdalla.mercator.audio.synthesis.util;
 
-import de.bushnaq.abdalla.mercator.audio.synthesis.AudioEngine;
+
+import de.bushnaq.abdalla.engine.audio.AudioEngine;
 
 public class SawAudioEngine extends AudioEngine {
     public static final int bits       = 16;

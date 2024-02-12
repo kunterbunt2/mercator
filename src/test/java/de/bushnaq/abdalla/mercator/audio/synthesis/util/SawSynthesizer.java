@@ -16,12 +16,12 @@
 
 package de.bushnaq.abdalla.mercator.audio.synthesis.util;
 
-import de.bushnaq.abdalla.mercator.audio.synthesis.OpenAlException;
-import de.bushnaq.abdalla.mercator.audio.synthesis.SawOscillator;
-import de.bushnaq.abdalla.mercator.audio.synthesis.Synthesizer;
+import de.bushnaq.abdalla.engine.audio.OpenAlException;
+import de.bushnaq.abdalla.engine.audio.synthesis.SawOscillator;
+import de.bushnaq.abdalla.engine.audio.synthesis.Synthesizer;
 
 public class SawSynthesizer extends Synthesizer {
-    SawOscillator saw1;
+    public SawOscillator saw1;
 
     public SawSynthesizer() throws OpenAlException {
         super(44100);

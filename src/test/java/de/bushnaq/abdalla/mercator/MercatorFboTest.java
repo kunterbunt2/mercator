@@ -65,7 +65,7 @@ public class MercatorFboTest extends TranslationUtil<LiniarTranslation> {
     private void createCamera() {
         Gdx.files = new Lwjgl3Files();
         Lwjgl3NativesLoader.load();
-        final MovingCamera camera = sceneManager.renderEngine.getCamera();
+        final MovingCamera camera = gameEngine.renderEngine.getCamera();
         camera.position.set(0f, 200f, 200f);
         camera.up.set(0f, 1f, 0f);
         camera.lookAt(0, 0, 0);

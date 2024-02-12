@@ -46,37 +46,37 @@ import java.util.Map;
 
 public class Trader3DRenderer extends ObjectRenderer<GameEngine3D> {
 
-    public static final  float                           TRADER_SIZE_Z           = 16 / Universe.WORLD_SCALE;
-    private static final float                           LIGHT_DISTANCE          = 5f;
-    private static final float                           LIGHT_INTENSITY         = 10000f;
-    private static final Color                           TRADER_NAME_COLOR       = Color.WHITE;
-    private static final float                           TRADER_SIZE_X           = 16 / Universe.WORLD_SCALE;
-    private static final float                           TRADER_SIZE_Y           = 8 / Universe.WORLD_SCALE;
-    private static final float                           TRADER_TRAVELING_HEIGHT = -TRADER_SIZE_Y / 2 + Planet3DRenderer.WATER_Y;
-    private static       int                             NUMBER_OF_LIGHTS        = 1;
-    private final        Vector3                         direction               = new Vector3();//intermediate value
-    private final        List<GameObject>                goodInstances           = new ArrayList<>();
-    private final        List<GameObject>                lightGameObjects        = new ArrayList<>();
-    private final        Vector3                         lightScaling            = new Vector3(2.0f, 2.0f, 2.0f);
-    private final        Vector3                         lightTranslation        = new Vector3();
-    private final        Logger                          logger                  = LoggerFactory.getLogger(this.getClass());
-    private final        List<PointLight>                pointLights             = new ArrayList<>();
-    private final        Vector3                         scaling                 = new Vector3();//intermediate value
-    private final        Vector3                         shift                   = new Vector3();//intermediate value
-    private final        Vector3                         target                  = new Vector3();//intermediate value
-    private final        Trader                          trader;
-    private final        Vector3                         translation             = new Vector3();//intermediate value
-    private final        Map<GoodType, List<GameObject>> unusedMls               = new HashMap<>();
-    private final        Map<GoodType, List<GameObject>> usedMls                 = new HashMap<>();
-    float[] lastVelocity = new float[3];
-    float[] position     = new float[3];
-    Vector3 speed        = new Vector3(0, 0, 0);
-    float[] velocity     = new float[3];
-    private int                 TraderColorIndex = -1;
-    private GameObject          instance;
-    private boolean             lastSelected     = false;
-    private long                lastTransaction  = 0;
-    private MercatorSynthesizer synth;
+    public static final  float                                         TRADER_SIZE_Z           = 16 / Universe.WORLD_SCALE;
+    private static final float                                         LIGHT_DISTANCE          = 5f;
+    private static final float                                         LIGHT_INTENSITY         = 10000f;
+    private static final Color                                         TRADER_NAME_COLOR       = Color.WHITE;
+    private static final float                                         TRADER_SIZE_X           = 16 / Universe.WORLD_SCALE;
+    private static final float                                         TRADER_SIZE_Y           = 8 / Universe.WORLD_SCALE;
+    private static final float                                         TRADER_TRAVELING_HEIGHT = -TRADER_SIZE_Y / 2 + Planet3DRenderer.WATER_Y;
+    private static       int                                           NUMBER_OF_LIGHTS        = 1;
+    private final        Vector3                                       direction               = new Vector3();//intermediate value
+    private final        List<GameObject<GameEngine3D>>                goodInstances           = new ArrayList<>();
+    private final        List<GameObject<GameEngine3D>>                lightGameObjects        = new ArrayList<>();
+    private final        Vector3                                       lightScaling            = new Vector3(2.0f, 2.0f, 2.0f);
+    private final        Vector3                                       lightTranslation        = new Vector3();
+    private final        Logger                                        logger                  = LoggerFactory.getLogger(this.getClass());
+    private final        List<PointLight>                              pointLights             = new ArrayList<>();
+    private final        Vector3                                       scaling                 = new Vector3();//intermediate value
+    private final        Vector3                                       shift                   = new Vector3();//intermediate value
+    private final        Vector3                                       target                  = new Vector3();//intermediate value
+    private final        Trader                                        trader;
+    private final        Vector3                                       translation             = new Vector3();//intermediate value
+    private final        Map<GoodType, List<GameObject<GameEngine3D>>> unusedMls               = new HashMap<>();
+    private final        Map<GoodType, List<GameObject<GameEngine3D>>> usedMls                 = new HashMap<>();
+    private              int                                           TraderColorIndex        = -1;
+    private              GameObject<GameEngine3D>                      instance;
+    private              boolean                                       lastSelected            = false;
+    private              long                                          lastTransaction         = 0;
+    private              float[]                                       lastVelocity            = new float[3];
+    private              float[]                                       position                = new float[3];
+    private              Vector3                                       speed                   = new Vector3(0, 0, 0);
+    private              MercatorSynthesizer                           synth;
+    private              float[]                                       velocity                = new float[3];
 
     public Trader3DRenderer(final Trader trader) {
         this.trader = trader;
@@ -110,15 +110,14 @@ public class Trader3DRenderer extends ObjectRenderer<GameEngine3D> {
     private void createGoods(final RenderEngine3D<GameEngine3D> renderEngine) {
         goodInstances.clear();
         for (final Good g : trader.getGoodList()) {
-            final List<GameObject> unused    = getUnusedGoodList(g.type);
-            final List<GameObject> used      = getUsedGoodList(g.type);
-            final int              usedDelta = used.size() - g.getAmount() / 5;
+            final List<GameObject<GameEngine3D>> unused    = getUnusedGoodList(g.type);
+            final List<GameObject<GameEngine3D>> used      = getUsedGoodList(g.type);
+            final int                            usedDelta = used.size() - g.getAmount() / 5;
             if (usedDelta > 0) {
                 for (int i = 0; i < usedDelta; i++) {
-                    final GameObject go = used.remove(used.size() - 1);
+                    final GameObject<GameEngine3D> go = used.remove(used.size() - 1);
                     unused.add(go);
-                    if (!renderEngine.removeDynamic(go))
-                        logger.error("Game engine logic error: Expected dynamic GameObject to exist.");
+                    if (!renderEngine.removeDynamic(go)) logger.error("Game engine logic error: Expected dynamic GameObject to exist.");
                 }
             } else if (usedDelta < 0) {
                 TraderColorIndex = g.type.ordinal();
@@ -126,19 +125,19 @@ public class Trader3DRenderer extends ObjectRenderer<GameEngine3D> {
                 final int reuseNr  = Math.min(addNr, unused.size());// reuse from unused
                 final int createNr = addNr - reuseNr;// create the rest
                 for (int i = 0; i < reuseNr; i++) {
-                    final GameObject go = unused.remove(unused.size() - 1);
+                    final GameObject<GameEngine3D> go = unused.remove(unused.size() - 1);
                     used.add(go);
                     //					goodInstances.add(go);
                     renderEngine.addDynamic(go);
                 }
                 for (int i = 0; i < createNr; i++) {
-                    final GameObject go = Good3DRenderer.instanciateGoodGameObject(g, renderEngine);
+                    final GameObject<GameEngine3D> go = Good3DRenderer.instanciateGoodGameObject(g, renderEngine);
                     used.add(go);
                     //					goodInstances.add(go);
                     renderEngine.addDynamic(go);
                 }
             }
-            for (final GameObject go : used) {
+            for (final GameObject<GameEngine3D> go : used) {
                 goodInstances.add(go);
             }
         }
@@ -150,7 +149,7 @@ public class Trader3DRenderer extends ObjectRenderer<GameEngine3D> {
         for (int i = 0; i < NUMBER_OF_LIGHTS; i++) {
             pointLights.add(new PointLight());
             renderEngine.add(pointLights.get(i), true);
-            final GameObject go = new GameObject(new ModelInstanceHack(renderEngine.getGameEngine().renderMaster.cubeEmissive), trader);
+            final GameObject<GameEngine3D> go = new GameObject<GameEngine3D>(new ModelInstanceHack(renderEngine.getGameEngine().renderMaster.cubeEmissive), trader);
             go.instance.materials.get(0).set(emissiveAttribute);
             lightGameObjects.add(go);
             renderEngine.addDynamic(lightGameObjects.get(i));
@@ -159,7 +158,7 @@ public class Trader3DRenderer extends ObjectRenderer<GameEngine3D> {
     }
 
     private void createTader(final RenderEngine3D<GameEngine3D> renderEngine) {
-        instance = new GameObject(new ModelInstanceHack(renderEngine.getGameEngine().renderMaster.trader), trader, this);
+        instance = new GameObject<GameEngine3D>(new ModelInstanceHack(renderEngine.getGameEngine().renderMaster.trader), trader, this);
         renderEngine.addDynamic(instance);
     }
 
@@ -168,24 +167,20 @@ public class Trader3DRenderer extends ObjectRenderer<GameEngine3D> {
         return TraderColorIndex;
     }
 
-    private List<GameObject> getUnusedGoodList(final GoodType type) {
-        if (unusedMls.get(type) == null)
-            unusedMls.put(type, new ArrayList<GameObject>());
+    private List<GameObject<GameEngine3D>> getUnusedGoodList(final GoodType type) {
+        if (unusedMls.get(type) == null) unusedMls.put(type, new ArrayList<GameObject<GameEngine3D>>());
         return unusedMls.get(type);
     }
 
-    private List<GameObject> getUsedGoodList(final GoodType type) {
-        if (usedMls.get(type) == null)
-            usedMls.put(type, new ArrayList<GameObject>());
+    private List<GameObject<GameEngine3D>> getUsedGoodList(final GoodType type) {
+        if (usedMls.get(type) == null) usedMls.put(type, new ArrayList<GameObject<GameEngine3D>>());
         return usedMls.get(type);
     }
 
     private boolean nearListener(final RenderEngine3D<GameEngine3D> renderEngine) {
         final Vector3 v = renderEngine.getCamera().position;
-        if ((trader.x - v.x) + (trader.z - v.z) > 1000)
-            return false;
-        else
-            return true;
+        if ((trader.x - v.x) + (trader.z - v.z) > 1000) return false;
+        else return true;
     }
 
     private void renderTextOnTop(final RenderEngine3D<GameEngine3D> renderEngine, final float dx, final float dy, final String text, final float size) {
@@ -297,10 +292,8 @@ public class Trader3DRenderer extends ObjectRenderer<GameEngine3D> {
             position[1] = translation.y;
             position[2] = translation.z;
             trader.calculateEngineSpeed();
-            if (trader.sourceWaypoint != null)
-                speed.set(trader.targetWaypoint.x - trader.sourceWaypoint.x, 0, trader.targetWaypoint.z - trader.sourceWaypoint.z);
-            else
-                speed.set(1, 0, 1);
+            if (trader.sourceWaypoint != null) speed.set(trader.targetWaypoint.x - trader.sourceWaypoint.x, 0, trader.targetWaypoint.z - trader.sourceWaypoint.z);
+            else speed.set(1, 0, 1);
 
             speed.nor();
             //			final float engineSpeed = trader.getMaxEngineSpeed();

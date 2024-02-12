@@ -30,11 +30,11 @@ import com.badlogic.gdx.utils.Align;
 import de.bushnaq.abdalla.engine.GameObject;
 import de.bushnaq.abdalla.engine.IContextFactory;
 import de.bushnaq.abdalla.engine.RenderEngine3D;
+import de.bushnaq.abdalla.engine.audio.AudioEngine;
+import de.bushnaq.abdalla.engine.audio.Mp3Player;
+import de.bushnaq.abdalla.engine.audio.OpenAlException;
 import de.bushnaq.abdalla.engine.camera.MovingCamera;
-import de.bushnaq.abdalla.mercator.audio.synthesis.AudioEngine;
 import de.bushnaq.abdalla.mercator.audio.synthesis.MercatorAudioEngine;
-import de.bushnaq.abdalla.mercator.audio.synthesis.Mp3Player;
-import de.bushnaq.abdalla.mercator.audio.synthesis.OpenAlException;
 import de.bushnaq.abdalla.mercator.desktop.Context;
 import de.bushnaq.abdalla.mercator.desktop.LaunchMode;
 import de.bushnaq.abdalla.mercator.renderer.camera.MyCameraInputController;
@@ -210,13 +210,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
             createJumpGates();
 
             if (launchMode == LaunchMode.demo) {
-                //				renderMaster.sceneManager.setEnableDepthOfField(true);
-                //				renderMaster.sceneManager.setAlwaysDay(false);
-                //				mp3Player = renderMaster.sceneClusterManager.audioEngine.createAudioProducer(Mp3Player.class);
-                //				mp3Player.setFile(Gdx.files.internal("02-methodica.ogg"));
-                //				mp3Player.setGain(0.1f);
-                //				mp3Player.play();
-                //				AudioEngine.checkAlError("Failed to set listener orientation with error #");
+                startDemoMode();
             }
             if (universe.selected != null) {
                 universe.setSelected(universe.selected, true);
@@ -275,8 +269,8 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
     @Override
     public void dispose() {
         try {
-            //			if (mp3Player != null)
-            //				mp3Player.dispose();
+            if (mp3Player != null)
+                mp3Player.dispose();
             audioEngine.dispose();
             if (profiler.isEnabled()) {
                 profiler.disable();
@@ -308,11 +302,12 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
     private void createCamera() throws Exception {
         camera = new MovingCamera(67f, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         Planet planet = universe.findBusyCenterPlanet();
-        if (planet == null)
-            planet = universe.planetList.get(0);
-
-        final Vector3 lookat = new Vector3(planet.x, 0, planet.z);
-//		final Vector3 lookat = new Vector3(0, 0, 0);
+        if (planet == null && !universe.planetList.isEmpty()) planet = universe.planetList.get(0);
+        Vector3 lookat;
+        if (planet != null)
+            lookat = new Vector3(planet.x, 0, planet.z);
+        else
+            lookat = new Vector3(0, 0, 0);
         camera.position.set(lookat.x + CAMERA_OFFSET_X / Universe.WORLD_SCALE, lookat.y + CAMERA_OFFSET_Y / Universe.WORLD_SCALE, lookat.z + CAMERA_OFFSET_Z / Universe.WORLD_SCALE);
         camera.up.set(0, 1, 0);
         camera.lookAt(lookat);
@@ -459,6 +454,84 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
         return infoVisible;
     }
 
+    @Override
+    public boolean keyDown(final int keycode) {
+        switch (keycode) {
+            case Input.Keys.A:
+            case Input.Keys.LEFT:
+                centerXD = -SCROLL_SPEED;
+                return true;
+            case Input.Keys.D:
+            case Input.Keys.RIGHT:
+                centerXD = SCROLL_SPEED;
+                return true;
+            case Input.Keys.W:
+            case Input.Keys.UP:
+                centerYD = -SCROLL_SPEED;
+                return true;
+            case Input.Keys.S:
+            case Input.Keys.DOWN:
+                centerYD = SCROLL_SPEED;
+                return true;
+            case Input.Keys.Q:
+                exit();
+                return true;
+            case Input.Keys.P:
+                renderMaster.universe.setEnableTime(!renderMaster.universe.isEnableTime());
+                return true;
+            case Input.Keys.PRINT_SCREEN:
+                queueScreenshot();
+                return true;
+            case Input.Keys.NUM_1:
+                renderEngine.setAlwaysDay(!renderEngine.isAlwaysDay());
+                return true;
+            case Input.Keys.NUM_3:
+                renderEngine.setDepthOfField(!renderEngine.isDepthOfField());
+                return true;
+            case Input.Keys.V:
+                vsyncEnabled = !vsyncEnabled;
+                Gdx.graphics.setVSync(vsyncEnabled);
+                return true;
+            case Input.Keys.I:
+                setInfoVisible(!isInfoVisible());
+                return true;
+            case Input.Keys.H:
+                try {
+                    if (hrtfEnabled) {
+                        audioEngine.disableHrtf(0);
+                        hrtfEnabled = false;
+                    } else {
+                        audioEngine.enableHrtf(0);
+                        hrtfEnabled = true;
+                    }
+                } catch (final OpenAlException e) {
+                    logger.error(e.getMessage(), e);
+                }
+                return true;
+            case Input.Keys.TAB:
+                try {
+                    universe.setSelected(profiler, false);
+                } catch (final Exception e) {
+                    logger.error(e.getMessage(), e);
+                }
+                return true;
+            case Input.Keys.NUM_2:
+                if (launchMode == LaunchMode.demo) launchMode = LaunchMode.normal;
+                else launchMode = LaunchMode.demo;
+                try {
+                    startDemoMode();
+                } catch (OpenAlException e) {
+                    throw new RuntimeException(e);
+                }
+                return true;
+            case Input.Keys.F:
+                followMode = !followMode;
+                return true;
+        }
+        return false;
+
+    }
+
     //	Sector3DRenderer sector3DRenderer = new Sector3DRenderer();
     //
     //	private void drawSectors() {
@@ -523,81 +596,6 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
     //	  graphics.setStroke( defaultStroke ); }
 
     @Override
-    public boolean keyDown(final int keycode) {
-        switch (keycode) {
-            case Input.Keys.A:
-            case Input.Keys.LEFT:
-                centerXD = -SCROLL_SPEED;
-                return true;
-            case Input.Keys.D:
-            case Input.Keys.RIGHT:
-                centerXD = SCROLL_SPEED;
-                return true;
-            case Input.Keys.W:
-            case Input.Keys.UP:
-                centerYD = -SCROLL_SPEED;
-                return true;
-            case Input.Keys.S:
-            case Input.Keys.DOWN:
-                centerYD = SCROLL_SPEED;
-                return true;
-            case Input.Keys.Q:
-                exit();
-                return true;
-            case Input.Keys.P:
-                renderMaster.universe.setEnableTime(!renderMaster.universe.isEnableTime());
-                return true;
-            case Input.Keys.PRINT_SCREEN:
-                queueScreenshot();
-                return true;
-            case Input.Keys.NUM_1:
-                renderEngine.setAlwaysDay(!renderEngine.isAlwaysDay());
-                return true;
-            case Input.Keys.NUM_3:
-                renderEngine.setDepthOfField(!renderEngine.isDepthOfField());
-                return true;
-            case Input.Keys.V:
-                vsyncEnabled = !vsyncEnabled;
-                Gdx.graphics.setVSync(vsyncEnabled);
-                return true;
-            case Input.Keys.I:
-                setInfoVisible(!isInfoVisible());
-                return true;
-            case Input.Keys.H:
-                try {
-                    if (hrtfEnabled) {
-                        audioEngine.disableHrtf(0);
-                        hrtfEnabled = false;
-                    } else {
-                        audioEngine.enableHrtf(0);
-                        hrtfEnabled = true;
-                    }
-                } catch (final OpenAlException e) {
-                    logger.error(e.getMessage(), e);
-                }
-                return true;
-            case Input.Keys.TAB:
-                try {
-                    universe.setSelected(profiler, false);
-                } catch (final Exception e) {
-                    logger.error(e.getMessage(), e);
-                }
-                return true;
-            case Input.Keys.NUM_2:
-                if (launchMode == LaunchMode.demo)
-                    launchMode = LaunchMode.normal;
-                else
-                    launchMode = LaunchMode.demo;
-                return true;
-            case Input.Keys.F:
-                followMode = !followMode;
-                return true;
-        }
-        return false;
-
-    }
-
-    @Override
     public boolean keyUp(final int keycode) {
         switch (keycode) {
             case Input.Keys.A:
@@ -613,6 +611,11 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
                 centerYD = 0;
                 return true;
         }
+        return false;
+    }
+
+    @Override
+    public boolean keyTyped(final char character) {
         return false;
     }
 
@@ -640,11 +643,6 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
     //	}
 
     @Override
-    public boolean keyTyped(final char character) {
-        return false;
-    }
-
-    @Override
     public boolean touchDown(final int screenX, final int screenY, final int pointer, final int button) {
         switch (button) {
             case Input.Buttons.LEFT:
@@ -652,20 +650,18 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
                 //			renderMaster.sceneClusterManager.createCoordinates();
                 final GameObject selected = renderEngine.getGameObject(screenX, screenY);
                 System.out.println("selected " + selected);
-                if (selected != null)
-                    try {
-                        universe.setSelected(selected.interactive, true);
-                    } catch (final Exception e) {
-                        // TODO Auto-generated catch block
-                        logger.error(e.getMessage(), e);
-                    }
-                else
-                    try {
-                        universe.setSelected(selected, true);
-                    } catch (final Exception e) {
-                        // TODO Auto-generated catch block
-                        logger.error(e.getMessage(), e);
-                    }
+                if (selected != null) try {
+                    universe.setSelected(selected.interactive, true);
+                } catch (final Exception e) {
+                    // TODO Auto-generated catch block
+                    logger.error(e.getMessage(), e);
+                }
+                else try {
+                    universe.setSelected(selected, true);
+                } catch (final Exception e) {
+                    // TODO Auto-generated catch block
+                    logger.error(e.getMessage(), e);
+                }
                 return true;
         }
         return false;
@@ -678,6 +674,11 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
 
     @Override
     public boolean touchCancelled(int screenX, int screenY, int pointer, int button) {
+        return false;
+    }
+
+    @Override
+    public boolean touchDragged(final int screenX, final int screenY, final int pointer) {
         return false;
     }
 
@@ -711,11 +712,6 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
     //			}
     //		}
     //	}
-
-    @Override
-    public boolean touchDragged(final int screenX, final int screenY, final int pointer) {
-        return false;
-    }
 
     @Override
     public boolean mouseMoved(final int screenX, final int screenY) {
@@ -791,10 +787,8 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
             }
 
             Color demoTextColor;
-            if (renderEngine.isNight())
-                demoTextColor = new Color(1f, 1f, 1f, 0.2f);
-            else
-                demoTextColor = new Color(0f, 0f, 0f, 0.6f);
+            if (renderEngine.isNight()) demoTextColor = new Color(1f, 1f, 1f, 0.2f);
+            else demoTextColor = new Color(0f, 0f, 0f, 0.6f);
             float deltaY = 0;
 
             final GlyphLayout layout = new GlyphLayout();
@@ -827,8 +821,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
                 deltaY += lastLayout.height * lineHeightFactor;
             }
             demoTextY += 1;
-            if (demoTextY - deltaY > render2DMaster.height * lineHeightFactor)
-                demoTextY = 0;
+            if (demoTextY - deltaY > render2DMaster.height * lineHeightFactor) demoTextY = 0;
         }
     }
 
@@ -858,30 +851,6 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
             planet.get3DRenderer().update(renderEngine, currentTime, renderEngine.getTimeOfDay(), 0, planet == renderMaster.universe.selectedPlanet);
         }
     }
-
-    //	public Planet select(int virtualX, int virtualY) throws Exception {
-    //		float xx = virtualX + (Planet3DRenderer.PLANET_DISTANCE / 2) * (int) Math.signum(virtualX);
-    //		float yy = virtualY + (Planet3DRenderer.PLANET_DISTANCE / 2) * (int) Math.signum(virtualY);
-    //		Planet planet = universe.planetList.queryPlanetByLocation(xx / Planet3DRenderer.PLANET_DISTANCE,
-    //				yy / Planet3DRenderer.PLANET_DISTANCE);
-    //		if (planet != null) {
-    //			universe.selectedPlanet = planet;
-    //			float dx = virtualX - (planet.x * Planet3DRenderer.PLANET_DISTANCE - Planet3DRenderer.PLANET_DISTANCE / 2);
-    //			if (dx < TRADER_X_SIZE) {
-    //				float dy = virtualY
-    //						- (planet.y * Planet3DRenderer.PLANET_DISTANCE - Planet3DRenderer.PLANET_DISTANCE / 2);
-    //				int index = (int) (dy / TRADER_Y_SIZE);
-    //				if (index < universe.selectedPlanet.traderList.size()) {
-    //					Trader trader = universe.selectedPlanet.traderList.get(index);
-    //					if (trader != null) {
-    //						universe.selectTrader(trader);
-    //					}
-    //				}
-    //			}
-    //			draw( currentTime);
-    //		}
-    //		return planet;
-    //	}
 
     private void renderStage() throws Exception {
         if (infoVisible) {
@@ -936,8 +905,28 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
         stage.draw();
     }
 
-    //	private void setMaxFramesPerSecond(int maxFramesPerSecond) {
-    //		this.maxFramesPerSecond = maxFramesPerSecond;
+    //	public Planet select(int virtualX, int virtualY) throws Exception {
+    //		float xx = virtualX + (Planet3DRenderer.PLANET_DISTANCE / 2) * (int) Math.signum(virtualX);
+    //		float yy = virtualY + (Planet3DRenderer.PLANET_DISTANCE / 2) * (int) Math.signum(virtualY);
+    //		Planet planet = universe.planetList.queryPlanetByLocation(xx / Planet3DRenderer.PLANET_DISTANCE,
+    //				yy / Planet3DRenderer.PLANET_DISTANCE);
+    //		if (planet != null) {
+    //			universe.selectedPlanet = planet;
+    //			float dx = virtualX - (planet.x * Planet3DRenderer.PLANET_DISTANCE - Planet3DRenderer.PLANET_DISTANCE / 2);
+    //			if (dx < TRADER_X_SIZE) {
+    //				float dy = virtualY
+    //						- (planet.y * Planet3DRenderer.PLANET_DISTANCE - Planet3DRenderer.PLANET_DISTANCE / 2);
+    //				int index = (int) (dy / TRADER_Y_SIZE);
+    //				if (index < universe.selectedPlanet.traderList.size()) {
+    //					Trader trader = universe.selectedPlanet.traderList.get(index);
+    //					if (trader != null) {
+    //						universe.selectTrader(trader);
+    //					}
+    //				}
+    //			}
+    //			draw( currentTime);
+    //		}
+    //		return planet;
     //	}
 
     private void renderTraders(final long currentTime) throws Exception {
@@ -948,6 +937,10 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
             }
         }
     }
+
+    //	private void setMaxFramesPerSecond(int maxFramesPerSecond) {
+    //		this.maxFramesPerSecond = maxFramesPerSecond;
+    //	}
 
     private void renderUniverse() {
         {
@@ -986,10 +979,8 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
                     String      yearName;
                     if (yearPosition - lastPosition > 256) {
                         // String yearName = String.format( "%.0f", i * daysDelta / 100 );
-                        if (i * daysDelta < TimeUnit.TICKS_PER_YEAR)
-                            yearName = TimeUnit.toString(i * daysDelta);
-                        else
-                            yearName = TimeUnit.toString(i * daysDelta, TimeAccuracy.YEAR_ACCURACY);
+                        if (i * daysDelta < TimeUnit.TICKS_PER_YEAR) yearName = TimeUnit.toString(i * daysDelta);
+                        else yearName = TimeUnit.toString(i * daysDelta, TimeAccuracy.YEAR_ACCURACY);
                         final float yX = render2DMaster.untransformX(yearPosition);
                         final float yY = render2DMaster.untransformY(render2DMaster.height - 2);
                         render2DMaster.atlasManager.defaultFont.setColor(TEXT_COLOR);
@@ -998,10 +989,8 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
                         lastSubPosition = yearPosition;
                     } else if (yearPosition - lastSubPosition > 51.2f) {
                         // String yearName = String.format( "%.0f", i * daysDelta / 100 );
-                        if (i * daysDelta < TimeUnit.TICKS_PER_YEAR)
-                            yearName = TimeUnit.toString(i * daysDelta);
-                        else
-                            yearName = TimeUnit.toString(i * daysDelta, TimeAccuracy.YEAR_ACCURACY);
+                        if (i * daysDelta < TimeUnit.TICKS_PER_YEAR) yearName = TimeUnit.toString(i * daysDelta);
+                        else yearName = TimeUnit.toString(i * daysDelta, TimeAccuracy.YEAR_ACCURACY);
                         final float yX = render2DMaster.untransformX(yearPosition);
                         final float yY = render2DMaster.untransformY(render2DMaster.height - 2 - (render2DMaster.defaultFontSize - render2DMaster.timeMachineFontSize) / (2 * render2DMaster.camera.zoom));
                         render2DMaster.atlasManager.timeMachineFont.setColor(TIME_MACHINE_SUB_MARKER_COLOR);
@@ -1028,14 +1017,10 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
     }
 
     private void setupImageBasedLightingByFaceNames(final String name, final String diffuseExtension, final String environmentExtension, final String specularExtension, final int specularIterations) {
-        diffuseCubemap          = EnvironmentUtil.createCubemap(new InternalFileHandleResolver(), AtlasManager.getAssetsFolderName() + "/textures/" + name + "/diffuse/diffuse_", "_0." + diffuseExtension,
-                EnvironmentUtil.FACE_NAMES_FULL);
-        environmentDayCubemap   = EnvironmentUtil.createCubemap(new InternalFileHandleResolver(), AtlasManager.getAssetsFolderName() + "/textures/" + name + "/environmentDay/environment_", "_0." + environmentExtension,
-                EnvironmentUtil.FACE_NAMES_FULL);
-        environmentNightCubemap = EnvironmentUtil.createCubemap(new InternalFileHandleResolver(), AtlasManager.getAssetsFolderName() + "/textures/" + name + "/environmentNight/environment_", "_0." + environmentExtension,
-                EnvironmentUtil.FACE_NAMES_FULL);
-        specularCubemap         = EnvironmentUtil.createCubemap(new InternalFileHandleResolver(), AtlasManager.getAssetsFolderName() + "/textures/" + name + "/specular/specular_", "_", "." + specularExtension,
-                specularIterations, EnvironmentUtil.FACE_NAMES_FULL);
+        diffuseCubemap          = EnvironmentUtil.createCubemap(new InternalFileHandleResolver(), AtlasManager.getAssetsFolderName() + "/textures/" + name + "/diffuse/diffuse_", "_0." + diffuseExtension, EnvironmentUtil.FACE_NAMES_FULL);
+        environmentDayCubemap   = EnvironmentUtil.createCubemap(new InternalFileHandleResolver(), AtlasManager.getAssetsFolderName() + "/textures/" + name + "/environmentDay/environment_", "_0." + environmentExtension, EnvironmentUtil.FACE_NAMES_FULL);
+        environmentNightCubemap = EnvironmentUtil.createCubemap(new InternalFileHandleResolver(), AtlasManager.getAssetsFolderName() + "/textures/" + name + "/environmentNight/environment_", "_0." + environmentExtension, EnvironmentUtil.FACE_NAMES_FULL);
+        specularCubemap         = EnvironmentUtil.createCubemap(new InternalFileHandleResolver(), AtlasManager.getAssetsFolderName() + "/textures/" + name + "/specular/specular_", "_", "." + specularExtension, specularIterations, EnvironmentUtil.FACE_NAMES_FULL);
         brdfLUT                 = new Texture(Gdx.files.classpath("net/mgsx/gltf/shaders/brdfLUT.png"));
 
         // // setup quick IBL (image based lighting)
@@ -1047,6 +1032,16 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
         // diffuseCubemap = iblBuilder.buildIrradianceMap(256);
         // specularCubemap = iblBuilder.buildRadianceMap(10);
         // iblBuilder.dispose();
+    }
+
+    private void startDemoMode() throws OpenAlException {
+        renderEngine.setDepthOfField(true);
+        renderEngine.setAlwaysDay(false);
+        mp3Player = audioEngine.createAudioProducer(Mp3Player.class);
+        mp3Player.setFile(Gdx.files.internal(AtlasManager.getAssetsFolderName() + "/audio/02-methodica.ogg"));
+        mp3Player.setGain(1.0f);
+        mp3Player.play();
+        AudioEngine.checkAlError("Failed to set listener orientation with error #");
     }
 
     class DemoString {

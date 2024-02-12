@@ -16,6 +16,9 @@
 
 package de.bushnaq.abdalla.mercator.audio.synthesis;
 
+import de.bushnaq.abdalla.engine.audio.synthesis.AbstractSynthesizerFactory;
+import de.bushnaq.abdalla.engine.audio.OpenAlException;
+
 public class MercatorSynthesizerFactory extends AbstractSynthesizerFactory<MercatorSynthesizer> {
 
     @Override

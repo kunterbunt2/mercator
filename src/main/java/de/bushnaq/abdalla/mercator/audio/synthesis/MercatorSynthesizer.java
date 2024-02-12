@@ -16,6 +16,8 @@
 
 package de.bushnaq.abdalla.mercator.audio.synthesis;
 
+import de.bushnaq.abdalla.engine.audio.OpenAlException;
+import de.bushnaq.abdalla.engine.audio.synthesis.*;
 import de.bushnaq.abdalla.mercator.universe.sim.trader.Trader;
 
 /**

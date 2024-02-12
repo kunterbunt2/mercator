@@ -16,8 +16,8 @@
 
 package de.bushnaq.abdalla.mercator.audio.synthesis.util;
 
-import de.bushnaq.abdalla.mercator.audio.synthesis.AbstractSynthesizerFactory;
-import de.bushnaq.abdalla.mercator.audio.synthesis.OpenAlException;
+import de.bushnaq.abdalla.engine.audio.synthesis.AbstractSynthesizerFactory;
+import de.bushnaq.abdalla.engine.audio.OpenAlException;
 
 public class SawSynthesizerFactory extends AbstractSynthesizerFactory<SawSynthesizer> {
 

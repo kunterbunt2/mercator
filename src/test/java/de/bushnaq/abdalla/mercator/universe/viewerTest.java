@@ -26,24 +26,41 @@ import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.IntAttribute;
+import com.badlogic.gdx.graphics.glutils.ShaderProgram;
+import de.bushnaq.abdalla.mercator.desktop.DesktopContextFactory;
 import de.bushnaq.abdalla.mercator.desktop.GraphicsDimentions;
+import de.bushnaq.abdalla.mercator.desktop.LaunchMode;
+import de.bushnaq.abdalla.mercator.renderer.AtlasManager;
 import de.bushnaq.abdalla.mercator.renderer.GameEngine3D;
 import de.bushnaq.abdalla.mercator.universe.event.EventLevel;
+import de.bushnaq.abdalla.mercator.universe.sim.Sim;
 import de.bushnaq.abdalla.mercator.util.ModelCreator;
 import net.mgsx.gltf.loaders.gltf.GLTFLoader;
 import net.mgsx.gltf.scene3d.attributes.PBRColorAttribute;
 import net.mgsx.gltf.scene3d.attributes.PBRFloatAttribute;
 import net.mgsx.gltf.scene3d.scene.SceneAsset;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class viewerTest implements ApplicationListener {
-    GameEngine3D screen;
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
+    DesktopContextFactory contextFactory = new DesktopContextFactory();
+    GameEngine3D          gameEngine;
 
     @Override
     public void create() {
-        screen.create();
+        try {
+            final GraphicsDimentions gd = GraphicsDimentions.D3;
+            contextFactory.create();
+            Universe universe = new Universe("U-0", gd, EventLevel.warning, Sim.class);
+            gameEngine = new GameEngine3D(contextFactory, universe, LaunchMode.development);
+            gameEngine.create();
+        } catch (final Exception e) {
+            logger.error(e.getMessage(), e);
+        }
         //		SceneAsset model1 = new GLTFLoader().load(Gdx.files.internal("models/glTF/glTF-Sample-Models-master/2.0/MetalRoughSpheres/glTF/MetalRoughSpheres.gltf"));
-        final SceneAsset model1 = new GLTFLoader().load(Gdx.files.internal("models/glTF/cube_gold_m100_r100.gltf"));
+        final SceneAsset model1 = new GLTFLoader().load(Gdx.files.internal(AtlasManager.getAssetsFolderName() + "/models/glTF/cube_gold_m100_r100.gltf"));
         {
             //			Material material = model1.scene.model.materials.get(0);
             //			System.out.println("----------------------------------------------------------");
@@ -84,30 +101,30 @@ public class viewerTest implements ApplicationListener {
 
     @Override
     public void resize(final int width, final int height) {
-        screen.resize(width, height);
+        gameEngine.resize(width, height);
 
     }
 
     @Override
     public void render() {
-        screen.render();
+        gameEngine.render();
     }
 
     @Override
     public void pause() {
-        screen.pause();
+        gameEngine.pause();
 
     }
 
     @Override
     public void resume() {
-        screen.resume();
+        gameEngine.resume();
 
     }
 
     @Override
     public void dispose() {
-        screen.dispose();
+        gameEngine.dispose();
 
     }
 
@@ -121,9 +138,23 @@ public class viewerTest implements ApplicationListener {
         config.setForegroundFPS(0);
         config.setResizable(false);
         config.setOpenGLEmulation(Lwjgl3ApplicationConfiguration.GLEmulation.GL30, 3, 2); // use GL 3.0 (emulated by OpenGL 3.2)
-//		config.useOpenGL3(true, 3, 2);
         config.setBackBufferConfig(8, 8, 8, 8, 16, 0, 4);
         config.setTitle("Mercator");
+        {
+            ShaderProgram.prependVertexCode   = "#version 150\n"//
+                    + "#define GLSL3\n"//
+                    + "#ifdef GLSL3\n"//
+                    + "#define attribute in\n"//
+                    + "#define varying out\n"//
+                    + "#endif\n";//
+            ShaderProgram.prependFragmentCode = "#version 150\n"//
+                    + "#define GLSL3\n"//
+                    + "#ifdef GLSL3\n"//
+                    + "#define textureCube texture\n"//
+                    + "#define texture2D texture\n"//
+                    + "#define varying in\n"//
+                    + "#endif\n";//
+        }
         //		screen = new Screen3D(universe, null, config);
         new Lwjgl3Application(this, config);
 

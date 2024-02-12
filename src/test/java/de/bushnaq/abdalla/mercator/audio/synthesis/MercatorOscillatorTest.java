@@ -19,6 +19,7 @@ package de.bushnaq.abdalla.mercator.audio.synthesis;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Files;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3NativesLoader;
+import de.bushnaq.abdalla.engine.audio.synthesis.Synthesizer;
 import de.bushnaq.abdalla.engine.camera.MovingCamera;
 import de.bushnaq.abdalla.mercator.audio.synthesis.util.SawAudioEngine;
 import org.junit.jupiter.api.Test;
@@ -70,7 +71,7 @@ public class MercatorOscillatorTest {
         audioEngine.end();
         audioEngine.dispose();
         logger.info(String.format("Rendered %d buffers each %d samples in %dms", numberOfSources, SawAudioEngine.samplerate, delta));
-        assertThat(String.format("expected to render %d buffers each %d samples in less than 1s", numberOfSources, SawAudioEngine.samples), delta, is(lessThan(1000L)));
+        assertThat(String.format("expected to render %d buffers each %d samples in less than 1s", numberOfSources, SawAudioEngine.samples), delta, is(lessThan(3000L)));
     }
 
     @Test

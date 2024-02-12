@@ -19,6 +19,7 @@ package de.bushnaq.abdalla.mercator.audio.synthesis;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Files;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3NativesLoader;
+import de.bushnaq.abdalla.engine.audio.synthesis.Synthesizer;
 import de.bushnaq.abdalla.engine.camera.MovingCamera;
 import de.bushnaq.abdalla.mercator.universe.sim.trader.Trader;
 import org.junit.jupiter.api.Test;

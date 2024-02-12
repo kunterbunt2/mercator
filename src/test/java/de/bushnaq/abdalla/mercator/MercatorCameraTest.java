@@ -65,7 +65,7 @@ public class MercatorCameraTest extends TranslationUtil<LiniarTranslation> {
     private void createCamera() {
         Gdx.files = new Lwjgl3Files();
         Lwjgl3NativesLoader.load();
-        final MovingCamera camera = sceneManager.renderEngine.getCamera();
+        final MovingCamera camera = gameEngine.renderEngine.getCamera();
         camera.position.set(100f, 0f, 0f);
         camera.up.set(0f, 1f, 0f);
         camera.lookAt(0, 0, 0);
@@ -114,7 +114,7 @@ public class MercatorCameraTest extends TranslationUtil<LiniarTranslation> {
     }
 
     private void moveCamera(final float x, final float y, final float z) {
-        final MovingCamera camera = sceneManager.renderEngine.getCamera();
+        final MovingCamera camera = gameEngine.renderEngine.getCamera();
         camera.position.set(x, y, z);
         camera.up.set(0f, 1f, 0f);
         camera.lookAt(0, 0, 0);

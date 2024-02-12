@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
-package de.bushnaq.abdalla.mercator.audio.synthesis.util;
+package de.bushnaq.abdalla.mercator.audio.synthesis;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Files;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3NativesLoader;
+import de.bushnaq.abdalla.engine.audio.synthesis.Synthesizer;
 import de.bushnaq.abdalla.engine.camera.MovingCamera;
-import de.bushnaq.abdalla.mercator.audio.synthesis.Synthesizer;
+import de.bushnaq.abdalla.mercator.audio.synthesis.util.SinAudioEngine;
+import de.bushnaq.abdalla.mercator.audio.synthesis.util.SinSynthesizer;
 import de.bushnaq.abdalla.mercator.universe.sim.trader.Trader;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -33,7 +35,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.lessThan;
 
-public class SawOscillatorTest {
+public class SinOscilliatorTest {
     private static final int          SECONDS_2 = 2000;
     private final        Logger       logger    = LoggerFactory.getLogger(this.getClass());
     private              MovingCamera camera;
@@ -55,14 +57,14 @@ public class SawOscillatorTest {
 
     @Test
     public void renderPerformanceTest() throws Exception {
-        final SawAudioEngine audioEngine = new SawAudioEngine();
+        final SinAudioEngine audioEngine = new SinAudioEngine();
         audioEngine.create();
         createCamera();
         final int               numberOfSources = audioEngine.getMaxMonoSources();
         final List<Synthesizer> synths          = new ArrayList<>();
         //create synths
         for (int i = 0; i < numberOfSources; i++) {
-            synths.add(audioEngine.createAudioProducer(SawSynthesizer.class));
+            synths.add(audioEngine.createAudioProducer(SinSynthesizer.class));
         }
 
         audioEngine.begin(camera);
@@ -74,22 +76,22 @@ public class SawOscillatorTest {
         final long delta = time2 - time1;
         audioEngine.end();
         audioEngine.dispose();
-        logger.info(String.format("Rendered %d buffers each %d samples in %dms", numberOfSources, SawAudioEngine.samplerate, delta));
-        assertThat(String.format("expected to render %d buffers each %d samples in less than 1s", numberOfSources, SawAudioEngine.samples), delta, is(lessThan(1000L)));
+        logger.info(String.format("Rendered %d buffers each %d samples in %dms", numberOfSources, SinAudioEngine.samples, delta));
+        assertThat(String.format("expected to render %d buffers each %d samples in less than 1s", numberOfSources, SinAudioEngine.samples), delta, is(lessThan(1000L)));
     }
 
     @Test
     public void renderSpeedTest() throws Exception {
-        final SawAudioEngine audioEngine = new SawAudioEngine();
+        final SinAudioEngine audioEngine = new SinAudioEngine();
         audioEngine.create();
         createCamera();
         {
-            final SawSynthesizer synth = audioEngine.createAudioProducer(SawSynthesizer.class);
+            final SinSynthesizer synth = audioEngine.createAudioProducer(SinSynthesizer.class);
             synth.setGain(5);
 
             float frequency = 220.0f;
             float speed     = calcualteSpeed(frequency);
-            synth.saw1.setFrequency(frequency);
+            synth.sin1.setFrequency(frequency);
 
             synth.setPositionAndVelocity(new float[]{frequency, 0, 0}, new float[]{speed, 0, 0});
             synth.play();
@@ -98,7 +100,7 @@ public class SawOscillatorTest {
             long       lastTime = 0;
             long       time2;
             float      delta    = 2;
-            synth.saw1.setOscillator(frequency);
+            synth.sin1.setOscillator(frequency);
             synth.setGain(20.0f);
             //						synth.setKeepCopy(true);
             do {
@@ -126,11 +128,11 @@ public class SawOscillatorTest {
 
     @Test
     public void renderTest() throws Exception {
-        final SawAudioEngine audioEngine = new SawAudioEngine();
+        final SinAudioEngine audioEngine = new SinAudioEngine();
         audioEngine.create();
         createCamera();
         {
-            final Synthesizer synth = audioEngine.createAudioProducer(SawSynthesizer.class);
+            final Synthesizer synth = audioEngine.createAudioProducer(SinSynthesizer.class);
             synth.setGain(5);
             synth.play();
             audioEngine.begin(camera);
@@ -138,7 +140,7 @@ public class SawOscillatorTest {
             do {
             } while (System.currentTimeMillis() - time1 < SECONDS_2);
             synth.renderBuffer();
-            synth.writeWav("target/saw");
+            synth.writeWav("target/sin.wav");
             audioEngine.end();
         }
         audioEngine.dispose();

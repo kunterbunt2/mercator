@@ -60,7 +60,7 @@ public class LiniarTranslationTest extends TranslationUtil<LiniarTranslation> {
 
     @Test
     public void liniarTranslatingSources() throws Exception {
-        runFor = 20000;
+        runFor = 5000;
         startLwjgl();
     }
 

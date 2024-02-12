@@ -28,8 +28,9 @@ import com.badlogic.gdx.graphics.g3d.environment.PointLight;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
 import de.bushnaq.abdalla.engine.GameObject;
+import de.bushnaq.abdalla.engine.audio.synthesis.Synthesizer;
 import de.bushnaq.abdalla.mercator.audio.synthesis.MercatorSynthesizer;
-import de.bushnaq.abdalla.mercator.audio.synthesis.Synthesizer;
+import de.bushnaq.abdalla.mercator.renderer.GameEngine3D;
 import de.bushnaq.abdalla.mercator.universe.sim.trader.Trader;
 import de.bushnaq.abdalla.mercator.util.ModelCreator;
 import net.mgsx.gltf.scene3d.attributes.PBRColorAttribute;
@@ -42,15 +43,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 public abstract class TranslationUtil<T extends Translation> extends AudioUtil {
-    protected static final float             CUBE_SIZE         = 64;
-    private static final   Color             CUBE_NAME_COLOR   = Color.WHITE;
-    private static final   float             MAX_CITY_SIZE     = 3000f + CUBE_SIZE;
-    private static         Color             DIAMON_BLUE_COLOR = new Color(0x006ab6ff);
-    private static         Color             GRAY_COLOR        = new Color(0x404853ff);
-    private static         Color             POST_GREEN_COLOR  = new Color(0x00614eff);
-    private static         Color             SCARLET_COLOR     = new Color(0xb00233ff);
-    protected final        List<GameObject>  gameObjects       = new ArrayList<>();
-    protected final        List<T>           translation       = new ArrayList<>();
+    protected static final float                          CUBE_SIZE         = 64;
+    private static final   Color                          CUBE_NAME_COLOR   = Color.WHITE;
+    private static final   float                          MAX_CITY_SIZE     = 3000f + CUBE_SIZE;
+    private static         Color                          DIAMON_BLUE_COLOR = new Color(0x006ab6ff);
+    private static         Color                          GRAY_COLOR        = new Color(0x404853ff);
+    private static         Color                          POST_GREEN_COLOR  = new Color(0x00614eff);
+    private static         Color                          SCARLET_COLOR     = new Color(0xb00233ff);
+    protected final        List<GameObject<GameEngine3D>> gameObjects       = new ArrayList<>();
+    protected final        List<T>                        translation       = new ArrayList<>();
     //	private Color getColor(final int index) {
     //		switch (index % 4) {
     //		case 0:
@@ -65,18 +66,18 @@ public abstract class TranslationUtil<T extends Translation> extends AudioUtil {
     //			return Color.WHITE;
     //		}
     //	}
-    private final          boolean           bassBoost         = true;
-    private final          Logger            logger            = LoggerFactory.getLogger(this.getClass());
-    private final          boolean           simulatePauses    = false;
-    private final          List<Synthesizer> synths            = new ArrayList<>();
-    protected              long              runFor            = 30000;//ms
-    private                GameObject        buildingGameObject;
-    private                Model             buildingModel;
-    private                GameObject        cityGameObject;
-    private                Model             cityModel;
-    private                long              last              = 0;
-    private                boolean           play              = true;
-    private                long              time1;
+    private final          boolean                        bassBoost         = true;
+    private final          Logger                         logger            = LoggerFactory.getLogger(this.getClass());
+    private final          boolean                        simulatePauses    = true;
+    private final          List<Synthesizer>              synths            = new ArrayList<>();
+    protected              long                           runFor            = 30000;//ms
+    private                GameObject<GameEngine3D>       buildingGameObject;
+    private                Model                          buildingModel;
+    private                GameObject<GameEngine3D>       cityGameObject;
+    private                Model                          cityModel;
+    private                long                           last              = 0;
+    private                boolean                        play              = false;
+    private                long                           time1;
 
     public static Color getColor(final int index) {
         switch (index % 4) {
@@ -99,19 +100,19 @@ public abstract class TranslationUtil<T extends Translation> extends AudioUtil {
         super.create();
         try {
             createCube();
-            buildingGameObject = new GameObject(new ModelInstanceHack(buildingModel), null);
+            buildingGameObject = new GameObject<GameEngine3D>(new ModelInstanceHack(buildingModel), null);
             buildingGameObject.instance.transform.setToTranslationAndScaling(0, CUBE_SIZE / 2, 0, CUBE_SIZE, CUBE_SIZE, CUBE_SIZE);
             final PointLight light = new PointLight().set(Color.WHITE, 0, CUBE_SIZE * 2, 0, 10000f);
-            sceneManager.renderEngine.add(light, true);
-            sceneManager.renderEngine.addStatic(buildingGameObject);
-            cityGameObject = new GameObject(new ModelInstanceHack(cityModel), null);
+            gameEngine.renderEngine.add(light, true);
+            gameEngine.renderEngine.addStatic(buildingGameObject);
+            cityGameObject = new GameObject<GameEngine3D>(new ModelInstanceHack(cityModel), null);
             cityGameObject.instance.transform.setToTranslationAndScaling(0, -CUBE_SIZE / 2, 0, MAX_CITY_SIZE, CUBE_SIZE, MAX_CITY_SIZE);
-            sceneManager.renderEngine.addStatic(cityGameObject);
+            gameEngine.renderEngine.addStatic(cityGameObject);
             for (int l = 0; l < numberOfSources; l++) {
-                final GameObject go = new GameObject(new ModelInstanceHack(createCube(getColor(l))), null);
+                final GameObject<GameEngine3D> go = new GameObject<GameEngine3D>(new ModelInstanceHack(createCube(getColor(l))), null);
                 gameObjects.add(go);
-                sceneManager.renderEngine.addDynamic(go);
-                final Synthesizer synth = sceneManager.audioEngine.createAudioProducer(MercatorSynthesizer.class);
+                gameEngine.renderEngine.addDynamic(go);
+                final Synthesizer synth = gameEngine.audioEngine.createAudioProducer(MercatorSynthesizer.class);
                 synth.play();
                 synths.add(synth);
             }
@@ -217,20 +218,20 @@ public abstract class TranslationUtil<T extends Translation> extends AudioUtil {
     protected void update() throws Exception {
         updateTranslation();
         for (int i = 0; i < gameObjects.size(); i++) {
-            final Translation t        = translation.get(i);
-            final GameObject  go       = gameObjects.get(i);
-            final Synthesizer synth    = synths.get(i);
-            final float[]     position = new float[]{t.position.x, t.position.y, t.position.z};
-            final float[]     velocity = new float[]{t.velocity.x, 0, t.velocity.z};
+            final Translation              t        = translation.get(i);
+            final GameObject<GameEngine3D> go       = gameObjects.get(i);
+            final Synthesizer              synth    = synths.get(i);
+            final float[]                  position = new float[]{t.position.x, t.position.y, t.position.z};
+            final float[]                  velocity = new float[]{t.velocity.x, 0, t.velocity.z};
             synth.setPositionAndVelocity(position, velocity);
             if (simulatePauses) {
                 if (System.currentTimeMillis() - last > 2000) {
-                    play = !play;
+//                    play = !play;
                     if (play) {
-                        logger.info("play");
+//                        logger.info("play");
                         synth.play();
                     } else {
-                        logger.info("pause");
+//                        logger.info("pause");
                         synth.pause();
                     }
                     last = System.currentTimeMillis();
@@ -255,8 +256,7 @@ public abstract class TranslationUtil<T extends Translation> extends AudioUtil {
             go.instance.transform.setToTranslationAndScaling(t.position.x, t.position.y, t.position.z, CUBE_SIZE, CUBE_SIZE, CUBE_SIZE);
 
         }
-        if (System.currentTimeMillis() - time1 > runFor)
-            Gdx.app.exit();
+        if (System.currentTimeMillis() - time1 > runFor) Gdx.app.exit();
 
     }
 
@@ -265,8 +265,8 @@ public abstract class TranslationUtil<T extends Translation> extends AudioUtil {
         final float y = aY;
         final float z = aZ;
         //draw text
-        final PolygonSpriteBatch batch = sceneManager.renderEngine.batch2D;
-        final BitmapFont         font  = sceneManager.getAtlasManager().modelFont;
+        final PolygonSpriteBatch batch = gameEngine.renderEngine.batch2D;
+        final BitmapFont         font  = gameEngine.getAtlasManager().modelFont;
         {
             final Matrix4     m        = new Matrix4();
             final float       fontSize = font.getLineHeight();

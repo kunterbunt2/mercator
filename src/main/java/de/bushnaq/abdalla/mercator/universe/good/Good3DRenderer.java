@@ -41,27 +41,27 @@ import java.util.List;
 
 public class Good3DRenderer extends ObjectRenderer<GameEngine3D> {
 
-    public static final  int              CONTAINER_EDGE_SIZE        = 4;
-    public static final  float            GOOD_HEIGHT                = 8f;
+    public static final  int                            CONTAINER_EDGE_SIZE        = 4;
+    public static final  float                          GOOD_HEIGHT                = 8f;
     //	public static final Color GOOD_COLOR = Color.RED; // 0xff000000;
-    public static final  float            GOOD_X                     = 8f / Universe.WORLD_SCALE;
-    public static final  float            GOOD_Y                     = 8f / Universe.WORLD_SCALE;
-    public static final  float            GOOD_Z                     = 8f / Universe.WORLD_SCALE;
+    public static final  float                          GOOD_X                     = 8f / Universe.WORLD_SCALE;
+    public static final  float                          GOOD_Y                     = 8f / Universe.WORLD_SCALE;
+    public static final  float                          GOOD_Z                     = 8f / Universe.WORLD_SCALE;
     //	private static Color magentaColor = new Color(1.0f, 0.0f, 1.0f, 1f);
     //	private static Color cyanColor = new Color(0.0f, 1.0f, 1.0f, 1f);
-    public static final  Color            NOT_TRADED_GOOD_COLOR      = Color.LIGHT_GRAY; // 0xffbbbbbb;
-    public static final  Color            SELECTED_GOOD_COLOR        = Color.LIGHT_GRAY; // 0xffeeeeee;
-    public static final  float            SPACE_BETWEEN_GOOD         = GameEngine3D.SPACE_BETWEEN_OBJECTS * 2;
-    private static final int              GOOD_AMOUNT_DRAWING_FACTOR = 5;
-    private static final Color            GOOD_NAME_COLOR            = new Color(0.596f, 0.08f, 0.247f, 0.8f);
-    private static       Color            DIAMON_BLUE_COLOR          = new Color(0x006ab6ff);
-    private static       Color            GRAY_COLOR                 = new Color(0x404853ff);
-    private static       Color            POST_GREEN_COLOR           = new Color(0x00614eff);
-    private static       Color            SCARLET_COLOR              = new Color(0xb00233ff);
-    private final        Good             good;
-    private final        Logger           logger                     = LoggerFactory.getLogger(this.getClass());
-    private final        List<GameObject> unusedMls                  = new ArrayList<>();
-    private final        List<GameObject> usedMls                    = new ArrayList<>();
+    public static final  Color                          NOT_TRADED_GOOD_COLOR      = Color.LIGHT_GRAY; // 0xffbbbbbb;
+    public static final  Color                          SELECTED_GOOD_COLOR        = Color.LIGHT_GRAY; // 0xffeeeeee;
+    public static final  float                          SPACE_BETWEEN_GOOD         = GameEngine3D.SPACE_BETWEEN_OBJECTS * 2;
+    private static final int                            GOOD_AMOUNT_DRAWING_FACTOR = 5;
+    private static final Color                          GOOD_NAME_COLOR            = new Color(0.596f, 0.08f, 0.247f, 0.8f);
+    private static       Color                          DIAMON_BLUE_COLOR          = new Color(0x006ab6ff);
+    private static       Color                          GRAY_COLOR                 = new Color(0x404853ff);
+    private static       Color                          POST_GREEN_COLOR           = new Color(0x00614eff);
+    private static       Color                          SCARLET_COLOR              = new Color(0xb00233ff);
+    private final        Good                           good;
+    private final        Logger                         logger                     = LoggerFactory.getLogger(this.getClass());
+    private final        List<GameObject<GameEngine3D>> unusedMls                  = new ArrayList<>();
+    private final        List<GameObject<GameEngine3D>> usedMls                    = new ArrayList<>();
 
     public Good3DRenderer(final Good good) {
         this.good = good;
@@ -84,10 +84,10 @@ public class Good3DRenderer extends ObjectRenderer<GameEngine3D> {
         }
     }
 
-    public static GameObject instanciateGoodGameObject(final Good good, final RenderEngine3D<GameEngine3D> renderEngine) {
-        GameObject     scene     = null;
-        final Material material1 = renderEngine.getGameEngine().renderMaster.cubeGood.materials.get(0);
-        scene = new GameObject(new ModelInstanceHack(renderEngine.getGameEngine().renderMaster.cubeGood), good);
+    public static GameObject<GameEngine3D> instanciateGoodGameObject(final Good good, final RenderEngine3D<GameEngine3D> renderEngine) {
+        GameObject<GameEngine3D> scene     = null;
+        final Material           material1 = renderEngine.getGameEngine().renderMaster.cubeGood.materials.get(0);
+        scene = new GameObject<GameEngine3D>(new ModelInstanceHack(renderEngine.getGameEngine().renderMaster.cubeGood), good);
         //TODO reuse instances
         final Material            material2 = scene.instance.materials.get(0);
         final Iterator<Attribute> i         = material1.iterator();
@@ -182,7 +182,7 @@ public class Good3DRenderer extends ObjectRenderer<GameEngine3D> {
         final int delta = usedMls.size() - good.getAmount() / GOOD_AMOUNT_DRAWING_FACTOR;
         if (delta > 0) {
             for (int i = 0; i < delta; i++) {
-                final GameObject scene = usedMls.remove(usedMls.size() - 1);
+                final GameObject<GameEngine3D> scene = usedMls.remove(usedMls.size() - 1);
                 unusedMls.add(scene);
                 if (!renderEngine.removeStatic(scene))
                     logger.error("Game engine logic error: Expected dynamic GameObject to exist.");
@@ -192,7 +192,7 @@ public class Good3DRenderer extends ObjectRenderer<GameEngine3D> {
             final int reuseNr  = Math.min(addNr, unusedMls.size());// reuse from unused
             final int createNr = addNr - reuseNr;// create the rest
             for (int i = 0; i < reuseNr; i++) {
-                final GameObject scene = unusedMls.remove(unusedMls.size() - 1);
+                final GameObject<GameEngine3D> scene = unusedMls.remove(unusedMls.size() - 1);
                 usedMls.add(scene);
                 renderEngine.addStatic(scene);
             }

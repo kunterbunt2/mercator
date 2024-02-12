@@ -117,9 +117,13 @@ public class Render2DMaster {
     public void create(AtlasManager atlasManager) {
         camera = new OrthographicCamera(300, 300 * (600 / 800));
         Planet planet = universe.findBusyCenterPlanet();
-        if (planet == null)
-            planet = universe.planetList.get(0);
-        camera.position.set(planet.x, planet.z, 0);
+        if (planet == null && !universe.planetList.isEmpty()) planet = universe.planetList.get(0);
+        Vector3 lookat;
+        if (planet != null)
+            lookat = new Vector3(planet.x, 0, planet.z);
+        else
+            lookat = new Vector3(0, 0, 0);
+        camera.position.set(lookat.x, lookat.z, 0);
         camera.zoom = 1.0f;
         camera.update();
         batch = new CustomizedSpriteBatch(5460);

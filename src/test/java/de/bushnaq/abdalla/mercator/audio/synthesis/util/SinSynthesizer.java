@@ -16,12 +16,12 @@
 
 package de.bushnaq.abdalla.mercator.audio.synthesis.util;
 
-import de.bushnaq.abdalla.mercator.audio.synthesis.OpenAlException;
-import de.bushnaq.abdalla.mercator.audio.synthesis.SinOscillator;
-import de.bushnaq.abdalla.mercator.audio.synthesis.Synthesizer;
+import de.bushnaq.abdalla.engine.audio.OpenAlException;
+import de.bushnaq.abdalla.engine.audio.synthesis.SinOscillator;
+import de.bushnaq.abdalla.engine.audio.synthesis.Synthesizer;
 
 public class SinSynthesizer extends Synthesizer {
-    SinOscillator sin1;
+    public SinOscillator sin1;
 
     public SinSynthesizer() throws OpenAlException {
         super(44100);

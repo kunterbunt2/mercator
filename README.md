@@ -34,16 +34,16 @@ Then you can start mercator by one of its starting classes
 | p                     | pause/unpause                  |
 | print                 | print screen/                  |
 | v                     | enable/disable vsync           |
-| m                     | enable/disable scene manager   |
+| n                     | enable/disable scene manager   |
 | h                     | enable/disable hrtf audio      |
 | tab                   | show profiler in scene manager |
 | f                     | follow selected trader         |
 | 1                     | enable/disable always day      |
 | 2                     | enable/disable demo mode       |
+| 3                     | enable/disable depth filter    |
 
 ## Issues
 
-1. UI text is not readable.
 1. Form selecting an item does not show info in the lower pane.
 1. Renderer statistics missing.
 1. Universe statistics never showing up.
@@ -51,3 +51,6 @@ Then you can start mercator by one of its starting classes
 2. Camera movement is still bad.
 3. Economy is not stable, all sims eventually die of hunger.
 1. skybox top not oriented correctly (see reflection screenshot)
+2. shadow depth buffer lower half is strange
+3. post process rendering not implemented yet
+4. if depth of field is disabled, and info panel is shown, screen becomes red

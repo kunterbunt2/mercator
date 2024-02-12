@@ -115,7 +115,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
     private Texture                 brdfLUT;
     private MyCameraInputController camController;
     private MovingCamera            camera;
-    private Camera                  camera2D;
+    private OrthographicCamera      camera2D;
     private float                   centerXD;
     private float                   centerYD;
     private Context                 context;
@@ -376,7 +376,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
     }
 
     private void createStage() throws Exception {
-        info = new Info(renderEngine, getAtlasManager(), renderEngine.batch2D, inputMultiplexer);
+        info = new Info(renderEngine, getAtlasManager(), camera2D, renderEngine.batch2D, inputMultiplexer);
         info.createStage();
         final int height = 12;
         stage = new Stage();
@@ -553,11 +553,14 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
             case Input.Keys.NUM_1:
                 renderEngine.setAlwaysDay(!renderEngine.isAlwaysDay());
                 return true;
+            case Input.Keys.NUM_3:
+                renderEngine.setDepthOfField(!renderEngine.isDepthOfField());
+                return true;
             case Input.Keys.V:
                 vsyncEnabled = !vsyncEnabled;
                 Gdx.graphics.setVSync(vsyncEnabled);
                 return true;
-            case Input.Keys.M:
+            case Input.Keys.I:
                 setInfoVisible(!isInfoVisible());
                 return true;
             case Input.Keys.H:
@@ -756,6 +759,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
         renderEngine.gpuGraph.begin();
         renderEngine.render(currentTime, deltaTime, takeScreenShot);
         renderEngine.postProcessRender();
+//        renderEngine.renderGraphs();
         render2DMaster.batch.begin();
         renderUniverse();
         renderDemo();

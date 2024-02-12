@@ -277,7 +277,7 @@ public class GameEngine2D implements ScreenListener, ApplicationListener, InputP
     }
 
     private void createStage() throws Exception {
-        info = new Info(null, atlasManager, renderEngine.batch, inputMultiplexer);
+        info = new Info(null, atlasManager, camera, renderEngine.batch, inputMultiplexer);
 //		info.createStage();
         final int height = 12;
         stage = new Stage();

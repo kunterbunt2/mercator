@@ -18,6 +18,7 @@ package de.bushnaq.abdalla.mercator.renderer.reports;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g3d.attributes.PointLightsAttribute;
@@ -55,6 +56,7 @@ public class Info {
     private static final String                       VARIABLE_LABEL = "variableLabel";
     private final        AtlasManager                 atlasManager;
     private final        Batch                        batch;
+    private final        OrthographicCamera           camera;
     private final        TimeStatistic                debugTimer;
     private final        InputMultiplexer             inputMultiplexer;
     private final        List<LabelData>              labels         = new ArrayList<LabelData>();
@@ -75,10 +77,11 @@ public class Info {
     //		this.inputMultiplexer = inputMultiplexer;
     //	}
 
-    public Info(RenderEngine3D<GameEngine3D> renderEngine, final AtlasManager atlasManager, final Batch batch, final InputMultiplexer inputMultiplexer) throws Exception {
+    public Info(RenderEngine3D<GameEngine3D> renderEngine, final AtlasManager atlasManager, OrthographicCamera camera, final Batch batch, final InputMultiplexer inputMultiplexer) throws Exception {
         this.renderEngine = renderEngine;
         //		this.universe = universe;
         this.atlasManager     = atlasManager;
+        this.camera           = camera;
         this.batch            = batch;
         this.inputMultiplexer = inputMultiplexer;
         debugTimer            = new TimeStatistic();
@@ -108,7 +111,7 @@ public class Info {
 
     public void createStage() {
         if (stage == null) {
-            stage = new Stage(new ScreenViewport(), batch);
+            stage = new Stage(new ScreenViewport(camera), batch);
             inputMultiplexer.addProcessor(stage);
             skin = new Skin();
             skin.addRegions(atlasManager.atlas);

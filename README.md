@@ -52,5 +52,4 @@ Then you can start mercator by one of its starting classes
 3. Economy is not stable, all sims eventually die of hunger.
 1. skybox top not oriented correctly (see reflection screenshot)
 2. shadow depth buffer lower half is strange
-3. post process rendering not implemented yet
 4. if depth of field is disabled, and info panel is shown, screen becomes red

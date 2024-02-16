@@ -188,6 +188,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
             renderEngine.getFog().setColor(Color.WHITE);
             renderEngine.getFog().setBeginDistance(3000f);
             renderEngine.getFog().setFullDistance(5000f);
+            renderEngine.getFog().setEnabled(true);
             renderEngine.setDynamicDayTime(true);
             renderEngine.setSceneBoxMin(new Vector3(-1000, -1000, -1000));
             renderEngine.setSceneBoxMax(new Vector3(1000, 1000, 1000));
@@ -872,6 +873,13 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
         //			labels.get(labelIndex++).setText(stringBuilder);
         //		}
         //time
+        {
+            stringBuilder.setLength(0);
+
+            final float angle = renderEngine.angle;
+            stringBuilder.append(" angle ").append(angle);
+            labels.get(labelIndex++).setText(stringBuilder);
+        }
         {
             stringBuilder.setLength(0);
 

@@ -34,13 +34,6 @@
     </properties>
 
     <dependencies>
-        <!--
-        <dependency>
-            <groupId>com.badlogicgames.gdx</groupId>
-            <artifactId>gdx</artifactId>
-            <version>${libgdxVersion}</version>
-        </dependency>
-        -->
         <dependency>
             <groupId>com.badlogicgames.gdx</groupId>
             <artifactId>gdx-freetype-platform</artifactId>
@@ -58,13 +51,6 @@
             <artifactId>gdx-freetype</artifactId>
             <version>${libgdxVersion}</version>
         </dependency>
-        <!--
-        <dependency>
-            <groupId>com.github.mgsx-dev.gdx-gltf</groupId>
-            <artifactId>gltf</artifactId>
-            <version>2.1.0</version>
-        </dependency>
-        -->
         <dependency>
             <groupId>com.kotcrab.vis</groupId>
             <artifactId>vis-ui</artifactId>
@@ -91,6 +77,7 @@
             <groupId>org.hamcrest</groupId>
             <artifactId>java-hamcrest</artifactId>
             <version>2.0.0.0</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.crashinvaders.vfx</groupId>

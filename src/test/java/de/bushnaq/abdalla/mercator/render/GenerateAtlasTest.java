@@ -33,8 +33,8 @@ import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFont
 import com.badlogic.gdx.tools.texturepacker.TexturePacker;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.GdxRuntimeException;
+import de.bushnaq.abdalla.engine.util.FontData;
 import de.bushnaq.abdalla.mercator.renderer.AtlasManager;
-import de.bushnaq.abdalla.mercator.renderer.generator.FontData;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;

@@ -27,8 +27,8 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
 import com.kotcrab.vis.ui.VisUI;
+import de.bushnaq.abdalla.engine.util.FontData;
 import de.bushnaq.abdalla.mercator.desktop.Context;
-import de.bushnaq.abdalla.mercator.renderer.generator.FontData;
 
 public class AtlasManager {
     public static final int          SOOMIN_FONT_SIZE = 10;

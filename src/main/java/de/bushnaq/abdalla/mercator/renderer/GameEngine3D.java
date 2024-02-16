@@ -18,7 +18,10 @@ package de.bushnaq.abdalla.mercator.renderer;
 
 import com.badlogic.gdx.*;
 import com.badlogic.gdx.assets.loaders.resolvers.InternalFileHandleResolver;
-import com.badlogic.gdx.graphics.*;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Cubemap;
+import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.profiling.GLErrorListener;
@@ -347,7 +350,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
     }
 
     private void createJumpGates() {
-//		if (launchMode == LaunchMode.development)
+//        if (launchMode == LaunchMode.development)
         {
             for (final Path path : universe.pathList) {
                 path.get3DRenderer().create(path.source.x, path.source.y, path.source.z, renderEngine);
@@ -745,6 +748,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
                 universe.setSelected(universe.selected, false);
             }
         }
+
         renderJumpGates(currentTime);
         renderPlanets(currentTime);
         renderGoods(currentTime);
@@ -755,7 +759,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
 
         renderEngine.gpuGraph.begin();
         renderEngine.render(currentTime, deltaTime, takeScreenShot);
-        renderEngine.postProcessRender();
+//        renderEngine.postProcessRender();
 //        renderEngine.renderGraphs();
         render2DMaster.batch.begin();
         renderUniverse();
@@ -867,19 +871,12 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
             labels.get(labelIndex++).setText(stringBuilder);
         }
         //audio sources
-        //		{
-        //			stringBuilder.setLength(0);
-        //			stringBuilder.append(" audio sources: ").append(renderMaster.sceneManager.audioEngine.getEnabledAudioSourceCount() + " / " + renderMaster.sceneManager.audioEngine.getDisabledAudioSourceCount());
-        //			labels.get(labelIndex++).setText(stringBuilder);
-        //		}
-        //time
         {
             stringBuilder.setLength(0);
-
-            final float angle = renderEngine.angle;
-            stringBuilder.append(" angle ").append(angle);
+            stringBuilder.append(" audio sources: ").append(audioEngine.getEnabledAudioSourceCount() + " / " + audioEngine.getDisabledAudioSourceCount());
             labels.get(labelIndex++).setText(stringBuilder);
         }
+        //time
         {
             stringBuilder.setLength(0);
 
@@ -887,27 +884,6 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
             final int   hours   = (int) time;
             final int   minutes = (int) (60 * ((time - (int) time) * 100) / 100);
             stringBuilder.append(" time ").append(hours).append(":").append(minutes);
-            labels.get(labelIndex++).setText(stringBuilder);
-        }
-//		{
-//			stringBuilder.setLength(0);
-//
-//			final float time = renderEngine.getTimeOfDay();
-//			final int hours = (int) time;
-//			final int minutes = (int) (60 * ((time - (int) time) * 100) / 100);
-//			stringBuilder.append(" time ").append(hours).append(":").append(minutes);
-//			labels.get(labelIndex++).setText(stringBuilder);
-//		}
-        {
-            stringBuilder.setLength(0);
-            Camera camera1 = renderEngine.getShadowLight().getCamera();
-            stringBuilder.append(" x=").append(camera1.position.x).append(" y=").append(camera1.position.y).append(" z=").append(camera1.position.z);
-            labels.get(labelIndex++).setText(stringBuilder);
-        }
-        {
-            stringBuilder.setLength(0);
-            Camera camera1 = renderEngine.getCamera();
-            stringBuilder.append(" x=").append(camera1.position.x).append(" y=").append(camera1.position.y).append(" z=").append(camera1.position.z);
             labels.get(labelIndex++).setText(stringBuilder);
         }
         stage.draw();

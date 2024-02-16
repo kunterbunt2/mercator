@@ -33,10 +33,10 @@ import net.mgsx.gltf.scene3d.attributes.PBRColorAttribute;
 import net.mgsx.gltf.scene3d.model.ModelInstanceHack;
 
 public class JumpGate3DRenderer extends ObjectRenderer<GameEngine3D> {
-    public static final  float JUMP_GATE_SIZE  = 16 / Universe.WORLD_SCALE;
-    private static final float JUMPGATE_DEPTH  = 0 / Universe.WORLD_SCALE /*+ Planet3DRenderer.WATER_Y*/;
-    private static final float JUMP_GATE_HIGHT = 16 / Universe.WORLD_SCALE;
-    private static final Color PATH_NAME_COLOR = Color.BLUE;
+    public static final  float JUMP_GATE_SIZE   = 16 / Universe.WORLD_SCALE;
+    private static final float JUMP_GATE_DEPTH  = 0 / Universe.WORLD_SCALE /*+ Planet3DRenderer.WATER_Y*/;
+    private static final float JUMP_GATE_HEIGHT = 16 / Universe.WORLD_SCALE;
+    private static final Color PATH_NAME_COLOR  = Color.BLUE;
     private final        Path  jumpGate;
     //	Matrix4 rotationMatrix = new Matrix4();
     //	protected Quaternion rotation = new Quaternion();
@@ -61,12 +61,14 @@ public class JumpGate3DRenderer extends ObjectRenderer<GameEngine3D> {
 
     @Override
     public void renderText(final RenderEngine3D<GameEngine3D> renderEngine, final int index, final boolean selected) {
-        final String text1 = jumpGate.target.getName();
-        renderTextOnTop(renderEngine, 0f, 0f, text1, JUMP_GATE_SIZE / 4);
+        if (renderEngine.isDebugMode()) {
+            final String text1 = jumpGate.target.getName();
+            renderTextOnTop(renderEngine, 0f, 0f, text1, JUMP_GATE_SIZE / 4);
 //		if (jumpGate.source.trader != null) {
 //			final String text2 = jumpGate.source.trader.getName();
 //			renderTextOnTop(sceneManager, 0f, 10f, text2, JUMP_GATE_SIZE/2);
 //		}
+        }
     }
 
     @Override
@@ -114,12 +116,12 @@ public class JumpGate3DRenderer extends ObjectRenderer<GameEngine3D> {
         //			Vector2 line = target.sub(start);
         //			float length = line.len();
         final float tx = jumpGate.target.x;
-        final float ty = jumpGate.target.y + JUMPGATE_DEPTH;
+        final float ty = jumpGate.target.y + JUMP_GATE_DEPTH;
         final float tz = jumpGate.target.z;
         //			float x1 = x + (tx - x) * JUMP_GATE_MIN_RADIUS / length;
         //			float y1 = y + (ty - y) * JUMP_GATE_MIN_RADIUS / length;
         final float scalex = (tx - x);
-        final float scaley = (ty - y - JUMPGATE_DEPTH);
+        final float scaley = (ty - y - JUMP_GATE_DEPTH);
         final float scalez = (tz - z);
         //lets start with north gateway, e.g. from planet to target in the north
         //		int ix = (int) (x / Planet.PLANET_DISTANCE);
@@ -170,13 +172,13 @@ public class JumpGate3DRenderer extends ObjectRenderer<GameEngine3D> {
         //		final Vector3 shift = new Vector3(-direction.z, direction.y, direction.x);
         //		shift.nor();
         //		shift.scl(Planet.CHANNEL_SIZE/2);
-        instance.instance.transform.setToTranslation(x/* + shift.x*/, y/* + shift.y*/ + JUMPGATE_DEPTH, z/* + shift.z*//*+sign * Planet3DRenderer.PLANET_SIZE / 2*/);
+        instance.instance.transform.setToTranslation(x/* + shift.x*/, y/* + shift.y*/ + JUMP_GATE_DEPTH, z/* + shift.z*//*+sign * Planet3DRenderer.PLANET_SIZE / 2*/);
         //		instance.instance.transform.setToTranslation(x, y, z + sign * Planet3DRenderer.PLANET_SIZE / 2);
         //		direction.nor();
         final Vector3 targetVector = new Vector3(tx, ty, tz /*- sign * Planet3DRenderer.PLANET_SIZE / 2*/);
         instance.instance.transform.rotateTowardTarget(targetVector, Vector3.Y);
         instance.instance.transform.translate(0, /*-sign*JUMP_GATE_HIGHT / 2 -*/ GameEngine3D.SPACE_BETWEEN_OBJECTS, -directionLength / 2);
-        instance.instance.transform.scale(JUMP_GATE_SIZE, JUMP_GATE_HIGHT, directionLength);
+        instance.instance.transform.scale(JUMP_GATE_SIZE, JUMP_GATE_HEIGHT, directionLength);
         instance.update();
     }
 
@@ -207,7 +209,7 @@ public class JumpGate3DRenderer extends ObjectRenderer<GameEngine3D> {
 
     private void renderTextOnTop(final RenderEngine3D<GameEngine3D> renderEngine, final float dx, final float dy, final String text, final float size) {
         final float x = jumpGate.target.x;
-        final float y = jumpGate.target.y + JUMP_GATE_HIGHT / 2/*- 10 / Universe.WORLD_SCALE*/;
+        final float y = jumpGate.target.y + JUMP_GATE_HEIGHT / 2/*- 10 / Universe.WORLD_SCALE*/;
         final float z = jumpGate.target.z;
         //draw text
         final PolygonSpriteBatch batch = renderEngine.batch2D;

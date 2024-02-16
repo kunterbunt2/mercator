@@ -23,6 +23,7 @@ import de.bushnaq.abdalla.mercator.universe.Universe;
  * @author bushnaq Created 13.02.2005
  */
 public class Land extends RenderablePosition {
+    //TODO remove land
 
     private final Universe universe;
 

@@ -24,8 +24,6 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
-import com.badlogic.gdx.graphics.profiling.GLErrorListener;
-import com.badlogic.gdx.graphics.profiling.GLProfiler;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
@@ -86,6 +84,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
     public static final  float                        SOOM_SPEED                    = 8.0f * 10;
     public static final  float                        SPACE_BETWEEN_OBJECTS         = 0.1f / Universe.WORLD_SCALE;
     public static final  Color                        TEXT_COLOR                    = Color.WHITE; // 0xffffffff;
+    public static final  int                          TIME_MACHINE_FONT_SIZE        = 10;
     //	private static final String RENDER_DURATION = "render()";
     //	private static final String RENDER_LIGHT = "light";
     private static final float                        SCROLL_SPEED                  = 100f;
@@ -97,63 +96,52 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
     //	private ModelInstance uberModelInstance;
     public final         Universe                     universe;
     private final        IContextFactory              contextFactory;
+    private final        List<DemoString>             demoText                      = new ArrayList<>();
     private final        InputMultiplexer             inputMultiplexer              = new InputMultiplexer();
     private final        List<Label>                  labels                        = new ArrayList<>();
     private final        Logger                       logger                        = LoggerFactory.getLogger(this.getClass());
+    //    private final        GameObject<GameEngine3D>     ocean                         = null;
     public               AudioEngine                  audioEngine                   = new MercatorAudioEngine();
     public               LaunchMode                   launchMode;
     public               RenderEngine3D<GameEngine3D> renderEngine;
-    public               Render3DMaster               renderMaster;
-    List<DemoString> demoText        = new ArrayList<>();
-    float            demoTextX       = 100;
-    float            demoTextY       = 0;
+    public               AssetManager                 renderMaster;
+    private              AtlasManager                 atlasManager;
+    private              Texture                      brdfLUT;
+    private              MyCameraInputController      camController;
+    private              MovingCamera                 camera;
+    private              OrthographicCamera           camera2D;
+    private              float                        centerXD;
+    private              float                        centerYD;
+    private              Context                      context;
+    private              float                        demoTextX                     = 100;
+    private              float                        demoTextY                     = 0;
+    private              Cubemap                      diffuseCubemap;
     //	private boolean end = false;
     //	private MercatorFrame frame;
     //	private LwjglApplicationConfiguration config;
-    boolean          enableProfiling = true;
-    Info             info;
-    Mp3Player        mp3Player;
-    GameObject       ocean           = null;
-    private AtlasManager            atlasManager;
-    private Texture                 brdfLUT;
-    private MyCameraInputController camController;
-    private MovingCamera            camera;
-    private OrthographicCamera      camera2D;
-    private float                   centerXD;
-    private float                   centerYD;
-    private Context                 context;
-    private Cubemap                 diffuseCubemap;
-    private Cubemap                 environmentDayCubemap;
-    private Cubemap                 environmentNightCubemap;
-    private boolean                 followMode;
-    private BitmapFont              font;
-    private boolean                 hrtfEnabled     = true;
-    private boolean                 infoVisible;
-    private GameObject              instance;//TODO
-    private long                    lastCameraDirty = 0;
-    //	private FPSLogger fPSLogger = new FPSLogger();
-    //	private float time;
-    private int                     maxFramesPerSecond;
-    //	private MyCanvas myCanvas;
-    //	private PerformanceLogger performanceLogger = new PerformanceLogger();
-    private GLProfiler              profiler;
-    private Render2DMaster          render2DMaster;
-    private Cubemap                 specularCubemap;
-    private Stage                   stage;
-    private StringBuilder           stringBuilder;
-    private boolean                 takeScreenShot;
-    private boolean                 vsyncEnabled    = true;
+    private              Cubemap                      environmentDayCubemap;
+    private              Cubemap                      environmentNightCubemap;
+    private              boolean                      followMode;
+    //    private              BitmapFont                   font;
+    private              boolean                      hrtfEnabled                   = true;
+    private              Info                         info;
+    private              boolean                      infoVisible;
+    private              GameObject<GameEngine3D>     instance;//TODO
+    private              long                         lastCameraDirty               = 0;
+    private              Mp3Player                    mp3Player;
+    //    private              Render2DMaster               render2DMaster;
+    private              boolean                      showFps;
+    private              Cubemap                      specularCubemap;
+    private              Stage                        stage;
+    private              StringBuilder                stringBuilder;
+    private              boolean                      takeScreenShot;
+    private              boolean                      vsyncEnabled                  = true;
 
     public GameEngine3D(final IContextFactory contextFactory, final Universe universe, final LaunchMode launchMode) throws Exception {
         this.contextFactory = contextFactory;
         this.universe       = universe;
         this.launchMode     = launchMode;
         universe.setScreenListener(this);
-        //		this.config = config;
-        //		this.frame = frame;
-        //		renderMaster.centerX = 0;
-        //		renderMaster.centerY = 0;
-        //		myCanvas = new MyCanvas(this, config);
     }
 
     @Override
@@ -163,43 +151,40 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
             {
                 context = (Context) contextFactory.create();
             }
-//			showFps = context.getShowFpsProperty();//TODO
-            profiler = new GLProfiler(Gdx.graphics);
-            profiler.setListener(GLErrorListener.LOGGING_LISTENER);// ---enable exception throwing in case of error
-            profiler.setListener(new MyGLErrorListener());
-            if (enableProfiling) {
-                profiler.enable();
-            }
-            try {
-                context.setSelected(profiler, false);
-            } catch (final Exception e) {
-                logger.error(e.getMessage(), e);
-            }
+            showFps = context.getShowFpsProperty();
             createCamera();
             createInputProcessor(this);
             atlasManager = new AtlasManager();
             atlasManager.init();
-            renderEngine = new RenderEngine3D<GameEngine3D>(context, this, this, camera, camera2D, getAtlasManager().menuFont, getAtlasManager().systemTextureRegion);
+            renderEngine = new RenderEngine3D<GameEngine3D>(context, this, camera, camera2D, getAtlasManager().menuFont, getAtlasManager().systemTextureRegion);
             renderEngine.getWater().setTiling(universe.size * 2 * 4 * 2 / Universe.WORLD_SCALE);
-            renderEngine.getWater().setPresent(true);
+            renderEngine.getWater().setPresent(false);
             renderEngine.getWater().setWaveStrength(0.01f / Universe.WORLD_SCALE);
             renderEngine.getWater().setWaveSpeed(0.03f);
             renderEngine.getWater().setRefractiveMultiplicator(1f);
             renderEngine.setReflectionClippingPlane(-(context.getWaterLevel() - 2));
             renderEngine.setRefractionClippingPlane((context.getWaterLevel() - 2));
             renderEngine.setShadowEnabled(true);
-            renderEngine.getFog().setColor(Color.WHITE);
+            renderEngine.getFog().setColor(Color.BLACK);
             renderEngine.getFog().setBeginDistance(3000f);
             renderEngine.getFog().setFullDistance(5000f);
             renderEngine.getFog().setEnabled(true);
             renderEngine.setDynamicDayTime(true);
             renderEngine.setSceneBoxMin(new Vector3(-1000, -1000, -1000));
             renderEngine.setSceneBoxMax(new Vector3(1000, 1000, 1000));
+            renderEngine.setDayAmbientLight(.01f, .01f, .01f, 1f);
+            renderEngine.setNightAmbientLight(.01f, .01f, .01f, 1f);
+            renderEngine.setSkyBox(false);
+            try {
+                context.setSelected(renderEngine.getProfiler(), false);
+            } catch (final Exception e) {
+                logger.error(e.getMessage(), e);
+            }
 
-            renderMaster   = new Render3DMaster(context, universe, this, launchMode);
-            render2DMaster = new Render2DMaster(universe);
+            renderMaster = new AssetManager(universe);
+//            render2DMaster = new Render2DMaster(universe);
             renderMaster.create();
-            render2DMaster.create(atlasManager);
+//            render2DMaster.create(atlasManager);
             createEnvironment();
             createStage();
             audioEngine.create();
@@ -208,7 +193,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
 //            createStone();
             createTraders();
 //			createRing();
-            createWater();
+//            createWater();
             createPlanets();
 //			createLand();
             createJumpGates();
@@ -228,16 +213,8 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
 
     @Override
     public void resize(final int width, final int height) {
-        //		renderMaster.width = width;
-        //		renderMaster.height = height;
-        //		renderMaster.sceneClusterManager.sceneManager.camera.viewportWidth = width;
-        //		renderMaster.sceneClusterManager.sceneManager.camera.viewportHeight = height;
-        //		renderMaster.sceneClusterManager.sceneManager.camera.update();
-
-        //		System.out.println("width = " + width + " height = " + height);
-        //		renderMaster.sceneClusterManager.info.resize(width, height);
-        render2DMaster.width  = width;
-        render2DMaster.height = height;
+        renderEngine.renderEngine2D.width  = width;
+        renderEngine.renderEngine2D.height = height;
     }
 
     @Override
@@ -245,8 +222,8 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
         try {
             renderEngine.cpuGraph.begin();
             universe.advanceInTime();
-            if (profiler.isEnabled()) {
-                profiler.reset();// reset on each frame
+            if (renderEngine.getProfiler().isEnabled()) {
+                renderEngine.getProfiler().reset();// reset on each frame
             }
             render(universe.currentTime);
             //			batch.setProjectionMatrix(renderMaster.sceneClusterManager.camera.combined);
@@ -273,15 +250,11 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
     @Override
     public void dispose() {
         try {
-            if (mp3Player != null)
-                mp3Player.dispose();
+            if (mp3Player != null) mp3Player.dispose();
             audioEngine.dispose();
-            if (profiler.isEnabled()) {
-                profiler.disable();
-            }
             //		myCanvas.stop();
             renderMaster.dispose();
-            font.dispose();
+//            font.dispose();
             //		synchronized (desktopLauncher) {
             //			desktopLauncher.notify();
             //		}
@@ -308,10 +281,8 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
         Planet planet = universe.findBusyCenterPlanet();
         if (planet == null && !universe.planetList.isEmpty()) planet = universe.planetList.get(0);
         Vector3 lookat;
-        if (planet != null)
-            lookat = new Vector3(planet.x, 0, planet.z);
-        else
-            lookat = new Vector3(0, 0, 0);
+        if (planet != null) lookat = new Vector3(planet.x, 0, planet.z);
+        else lookat = new Vector3(0, 0, 0);
         camera.position.set(lookat.x + CAMERA_OFFSET_X / Universe.WORLD_SCALE, lookat.y + CAMERA_OFFSET_Y / Universe.WORLD_SCALE, lookat.z + CAMERA_OFFSET_Z / Universe.WORLD_SCALE);
         camera.up.set(0, 1, 0);
         camera.lookAt(lookat);
@@ -329,9 +300,11 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
             setupImageBasedLightingByFaceNames("clouds", "jpg", "jpg", "jpg", 10);
 //			setupImageBasedLightingByFaceNames("moonless_golf_2k", "jpg", "jpg", "jpg", 10);
             // setup skybox
-            renderEngine.setDaySkyBox(new SceneSkybox(environmentDayCubemap));
-            renderEngine.setSkyBox(true);
-            renderEngine.setNightSkyBox(new SceneSkybox(environmentNightCubemap));
+            if (renderEngine.isSkyBox()) {
+                renderEngine.setDaySkyBox(new SceneSkybox(environmentDayCubemap));
+//            renderEngine.setSkyBox(true);
+                renderEngine.setNightSkyBox(new SceneSkybox(environmentNightCubemap));
+            }
             renderEngine.environment.set(PBRCubemapAttribute.createDiffuseEnv(diffuseCubemap));
             renderEngine.environment.set(PBRCubemapAttribute.createSpecularEnv(specularCubemap));
             renderEngine.environment.set(new PBRTextureAttribute(PBRTextureAttribute.BRDFLUTTexture, brdfLUT));
@@ -375,13 +348,13 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
     }
 
     private void createStage() throws Exception {
-        info = new Info(renderEngine, getAtlasManager(), camera2D, renderEngine.batch2D, inputMultiplexer);
+        info = new Info(renderEngine, getAtlasManager(), camera2D, renderEngine.renderEngine2D.batch, inputMultiplexer);
         info.createStage();
         final int height = 12;
         stage = new Stage();
-        font  = new BitmapFont();
+//        font  = new BitmapFont();
         for (int i = 0; i < 8; i++) {
-            final Label label = new Label(" ", new Label.LabelStyle(font, Color.WHITE));
+            final Label label = new Label(" ", new Label.LabelStyle(getAtlasManager().menuFont, Color.WHITE));
 
             label.setPosition(0, i * height);
             stage.addActor(label);
@@ -392,13 +365,13 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
 
     private void createStone() {
         {
-            instance = new GameObject(new ModelInstanceHack(renderEngine.getGameEngine().renderMaster.cube.scene.model), null);
+            instance = new GameObject<>(new ModelInstanceHack(renderEngine.getGameEngine().renderMaster.cube.scene.model), null);
             instance.instance.transform.setToTranslationAndScaling(0, 0, 0, 16, 16, 16);
             instance.update();
             renderEngine.addStatic(instance);
         }
         {
-            instance = new GameObject(new ModelInstanceHack(renderEngine.getGameEngine().renderMaster.cube.scene.model), null);
+            instance = new GameObject<>(new ModelInstanceHack(renderEngine.getGameEngine().renderMaster.cube.scene.model), null);
             instance.instance.transform.setToTranslationAndScaling(0, 0, 0, 32, 1, 32);
             instance.update();
             renderEngine.addStatic(instance);
@@ -418,7 +391,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
         //sector
         {
             //			final Color sectorColor = renderMaster.getDistinctiveColor(planet.sector.type);
-            final GameObject sectorInstance = new GameObject(new ModelInstanceHack(renderMaster.sector), null);
+            final GameObject<GameEngine3D> sectorInstance = new GameObject<>(new ModelInstanceHack(renderMaster.sector), null);
             sectorInstance.instance.transform.setToTranslationAndScaling(0, Planet3DRenderer.SECTOR_Y, 0, delta, 8, delta);
             sectorInstance.update();
             renderEngine.addStatic(sectorInstance);
@@ -426,7 +399,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
         }
         //water
         {
-            final GameObject sectorInstance = new GameObject(new ModelInstanceHack(renderMaster.water), null);
+            final GameObject<GameEngine3D> sectorInstance = new GameObject<>(new ModelInstanceHack(renderMaster.water), null);
             sectorInstance.instance.transform.setToTranslationAndScaling(0, Planet3DRenderer.WATER_Y, 0, delta, 1, delta);
             sectorInstance.update();
             renderEngine.addStatic(sectorInstance);
@@ -450,9 +423,9 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
         return atlasManager;
     }
 
-    public int getMaxFramesPerSecond() {
-        return maxFramesPerSecond;
-    }
+//    public int getMaxFramesPerSecond() {
+//        return maxFramesPerSecond;
+//    }
 
     public boolean isInfoVisible() {
         return infoVisible;
@@ -514,7 +487,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
                 return true;
             case Input.Keys.TAB:
                 try {
-                    universe.setSelected(profiler, false);
+                    universe.setSelected(renderEngine.getProfiler(), false);
                 } catch (final Exception e) {
                     logger.error(e.getMessage(), e);
                 }
@@ -652,7 +625,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
             case Input.Buttons.LEFT:
                 //did we select an object?
                 //			renderMaster.sceneClusterManager.createCoordinates();
-                final GameObject selected = renderEngine.getGameObject(screenX, screenY);
+                final GameObject<GameEngine3D> selected = renderEngine.getGameObject(screenX, screenY);
                 System.out.println("selected " + selected);
                 if (selected != null) try {
                     universe.setSelected(selected.interactive, true);
@@ -685,37 +658,6 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
     public boolean touchDragged(final int screenX, final int screenY, final int pointer) {
         return false;
     }
-
-    //	private void printStatistics() throws Exception {
-    //		if (profiler.isEnabled()) {
-    //			//			setMaxFramesPerSecond(Math.max(getMaxFramesPerSecond(), Gdx.graphics.getFramesPerSecond()));
-    //			// once a second
-    //			if (debugTimer.getTime() > 1000) {
-    //				// for ( String statisticName : universe.timeStatisticManager.getSet() )
-    //				// {
-    //				// TimeStatistic statistic = universe.timeStatisticManager.getStatistic(
-    //				// statisticName );
-    //				// System.out.println( String.format( "%s %dms %dms %dms %dms", statisticName,
-    //				// statistic.lastTime, statistic.minTime, statistic.averageTime,
-    //				// statistic.maxTime ) );
-    //				// }
-    //				System.out.printf("----------------------------------------------------\n");
-    //				System.out.printf("profiler.textureBindings %d\n", profiler.getTextureBindings());// expensive, minimize
-    //																									// with atlas
-    //				System.out.printf("profiler.drawCalls %d\n", profiler.getDrawCalls());
-    //				System.out.printf("profiler.shaderSwitches %d\n", profiler.getShaderSwitches());
-    //				System.out.printf("profiler.vertexCount.min %.0f\n", profiler.getVertexCount().min);
-    //				System.out.printf("profiler.vertexCount.average %.0f\n", profiler.getVertexCount().average);
-    //				System.out.printf("profiler.vertexCount.max %.0f\n", profiler.getVertexCount().max);
-    //				System.out.printf("profiler.calls %d\n", profiler.getCalls());
-    //				System.out.printf("Texture.getNumManagedTextures() %d\n", Texture.getNumManagedTextures());
-    //				System.out.printf("Gdx.graphics.getDeltaTime() %f\n", Gdx.graphics.getDeltaTime());
-    //				//				System.out.printf("batch.renderCalls %d\n", renderMaster.sceneClusterManager.modelBatch.);
-    //				System.out.printf(Gdx.graphics.getFramesPerSecond() + " fps\n");
-    //				System.out.printf("----------------------------------------------------\n");
-    //			}
-    //		}
-    //	}
 
     @Override
     public boolean mouseMoved(final int screenX, final int screenY) {
@@ -761,10 +703,10 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
         renderEngine.render(currentTime, deltaTime, takeScreenShot);
 //        renderEngine.postProcessRender();
 //        renderEngine.renderGraphs();
-        render2DMaster.batch.begin();
+        renderEngine.renderEngine2D.batch.begin();
         renderUniverse();
         renderDemo();
-        render2DMaster.batch.end();
+        renderEngine.renderEngine2D.batch.end();
         renderEngine.gpuGraph.end();
         renderStage();
         renderEngine.handleQueuedScreenshot(takeScreenShot);
@@ -776,18 +718,18 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
         if (launchMode == LaunchMode.demo) {
             final float lineHeightFactor = 2f;
             if (demoText.isEmpty()) {
-                demoText.add(new DemoString("Mercator", render2DMaster.atlasManager.demoBigFont));
-                demoText.add(new DemoString("A computer game implementation of a closed economical simulation.", render2DMaster.atlasManager.demoMidFont));
-                demoText.add(new DemoString(String.format("The current world is generated proceduraly and includes %d cities, %d factories, %d traders and %d sims.", universe.planetList.size(), universe.planetList.size() * 2, universe.traderList.size(), universe.simList.size()), render2DMaster.atlasManager.demoMidFont));
-                demoText.add(new DemoString("The amount of wealth in the system, including products and money is constant at all times. ", render2DMaster.atlasManager.demoMidFont));
-                demoText.add(new DemoString("Factories pay wages to sims to produce goods that are sold on a free market.", render2DMaster.atlasManager.demoMidFont));
-                demoText.add(new DemoString("Some sims are traders that buy products in one city and sell them with profit in another city.", render2DMaster.atlasManager.demoMidFont));
-                demoText.add(new DemoString("All sims have needs that they need to fulfill else they die.", render2DMaster.atlasManager.demoMidFont));
-                demoText.add(new DemoString("All sims have cravings that they need to fulfill to keep their satisfaction level up.", render2DMaster.atlasManager.demoMidFont));
-                demoText.add(new DemoString("All sounds are generated by a openal based audio render engine for libgdx supporting procedurally generated audio using HRTF.", render2DMaster.atlasManager.demoMidFont));
+                demoText.add(new DemoString("Mercator", getAtlasManager().demoBigFont));
+                demoText.add(new DemoString("A computer game implementation of a closed economical simulation.", getAtlasManager().demoMidFont));
+                demoText.add(new DemoString(String.format("The current world is generated proceduraly and includes %d cities, %d factories, %d traders and %d sims.", universe.planetList.size(), universe.planetList.size() * 2, universe.traderList.size(), universe.simList.size()), getAtlasManager().demoMidFont));
+                demoText.add(new DemoString("The amount of wealth in the system, including products and money is constant at all times. ", getAtlasManager().demoMidFont));
+                demoText.add(new DemoString("Factories pay wages to sims to produce goods that are sold on a free market.", getAtlasManager().demoMidFont));
+                demoText.add(new DemoString("Some sims are traders that buy products in one city and sell them with profit in another city.", getAtlasManager().demoMidFont));
+                demoText.add(new DemoString("All sims have needs that they need to fulfill else they die.", getAtlasManager().demoMidFont));
+                demoText.add(new DemoString("All sims have cravings that they need to fulfill to keep their satisfaction level up.", getAtlasManager().demoMidFont));
+                demoText.add(new DemoString("All sounds are generated by a openal based audio render engine for libgdx supporting procedurally generated audio using HRTF.", getAtlasManager().demoMidFont));
                 //				demoText.add(new DemoString("Demo song is 'abyss' by Abdalla Bushnaq.", render2DMaster.atlasManager.demoMidFont));
-                demoText.add(new DemoString("Work in progress...", render2DMaster.atlasManager.demoMidFont));
-                demoText.add(new DemoString("Developed using libgdx and gdx-gltf open source frameworks.", render2DMaster.atlasManager.demoMidFont));
+                demoText.add(new DemoString("Work in progress...", getAtlasManager().demoMidFont));
+                demoText.add(new DemoString("Developed using libgdx and gdx-gltf open source frameworks.", getAtlasManager().demoMidFont));
                 export("target/demo.txt", demoText);
             }
 
@@ -813,20 +755,20 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
                 } else if (y < buttomMargine * 2) {
                     ds.font.setColor(demoTextColor);
                     ds.font.getColor().a = demoTextColor.a * (y - buttomMargine) / buttomMargine;
-                } else if (y > render2DMaster.height - topMargine) {
+                } else if (y > renderEngine.renderEngine2D.height - topMargine) {
                     ds.font.setColor(demoTextColor);
                     ds.font.getColor().a = 0;
-                } else if (y > render2DMaster.height - topMargine * 2) {
+                } else if (y > renderEngine.renderEngine2D.height - topMargine * 2) {
                     ds.font.setColor(demoTextColor);
-                    ds.font.getColor().a = demoTextColor.a * (1 - (y - render2DMaster.height + topMargine * 2) / topMargine);
+                    ds.font.getColor().a = demoTextColor.a * (1 - (y - renderEngine.renderEngine2D.height + topMargine * 2) / topMargine);
                 } else {
                     ds.font.setColor(demoTextColor);
                 }
-                final GlyphLayout lastLayout = ds.font.draw(render2DMaster.batch, ds.text, demoTextX, y, width, Align.left, true);
+                final GlyphLayout lastLayout = ds.font.draw(renderEngine.renderEngine2D.batch, ds.text, demoTextX, y, width, Align.left, true);
                 deltaY += lastLayout.height * lineHeightFactor;
             }
             demoTextY += 1;
-            if (demoTextY - deltaY > render2DMaster.height * lineHeightFactor) demoTextY = 0;
+            if (demoTextY - deltaY > renderEngine.renderEngine2D.height * lineHeightFactor) demoTextY = 0;
         }
     }
 
@@ -865,10 +807,11 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
         }
         int labelIndex = 0;
         // fps
-        {
+        if (showFps) {
             stringBuilder.setLength(0);
             stringBuilder.append(" FPS ").append(Gdx.graphics.getFramesPerSecond());
-            labels.get(labelIndex++).setText(stringBuilder);
+            labels.get(labelIndex).setText(stringBuilder);
+            labelIndex++;
         }
         //audio sources
         {
@@ -928,10 +871,10 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
 
     private void renderUniverse() {
         {
-            final float x1 = render2DMaster.untransformX(0);
-            final float y1 = render2DMaster.untransformY(render2DMaster.height - GameEngine2D.FONT_SIZE - 2);
-            render2DMaster.batch.setColor(TIME_MACHINE_BACKGROUND_COLOR);
-            render2DMaster.batch.draw(render2DMaster.atlasManager.factoryTextureRegion, x1, y1, render2DMaster.width * render2DMaster.camera.zoom, render2DMaster.height * render2DMaster.camera.zoom);
+            final float x1 = renderEngine.renderEngine2D.untransformX(0);
+            final float y1 = renderEngine.renderEngine2D.untransformY(renderEngine.renderEngine2D.height - GameEngine2D.FONT_SIZE - 2);
+            renderEngine.renderEngine2D.batch.setColor(TIME_MACHINE_BACKGROUND_COLOR);
+            renderEngine.renderEngine2D.batch.draw(getAtlasManager().factoryTextureRegion, x1, y1, renderEngine.renderEngine2D.width * renderEngine.renderEngine2D.camera.zoom, renderEngine.renderEngine2D.height * renderEngine.renderEngine2D.camera.zoom);
         }
         // for ( int i = 0; i < renderMaster.distinctiveColorlist.size(); i++ )
         // {
@@ -943,11 +886,11 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
         // renderMaster.camera.zoom, renderMaster.height * renderMaster.camera.zoom );
         // }
         {
-            render2DMaster.atlasManager.defaultFont.setColor(TEXT_COLOR);
+            getAtlasManager().defaultFont.setColor(TEXT_COLOR);
             final String universeAge = String.format("%s", TimeUnit.toString(universe.currentTime, TimeAccuracy.DAY_ACCURACY));
-            final float  x           = render2DMaster.untransformX(render2DMaster.width - 50);
-            final float  y           = render2DMaster.untransformY(render2DMaster.height - 2);
-            render2DMaster.atlasManager.defaultFont.draw(render2DMaster.batch, universeAge, x, y);
+            final float  x           = renderEngine.renderEngine2D.untransformX(renderEngine.renderEngine2D.width - 50);
+            final float  y           = renderEngine.renderEngine2D.untransformY(renderEngine.renderEngine2D.height - 2);
+            getAtlasManager().defaultFont.draw(renderEngine.renderEngine2D.batch, universeAge, x, y);
         }
         {
             final float start     = 0;
@@ -958,27 +901,27 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
                 final long daysDelta       = (long) Math.pow(10, digits - 1);
                 float      lastPosition    = 0;
                 float      lastSubPosition = 0;
-                for (int i = 0; i * (daysDelta / totalDays) * render2DMaster.width < render2DMaster.width - 70; i++) {
-                    final float yearPosition = i * (daysDelta / totalDays) * render2DMaster.width;
+                for (int i = 0; i * (daysDelta / totalDays) * renderEngine.renderEngine2D.width < renderEngine.renderEngine2D.width - 70; i++) {
+                    final float yearPosition = i * (daysDelta / totalDays) * renderEngine.renderEngine2D.width;
                     String      yearName;
                     if (yearPosition - lastPosition > 256) {
                         // String yearName = String.format( "%.0f", i * daysDelta / 100 );
                         if (i * daysDelta < TimeUnit.TICKS_PER_YEAR) yearName = TimeUnit.toString(i * daysDelta);
                         else yearName = TimeUnit.toString(i * daysDelta, TimeAccuracy.YEAR_ACCURACY);
-                        final float yX = render2DMaster.untransformX(yearPosition);
-                        final float yY = render2DMaster.untransformY(render2DMaster.height - 2);
-                        render2DMaster.atlasManager.defaultFont.setColor(TEXT_COLOR);
-                        render2DMaster.atlasManager.defaultFont.draw(render2DMaster.batch, yearName, yX, yY);
+                        final float yX = renderEngine.renderEngine2D.untransformX(yearPosition);
+                        final float yY = renderEngine.renderEngine2D.untransformY(renderEngine.renderEngine2D.height - 2);
+                        getAtlasManager().defaultFont.setColor(TEXT_COLOR);
+                        getAtlasManager().defaultFont.draw(renderEngine.renderEngine2D.batch, yearName, yX, yY);
                         lastPosition    = yearPosition;
                         lastSubPosition = yearPosition;
                     } else if (yearPosition - lastSubPosition > 51.2f) {
                         // String yearName = String.format( "%.0f", i * daysDelta / 100 );
                         if (i * daysDelta < TimeUnit.TICKS_PER_YEAR) yearName = TimeUnit.toString(i * daysDelta);
                         else yearName = TimeUnit.toString(i * daysDelta, TimeAccuracy.YEAR_ACCURACY);
-                        final float yX = render2DMaster.untransformX(yearPosition);
-                        final float yY = render2DMaster.untransformY(render2DMaster.height - 2 - (render2DMaster.defaultFontSize - render2DMaster.timeMachineFontSize) / (2 * render2DMaster.camera.zoom));
-                        render2DMaster.atlasManager.timeMachineFont.setColor(TIME_MACHINE_SUB_MARKER_COLOR);
-                        render2DMaster.atlasManager.timeMachineFont.draw(render2DMaster.batch, yearName, yX, yY);
+                        final float yX = renderEngine.renderEngine2D.untransformX(yearPosition);
+                        final float yY = renderEngine.renderEngine2D.untransformY(renderEngine.renderEngine2D.height - 2 - (FONT_SIZE - TIME_MACHINE_FONT_SIZE) / (2 * renderEngine.renderEngine2D.camera.zoom));
+                        getAtlasManager().timeMachineFont.setColor(TIME_MACHINE_SUB_MARKER_COLOR);
+                        getAtlasManager().timeMachineFont.draw(renderEngine.renderEngine2D.batch, yearName, yX, yY);
                         lastSubPosition = yearPosition;
                     }
                 }

@@ -126,7 +126,7 @@ public class Planet3DRenderer extends ObjectRenderer<GameEngine3D> {
         final float x    = planet.x;
         final float z    = planet.z;
         //draw text
-        final PolygonSpriteBatch batch = renderEngine.batch2D;
+        final PolygonSpriteBatch batch = renderEngine.renderEngine2D.batch;
         final BitmapFont         font  = renderEngine.getGameEngine().getAtlasManager().modelFont;
         {
             final Matrix4 m        = new Matrix4();

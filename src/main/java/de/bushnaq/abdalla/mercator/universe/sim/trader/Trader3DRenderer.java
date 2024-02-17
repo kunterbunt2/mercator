@@ -188,7 +188,7 @@ public class Trader3DRenderer extends ObjectRenderer<GameEngine3D> {
         final float y = translation.y;
         final float z = translation.z;
         //draw text
-        final PolygonSpriteBatch batch = renderEngine.batch2D;
+        final PolygonSpriteBatch batch = renderEngine.renderEngine2D.batch;
         final BitmapFont         font  = renderEngine.getGameEngine().getAtlasManager().modelFont;
         {
             final Matrix4     m        = new Matrix4();

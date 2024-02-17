@@ -38,7 +38,7 @@ import de.bushnaq.abdalla.mercator.util.TimeUnit;
  */
 public class DesktopLauncher3D implements ApplicationListener {
     private static final int UNIVERSE_GENERATION_RANDOM_SEED = 1;
-    private static final int UNIVERSE_SIZE                   = 2;
+    private static final int UNIVERSE_SIZE                   = 10;
     //    private final Universe universe;
     DesktopContextFactory contextFactory = new DesktopContextFactory();
     LaunchMode            launchMode     = LaunchMode.normal;

@@ -27,7 +27,7 @@ import com.badlogic.gdx.graphics.g3d.environment.PointLight;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.utils.Array;
-import de.bushnaq.abdalla.mercator.renderer.Render3DMaster;
+import de.bushnaq.abdalla.mercator.renderer.AssetManager;
 import de.bushnaq.abdalla.mercator.shader.GameSettings;
 
 import java.util.ArrayList;
@@ -37,7 +37,7 @@ public class SceneCluster {
 
     private final Environment         ambientEnvironment   = new Environment();
     // ModelInstance uberModelInstance;
-    private final Render3DMaster      renderMaster;
+    private final AssetManager        renderMaster;
     private final List<ModelInstance> renderModelInstances = new ArrayList<ModelInstance>();
     BoundingBox         clusterBoundingBox;
     List<ModelInstance> dynamicModelInstances = new ArrayList<ModelInstance>();
@@ -47,7 +47,7 @@ public class SceneCluster {
     Array<PointLight>   staticPointLights     = new Array<PointLight>();
     private DirectionalShadowLight shadowLight;
 
-    public SceneCluster(final Render3DMaster renderMaster) {
+    public SceneCluster(final AssetManager renderMaster) {
         this.renderMaster = renderMaster;
     }
 

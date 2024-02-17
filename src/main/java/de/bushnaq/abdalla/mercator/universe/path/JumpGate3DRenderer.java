@@ -212,7 +212,7 @@ public class JumpGate3DRenderer extends ObjectRenderer<GameEngine3D> {
         final float y = jumpGate.target.y + JUMP_GATE_HEIGHT / 2/*- 10 / Universe.WORLD_SCALE*/;
         final float z = jumpGate.target.z;
         //draw text
-        final PolygonSpriteBatch batch = renderEngine.batch2D;
+        final PolygonSpriteBatch batch = renderEngine.renderEngine2D.batch;
         final BitmapFont         font  = renderEngine.getGameEngine().getAtlasManager().modelFont;
         {
             final Matrix4     m        = new Matrix4();

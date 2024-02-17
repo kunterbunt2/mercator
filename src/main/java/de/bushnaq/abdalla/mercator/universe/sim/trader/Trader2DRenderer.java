@@ -202,9 +202,9 @@ public class Trader2DRenderer extends ObjectRenderer<GameEngine2D> {
             renderEngine.getGameEngine().renderEngine.lable(renderEngine.getGameEngine().atlasManager.dottedLineTextureRegion, trader.x - hps, trader.z - hps, Trader2DRenderer.TRADER_WIDTH, Trader2DRenderer.TRADER_HEIGHT, TRADER_WIDTH * 1, TRADER_WIDTH * 3, renderEngine.getGameEngine().atlasManager.defaultFont, color, trader.getName(), color, String.format("%.0f", trader.getCredits()), renderEngine.getGameEngine().queryCreditColor(trader.getCredits(), Trader.TRADER_START_CREDITS));
         }
         circle.setPosition(trader.x, trader.z);
-        if (trader.getName().equals("T-13")) {
-            System.out.println(String.format("%f %f", trader.x, trader.z));
-        }
+//        if (trader.getName().equals("T-13")) {
+//            System.out.println(String.format("%f %f", trader.x, trader.z));
+//        }
     }
 
     @Override

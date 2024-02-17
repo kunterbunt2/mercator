@@ -172,8 +172,8 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
             renderEngine.setDynamicDayTime(true);
             renderEngine.setSceneBoxMin(new Vector3(-1000, -1000, -1000));
             renderEngine.setSceneBoxMax(new Vector3(1000, 1000, 1000));
-            renderEngine.setDayAmbientLight(.01f, .01f, .01f, 1f);
-            renderEngine.setNightAmbientLight(.01f, .01f, .01f, 1f);
+            renderEngine.setDayAmbientLight(.01f, .01f, .01f, 10f);
+            renderEngine.setNightAmbientLight(.01f, .01f, .01f, 10f);
             renderEngine.setSkyBox(false);
             try {
                 context.setSelected(renderEngine.getProfiler(), false);

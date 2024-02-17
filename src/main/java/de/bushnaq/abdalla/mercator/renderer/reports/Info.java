@@ -201,7 +201,7 @@ public class Info {
             if (renderEngine != null) {
                 {
                     final int count      = renderEngine.visibleStaticGameObjectCount;
-                    final int totalCount = renderEngine.staticModelInstances.size;
+                    final int totalCount = renderEngine.staticGameObjects.size;
                     stringBuilder.setLength(0);
                     stringBuilder.append(count).append(" / ").append(totalCount);
                     updateNameAndValue("Static Models", stringBuilder.toString(), VARIABLE_LABEL);
@@ -209,7 +209,7 @@ public class Info {
                 {
                     stringBuilder.setLength(0);
                     final int count      = renderEngine.visibleDynamicGameObjectCount;
-                    final int totalCount = renderEngine.dynamicModelInstances.size;
+                    final int totalCount = renderEngine.dynamicGameObjects.size;
                     stringBuilder.append(count).append(" / ").append(totalCount);
                     updateNameAndValue("Dynamic Models", stringBuilder.toString(), VARIABLE_LABEL);
                 }

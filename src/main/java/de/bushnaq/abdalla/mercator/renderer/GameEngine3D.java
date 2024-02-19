@@ -100,11 +100,11 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
     private final        InputMultiplexer             inputMultiplexer              = new InputMultiplexer();
     private final        List<Label>                  labels                        = new ArrayList<>();
     private final        Logger                       logger                        = LoggerFactory.getLogger(this.getClass());
+    public               AssetManager                 assetManager;
     //    private final        GameObject<GameEngine3D>     ocean                         = null;
     public               AudioEngine                  audioEngine                   = new MercatorAudioEngine();
     public               LaunchMode                   launchMode;
     public               RenderEngine3D<GameEngine3D> renderEngine;
-    public               AssetManager                 renderMaster;
     private              AtlasManager                 atlasManager;
     private              Texture                      brdfLUT;
     private              MyCameraInputController      camController;
@@ -174,16 +174,19 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
             renderEngine.setSceneBoxMax(new Vector3(1000, 1000, 1000));
             renderEngine.setDayAmbientLight(.01f, .01f, .01f, 10f);
             renderEngine.setNightAmbientLight(.01f, .01f, .01f, 10f);
-            renderEngine.setSkyBox(false);
+            renderEngine.setSkyBox(true);
+            renderEngine.getMirror().setPresent(true);
+            renderEngine.getMirror().setReflectivity(0.6f);
+
             try {
                 context.setSelected(renderEngine.getProfiler(), false);
             } catch (final Exception e) {
                 logger.error(e.getMessage(), e);
             }
 
-            renderMaster = new AssetManager(universe);
+            assetManager = new AssetManager(universe);
 //            render2DMaster = new Render2DMaster(universe);
-            renderMaster.create();
+            assetManager.create();
 //            render2DMaster.create(atlasManager);
             createEnvironment();
             createStage();
@@ -193,7 +196,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
 //            createStone();
             createTraders();
 //			createRing();
-//            createWater();
+            createWater();
             createPlanets();
 //			createLand();
             createJumpGates();
@@ -253,7 +256,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
             if (mp3Player != null) mp3Player.dispose();
             audioEngine.dispose();
             //		myCanvas.stop();
-            renderMaster.dispose();
+            assetManager.dispose();
 //            font.dispose();
             //		synchronized (desktopLauncher) {
             //			desktopLauncher.notify();
@@ -365,13 +368,13 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
 
     private void createStone() {
         {
-            instance = new GameObject<>(new ModelInstanceHack(renderEngine.getGameEngine().renderMaster.cube.scene.model), null);
+            instance = new GameObject<>(new ModelInstanceHack(renderEngine.getGameEngine().assetManager.cube.scene.model), null);
             instance.instance.transform.setToTranslationAndScaling(0, 0, 0, 16, 16, 16);
             instance.update();
             renderEngine.addStatic(instance);
         }
         {
-            instance = new GameObject<>(new ModelInstanceHack(renderEngine.getGameEngine().renderMaster.cube.scene.model), null);
+            instance = new GameObject<>(new ModelInstanceHack(renderEngine.getGameEngine().assetManager.cube.scene.model), null);
             instance.instance.transform.setToTranslationAndScaling(0, 0, 0, 32, 1, 32);
             instance.update();
             renderEngine.addStatic(instance);
@@ -379,7 +382,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
     }
 
     private void createTraders() {
-        for (final Planet planet : renderMaster.universe.planetList) {
+        for (final Planet planet : assetManager.universe.planetList) {
             for (final Trader trader : planet.traderList) {
                 trader.get3DRenderer().create(renderEngine);
             }
@@ -391,7 +394,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
         //sector
         {
             //			final Color sectorColor = renderMaster.getDistinctiveColor(planet.sector.type);
-            final GameObject<GameEngine3D> sectorInstance = new GameObject<>(new ModelInstanceHack(renderMaster.sector), null);
+            final GameObject<GameEngine3D> sectorInstance = new GameObject<>(new ModelInstanceHack(assetManager.sector), null);
             sectorInstance.instance.transform.setToTranslationAndScaling(0, Planet3DRenderer.SECTOR_Y, 0, delta, 8, delta);
             sectorInstance.update();
             renderEngine.addStatic(sectorInstance);
@@ -399,7 +402,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
         }
         //water
         {
-            final GameObject<GameEngine3D> sectorInstance = new GameObject<>(new ModelInstanceHack(renderMaster.water), null);
+            final GameObject<GameEngine3D> sectorInstance = new GameObject<>(new ModelInstanceHack(assetManager.mirror), null);
             sectorInstance.instance.transform.setToTranslationAndScaling(0, Planet3DRenderer.WATER_Y, 0, delta, 1, delta);
             sectorInstance.update();
             renderEngine.addStatic(sectorInstance);
@@ -454,7 +457,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
                 exit();
                 return true;
             case Input.Keys.P:
-                renderMaster.universe.setEnableTime(!renderMaster.universe.isEnableTime());
+                assetManager.universe.setEnableTime(!assetManager.universe.isEnableTime());
                 return true;
             case Input.Keys.PRINT_SCREEN:
                 queueScreenshot();
@@ -795,7 +798,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
 
     private void renderPlanets(final long currentTime) throws Exception {
         for (final Planet planet : universe.planetList) {
-            planet.get3DRenderer().update(renderEngine, currentTime, renderEngine.getTimeOfDay(), 0, planet == renderMaster.universe.selectedPlanet);
+            planet.get3DRenderer().update(renderEngine, currentTime, renderEngine.getTimeOfDay(), 0, planet == assetManager.universe.selectedPlanet);
         }
     }
 
@@ -857,10 +860,10 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
     //	}
 
     private void renderTraders(final long currentTime) throws Exception {
-        for (final Planet planet : renderMaster.universe.planetList) {
+        for (final Planet planet : assetManager.universe.planetList) {
             int index = 0;
             for (final Trader trader : planet.traderList) {
-                trader.get3DRenderer().update(renderEngine, currentTime, renderEngine.getTimeOfDay(), index++, trader == renderMaster.universe.selectedTrader);
+                trader.get3DRenderer().update(renderEngine, currentTime, renderEngine.getTimeOfDay(), index++, trader == assetManager.universe.selectedTrader);
             }
         }
     }
@@ -936,7 +939,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
 
     @Override
     public void setShowGood(final ShowGood name) {
-        renderMaster.showGood = name;
+        assetManager.showGood = name;
     }
 
     public void setInfoVisible(final boolean infoVisible) {

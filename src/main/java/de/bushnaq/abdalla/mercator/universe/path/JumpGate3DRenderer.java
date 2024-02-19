@@ -161,7 +161,7 @@ public class JumpGate3DRenderer extends ObjectRenderer<GameEngine3D> {
         //		Vector3 up = new Vector3(0, scalez, scaley);
         //		up.nor();
 
-        instance = new GameObject(new ModelInstanceHack(renderEngine.getGameEngine().renderMaster.jumpGate), null, this);
+        instance = new GameObject(new ModelInstanceHack(renderEngine.getGameEngine().assetManager.jumpGate), null, this);
         //			instance = new ModelInstance(renderMaster.boxModel2);
         //			instance.materials.get(0).set(ColorAttribute.createDiffuse(JUMPGATE_COLOR));
         //		final Color sectorColor = renderMaster.getDistinctiveColor(jumpGate.planet.sector.type);
@@ -198,7 +198,7 @@ public class JumpGate3DRenderer extends ObjectRenderer<GameEngine3D> {
 //				} else
                 {
                     instance.instance.materials.get(0).remove(ColorAttribute.Emissive);
-                    final PBRColorAttribute ca = (PBRColorAttribute) renderEngine.getGameEngine().renderMaster.cubeBase1.materials.get(0).get(PBRColorAttribute.BaseColorFactor);
+                    final PBRColorAttribute ca = (PBRColorAttribute) renderEngine.getGameEngine().assetManager.cubeBase1.materials.get(0).get(PBRColorAttribute.BaseColorFactor);
                     instance.instance.materials.get(0).set(new PBRColorAttribute(PBRColorAttribute.BaseColorFactor, ca.color));
                 }
             }

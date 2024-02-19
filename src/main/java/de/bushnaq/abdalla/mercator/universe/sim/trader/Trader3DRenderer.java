@@ -149,7 +149,7 @@ public class Trader3DRenderer extends ObjectRenderer<GameEngine3D> {
         for (int i = 0; i < NUMBER_OF_LIGHTS; i++) {
             pointLights.add(new PointLight());
             renderEngine.add(pointLights.get(i), true);
-            final GameObject<GameEngine3D> go = new GameObject<GameEngine3D>(new ModelInstanceHack(renderEngine.getGameEngine().renderMaster.cubeEmissive), trader);
+            final GameObject<GameEngine3D> go = new GameObject<GameEngine3D>(new ModelInstanceHack(renderEngine.getGameEngine().assetManager.cubeEmissive), trader);
             go.instance.materials.get(0).set(emissiveAttribute);
             lightGameObjects.add(go);
             renderEngine.addDynamic(lightGameObjects.get(i));

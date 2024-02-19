@@ -68,7 +68,7 @@ public class Ring3DRenderer extends ObjectRenderer<GameEngine3D> {
         //		}
         //		System.out.println("finished");
         {
-            final GameObject sectorInstance = new GameObject(new ModelInstanceHack(renderEngine.getGameEngine().renderMaster.sector), null);
+            final GameObject sectorInstance = new GameObject(new ModelInstanceHack(renderEngine.getGameEngine().assetManager.sector), null);
             sectorInstance.instance.transform.setToTranslationAndScaling(0, Planet3DRenderer.SECTOR_Y, 0, delta, 8, delta);
             sectorInstance.update();
             renderEngine.addStatic(sectorInstance);
@@ -76,7 +76,7 @@ public class Ring3DRenderer extends ObjectRenderer<GameEngine3D> {
         }
         //water
         {
-            final GameObject sectorInstance = new GameObject(new ModelInstanceHack(renderEngine.getGameEngine().renderMaster.water), null);
+            final GameObject sectorInstance = new GameObject(new ModelInstanceHack(renderEngine.getGameEngine().assetManager.water), null);
             sectorInstance.instance.transform.setToTranslationAndScaling(0, Planet3DRenderer.WATER_Y, 0, delta, 1, delta);
             sectorInstance.update();
             renderEngine.addStatic(sectorInstance);

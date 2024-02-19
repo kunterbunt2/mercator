@@ -56,10 +56,12 @@ public class AssetManager {
     public Model                   cubeGood;
     public Model                   jumpGate;
     public Model                   land;
+    public Model                   mirror;
     public Model                   planet;
     public Model                   sector;
     public ShowGood                showGood = ShowGood.Name;
     public Model                   trader;
+    public SceneAsset              traderAsset;
     public SceneAsset              turbine;
     public Universe                universe;
     public Model                   water;
@@ -113,7 +115,7 @@ public class AssetManager {
             //			Attribute shininess = PBRFloatAttribute.createShininess(1.0f);
             final Material material = new Material(metallic, roughness, color/* , culling, normal, occlusion, shininess */);
             //			trader = modelCreator.createBox(material);
-            trader = modelBuilder.createBox(1.0f, 1.0f, 1.0f, material, Usage.Position | Usage.Normal);
+            trader      = modelBuilder.createBox(1.0f, 1.0f, 1.0f, material, Usage.Position | Usage.Normal);
         }
         {
             final Attribute color = new PBRColorAttribute(PBRColorAttribute.BaseColorFactor, Color.WHITE);
@@ -196,6 +198,13 @@ public class AssetManager {
             final Material         material       = new Material(diffuseColor, diffuseTexture);
             material.id = "water";
             water       = createSquare(modelBuilder, 0.5f, 0.5f, material);
+        }
+        {
+            final ColorAttribute   diffuseColor   = ColorAttribute.createDiffuse(Color.BLACK);
+            final TextureAttribute diffuseTexture = TextureAttribute.createDiffuse(texture);
+            final Material         material       = new Material(diffuseColor, diffuseTexture);
+            material.id = "mirror";
+            mirror      = createSquare(modelBuilder, 0.5f, 0.5f, material);
         }
         {
             cube = new GLBLoader().load(Gdx.files.internal(String.format(AtlasManager.getAssetsFolderName() + "/models/turtle.glb")));

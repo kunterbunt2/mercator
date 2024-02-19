@@ -86,8 +86,8 @@ public class Good3DRenderer extends ObjectRenderer<GameEngine3D> {
 
     public static GameObject<GameEngine3D> instanciateGoodGameObject(final Good good, final RenderEngine3D<GameEngine3D> renderEngine) {
         GameObject<GameEngine3D> scene     = null;
-        final Material           material1 = renderEngine.getGameEngine().renderMaster.cubeGood.materials.get(0);
-        scene = new GameObject<GameEngine3D>(new ModelInstanceHack(renderEngine.getGameEngine().renderMaster.cubeGood), good);
+        final Material           material1 = renderEngine.getGameEngine().assetManager.cubeGood.materials.get(0);
+        scene = new GameObject<GameEngine3D>(new ModelInstanceHack(renderEngine.getGameEngine().assetManager.cubeGood), good);
         //TODO reuse instances
         final Material            material2 = scene.instance.materials.get(0);
         final Iterator<Attribute> i         = material1.iterator();
@@ -225,7 +225,7 @@ public class Good3DRenderer extends ObjectRenderer<GameEngine3D> {
         // Screen.GOOD_WIDTH - Screen.SPACE_BETWEEN_OBJECTS ) / 2, y + (
         // Screen.GOOD_HEIGHT - Screen.SPACE_BETWEEN_OBJECTS ) / 2, lightColor,
         // Screen.GOOD_WIDTH );
-        switch (renderEngine.getGameEngine().renderMaster.showGood) {
+        switch (renderEngine.getGameEngine().assetManager.showGood) {
             case Price:
                 //				renderMaster.text( x, y, color, Screen.TEXT_COLOR, String.format( "%.0f", good.price ) );
                 //				renderMaster.bar( renderMaster.gaugeTexture, x + Screen.GOOD_WIDTH - 1 - 2 - Screen.SPACE_BETWEEN_OBJECTS, y + Screen.GOOD_HEIGHT - 1 -

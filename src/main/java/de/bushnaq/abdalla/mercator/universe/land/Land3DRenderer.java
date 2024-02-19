@@ -45,7 +45,7 @@ public class Land3DRenderer extends ObjectRenderer<GameEngine3D> {
     }
 
     private void instanciateLand(final RenderEngine3D<GameEngine3D> renderEngine, final float x, final float y, final float z) {
-        instance = new GameObject(new ModelInstanceHack(renderEngine.getGameEngine().renderMaster.land), null);
+        instance = new GameObject(new ModelInstanceHack(renderEngine.getGameEngine().assetManager.land), null);
         instance.instance.transform.setToTranslationAndScaling(x, y - LAND_HIGHT / 2 + HILL_HIGHT, z, LAND_SIZE, LAND_HIGHT + HILL_HIGHT, LAND_SIZE);
         instance.update();
         renderEngine.addStatic(instance);

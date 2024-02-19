@@ -170,7 +170,7 @@ public class Planet3DRenderer extends ObjectRenderer<GameEngine3D> {
         iteration /= 2;
         //		System.out.println(String.format("iteration=%d scale=%f x=%f z=%f", iteration, scale, x, z));
         //		int i = 0;
-        averrageBuildingHight = averrageBuildingHight + averrageBuildingHight * (0.5f - renderEngine.getGameEngine().renderMaster.createRG.nextFloat());
+        averrageBuildingHight = averrageBuildingHight + averrageBuildingHight * (0.5f - renderEngine.getGameEngine().assetManager.createRG.nextFloat());
         final TwinBuilding twinChances[][] = {{new TwinBuilding(0.3f, 0.0f, 1, 1)/*0,0*/, new TwinBuilding(0.0f, 0.3f, 1, -1)}/*0,1*/, {new TwinBuilding(0.0f, 0.3f, -1, 1)/*1,0*/, new TwinBuilding(0.3f, 0.0f, -1, -1)}/*1,1*/};
         //		z=1, x=1, x=0
         //		0,0
@@ -188,15 +188,15 @@ public class Planet3DRenderer extends ObjectRenderer<GameEngine3D> {
                     //the bigger the block, the lower the change for it to be one building
                     final float changceOfOneBuilding = 0.5f / iteration;
                     final float changceOfNoBuilding  = 0.0f / iteration;
-                    if (renderEngine.getGameEngine().renderMaster.createRG.nextFloat() < changceOfNoBuilding) {
+                    if (renderEngine.getGameEngine().assetManager.createRG.nextFloat() < changceOfNoBuilding) {
 
-                    } else if (iteration > 1f && renderEngine.getGameEngine().renderMaster.createRG.nextFloat() > changceOfOneBuilding)
+                    } else if (iteration > 1f && renderEngine.getGameEngine().assetManager.createRG.nextFloat() > changceOfOneBuilding)
                         //create smaller buildings
                         createCity(renderEngine, xx, zz, iteration, scale, averrageBuildingHight);
                     else {
                         float twinFactorXs = 1f;
                         float twinFactorZs = 1f;
-                        if (renderEngine.getGameEngine().renderMaster.createRG.nextFloat() < twinChance.chanceHorizontal) {
+                        if (renderEngine.getGameEngine().assetManager.createRG.nextFloat() < twinChance.chanceHorizontal) {
                             final TwinBuilding twin = twinChances[xi + twinChance.deltaX][zi];
                             if (!twin.occupided) {
                                 twinFactorXs   = 2f;
@@ -204,7 +204,7 @@ public class Planet3DRenderer extends ObjectRenderer<GameEngine3D> {
                                 twin.occupided = true;
                             }
                         }
-                        if (renderEngine.getGameEngine().renderMaster.createRG.nextFloat() < twinChance.chanceVertical) {
+                        if (renderEngine.getGameEngine().assetManager.createRG.nextFloat() < twinChance.chanceVertical) {
                             final TwinBuilding twin = twinChances[xi][zi + twinChance.deltaZ];
                             if (!twin.occupided) {
                                 twinFactorZs   = 2f;
@@ -216,7 +216,7 @@ public class Planet3DRenderer extends ObjectRenderer<GameEngine3D> {
                         final GameObject<GameEngine3D> inst = instanciateBuilding(renderEngine, index++);
                         final float                    xs   = iteration * 2 * scale * twinFactorXs - streetSize;
                         //the bigger the building, the lower the change for it to get big
-                        final float ys = /*(5 - iteration) * 16;//*/averrageBuildingHight * (0.1f + 3 * renderEngine.getGameEngine().renderMaster.createRG.nextFloat());
+                        final float ys = /*(5 - iteration) * 16;//*/averrageBuildingHight * (0.1f + 3 * renderEngine.getGameEngine().assetManager.createRG.nextFloat());
                         final float zs = iteration * 2 * scale * twinFactorZs - streetSize;
                         //					System.out.println(String.format("  xx=%f zz=%f xs=%f", xx, zz, xs));
                         inst.instance.transform.setToTranslationAndScaling(xx, ys / 2, zz, xs, ys, zs);
@@ -239,7 +239,7 @@ public class Planet3DRenderer extends ObjectRenderer<GameEngine3D> {
         for (final ProductionFacility productionFacility : planet.productionFacilityList) {
             final int                index = productionFacility.producedGood.type.ordinal();
             final float              fz    = z + Planet3DRenderer.PLANET_SIZE / 2 - edgeSize / 2 * (Good3DRenderer.GOOD_Y) - index * (edgeSize + 1) * (Good3DRenderer.GOOD_Y);
-            GameObject<GameEngine3D> go    = new GameObject<>(new ModelInstanceHack(renderEngine.getGameEngine().renderMaster.turbine.scene.model), productionFacility);
+            GameObject<GameEngine3D> go    = new GameObject<>(new ModelInstanceHack(renderEngine.getGameEngine().assetManager.turbine.scene.model), productionFacility);
             go.instance.transform.setToTranslationAndScaling(fx, 0, fz, TURBINE_SIZE, TURBINE_SIZE, TURBINE_SIZE);
             go.instance.transform.rotate(Vector3.Y, 90);
             go.update();
@@ -247,7 +247,7 @@ public class Planet3DRenderer extends ObjectRenderer<GameEngine3D> {
             go.controller.setAnimation(go.instance.getAnimation("rotate"), -1);
             animatedObjects.add(go);
             renderEngine.addDynamic(go);
-            go = new GameObject<>(new ModelInstanceHack(renderEngine.getGameEngine().renderMaster.cubeEmissive), planet);
+            go = new GameObject<>(new ModelInstanceHack(renderEngine.getGameEngine().assetManager.cubeEmissive), planet);
             go.instance.materials.get(0).set(emissiveAttribute);
             go.instance.transform.setToTranslationAndScaling(fx, 0f, fz, 1.0f, 1.0f, 1.0f);
             pointLightObjects.add(go);
@@ -260,7 +260,7 @@ public class Planet3DRenderer extends ObjectRenderer<GameEngine3D> {
         final float z = planet.z;
         //planet
         {
-            gameObject = new GameObject<GameEngine3D>(new ModelInstanceHack(renderEngine.getGameEngine().renderMaster.planet), null, this);
+            gameObject = new GameObject<GameEngine3D>(new ModelInstanceHack(renderEngine.getGameEngine().assetManager.planet), null, this);
             gameObject.instance.transform.setToTranslationAndScaling(x, -PLANET_HIGHT / 2, z, PLANET_SIZE, PLANET_HIGHT, PLANET_SIZE);
             gameObject.update();
             renderEngine.addStatic(gameObject);
@@ -321,7 +321,7 @@ public class Planet3DRenderer extends ObjectRenderer<GameEngine3D> {
     }
 
     private GameObject<GameEngine3D> instanciateBuilding(final RenderEngine3D<GameEngine3D> renderEngine, final int index) {
-        final GameObject<GameEngine3D> go = new GameObject<>(new ModelInstanceHack(renderEngine.getGameEngine().renderMaster.buildingCube), planet);
+        final GameObject<GameEngine3D> go = new GameObject<>(new ModelInstanceHack(renderEngine.getGameEngine().assetManager.buildingCube), planet);
         //		final Material material = go.instance.materials.get(0);
         //		material.set(new PBRColorAttribute(PBRColorAttribute.BaseColorFactor, getBuildingColor(index)));
         return go;

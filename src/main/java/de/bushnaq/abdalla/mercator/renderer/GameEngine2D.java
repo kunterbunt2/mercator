@@ -29,6 +29,7 @@ import com.badlogic.gdx.utils.BufferUtils;
 import com.badlogic.gdx.utils.ScreenUtils;
 import de.bushnaq.abdalla.engine.IContextFactory;
 import de.bushnaq.abdalla.engine.RenderEngine2D;
+import de.bushnaq.abdalla.engine.RenderEngineExtension;
 import de.bushnaq.abdalla.mercator.desktop.Context;
 import de.bushnaq.abdalla.mercator.desktop.LaunchMode;
 import de.bushnaq.abdalla.mercator.renderer.reports.Info;
@@ -52,7 +53,7 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
-public class GameEngine2D implements ScreenListener, ApplicationListener, InputProcessor, Message {
+public class GameEngine2D implements ScreenListener, ApplicationListener, InputProcessor, Message, RenderEngineExtension {
     //	private static final String BATCH_END_DURATION = "batch.end()";
     public static final  int                          CHART_FONT_SIZE                 = 10;
     public static final  Color                        DARK_RED_COLOR                  = new Color(0.475f, 0.035f, 0.027f, 1.0f);
@@ -147,10 +148,6 @@ public class GameEngine2D implements ScreenListener, ApplicationListener, InputP
         }
     }
 
-    //	private void enableProfiler() {
-    //		//		GLProfiler.enable();
-    //	}
-
     @Override
     public void create() {
         try {
@@ -167,8 +164,9 @@ public class GameEngine2D implements ScreenListener, ApplicationListener, InputP
 //            info = new Info(null, atlasManager, renderEngine.batch, camera, inputMultiplexer);
             //		info = new Info(render2DMaster, inputMultiplexer);
 //			info.createStage();
-            inputMultiplexer.addProcessor(this);
-            Gdx.input.setInputProcessor(inputMultiplexer);
+            createInputProcessor(this);
+
+
             profiler = new GLProfiler(Gdx.graphics);
             profiler.setListener(GLErrorListener.THROWING_LISTENER);// ---enable exception throwing in case of error
             profiler.enable();
@@ -179,29 +177,6 @@ public class GameEngine2D implements ScreenListener, ApplicationListener, InputP
         }
     }
 
-    //	private int getMaxFramesPerSecond() {
-    //		return maxFramesPerSecond;
-    //	}
-
-    //	private void handleMessages() {
-    //		synchronized (this) {
-    //			while (!messageQueue.isEmpty()) {
-    //				MercatorMessage message = messageQueue.remove(0);
-    //				switch (message) {
-    //				case MERCATOR_MESSAGE_PAUSE:
-    //					pauseTime();
-    //					break;
-    //				case MERCATOR_MESSAGE_ENABLE_PROFILING:
-    //					enableProfiler();
-    //					break;
-    //				case MERCATOR_MESSAGE_EXIT:
-    //					exit();
-    //					break;
-    //				}
-    //			}
-    //		}
-    //	}
-
     @Override
     public void resize(final int width, final int height) {
         renderEngine.width  = width;
@@ -211,6 +186,10 @@ public class GameEngine2D implements ScreenListener, ApplicationListener, InputP
         renderEngine.batch.setProjectionMatrix(renderEngine.camera.combined);
         info.resize(width, height);
     }
+
+    //	private void enableProfiler() {
+    //		//		GLProfiler.enable();
+    //	}
 
     @Override
     public void render() {
@@ -237,6 +216,29 @@ public class GameEngine2D implements ScreenListener, ApplicationListener, InputP
             System.exit(0);
         }
     }
+
+    //	private int getMaxFramesPerSecond() {
+    //		return maxFramesPerSecond;
+    //	}
+
+    //	private void handleMessages() {
+    //		synchronized (this) {
+    //			while (!messageQueue.isEmpty()) {
+    //				MercatorMessage message = messageQueue.remove(0);
+    //				switch (message) {
+    //				case MERCATOR_MESSAGE_PAUSE:
+    //					pauseTime();
+    //					break;
+    //				case MERCATOR_MESSAGE_ENABLE_PROFILING:
+    //					enableProfiler();
+    //					break;
+    //				case MERCATOR_MESSAGE_EXIT:
+    //					exit();
+    //					break;
+    //				}
+    //			}
+    //		}
+    //	}
 
     @Override
     public void pause() {
@@ -276,9 +278,14 @@ public class GameEngine2D implements ScreenListener, ApplicationListener, InputP
         return fileName;
     }
 
+    private void createInputProcessor(final InputProcessor inputProcessor) throws Exception {
+        inputMultiplexer.addProcessor(inputProcessor);
+        Gdx.input.setInputProcessor(inputMultiplexer);
+    }
+
     private void createStage() throws Exception {
         info = new Info(null, atlasManager, camera, renderEngine.batch, inputMultiplexer);
-//		info.createStage();
+        info.createStage();
         final int height = 12;
         stage = new Stage();
         font  = new BitmapFont();
@@ -289,6 +296,27 @@ public class GameEngine2D implements ScreenListener, ApplicationListener, InputP
             labels.add(label);
         }
         stringBuilder = new StringBuilder();
+    }
+
+    private void drawDebugGrid() {
+        for (int y = -universe.size; y < universe.size; y++) {
+            for (int x = -universe.size; x < universe.size; x++) {
+                {
+                    final float tx1 = x * Planet.PLANET_DISTANCE + 1;
+                    final float ty1 = y * Planet.PLANET_DISTANCE + 1;
+                    final float tx2 = x * Planet.PLANET_DISTANCE + Planet.PLANET_DISTANCE - 2;
+                    final float ty2 = y * Planet.PLANET_DISTANCE + Planet.PLANET_DISTANCE - 2;
+                    renderEngine.bar(atlasManager.systemTextureRegion, tx1, ty1, tx2, ty2, DEBUG_GRID_BORDER_COLOR);
+                }
+                {
+                    final float tx1 = x * Planet.PLANET_DISTANCE/* + Planet3DRenderer.PLANET_BORDER*/;
+                    final float ty1 = y * Planet.PLANET_DISTANCE/* + Planet3DRenderer.PLANET_BORDER*/;
+                    final float tx2 = x * Planet.PLANET_DISTANCE + Planet.PLANET_DISTANCE/* - Planet3DRenderer.PLANET_BORDER*/ - 1;
+                    final float ty2 = y * Planet.PLANET_DISTANCE + Planet.PLANET_DISTANCE/* - Planet3DRenderer.PLANET_BORDER*/ - 1;
+                    renderEngine.bar(atlasManager.systemTextureRegion, tx1, ty1, tx2, ty2, DEBUG_GRID_COLOR);
+                }
+            }
+        }
     }
 
     //	private void printStatistics() throws Exception {
@@ -320,27 +348,6 @@ public class GameEngine2D implements ScreenListener, ApplicationListener, InputP
     //			}
     //		}
     //	}
-
-    private void drawDebugGrid() {
-        for (int y = -universe.size; y < universe.size; y++) {
-            for (int x = -universe.size; x < universe.size; x++) {
-                {
-                    final float tx1 = x * Planet.PLANET_DISTANCE + 1;
-                    final float ty1 = y * Planet.PLANET_DISTANCE + 1;
-                    final float tx2 = x * Planet.PLANET_DISTANCE + Planet.PLANET_DISTANCE - 2;
-                    final float ty2 = y * Planet.PLANET_DISTANCE + Planet.PLANET_DISTANCE - 2;
-                    renderEngine.bar(atlasManager.systemTextureRegion, tx1, ty1, tx2, ty2, DEBUG_GRID_BORDER_COLOR);
-                }
-                {
-                    final float tx1 = x * Planet.PLANET_DISTANCE/* + Planet3DRenderer.PLANET_BORDER*/;
-                    final float ty1 = y * Planet.PLANET_DISTANCE/* + Planet3DRenderer.PLANET_BORDER*/;
-                    final float tx2 = x * Planet.PLANET_DISTANCE + Planet.PLANET_DISTANCE/* - Planet3DRenderer.PLANET_BORDER*/ - 1;
-                    final float ty2 = y * Planet.PLANET_DISTANCE + Planet.PLANET_DISTANCE/* - Planet3DRenderer.PLANET_BORDER*/ - 1;
-                    renderEngine.bar(atlasManager.systemTextureRegion, tx1, ty1, tx2, ty2, DEBUG_GRID_COLOR);
-                }
-            }
-        }
-    }
 
     private void exit() {
         Gdx.app.exit();
@@ -549,6 +556,11 @@ public class GameEngine2D implements ScreenListener, ApplicationListener, InputP
         //		}
         return false;
     }
+
+    @Override
+    public boolean keyTyped(final char character) {
+        return false;
+    }
     // private void drawSectors()
     // {
     // for ( int y = 0; y < universe.size * 2; y++ )
@@ -564,11 +576,6 @@ public class GameEngine2D implements ScreenListener, ApplicationListener, InputP
     // }
     // }
     // }
-
-    @Override
-    public boolean keyTyped(final char character) {
-        return false;
-    }
 
     @Override
     public boolean touchDown(final int screenX, final int screenY, final int pointer, final int button) {
@@ -629,14 +636,14 @@ public class GameEngine2D implements ScreenListener, ApplicationListener, InputP
         return false;
     }
 
-    //	private void setMaxFramesPerSecond(int maxFramesPerSecond) {
-    //		this.maxFramesPerSecond = maxFramesPerSecond;
-    //	}
-
     @Override
     public void post(final MercatorMessage message) {
         messageQueue.add(message);
     }
+
+    //	private void setMaxFramesPerSecond(int maxFramesPerSecond) {
+    //		this.maxFramesPerSecond = maxFramesPerSecond;
+    //	}
 
     public Color priceColor(final Good good) {
         return availabilityColor(good.price, good.getMaxPrice());
@@ -699,6 +706,11 @@ public class GameEngine2D implements ScreenListener, ApplicationListener, InputP
         }
         handleQueuedScreenshot(takeScreenShot);
         takeScreenShot = false;
+    }
+
+    @Override
+    public void render2Dxz() {
+
     }
 
     private void renderGoods() {

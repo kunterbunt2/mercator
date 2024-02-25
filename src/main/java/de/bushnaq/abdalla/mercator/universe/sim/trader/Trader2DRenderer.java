@@ -32,7 +32,7 @@ public class Trader2DRenderer extends ObjectRenderer<GameEngine2D> {
     public static final  Color   TRADER_COLOR            = new Color(.7f, .7f, .7f, 0.45f); // 0xffcc5555;
     public static final  float   TRADER_HEIGHT           = 17;
     public static final  float   TRADER_SIZE_Z           = 32 * 2 / Universe.WORLD_SCALE;
-    public static final  float   TRADER_WIDTH            = 17;
+    public static final  float   TRADER_WIDTH            = 17f;
     private static final float   RADIUS                  = Planet2DRenderer.PLANET_SIZE * 2.0f;
     private static final float   TRADER_SIZE_X           = 16 * 2 / Universe.WORLD_SCALE;
     private static final float   TRADER_SIZE_Y           = 8 * 2 / Universe.WORLD_SCALE;

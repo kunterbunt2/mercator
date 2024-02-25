@@ -22,10 +22,13 @@ import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.PolygonSpriteBatch;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.math.Matrix4;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import de.bushnaq.abdalla.engine.GameObject;
 import de.bushnaq.abdalla.engine.ObjectRenderer;
+import de.bushnaq.abdalla.engine.RenderEngine2D;
 import de.bushnaq.abdalla.engine.RenderEngine3D;
+import de.bushnaq.abdalla.mercator.renderer.GameEngine2D;
 import de.bushnaq.abdalla.mercator.renderer.GameEngine3D;
 import de.bushnaq.abdalla.mercator.universe.Universe;
 import de.bushnaq.abdalla.mercator.universe.sim.trader.Trader;
@@ -34,6 +37,7 @@ import net.mgsx.gltf.scene3d.model.ModelInstanceHack;
 
 public class JumpGate3DRenderer extends ObjectRenderer<GameEngine3D> {
     public static final  float JUMP_GATE_SIZE   = 16 / Universe.WORLD_SCALE;
+    static final         Color JUMPGATE_COLOR   = new Color(0.275f, 0.314f, 0.314f, 1.0f);
     private static final float JUMP_GATE_DEPTH  = 0 / Universe.WORLD_SCALE /*+ Planet3DRenderer.WATER_Y*/;
     private static final float JUMP_GATE_HEIGHT = 16 / Universe.WORLD_SCALE;
     private static final Color PATH_NAME_COLOR  = Color.BLUE;
@@ -59,6 +63,24 @@ public class JumpGate3DRenderer extends ObjectRenderer<GameEngine3D> {
         createJumpGate(x, y, z, renderEngine);
     }
 
+    public void render2D(final RenderEngine3D<GameEngine3D> renderEngine, final int index, final boolean selected) {
+        final Vector2 target    = new Vector2(jumpGate.target.x, jumpGate.target.z);
+        final Vector2 start     = new Vector2(jumpGate.source.x, jumpGate.source.z);
+        Color         color;
+        float         thickness = 1.3f /* renderEngine.getGameEngine().renderEngine.camera.zoom*/;
+        if (jumpGate.closed) {
+            color = Color.RED;
+        } else if (jumpGate.selected) {
+            color     = GameEngine2D.SELECTED_COLOR;
+            thickness = 3.3f /* renderEngine.getGameEngine().renderEngine.camera.zoom*/;
+        } else {
+            color = JUMPGATE_COLOR;
+        }
+        final Color c = new Color(color);
+        c.a = 0.45f;
+        renderEngine.renderutils2Dxz.line(renderEngine.getGameEngine().getAtlasManager().dottedLineTextureRegion, start.x, 0, start.y, target.x, 0, target.y, c, thickness);
+    }
+
     @Override
     public void renderText(final RenderEngine3D<GameEngine3D> renderEngine, final int index, final boolean selected) {
         if (renderEngine.isDebugMode()) {
@@ -80,34 +102,6 @@ public class JumpGate3DRenderer extends ObjectRenderer<GameEngine3D> {
     public boolean withinBounds(final float x, final float y) {
         return false;
     }
-
-    //	private void renderTextOnTop(final SceneManager sceneManager, final String text1) {
-    //		final float x = jumpGate.target.x;
-    //		final float y = jumpGate.target.y - 10 / Universe.WORLD_SCALE;
-    //		final float z = jumpGate.target.z;
-    //
-    //		final float size = JUMP_GATE_SIZE * 2;
-    //		//draw text
-    //		final PolygonSpriteBatch batch = sceneManager.batch2D;
-    //		final BitmapFont font = sceneManager.getAtlasManager().modelFont;
-    //		{
-    //			final Matrix4 m = new Matrix4();
-    //			final float fontSize = font.getLineHeight();
-    //			final float scaling = size / fontSize;
-    //			final GlyphLayout layout = new GlyphLayout();
-    //			layout.setText(font, text1);
-    //			final float width = layout.width;// contains the width of the current set text
-    //			final float height = layout.height; // contains the height of the current set text
-    //			m.setToTranslation(x - height * scaling / 2.0f, y + 0.2f, z + width * scaling / 2.0f);
-    //			//			m.setToTranslation(x - size/2, y + 0.1f, z - size / 2);
-    //			m.rotate(Vector3.Y, 90);
-    //			m.rotate(Vector3.X, -90);
-    //			m.scale(scaling, scaling, 1f);
-    //			batch.setTransformMatrix(m);
-    //			font.setColor(PATH_NAME_COLOR);
-    //			font.draw(batch, text1, 0, 0);
-    //		}
-    //	}
 
     private void createJumpGate(final float x, final float y, final float z, final RenderEngine3D<GameEngine3D> renderEngine) {
         //jump gate
@@ -182,6 +176,34 @@ public class JumpGate3DRenderer extends ObjectRenderer<GameEngine3D> {
         instance.update();
     }
 
+    //	private void renderTextOnTop(final SceneManager sceneManager, final String text1) {
+    //		final float x = jumpGate.target.x;
+    //		final float y = jumpGate.target.y - 10 / Universe.WORLD_SCALE;
+    //		final float z = jumpGate.target.z;
+    //
+    //		final float size = JUMP_GATE_SIZE * 2;
+    //		//draw text
+    //		final PolygonSpriteBatch batch = sceneManager.batch2D;
+    //		final BitmapFont font = sceneManager.getAtlasManager().modelFont;
+    //		{
+    //			final Matrix4 m = new Matrix4();
+    //			final float fontSize = font.getLineHeight();
+    //			final float scaling = size / fontSize;
+    //			final GlyphLayout layout = new GlyphLayout();
+    //			layout.setText(font, text1);
+    //			final float width = layout.width;// contains the width of the current set text
+    //			final float height = layout.height; // contains the height of the current set text
+    //			m.setToTranslation(x - height * scaling / 2.0f, y + 0.2f, z + width * scaling / 2.0f);
+    //			//			m.setToTranslation(x - size/2, y + 0.1f, z - size / 2);
+    //			m.rotate(Vector3.Y, 90);
+    //			m.rotate(Vector3.X, -90);
+    //			m.scale(scaling, scaling, 1f);
+    //			batch.setTransformMatrix(m);
+    //			font.setColor(PATH_NAME_COLOR);
+    //			font.draw(batch, text1, 0, 0);
+    //		}
+    //	}
+
     private void drawJumpGate(final float x, final float y, final float z, final RenderEngine3D<GameEngine3D> renderEngine, final long currentTime, final boolean selected) {
         if (instance != null && (selected != lastSelected || jumpGate.source.trader != lastTrader)) {
             if (selected) {
@@ -205,6 +227,24 @@ public class JumpGate3DRenderer extends ObjectRenderer<GameEngine3D> {
             lastSelected = selected;
             lastTrader   = jumpGate.source.trader;
         }
+    }
+
+    public void render2Da(final RenderEngine2D<GameEngine3D> renderEngine, final int index, final boolean selected) {
+        final Vector2 target    = new Vector2(jumpGate.target.x, jumpGate.target.z);
+        final Vector2 start     = new Vector2(jumpGate.source.x, jumpGate.source.z);
+        Color         color;
+        float         thickness = 1.3f /* renderEngine.getGameEngine().renderEngine.camera.zoom*/;
+        if (jumpGate.closed) {
+            color = Color.RED;
+        } else if (jumpGate.selected) {
+            color     = GameEngine2D.SELECTED_COLOR;
+            thickness = 3.3f /* renderEngine.getGameEngine().renderEngine.camera.zoom*/;
+        } else {
+            color = JUMPGATE_COLOR;
+        }
+        final Color c = new Color(color);
+        c.a = 0.45f;
+        renderEngine.line(renderEngine.getGameEngine().getAtlasManager().dottedLineTextureRegion, start.x, start.y, target.x, target.y, c, thickness);
     }
 
     private void renderTextOnTop(final RenderEngine3D<GameEngine3D> renderEngine, final float dx, final float dy, final String text, final float size) {

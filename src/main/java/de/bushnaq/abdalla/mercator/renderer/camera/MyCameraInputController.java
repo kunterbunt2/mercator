@@ -21,28 +21,29 @@ import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.g3d.utils.CameraInputController;
 import com.badlogic.gdx.math.Vector3;
 import de.bushnaq.abdalla.engine.camera.MovingCamera;
+import de.bushnaq.abdalla.mercator.renderer.GameEngine3D;
 import de.bushnaq.abdalla.mercator.universe.Universe;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class MyCameraInputController extends CameraInputController {
 
-    private final Logger  logger = LoggerFactory.getLogger(this.getClass());
-    //	private final CameraInputControllerListener cameraInputControllerListener;
-    private final Vector3 tmpV1  = new Vector3();
-    private final Vector3 tmpV2  = new Vector3();
+    private final GameEngine3D gameEngine;
+    private final Logger       logger = LoggerFactory.getLogger(this.getClass());
+    private final Vector3      tmpV1  = new Vector3();
+    private final Vector3      tmpV2  = new Vector3();
+    float[] zoomFactors = {200, 400, 500, 600, 1000, 1500, 2000, 2500, 3000, 4000, 6000, 10000};
 
-    public MyCameraInputController(final Camera camera/*, final CameraInputControllerListener cameraInputControllerListener*/) throws Exception {
+    int zoomIndex = 0;
+
+    public MyCameraInputController(final Camera camera, GameEngine3D gameEngine) throws Exception {
         super(camera);
+        this.gameEngine = gameEngine;
         //		this.cameraInputControllerListener = cameraInputControllerListener;
         rotateButton = Buttons.MIDDLE;
         //		notifyListener(camera);
         pinchZoomFactor = 1f / Universe.WORLD_SCALE;
     }
-
-    //	public void notifyListener(final Camera camera) throws Exception {
-    //		cameraInputControllerListener.setPositionDirectionUp(camera.position, camera.direction, camera.up);
-    //	}
 
     @Override
     protected boolean process(final float deltaX, final float deltaY, final int button) {
@@ -88,9 +89,22 @@ public class MyCameraInputController extends CameraInputController {
         try {
             if (!alwaysScroll && activateKey != 0 && !activatePressed)
                 return false;
-            final MovingCamera myCamera = (MovingCamera) camera;
-            myCamera.translate(0, -amount * pinchZoomFactor, 0);
-            myCamera.setDirty(true);
+            if (amount < 0 && zoomIndex < zoomFactors.length - 1) {
+                zoomIndex++;
+                camera.translate(0, zoomFactors[zoomIndex] - camera.position.y, 0);
+            } else if (amount > 0 && zoomIndex > 0) {
+                zoomIndex--;
+                camera.translate(0, zoomFactors[zoomIndex] - camera.position.y, 0);
+            }
+//            myCamera.translate(0, -amount * pinchZoomFactor, 0);
+
+
+            camera.up.set(0, 1, 0);
+            if (camera instanceof MovingCamera) {
+                final MovingCamera myCamera = (MovingCamera) camera;
+                myCamera.lookAt(myCamera.lookat);
+                myCamera.setDirty(true);
+            }
             //			notifyListener(myCamera);
             if (autoUpdate)
                 camera.update();

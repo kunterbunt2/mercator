@@ -27,9 +27,12 @@ import com.badlogic.gdx.math.Vector3;
 import de.bushnaq.abdalla.engine.GameObject;
 import de.bushnaq.abdalla.engine.ObjectRenderer;
 import de.bushnaq.abdalla.engine.RenderEngine3D;
+import de.bushnaq.abdalla.mercator.renderer.GameEngine2D;
 import de.bushnaq.abdalla.mercator.renderer.GameEngine3D;
 import de.bushnaq.abdalla.mercator.universe.Universe;
+import de.bushnaq.abdalla.mercator.universe.planet.Planet2DRenderer;
 import de.bushnaq.abdalla.mercator.universe.planet.Planet3DRenderer;
+import de.bushnaq.abdalla.mercator.util.AnnulusSegment;
 import net.mgsx.gltf.scene3d.attributes.PBRColorAttribute;
 import net.mgsx.gltf.scene3d.model.ModelInstanceHack;
 import org.slf4j.Logger;
@@ -52,8 +55,13 @@ public class Good3DRenderer extends ObjectRenderer<GameEngine3D> {
     public static final  Color                          NOT_TRADED_GOOD_COLOR      = Color.LIGHT_GRAY; // 0xffbbbbbb;
     public static final  Color                          SELECTED_GOOD_COLOR        = Color.LIGHT_GRAY; // 0xffeeeeee;
     public static final  float                          SPACE_BETWEEN_GOOD         = GameEngine3D.SPACE_BETWEEN_OBJECTS * 2;
+    static final         Color                          GOOD_COLOR                 = new Color(0.09f, 0.388f, 0.69f, 0.8f); // 0xff000000;
+    private static final float                          ANGLE_BORDER               = (float) Math.PI / 256;
     private static final int                            GOOD_AMOUNT_DRAWING_FACTOR = 5;
     private static final Color                          GOOD_NAME_COLOR            = new Color(0.596f, 0.08f, 0.247f, 0.8f);
+    private static final float                          MAX_RADIUS                 = Planet2DRenderer.PLANET_SIZE * 7.5f;
+    private static final float                          MIN_ANGLE                  = (float) Math.PI / 12;
+    private static final float                          MIN_RADIUS                 = Planet2DRenderer.PLANET_SIZE * 6f + 3;
     private static       Color                          DIAMON_BLUE_COLOR          = new Color(0x006ab6ff);
     private static       Color                          GRAY_COLOR                 = new Color(0x404853ff);
     private static       Color                          POST_GREEN_COLOR           = new Color(0x00614eff);
@@ -62,6 +70,7 @@ public class Good3DRenderer extends ObjectRenderer<GameEngine3D> {
     private final        Logger                         logger                     = LoggerFactory.getLogger(this.getClass());
     private final        List<GameObject<GameEngine3D>> unusedMls                  = new ArrayList<>();
     private final        List<GameObject<GameEngine3D>> usedMls                    = new ArrayList<>();
+    AnnulusSegment annulusSegment;
 
     public Good3DRenderer(final Good good) {
         this.good = good;
@@ -100,12 +109,72 @@ public class Good3DRenderer extends ObjectRenderer<GameEngine3D> {
         return scene;
     }
 
+    private void drawGood(final float aX, final float aY, final Good good, final RenderEngine3D<GameEngine3D> renderEngine, final int index, final boolean selected) {
+        Color color;
+        if (selected) {
+            color = GameEngine2D.SELECTED_COLOR;
+        } else if (good.isTraded(renderEngine.getGameEngine().universe.currentTime)) {
+            color = GOOD_COLOR;
+        } else {
+            color = NOT_TRADED_GOOD_COLOR;
+        }
+        // if ( good.type == GoodType.Food && !good.isTraded(
+        // universe.currentTime ) )
+        // System.out.printf( "planet %s last time %d now %d\n", planet.name,
+        // good.lastBuyInterest, universe.currentTime );
+        // float x = aX * Screen.PLANET_DISTANCE + Screen.PLANET_ATMOSPHARE_SIZE / 2 -
+        // Screen.GOOD_WIDTH;
+        // float y = aY * Screen.PLANET_DISTANCE - Screen.PLANET_ATMOSPHARE_SIZE / 2 +
+        // index * Screen.GOOD_HEIGHT;
+        // renderMaster.bar( renderMaster.goodTexture, x, y, x + Screen.GOOD_WIDTH - 1 -
+        // Screen.SPACE_BETWEEN_OBJECTS, y + Screen.GOOD_HEIGHT - 1 -
+        // Screen.SPACE_BETWEEN_OBJECTS, color );
+        final float tx          = aX;
+        final float ty          = aY;
+        final float minAngle    = (float) Math.PI / 2 + MIN_ANGLE * index;
+        final float maxAngle    = (float) Math.PI / 2 + MIN_ANGLE * (index + 1) - ANGLE_BORDER;
+        String      name        = null;
+        float       deltaRadius = 0;
+        Color       barColor    = null;
+        switch (renderEngine.getGameEngine().showGood) {
+            case Price:
+                name = String.format("%.0f", good.price);
+                barColor = renderEngine.getGameEngine().priceColor(good);
+                deltaRadius = (maxAngle - minAngle) * good.price / good.getMaxPrice();
+                break;
+            case Name:
+                name = good.type.getName();
+                barColor = renderEngine.getGameEngine().amountColor(good);
+                deltaRadius = (maxAngle - minAngle) * good.getAmount() / good.getMaxAmount();
+                break;
+            case Volume:
+                name = String.format("%.0f", good.getAmount());
+                barColor = renderEngine.getGameEngine().amountColor(good);
+                deltaRadius = (maxAngle - minAngle) * good.getAmount() / good.getMaxAmount();
+                break;
+        }
+        // if ( renderMaster.camera.zoom > 1.2f )
+        // {
+        // name = null;
+        // }
+        if (renderEngine.getCamera().position.y < 3000) {
+            renderEngine.renderutils2Dxz.fillPie(renderEngine.getGameEngine().getAtlasManager().factoryTextureRegion, tx, 0, ty, MIN_RADIUS, MAX_RADIUS, minAngle, maxAngle, color, 8, renderEngine.getGameEngine().getAtlasManager().zoominDefaultFont, GameEngine2D.TEXT_COLOR, name);
+            renderEngine.renderutils2Dxz.fillPie(renderEngine.getGameEngine().getAtlasManager().gaugeTextureRegion, tx, 0, ty, MAX_RADIUS - 5, MAX_RADIUS, maxAngle - deltaRadius, maxAngle, barColor, 8, renderEngine.getGameEngine().getAtlasManager().zoominDefaultFont, GameEngine2D.TEXT_COLOR, "");
+        }
+        annulusSegment = new AnnulusSegment(tx, ty, MIN_RADIUS, MAX_RADIUS, minAngle, maxAngle);
+    }
+
+    @Override
+    public void render2D(final float x, final float y, final RenderEngine3D<GameEngine3D> renderEngine, final int index, final boolean selected) {
+        drawGood(x, y, good, renderEngine, index, selected);
+    }
+
     @Override
     public void renderText(final float aX, final float aY, final float aZ, final RenderEngine3D<GameEngine3D> renderEngine, final int index) {
 //	public void renderText(final RenderEngine<Screen3D> renderEngine, final int index) {
         {
-            final float dy = -Planet3DRenderer.PLANET_SIZE / 2 + index * (CONTAINER_EDGE_SIZE + 1) * (GOOD_Y + SPACE_BETWEEN_GOOD);
-            final float dx = Planet3DRenderer.PLANET_SIZE / 2 - (CONTAINER_EDGE_SIZE) * (GOOD_X + SPACE_BETWEEN_GOOD);
+            final float dy = -Planet3DRenderer.PLANET_3D_SIZE / 2 + index * (CONTAINER_EDGE_SIZE + 1) * (GOOD_Y + SPACE_BETWEEN_GOOD);
+            final float dx = Planet3DRenderer.PLANET_3D_SIZE / 2 - (CONTAINER_EDGE_SIZE) * (GOOD_X + SPACE_BETWEEN_GOOD);
             renderTextOnTop(aX, aY, aZ, renderEngine, dy, 0, dx, good.type.getName(), GOOD_X);
             //			final float size = 8;
             //			final float x = aX;
@@ -203,8 +272,8 @@ public class Good3DRenderer extends ObjectRenderer<GameEngine3D> {
                 final int        xContainer = usedMls.size() % xEdgeSize;
                 final int        zContainer = (int) Math.floor(usedMls.size() / xEdgeSize) % yEdgeSize;
                 final int        yContainer = (int) Math.floor(usedMls.size() / (xEdgeSize * yEdgeSize));
-                final float      x          = aX - Planet3DRenderer.PLANET_SIZE / 2 + GOOD_X / 2 + xContainer * (GOOD_X);
-                final float      z          = aZ + Planet3DRenderer.PLANET_SIZE / 2 - GOOD_Z / 2 - zContainer * (GOOD_Z) - index * (edgeSize + 1) * (GOOD_Z);
+                final float      x          = aX - Planet3DRenderer.PLANET_3D_SIZE / 2 + GOOD_X / 2 + xContainer * (GOOD_X);
+                final float      z          = aZ + Planet3DRenderer.PLANET_3D_SIZE / 2 - GOOD_Z / 2 - zContainer * (GOOD_Z) - index * (edgeSize + 1) * (GOOD_Z);
                 final float      y          = aY + GOOD_Y / 2 + yContainer * (GOOD_Y);
                 final GameObject go         = instanciateGoodGameObject(good, renderEngine);
                 go.instance.transform.setToTranslationAndScaling(x, y, z, GOOD_X - SPACE_BETWEEN_GOOD, GOOD_Y - SPACE_BETWEEN_GOOD, GOOD_Z - SPACE_BETWEEN_GOOD);
@@ -246,5 +315,9 @@ public class Good3DRenderer extends ObjectRenderer<GameEngine3D> {
                 break;
         }
     }
+//    @Override
+//    public boolean withinBounds(final float x, final float y) {
+//        return annulusSegment.contains(x, y);
+//    }
 
 }

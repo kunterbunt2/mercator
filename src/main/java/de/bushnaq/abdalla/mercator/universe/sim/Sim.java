@@ -63,8 +63,7 @@ public class Sim extends Renderable implements TradingPartner {
         simNeedsList.createGoodList();
         eventManager = new SimEventManager(this, planet.universe.eventManager.isEnabled());
         set2DRenderer(new Sim2DRenderer(this));
-        //		set3DRenderer(new Sim3DRenderer(this));
-        // TODO add 3D renderer
+        set3DRenderer(new Sim3DRenderer(this));
     }
 
     public boolean advanveInTime(final long currentTime, final MercatorRandomGenerator randomGenerator, final SimList simList) {
@@ -84,18 +83,15 @@ public class Sim extends Renderable implements TradingPartner {
                 Transaction.trade(currentTime, good.type, good.price, 1, planet, this, planet, false);
                 // buy( currentTime, food.type, food.price, 1, planet, planet );
                 // needs.amount = (int)NEEDS_GOODS_EVERY;
-                if (eventManager.enabled)
-                    eventManager.add(currentTime, getVolume(), SimEventType.buy, credits, String.format("%d %s for %5.2f from %s.", 1, good.type.getName(), good.price * 1, planet.getName()));
+                if (eventManager.enabled) eventManager.add(currentTime, getVolume(), SimEventType.buy, credits, String.format("%d %s for %5.2f from %s.", 1, good.type.getName(), good.price * 1, planet.getName()));
                 currentConsumedAmount += 1;
                 needs.consume(currentTime);
                 goodList.consume(good.type, 1);
-                if (eventManager.enabled)
-                    eventManager.add(currentTime, getVolume(), SimEventType.consue, credits, String.format("%d %s.", 1, good.type.getName()));
+                if (eventManager.enabled) eventManager.add(currentTime, getVolume(), SimEventType.consue, credits, String.format("%d %s.", 1, good.type.getName()));
                 status = SimStatus.LIVING;
             }
             if (calculateStatus(currentTime)) {
-                if (eventManager.enabled)
-                    eventManager.add(currentTime, getVolume(), SimEventType.die, credits, String.format("because no food."));
+                if (eventManager.enabled) eventManager.add(currentTime, getVolume(), SimEventType.die, credits, String.format("because no food."));
                 //				planet.universe.eventManager.add(EventLevel.error, currentTime, this, String.format("%s: died because no '%s' available at '%s'.", getName(), good.type.getName(), planet.getName()));
                 return true;
             }
@@ -181,10 +177,8 @@ public class Sim extends Renderable implements TradingPartner {
         if (dying) {
             status    = SimStatus.DEAD_REASON_NO_FOOD;
             breakLoop = true;
-        } else if (starving)
-            status = SimStatus.STARVING_NO_GOODS;
-        else
-            status = SimStatus.LIVING;
+        } else if (starving) status = SimStatus.STARVING_NO_GOODS;
+        else status = SimStatus.LIVING;
 
         return breakLoop;
     }
@@ -196,8 +190,7 @@ public class Sim extends Renderable implements TradingPartner {
     @Override
     public void ern(final long currentTime, final float credits) {
         this.credits += credits;
-        if (eventManager.enabled)
-            eventManager.add(currentTime, getVolume(), SimEventType.ern, getCredits(), String.format("%5.2f credits.", credits));
+        if (eventManager.enabled) eventManager.add(currentTime, getVolume(), SimEventType.ern, getCredits(), String.format("%5.2f credits.", credits));
     }
 
     // @Override
@@ -297,8 +290,7 @@ public class Sim extends Renderable implements TradingPartner {
     public float getSatisfactionFactor(final long currentTime) {
         float satisfaction = 0;
         for (final SimNeed needs : simNeedsList) {
-            if (currentTime - needs.lastConsumed < needs.consumeEvery)
-                satisfaction += 100 / simNeedsList.size();
+            if (currentTime - needs.lastConsumed < needs.consumeEvery) satisfaction += 100 / simNeedsList.size();
         }
         return satisfaction;
     }

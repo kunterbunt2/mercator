@@ -40,8 +40,7 @@ public abstract class ProductionFacility extends Renderable {
         engineers         = new SimList(planet);
         this.producedGood = producedGood;
         set2DRenderer(new Factory2DRenderer(this));
-        //		set3DRenderer(new Factory3DRenderer(this));
-        //TODO add 3d renderer
+        set3DRenderer(new Factory3DRenderer(this));
     }
 
     public void addEngineer(final Sim engineer) {

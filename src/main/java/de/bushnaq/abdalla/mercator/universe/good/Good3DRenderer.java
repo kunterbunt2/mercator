@@ -47,9 +47,9 @@ public class Good3DRenderer extends ObjectRenderer<GameEngine3D> {
     public static final  int                            CONTAINER_EDGE_SIZE        = 4;
     public static final  float                          GOOD_HEIGHT                = 8f;
     //	public static final Color GOOD_COLOR = Color.RED; // 0xff000000;
-    public static final  float                          GOOD_X                     = 8f / Universe.WORLD_SCALE;
-    public static final  float                          GOOD_Y                     = 8f / Universe.WORLD_SCALE;
-    public static final  float                          GOOD_Z                     = 8f / Universe.WORLD_SCALE;
+    public static final  float                          GOOD_X                     = 7f / Universe.WORLD_SCALE;
+    public static final  float                          GOOD_Y                     = 7f / Universe.WORLD_SCALE;
+    public static final  float                          GOOD_Z                     = 7f / Universe.WORLD_SCALE;
     //	private static Color magentaColor = new Color(1.0f, 0.0f, 1.0f, 1f);
     //	private static Color cyanColor = new Color(0.0f, 1.0f, 1.0f, 1f);
     public static final  Color                          NOT_TRADED_GOOD_COLOR      = Color.LIGHT_GRAY; // 0xffbbbbbb;
@@ -95,8 +95,8 @@ public class Good3DRenderer extends ObjectRenderer<GameEngine3D> {
 
     public static GameObject<GameEngine3D> instanciateGoodGameObject(final Good good, final RenderEngine3D<GameEngine3D> renderEngine) {
         GameObject<GameEngine3D> scene     = null;
-        final Material           material1 = renderEngine.getGameEngine().assetManager.cubeGood.materials.get(0);
-        scene = new GameObject<GameEngine3D>(new ModelInstanceHack(renderEngine.getGameEngine().assetManager.cubeGood), good);
+        final Material           material1 = renderEngine.getGameEngine().assetManager.goodContainer.materials.get(0);
+        scene = new GameObject<GameEngine3D>(new ModelInstanceHack(renderEngine.getGameEngine().assetManager.goodContainer), good);
         //TODO reuse instances
         final Material            material2 = scene.instance.materials.get(0);
         final Iterator<Attribute> i         = material1.iterator();
@@ -157,7 +157,8 @@ public class Good3DRenderer extends ObjectRenderer<GameEngine3D> {
         // {
         // name = null;
         // }
-        if (renderEngine.getCamera().position.y < 3000) {
+//        if (renderEngine.getCamera().position.y < 3000)
+        {
             renderEngine.renderutils2Dxz.fillPie(renderEngine.getGameEngine().getAtlasManager().factoryTextureRegion, tx, 0, ty, MIN_RADIUS, MAX_RADIUS, minAngle, maxAngle, color, 8, renderEngine.getGameEngine().getAtlasManager().zoominDefaultFont, GameEngine2D.TEXT_COLOR, name);
             renderEngine.renderutils2Dxz.fillPie(renderEngine.getGameEngine().getAtlasManager().gaugeTextureRegion, tx, 0, ty, MAX_RADIUS - 5, MAX_RADIUS, maxAngle - deltaRadius, maxAngle, barColor, 8, renderEngine.getGameEngine().getAtlasManager().zoominDefaultFont, GameEngine2D.TEXT_COLOR, "");
         }
@@ -272,8 +273,8 @@ public class Good3DRenderer extends ObjectRenderer<GameEngine3D> {
                 final int        xContainer = usedMls.size() % xEdgeSize;
                 final int        zContainer = (int) Math.floor(usedMls.size() / xEdgeSize) % yEdgeSize;
                 final int        yContainer = (int) Math.floor(usedMls.size() / (xEdgeSize * yEdgeSize));
-                final float      x          = aX - Planet3DRenderer.PLANET_3D_SIZE / 2 + GOOD_X / 2 + xContainer * (GOOD_X);
-                final float      z          = aZ + Planet3DRenderer.PLANET_3D_SIZE / 2 - GOOD_Z / 2 - zContainer * (GOOD_Z) - index * (edgeSize + 1) * (GOOD_Z);
+                final float      x          = aX - Planet3DRenderer.PLANET_3D_SIZE / 2 + GOOD_X / 2 + xContainer * (GOOD_X + 1);
+                final float      z          = aZ + Planet3DRenderer.PLANET_3D_SIZE / 2 - GOOD_Z / 2 - zContainer * (GOOD_Z) + 1 - index * (edgeSize + 1) * (GOOD_Z + 1);
                 final float      y          = aY + GOOD_Y / 2 + yContainer * (GOOD_Y);
                 final GameObject go         = instanciateGoodGameObject(good, renderEngine);
                 go.instance.transform.setToTranslationAndScaling(x, y, z, GOOD_X - SPACE_BETWEEN_GOOD, GOOD_Y - SPACE_BETWEEN_GOOD, GOOD_Z - SPACE_BETWEEN_GOOD);

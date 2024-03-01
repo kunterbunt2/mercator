@@ -87,6 +87,8 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
     public static final  float                        SPACE_BETWEEN_OBJECTS           = 0.1f / Universe.WORLD_SCALE;
     public static final  Color                        TEXT_COLOR                      = Color.WHITE; // 0xffffffff;
     public static final  int                          TIME_MACHINE_FONT_SIZE          = 10;
+    private static final float                        RENDER_2D_UNTIL                 = 1500;
+    private static final float                        RENDER_3D_UNTIL                 = 2000;
     //	private static final String RENDER_DURATION = "render()";
     //	private static final String RENDER_LIGHT = "light";
     private static final float                        SCROLL_SPEED                    = 100f;
@@ -176,26 +178,26 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
             atlasManager.init();
             initColors();
             renderEngine = new RenderEngine3D<GameEngine3D>(context, this, camera, camera2D, getAtlasManager().menuFont, getAtlasManager().systemTextureRegion);
-            renderEngine.getWater().setTiling(universe.size * 2 * 4 * 2 / Universe.WORLD_SCALE);
-            renderEngine.getWater().setPresent(false);
+            renderEngine.getWater().setPresent(true);
+            renderEngine.getWater().setTiling(universe.size * 2 * 4 * 2 * 4 / Universe.WORLD_SCALE);
             renderEngine.getWater().setWaveStrength(0.01f / Universe.WORLD_SCALE);
-            renderEngine.getWater().setWaveSpeed(0.03f);
+            renderEngine.getWater().setWaveSpeed(0.01f);
             renderEngine.getWater().setRefractiveMultiplicator(1f);
-            renderEngine.setReflectionClippingPlane(-(context.getWaterLevel() - 2));
-            renderEngine.setRefractionClippingPlane((context.getWaterLevel() - 2));
-            renderEngine.setShadowEnabled(true);
-            renderEngine.getFog().setColor(Color.BLACK);
-            renderEngine.getFog().setBeginDistance(3000f);
-            renderEngine.getFog().setFullDistance(5000f);
-            renderEngine.getFog().setEnabled(true);
-            renderEngine.setDynamicDayTime(true);
-            renderEngine.setSceneBoxMin(new Vector3(-1000, -1000, -1000));
-            renderEngine.setSceneBoxMax(new Vector3(1000, 1000, 1000));
-            renderEngine.setDayAmbientLight(.01f, .01f, .01f, 10f);
-            renderEngine.setNightAmbientLight(.01f, .01f, .01f, 10f);
-            renderEngine.setSkyBox(true);
             renderEngine.getMirror().setPresent(false);
             renderEngine.getMirror().setReflectivity(0.6f);
+            renderEngine.setShadowEnabled(true);
+            renderEngine.getFog().setEnabled(true);
+            renderEngine.getFog().setColor(Color.WHITE);
+            renderEngine.getFog().setBeginDistance(3000f);
+            renderEngine.getFog().setFullDistance(5000f);
+            renderEngine.setReflectionClippingPlane(-(context.getWaterLevel() - 2));
+            renderEngine.setRefractionClippingPlane((context.getWaterLevel() - 2));
+            renderEngine.setDynamicDayTime(true);
+            renderEngine.setSkyBox(true);
+            renderEngine.setSceneBoxMin(new Vector3(-1000, -1000, -1000));
+            renderEngine.setSceneBoxMax(new Vector3(1000, 1000, 1000));
+            renderEngine.setDayAmbientLight(1f, 1f, 1f, 20f);
+            renderEngine.setNightAmbientLight(.01f, .01f, .01f, 10f);
             createInputProcessor(this, this);
 
             try {
@@ -205,18 +207,16 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
             }
 
             assetManager = new AssetManager(universe);
-//            render2DMaster = new Render2DMaster(universe);
             assetManager.create();
-//            render2DMaster.create(atlasManager);
             createEnvironment();
             createStage();
             audioEngine.create();
             audioEngine.enableHrtf(0);
 
-//            createStone();
+            createStone();
             createTraders();
 //			createRing();
-//            createWater();
+            createWater();
             createPlanets();
 //			createLand();
             createJumpGates();
@@ -249,9 +249,6 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
                 renderEngine.getProfiler().reset();// reset on each frame
             }
             render(universe.currentTime);
-            //			batch.setProjectionMatrix(renderMaster.sceneClusterManager.camera.combined);
-            //			batch.begin();
-            //			batch.end();
         } catch (final Exception e) {
             logger.error(e.getMessage(), e);
             System.exit(0);
@@ -287,26 +284,14 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
         }
     }
 
-    //	private void createCamera() {
-//		camera = new MovingCamera(67f, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-//		final Vector3 lookat = new Vector3(0, 0, 0);
-//		camera.position.set(lookat.x + 0f / 2, lookat.y + 0f / 2, lookat.z + 8);
-//		camera.up.set(0, 1, 0);
-//		camera.lookAt(lookat);
-//		camera.near = 2f;
-//		camera.far = 100f;
-//		camera.update();
-//		camera.setDirty(true);
-//
-//	}
     private void createCamera() throws Exception {
         camera = new MovingCamera(67f, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         Planet planet = universe.findBusyCenterPlanet();
         if (planet == null && !universe.planetList.isEmpty()) planet = universe.planetList.get(0);
         Vector3 lookat;
-//        if (planet != null) lookat = new Vector3(planet.x, 0, planet.z);
-//        else
-        lookat = new Vector3(0, 0, 0);
+        if (planet != null) lookat = new Vector3(planet.x, 0, planet.z);
+        else
+            lookat = new Vector3(0, 0, 0);
         camera.position.set(lookat.x /*+ CAMERA_OFFSET_X / Universe.WORLD_SCALE*/, lookat.y + CAMERA_OFFSET_Y / Universe.WORLD_SCALE, lookat.z + CAMERA_OFFSET_Z / Universe.WORLD_SCALE);
         camera.up.set(0, 1, 0);
         camera.lookAt(lookat);
@@ -326,13 +311,12 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
             // setup skybox
             if (renderEngine.isSkyBox()) {
                 renderEngine.setDaySkyBox(new SceneSkybox(environmentDayCubemap));
-//            renderEngine.setSkyBox(true);
                 renderEngine.setNightSkyBox(new SceneSkybox(environmentNightCubemap));
             }
             renderEngine.environment.set(PBRCubemapAttribute.createDiffuseEnv(diffuseCubemap));
             renderEngine.environment.set(PBRCubemapAttribute.createSpecularEnv(specularCubemap));
             renderEngine.environment.set(new PBRTextureAttribute(PBRTextureAttribute.BRDFLUTTexture, brdfLUT));
-            renderEngine.environment.set(new PBRFloatAttribute(PBRFloatAttribute.ShadowBias, 0f));
+            renderEngine.environment.set(new PBRFloatAttribute(PBRFloatAttribute.ShadowBias, .001f));
         } else {
         }
     }
@@ -394,14 +378,14 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
 
     private void createStone() {
         {
-            instance = new GameObject<>(new ModelInstanceHack(renderEngine.getGameEngine().assetManager.cube.scene.model), null);
+            instance = new GameObject<>(new ModelInstanceHack(renderEngine.getGameEngine().assetManager.cubeModel), null);
             instance.instance.transform.setToTranslationAndScaling(0, 0, 0, 16, 16, 16);
             instance.update();
             renderEngine.addStatic(instance);
         }
         {
-            instance = new GameObject<>(new ModelInstanceHack(renderEngine.getGameEngine().assetManager.cube.scene.model), null);
-            instance.instance.transform.setToTranslationAndScaling(0, 0, 0, 32, 1, 32);
+            instance = new GameObject<>(new ModelInstanceHack(renderEngine.getGameEngine().assetManager.cubeModel), null);
+            instance.instance.transform.setToTranslationAndScaling(0, 0, 0, 128, 1, 128);
             instance.update();
             renderEngine.addStatic(instance);
         }
@@ -416,22 +400,24 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
     }
 
     private void createWater() {
-        final float delta = (universe.size + 1) * Planet.PLANET_DISTANCE * 2;
-        //sector
-        {
-            //			final Color sectorColor = renderMaster.getDistinctiveColor(planet.sector.type);
-            final GameObject<GameEngine3D> sectorInstance = new GameObject<>(new ModelInstanceHack(assetManager.sector), null);
-            sectorInstance.instance.transform.setToTranslationAndScaling(0, Planet3DRenderer.SECTOR_Y, 0, delta, 8, delta);
-            sectorInstance.update();
-            renderEngine.addStatic(sectorInstance);
+        if (renderEngine.getWater().isPresent()) {
+            final float delta = (universe.size + 1) * Planet.PLANET_DISTANCE * 2;
+            //sector
+            {
+                //			final Color sectorColor = renderMaster.getDistinctiveColor(planet.sector.type);
+                final GameObject<GameEngine3D> sectorInstance = new GameObject<>(new ModelInstanceHack(assetManager.sector), null);
+                sectorInstance.instance.transform.setToTranslationAndScaling(0, Planet3DRenderer.SECTOR_Y, 0, delta, 8, delta);
+                sectorInstance.update();
+                renderEngine.addStatic(sectorInstance);
 
-        }
-        //water
-        {
-            final GameObject<GameEngine3D> sectorInstance = new GameObject<>(new ModelInstanceHack(assetManager.mirror), null);
-            sectorInstance.instance.transform.setToTranslationAndScaling(0, Planet3DRenderer.WATER_Y, 0, delta, 1, delta);
-            sectorInstance.update();
-            renderEngine.addStatic(sectorInstance);
+            }
+            //water
+            {
+                final GameObject<GameEngine3D> sectorInstance = new GameObject<>(new ModelInstanceHack(assetManager.waterModel), null);
+                sectorInstance.instance.transform.setToTranslationAndScaling(0, Planet3DRenderer.WATER_Y, 0, delta, 1, delta);
+                sectorInstance.update();
+                renderEngine.addStatic(sectorInstance);
+            }
         }
     }
 
@@ -778,8 +764,8 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
 
     private void render(final long currentTime) throws Exception {
         final float deltaTime = Gdx.graphics.getDeltaTime();
-        renderEngine.render2D = camera.position.y >= 600;
-        renderEngine.render3D = camera.position.y < 1000;
+        renderEngine.render2D = camera.position.y >= RENDER_2D_UNTIL;
+        renderEngine.render3D = camera.position.y < RENDER_3D_UNTIL;
 
 
         if (followMode && universe.selected instanceof Trader) {
@@ -792,6 +778,13 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
         }
         // must be called after moving the camera
         renderEngine.updateCamera(centerXD, 0f, centerYD);
+//        if (camera.position.y > 1000) {
+//            renderEngine.getFog().setBeginDistance(camera.position.y + 100);
+//            renderEngine.getFog().setBeginDistance(camera.position.y + 1000);
+//        } else {
+//            renderEngine.getFog().setBeginDistance(3000);
+//            renderEngine.getFog().setFullDistance(5000);
+//        }
 
         updateJumpGates(currentTime);
         updatePlanets(currentTime);
@@ -938,19 +931,15 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
 
     private void renderJumpGates() {
         for (final Path path : universe.pathList) {
-            if (renderEngine.testCase == 1 | renderEngine.testCase == 2)
-                path.get3DRenderer().render2D(renderEngine, 0, false);
-            if (renderEngine.testCase == 3)
-                path.get3DRenderer().render2Da(renderEngine, 0, false);
+            if (renderEngine.testCase == 1 | renderEngine.testCase == 2) path.get3DRenderer().render2D(renderEngine, 0, false);
+            if (renderEngine.testCase == 3) path.get3DRenderer().render2Da(renderEngine, 0, false);
         }
     }
 
     private void renderPlanets() {
         for (final Planet planet : universe.planetList) {
-            if (renderEngine.testCase == 1 | renderEngine.testCase == 2)
-                planet.get3DRenderer().render2D(renderEngine, 0, false);
-            if (renderEngine.testCase == 3)
-                planet.get3DRenderer().render2Da(renderEngine, 0, false);
+            if (renderEngine.testCase == 1 | renderEngine.testCase == 2) planet.get3DRenderer().render2D(renderEngine, 0, false);
+            if (renderEngine.testCase == 3) planet.get3DRenderer().render2Da(renderEngine, 0, false);
         }
     }
 
@@ -967,6 +956,12 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
             stringBuilder.append(" FPS ").append(Gdx.graphics.getFramesPerSecond());
             labels.get(labelIndex).setText(stringBuilder);
             labelIndex++;
+        }
+        //camera y
+        {
+            stringBuilder.setLength(0);
+            stringBuilder.append(" camera height: ").append(camera.position.y);
+            labels.get(labelIndex++).setText(stringBuilder);
         }
         //audio sources
         {
@@ -991,10 +986,8 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
         for (final Planet planet : universe.planetList) {
             int index = 0;
             for (final Sim trader : planet.traderList) {
-                if (renderEngine.testCase == 1 | renderEngine.testCase == 2)
-                    trader.get3DRenderer().render2D(renderEngine, 0, false);
-                if (renderEngine.testCase == 3)
-                    trader.get3DRenderer().render2Da(renderEngine, 0, false);
+                if (renderEngine.testCase == 1 | renderEngine.testCase == 2) trader.get3DRenderer().render2D(renderEngine, 0, false);
+                if (renderEngine.testCase == 3) trader.get3DRenderer().render2Da(renderEngine, 0, false);
             }
         }
     }
@@ -1143,11 +1136,6 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
         for (final Path path : universe.pathList) {
             path.get3DRenderer().update(path.source.x, path.source.y, path.source.z, renderEngine, currentTime, renderEngine.getTimeOfDay(), 0, path.selected);
         }
-        //		for (final Planet planet : universe.planetList) {
-        //			for (final Path jumpGate : planet.pathList) {
-        //				jumpGate.get3DRenderer().update(planet.x, planet.y, planet.z, renderMaster, currentTime, renderMaster.sceneManager.getTimeOfDay(), 0, jumpGate.selected);
-        //			}
-        //		}
     }
 
     private void updatePlanets(final long currentTime) throws Exception {

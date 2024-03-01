@@ -76,7 +76,7 @@ public class Ring3DRenderer extends ObjectRenderer<GameEngine3D> {
         }
         //water
         {
-            final GameObject sectorInstance = new GameObject(new ModelInstanceHack(renderEngine.getGameEngine().assetManager.water), null);
+            final GameObject sectorInstance = new GameObject(new ModelInstanceHack(renderEngine.getGameEngine().assetManager.waterModel), null);
             sectorInstance.instance.transform.setToTranslationAndScaling(0, Planet3DRenderer.WATER_Y, 0, delta, 1, delta);
             sectorInstance.update();
             renderEngine.addStatic(sectorInstance);

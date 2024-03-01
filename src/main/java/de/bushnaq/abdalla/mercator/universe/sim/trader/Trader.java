@@ -38,7 +38,7 @@ import org.slf4j.LoggerFactory;
  */
 public class Trader extends Sim {
     public static final  int          MAX_ENGINE_SPEED                    = 20;
-    public static final  int          MAX_GOOD_SPACE                      = 100;
+    public static final  int          MAX_GOOD_SPACE                      = 80;
     public static final  int          MIN_ENGINE_SPEED                    = 2;
     public static final  int          MIN_GOOD_SPACE                      = 30;
     public final static  int          TRADER_MAX_PORT_REST_TIME           = 3;

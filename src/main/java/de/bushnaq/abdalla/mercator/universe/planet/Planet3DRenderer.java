@@ -256,7 +256,7 @@ public class Planet3DRenderer extends ObjectRenderer<GameEngine3D> {
             go.controller.setAnimation(go.instance.getAnimation("rotate"), -1);
             animatedObjects.add(go);
             renderEngine.addDynamic(go);
-            go = new GameObject<>(new ModelInstanceHack(renderEngine.getGameEngine().assetManager.cubeEmissive), planet);
+            go = new GameObject<>(new ModelInstanceHack(renderEngine.getGameEngine().assetManager.emissiveModel), planet);
             go.instance.materials.get(0).set(emissiveAttribute);
             go.instance.transform.setToTranslationAndScaling(fx, 0f, fz, 1.0f, 1.0f, 1.0f);
             pointLightObjects.add(go);
@@ -269,7 +269,7 @@ public class Planet3DRenderer extends ObjectRenderer<GameEngine3D> {
         final float z = planet.z;
         //planet
         {
-            gameObject = new GameObject<GameEngine3D>(new ModelInstanceHack(renderEngine.getGameEngine().assetManager.planet), null, this);
+            gameObject = new GameObject<GameEngine3D>(new ModelInstanceHack(renderEngine.getGameEngine().assetManager.planetModel), null, this);
             gameObject.instance.transform.setToTranslationAndScaling(x, -PLANET_HIGHT / 2, z, PLANET_3D_SIZE, PLANET_HIGHT, PLANET_3D_SIZE);
             gameObject.update();
             renderEngine.addStatic(gameObject);
@@ -329,7 +329,7 @@ public class Planet3DRenderer extends ObjectRenderer<GameEngine3D> {
     }
 
     private GameObject<GameEngine3D> instanciateBuilding(final RenderEngine3D<GameEngine3D> renderEngine, final int index) {
-        final GameObject<GameEngine3D> go = new GameObject<>(new ModelInstanceHack(renderEngine.getGameEngine().assetManager.buildingCube), planet);
+        final GameObject<GameEngine3D> go = new GameObject<>(new ModelInstanceHack(renderEngine.getGameEngine().assetManager.buildingModel), planet);
         //		final Material material = go.instance.materials.get(0);
         //		material.set(new PBRColorAttribute(PBRColorAttribute.BaseColorFactor, getBuildingColor(index)));
         return go;
@@ -477,6 +477,7 @@ public class Planet3DRenderer extends ObjectRenderer<GameEngine3D> {
     }
 
     private void updatePlanet(final RenderEngine3D<GameEngine3D> renderEngine) {
+        // animate factories
         for (final GameObject<GameEngine3D> go : animatedObjects) {
             if (ProductionFacility.class.isInstance(go.interactive)) {
                 final ProductionFacility pf = (ProductionFacility) go.interactive;
@@ -484,6 +485,7 @@ public class Planet3DRenderer extends ObjectRenderer<GameEngine3D> {
                     go.controller.update(Gdx.graphics.getDeltaTime());
             }
         }
+        //animate lights
         if (renderEngine.getGameEngine().renderEngine.isNight() && dayMode) {
             for (final PointLight l : pointLight) {
                 l.intensity = LIGHT_NIGHT_INTENSITY;

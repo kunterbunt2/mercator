@@ -44,28 +44,28 @@ import java.util.Iterator;
  * loads 3D model assets for rendering
  */
 public class AssetManager {
-    public SceneAsset              BoomBox;
+    //    public SceneAsset              BoomBox;
     public SceneAsset              Rock_Alien_02;
-    public Model                   buildingCube;
+    public Model                   buildingModel;
     public MercatorRandomGenerator createRG = new MercatorRandomGenerator(1, null);
-    public SceneAsset              cube;
-    public SceneAsset              cubeAluminiumBrushed;
+    //    public SceneAsset              cubeAluminiumBrushed;
     public Model                   cubeBase1;
-    public Model                   cubeEmissive;
-    public SceneAsset              cubeGoldLeaves;
-    public Model                   cubeGood;
+    public Model                   cubeModel;//used for debugging
+    public Model                   emissiveModel;
+    //    public SceneAsset              cubeGoldLeaves;
+    public Model                   goodContainer;
     public Model                   jumpGate;
     public Model                   land;
-    public Model                   mirror;
-    public Model                   planet;
+    public Model                   mirrorModel;
+    public Model                   planetModel;
     public Model                   sector;
     public ShowGood                showGood = ShowGood.Name;
-    public Model                   trader;
-    public SceneAsset              traderAsset;
+    public SceneAsset              trader;
+    //    public SceneAsset              traderAsset;
     public SceneAsset              turbine;
     public Universe                universe;
-    public Model                   water;
-    public SceneAsset              wheel;
+    public Model                   waterModel;
+//    public SceneAsset              wheel;
 
     public AssetManager(final Universe universe) {
         this.universe = universe;
@@ -86,14 +86,13 @@ public class AssetManager {
     }
 
     public void create() throws Exception {
-        cubeGoldLeaves = new GLTFLoader().load(Gdx.files.internal(AtlasManager.getAssetsFolderName() + "/models/glTF/cube-Gold_leafs/cube-Gold_leafs.gltf"));
+//        cubeGoldLeaves = new GLTFLoader().load(Gdx.files.internal(AtlasManager.getAssetsFolderName() + "/models/glTF/cube-Gold_leafs/cube-Gold_leafs.gltf"));
         final Texture           texture      = new Texture(Gdx.files.internal(AtlasManager.getAssetsFolderName() + "/tiles.png"));
         final TextureRegion[][] tiles        = TextureRegion.split(texture, 32, 32);
         final ModelBuilder      modelBuilder = new ModelBuilder();
         final ModelCreator      modelCreator = new ModelCreator();
-        cubeAluminiumBrushed = new GLTFLoader().load(Gdx.files.internal(AtlasManager.getAssetsFolderName() + "/models/glTF/cube-Aluminium_brushed/cube-Aluminium_brushed.gltf"));
-        BoomBox              = new GLTFLoader().load(Gdx.files.internal(AtlasManager.getAssetsFolderName() + "/models/glTF/BoomBox.gltf"));
-        Rock_Alien_02        = new GLTFLoader().load(Gdx.files.internal(AtlasManager.getAssetsFolderName() + "/models/glTF/Rock_Alien_02/Rock_Alien_02.gltf"));
+//        cubeAluminiumBrushed = new GLTFLoader().load(Gdx.files.internal(AtlasManager.getAssetsFolderName() + "/models/glTF/cube-Aluminium_brushed/cube-Aluminium_brushed.gltf"));
+//        BoomBox              = new GLTFLoader().load(Gdx.files.internal(AtlasManager.getAssetsFolderName() + "/models/glTF/BoomBox.gltf"));
         {
             final Attribute metallic  = PBRFloatAttribute.createMetallic(0.3f);
             final Attribute roughness = PBRFloatAttribute.createRoughness(0.2f);
@@ -105,42 +104,11 @@ public class AssetManager {
             final Material material = new Material(metallic, roughness, color /*, culling, normal, occlusion, shininess */);
             cubeBase1 = modelCreator.createBox(material);
         }
-        {
-            final Attribute metallic  = PBRFloatAttribute.createMetallic(0.9f);
-            final Attribute roughness = PBRFloatAttribute.createRoughness(0.2f);
-            final Attribute color     = PBRColorAttribute.createBaseColorFactor(Color.BLACK);
-            //			Attribute normal = PBRFloatAttribute.createNormalScale(0.0f);
-            //			Attribute occlusion = PBRFloatAttribute.createOcclusionStrength(0.0f);
-            //			Attribute culling = IntAttribute.createCullFace(0);
-            //			Attribute shininess = PBRFloatAttribute.createShininess(1.0f);
-            final Material material = new Material(metallic, roughness, color/* , culling, normal, occlusion, shininess */);
-            //			trader = modelCreator.createBox(material);
-            trader      = modelBuilder.createBox(1.0f, 1.0f, 1.0f, material, Usage.Position | Usage.Normal);
-        }
-        {
-            final Attribute color = new PBRColorAttribute(PBRColorAttribute.BaseColorFactor, Color.WHITE);
-            //			Attribute culface = IntAttribute.createCullFace(1);
-            final Attribute metallic  = PBRFloatAttribute.createMetallic(0.5f);
-            final Attribute roughness = PBRFloatAttribute.createRoughness(0.5f);
-            //			Attribute occlusion = PBRFloatAttribute.createOcclusionStrength(1.0f);
-            //			Attribute normal = PBRFloatAttribute.createNormalScale(1.0f);
-            final Material material = new Material(metallic, roughness, color/*, culface, normal, occlusion*/);
-            //			cubeGood = modelCreator.createBox(material);
-            cubeGood = modelBuilder.createBox(1.0f, 1.0f, 1.0f, material, Usage.Position | Usage.Normal);
-        }
+        createTrader();
+        createGoodContainer(modelBuilder);
 
-        {
-            final Attribute emissive = ColorAttribute.createEmissive(Color.YELLOW);
-            final Material  material = new Material(emissive);
-            cubeEmissive = modelCreator.createBox(material);
-        }
-        {
-            final Attribute color     = new PBRColorAttribute(PBRColorAttribute.BaseColorFactor, Color.WHITE);
-            final Attribute metallic  = PBRFloatAttribute.createMetallic(0.5f);
-            final Attribute roughness = PBRFloatAttribute.createRoughness(0.5f);
-            final Material  material  = new Material(metallic, roughness, color);
-            planet = modelCreator.createBox(material);
-        }
+        createEmissiveModel(modelCreator);
+        createPlanet(modelCreator);
         {
             final Attribute color     = new PBRColorAttribute(PBRColorAttribute.BaseColorFactor, Color.DARK_GRAY);
             final Attribute metallic  = PBRFloatAttribute.createMetallic(0.0f);
@@ -148,43 +116,23 @@ public class AssetManager {
             final Material  material  = new Material(metallic, roughness, color);
             land = modelCreator.createBox(material);
         }
-        {
-            final Attribute color     = new PBRColorAttribute(PBRColorAttribute.BaseColorFactor, Color.WHITE);
-            final Attribute metallic  = PBRFloatAttribute.createMetallic(0.5f);
-            final Attribute roughness = PBRFloatAttribute.createRoughness(0.5f);
-            final Attribute occlusion = PBRFloatAttribute.createOcclusionStrength(1.0f);
-            //			final Attribute culling = IntAttribute.createCullFace(1);
-            //			final Material material = new Material(metallic, roughness, color);
-            //			final Material material = new Material(metallic, roughness, color, culling/*, normal*/, occlusion/*, shininess */);
-            final Material material = new Material(metallic, roughness, color, occlusion);
-            buildingCube = modelBuilder.createBox(1.0f, 1.0f, 1.0f, material, Usage.Position | Usage.Normal);
-        }
-        {
-            final Attribute color     = new PBRColorAttribute(PBRColorAttribute.BaseColorFactor, Color.WHITE);
-            final Attribute metallic  = PBRFloatAttribute.createMetallic(0.5f);
-            final Attribute roughness = PBRFloatAttribute.createRoughness(0.5f);
-            final Attribute occlusion = PBRFloatAttribute.createOcclusionStrength(1.0f);
-            //			final Attribute culling = IntAttribute.createCullFace(1);
-            //			final Material material = new Material(metallic, roughness, color);
-            //			final Material material = new Material(metallic, roughness, color, culling/*, normal*/, occlusion/*, shininess */);
-            final Material material = new Material(metallic, roughness, color, occlusion);
-            jumpGate = modelBuilder.createBox(1.0f, 1.0f, 1.0f, material, Usage.Position | Usage.Normal);
-        }
-        {
-            wheel = new GLTFLoader().load(Gdx.files.internal(AtlasManager.getAssetsFolderName() + "/models/glTF/wheel/wheel.gltf"));
-            final Material material = wheel.scene.model.materials.get(0);
-            material.set(buildingCube.materials.get(0));
-            set(buildingCube.materials.get(0), material);
-
-        }
-        turbine = new GLTFLoader().load(Gdx.files.internal(AtlasManager.getAssetsFolderName() + "/models/glTF/turbine/turbine.gltf"));
+        createBuilding(modelBuilder);
+        createJumpgate(modelBuilder);
+//        {
+//            wheel = new GLTFLoader().load(Gdx.files.internal(AtlasManager.getAssetsFolderName() + "/models/glTF/wheel/wheel.gltf"));
+//            final Material material = wheel.scene.model.materials.get(0);
+//            material.set(buildingCube.materials.get(0));
+//            set(buildingCube.materials.get(0), material);
+//        }
+        createTurbine();
         {
 //            final Attribute metallic  = PBRFloatAttribute.createMetallic(0.0f);
 //            final Attribute roughness = PBRFloatAttribute.createRoughness(1.0f);
 //            final Attribute color     = PBRColorAttribute.createBaseColorFactor(new Color(Color.WHITE));
 //            final Material  material  = new Material(metallic, roughness, color);
 //            sector = modelCreator.createBox(material);
-            sector = Rock_Alien_02.scene.model;
+            Rock_Alien_02 = new GLTFLoader().load(Gdx.files.internal(AtlasManager.getAssetsFolderName() + "/models/glTF/Rock_Alien_02/Rock_Alien_02.gltf"));
+            sector        = Rock_Alien_02.scene.model;
             final Material            material2 = sector.materials.get(0);
             final Attribute           attribute = material2.get(PBRTextureAttribute.MetallicRoughnessTexture);
             final PBRTextureAttribute a         = (PBRTextureAttribute) attribute;
@@ -192,27 +140,112 @@ public class AssetManager {
             a.scaleV = 10;
         }
 
-        {
-            final ColorAttribute   diffuseColor   = ColorAttribute.createDiffuse(Color.WHITE);
-            final TextureAttribute diffuseTexture = TextureAttribute.createDiffuse(texture);
-            final Material         material       = new Material(diffuseColor, diffuseTexture);
-            material.id = "water";
-            water       = createSquare(modelBuilder, 0.5f, 0.5f, material);
-        }
-        {
-            final ColorAttribute   diffuseColor   = ColorAttribute.createDiffuse(Color.BLACK);
-            final TextureAttribute diffuseTexture = TextureAttribute.createDiffuse(texture);
-            final Material         material       = new Material(diffuseColor, diffuseTexture);
-            material.id = "mirror";
-            mirror      = createSquare(modelBuilder, 0.5f, 0.5f, material);
-        }
-        {
-            cube = new GLBLoader().load(Gdx.files.internal(String.format(AtlasManager.getAssetsFolderName() + "/models/turtle.glb")));
-        }
+        createWater(texture, modelBuilder);
+        createMirror(texture, modelBuilder);
+        createCube(modelBuilder);
+    }
+
+    private void createBuilding(ModelBuilder modelBuilder) {
+        final Attribute color     = new PBRColorAttribute(PBRColorAttribute.BaseColorFactor, Color.WHITE);
+        final Attribute metallic  = PBRFloatAttribute.createMetallic(0.5f);
+        final Attribute roughness = PBRFloatAttribute.createRoughness(0.5f);
+        final Attribute occlusion = PBRFloatAttribute.createOcclusionStrength(1.0f);
+        //			final Attribute culling = IntAttribute.createCullFace(1);
+        //			final Material material = new Material(metallic, roughness, color);
+        //			final Material material = new Material(metallic, roughness, color, culling/*, normal*/, occlusion/*, shininess */);
+        final Material material = new Material(metallic, roughness, color, occlusion);
+        buildingModel = modelBuilder.createBox(1.0f, 1.0f, 1.0f, material, Usage.Position | Usage.Normal);
+    }
+
+    private void createCube(ModelBuilder modelBuilder) {
+        final Attribute color     = new PBRColorAttribute(PBRColorAttribute.BaseColorFactor, Color.WHITE);
+        final Attribute metallic  = PBRFloatAttribute.createMetallic(0.5f);
+        final Attribute roughness = PBRFloatAttribute.createRoughness(0.5f);
+        final Attribute occlusion = PBRFloatAttribute.createOcclusionStrength(1.0f);
+        final Material  material  = new Material(metallic, roughness, color, occlusion);
+        cubeModel = modelBuilder.createBox(1.0f, 1.0f, 1.0f, material, Usage.Position | Usage.Normal);
+    }
+
+    private void createEmissiveModel(ModelCreator modelCreator) {
+        final Attribute emissive = ColorAttribute.createEmissive(Color.WHITE);
+        final Material  material = new Material(emissive);
+        emissiveModel = modelCreator.createBox(material);
+    }
+
+    private void createGoodContainer(ModelBuilder modelBuilder) {
+        final Attribute color = new PBRColorAttribute(PBRColorAttribute.BaseColorFactor, Color.WHITE);
+        //			Attribute culface = IntAttribute.createCullFace(1);
+        final Attribute metallic  = PBRFloatAttribute.createMetallic(0.5f);
+        final Attribute roughness = PBRFloatAttribute.createRoughness(0.5f);
+        //			Attribute occlusion = PBRFloatAttribute.createOcclusionStrength(1.0f);
+        //			Attribute normal = PBRFloatAttribute.createNormalScale(1.0f);
+        final Material material = new Material(metallic, roughness, color/*, culface, normal, occlusion*/);
+        //			cubeGood = modelCreator.createBox(material);
+        goodContainer = modelBuilder.createBox(1.0f, 1.0f, 1.0f, material, Usage.Position | Usage.Normal);
+    }
+
+    private void createJumpgate(ModelBuilder modelBuilder) {
+        final Attribute color     = new PBRColorAttribute(PBRColorAttribute.BaseColorFactor, Color.WHITE);
+        final Attribute metallic  = PBRFloatAttribute.createMetallic(1f);
+        final Attribute roughness = PBRFloatAttribute.createRoughness(0.5f);
+        final Attribute occlusion = PBRFloatAttribute.createOcclusionStrength(1.0f);
+        //			final Attribute culling = IntAttribute.createCullFace(1);
+        //			final Material material = new Material(metallic, roughness, color);
+        //			final Material material = new Material(metallic, roughness, color, culling/*, normal*/, occlusion/*, shininess */);
+        final Material material = new Material(metallic, roughness, color, occlusion);
+        jumpGate = modelBuilder.createBox(1.0f, 1.0f, 1.0f, material, Usage.Position | Usage.Normal);
+    }
+
+    private void createMirror(Texture texture, ModelBuilder modelBuilder) {
+        final ColorAttribute   diffuseColor   = ColorAttribute.createDiffuse(Color.BLACK);
+        final TextureAttribute diffuseTexture = TextureAttribute.createDiffuse(texture);
+        final Material         material       = new Material(diffuseColor, diffuseTexture);
+        material.id = "mirror";
+        mirrorModel = createSquare(modelBuilder, 0.5f, 0.5f, material);
+    }
+
+    private void createPlanet(ModelCreator modelCreator) {
+        final Attribute color     = new PBRColorAttribute(PBRColorAttribute.BaseColorFactor, Color.WHITE);
+        final Attribute metallic  = PBRFloatAttribute.createMetallic(0.5f);
+        final Attribute roughness = PBRFloatAttribute.createRoughness(0.5f);
+        final Material  material  = new Material(metallic, roughness, color);
+        planetModel = modelCreator.createBox(material);
     }
 
     private Model createSquare(final ModelBuilder modelBuilder, final float sx, final float sz, final Material material) {
         return modelBuilder.createRect(-sx, 0f, sz, sx, 0f, sz, sx, 0f, -sz, -sx, 0f, -sz, 0f, 1f, 0f, material, Usage.Position | Usage.Normal | Usage.TextureCoordinates);
+    }
+
+    private void createTrader() {
+        final Attribute metallic  = PBRFloatAttribute.createMetallic(0.7f);
+        final Attribute roughness = PBRFloatAttribute.createRoughness(0.3f);
+        final Attribute color     = PBRColorAttribute.createBaseColorFactor(Color.BLACK);
+        //			Attribute normal = PBRFloatAttribute.createNormalScale(0.0f);
+        //			Attribute occlusion = PBRFloatAttribute.createOcclusionStrength(0.0f);
+        //			Attribute culling = IntAttribute.createCullFace(0);
+        //			Attribute shininess = PBRFloatAttribute.createShininess(1.0f);
+        final Material material = new Material(metallic, roughness, color/* , culling, normal, occlusion, shininess */);
+        //			trader = modelCreator.createBox(material);
+//            trader      = modelBuilder.createBox(1.0f, 1.0f, 1.0f, material, Usage.Position | Usage.Normal);
+        trader = new GLBLoader().load(Gdx.files.internal(String.format(AtlasManager.getAssetsFolderName() + "/models/trader.glb")));
+        for (Material m : trader.scene.model.materials) {
+//        Material m = trader.scene.model.materials.get(0);
+            m.set(metallic);
+            m.set(roughness);
+            m.set(color);
+        }
+    }
+
+    private void createTurbine() {
+        turbine = new GLTFLoader().load(Gdx.files.internal(AtlasManager.getAssetsFolderName() + "/models/glTF/turbine/turbine.gltf"));
+    }
+
+    private void createWater(Texture texture, ModelBuilder modelBuilder) {
+        final ColorAttribute   diffuseColor   = ColorAttribute.createDiffuse(Color.WHITE);
+        final TextureAttribute diffuseTexture = TextureAttribute.createDiffuse(texture);
+        final Material         material       = new Material(diffuseColor, diffuseTexture);
+        material.id = "water";
+        waterModel  = createSquare(modelBuilder, 0.5f, 0.5f, material);
     }
 
     public void dispose() throws Exception {

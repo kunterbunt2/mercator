@@ -32,9 +32,24 @@ public class MyCameraInputController extends CameraInputController {
     private final Logger       logger = LoggerFactory.getLogger(this.getClass());
     private final Vector3      tmpV1  = new Vector3();
     private final Vector3      tmpV2  = new Vector3();
-    float[] zoomFactors = {200, 400, 500, 600, 1000, 1500, 2000, 2500, 3000, 4000, 6000, 10000};
-
-    int zoomIndex = 0;
+    ZoomCoordinates[] zoomFactors = {//
+            new ZoomCoordinates(0, 100, 40),//
+            new ZoomCoordinates(0, 120, 50),//
+            new ZoomCoordinates(0, 140, 60),//
+            new ZoomCoordinates(0, 200, 100),//
+            new ZoomCoordinates(0, 400, 200),//
+            new ZoomCoordinates(0, 500, 300),//
+            new ZoomCoordinates(0, 600, 400),//
+            new ZoomCoordinates(0, 1000, 380),//
+            new ZoomCoordinates(0, 1500, 300),//
+            new ZoomCoordinates(0, 2000, 200),//
+            new ZoomCoordinates(0, 2500, 100),//
+            new ZoomCoordinates(0, 3000, 0),//
+            new ZoomCoordinates(0, 4000, 0),//
+            new ZoomCoordinates(0, 6000, 0),//
+            new ZoomCoordinates(0, 10000, 0),//
+    };
+    int               zoomIndex   = 0;
 
     public MyCameraInputController(final Camera camera, GameEngine3D gameEngine) throws Exception {
         super(camera);
@@ -56,8 +71,9 @@ public class MyCameraInputController extends CameraInputController {
                 myCamera.setDirty(true);
                 //				notifyListener(myCamera);
             } else if (button == translateButton) {
-                final Vector3 tx = Vector3.X.cpy().scl(-deltaX * translateUnits);
-                final Vector3 tz = Vector3.Z.cpy().scl(deltaY * translateUnits);
+                // move
+                final Vector3 tx = Vector3.X.cpy().scl(-deltaX * translateUnits * camera.position.y / 500);
+                final Vector3 tz = Vector3.Z.cpy().scl(deltaY * translateUnits * camera.position.y / 500);
                 //			System.out.println(String.format("x=%f %f y=%f %f %f", deltaX, tx.x, deltaY, tz.z, translateUnits));
                 myCamera.translate(tx);
                 myCamera.translate(tz);
@@ -91,15 +107,14 @@ public class MyCameraInputController extends CameraInputController {
                 return false;
             if (amount < 0 && zoomIndex < zoomFactors.length - 1) {
                 zoomIndex++;
-                camera.translate(0, zoomFactors[zoomIndex] - camera.position.y, 0);
+                zoomCamera();
             } else if (amount > 0 && zoomIndex > 0) {
                 zoomIndex--;
-                camera.translate(0, zoomFactors[zoomIndex] - camera.position.y, 0);
+                zoomCamera();
             }
 //            myCamera.translate(0, -amount * pinchZoomFactor, 0);
-
-
-            camera.up.set(0, 1, 0);
+            //todo need to find a fix for this otherwise camera rotatiosn will lead to starnge effects
+//            camera.up.set(0, 1, 0);//careful, this will go wrong if camera is pointing directly at 0, 0, 0 from above.
             if (camera instanceof MovingCamera) {
                 final MovingCamera myCamera = (MovingCamera) camera;
                 myCamera.lookAt(myCamera.lookat);
@@ -112,6 +127,24 @@ public class MyCameraInputController extends CameraInputController {
             logger.error(e.getMessage(), e);
         }
         return true;
+    }
+
+    private void zoomCamera() {
+        if (camera instanceof MovingCamera) {
+            final MovingCamera myCamera = (MovingCamera) camera;
+            camera.translate(zoomFactors[zoomIndex].x - (camera.position.x - myCamera.lookat.x), zoomFactors[zoomIndex].y - camera.position.y, zoomFactors[zoomIndex].z - (camera.position.z - myCamera.lookat.z));
+//            camera.translate(0, zoomFactors[zoomIndex].y - camera.position.y, 0);
+        }
+    }
+
+    class ZoomCoordinates {
+        float x, y, z;
+
+        public ZoomCoordinates(float x, float y, float z) {
+            this.x = x;
+            this.y = y;
+            this.z = z;
+        }
     }
 
 }

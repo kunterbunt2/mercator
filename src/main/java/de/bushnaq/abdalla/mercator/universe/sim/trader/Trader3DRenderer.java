@@ -20,8 +20,6 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.PolygonSpriteBatch;
-import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
-import com.badlogic.gdx.graphics.g3d.environment.PointLight;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
 import de.bushnaq.abdalla.engine.GameObject;
@@ -48,44 +46,39 @@ import java.util.Map;
 
 public class Trader3DRenderer extends ObjectRenderer<GameEngine3D> {
 
-    public static final  Color                                         TADER_COLOR_IS_GOOD          = Color.LIGHT_GRAY; // 0xaaaaaa
-    public static final  Color                                         TRADER_COLOR                 = new Color(.7f, .7f, .7f, 0.45f); // 0xffcc5555;
-    public static final  float                                         TRADER_SIZE_Z                = (8 + 80 + 8)/*16*/ / Universe.WORLD_SCALE;
-    public static final  float                                         TRADER_WIDTH                 = 16;
-    private static final int                                           AVERAGE_LIGHT_OFF_DURATION   = 200;
-    private static final float                                         LIGHT_DISTANCE               = 10f;
-    private static final float                                         LIGHT_MAX_INTENSITY          = 1000f;
-    private static final int                                           LIGHT_OFF_DURATION_DEVIATION = 100;
-    private static final int                                           LIGHT_ON_DURATION            = 200;
-    private static final int                                           NUMBER_OF_LIGHTS             = 4;
-    private static final Color                                         TRADER_NAME_COLOR            = Color.ORANGE;
-    private static final float                                         TRADER_SIZE_X                = 16 / Universe.WORLD_SCALE;
-    private static final float                                         TRADER_SIZE_Y                = 16 / Universe.WORLD_SCALE;
-    private static final float                                         TRADER_TRAVELING_HEIGHT      = -TRADER_SIZE_Y / 2 + Planet3DRenderer.WATER_Y;
-    private final        Vector3                                       direction                    = new Vector3();//intermediate value
-    private final        List<GameObject<GameEngine3D>>                goodInstances                = new ArrayList<>();
-    private final        float[]                                       lastVelocity                 = new float[3];
-    private final        List<GameObject<GameEngine3D>>                lightGameObjects             = new ArrayList<>();
-    private final        Vector3                                       lightScaling                 = new Vector3(1.0f, 1.0f, 1.0f);
-    private final        Vector3                                       lightTranslation             = new Vector3();
-    private final        Logger                                        logger                       = LoggerFactory.getLogger(this.getClass());
-    private final        List<PointLight>                              pointLights                  = new ArrayList<>();
-    private final        float[]                                       position                     = new float[3];
-    private final        Vector3                                       scaling                      = new Vector3();//intermediate value
-    private final        Vector3                                       shift                        = new Vector3();//intermediate value
-    private final        Vector3                                       speed                        = new Vector3(0, 0, 0);
-    private final        Vector3                                       target                       = new Vector3();//intermediate value
+    public static final  Color                                         TRADER_COLOR            = new Color(.7f, .7f, .7f, 0.45f); // 0xffcc5555;
+    public static final  Color                                         TRADER_COLOR_IS_GOOD    = Color.LIGHT_GRAY; // 0xaaaaaa
+    public static final  float                                         TRADER_SIZE_Z           = (8 + 80 + 8)/*16*/ / Universe.WORLD_SCALE;
+    public static final  float                                         TRADER_WIDTH            = 16;
+    private static final float                                         LIGHT_DISTANCE          = 0f;
+    private static final int                                           NUMBER_OF_LIGHTS        = 4;
+    private static final Color                                         TRADER_NAME_COLOR       = Color.ORANGE;
+    private static final float                                         TRADER_SIZE_X           = 16 / Universe.WORLD_SCALE;
+    private static final float                                         TRADER_SIZE_Y           = 16 / Universe.WORLD_SCALE;
+    private static final float                                         TRADER_TRAVELING_HEIGHT = -TRADER_SIZE_Y / 2 + Planet3DRenderer.WATER_Y;
+    private final        Vector3                                       direction               = new Vector3();//intermediate value
+    private final        List<GameObject<GameEngine3D>>                goodInstances           = new ArrayList<>();
+    private final        float[]                                       lastVelocity            = new float[3];
+    //    private final        List<GameObject<GameEngine3D>>                lightGameObjects             = new ArrayList<>();
+    private final        Logger                                        logger                  = LoggerFactory.getLogger(this.getClass());
+    //    private final        List<PointLight>                              pointLights                  = new ArrayList<>();
+    private final        float[]                                       position                = new float[3];
+    private final        Vector3                                       scaling                 = new Vector3();//intermediate value
+    private final        Vector3                                       shift                   = new Vector3();//intermediate value
+    private final        Vector3                                       speed                   = new Vector3(0, 0, 0);
+    private final        List<StrobeLight>                             strobeLights            = new ArrayList<>();
+    private final        Vector3                                       target                  = new Vector3();//intermediate value
     private final        Trader                                        trader;
-    private final        Vector3                                       translation                  = new Vector3();//intermediate value
-    private final        Map<GoodType, List<GameObject<GameEngine3D>>> unusedMls                    = new HashMap<>();
-    private final        Map<GoodType, List<GameObject<GameEngine3D>>> usedMls                      = new HashMap<>();
-    private final        float[]                                       velocity                     = new float[3];
-    private              int                                           TraderColorIndex             = -1;
+    private final        Vector3                                       translation             = new Vector3();//intermediate value
+    private final        Map<GoodType, List<GameObject<GameEngine3D>>> unusedMls               = new HashMap<>();
+    private final        Map<GoodType, List<GameObject<GameEngine3D>>> usedMls                 = new HashMap<>();
+    private final        float[]                                       velocity                = new float[3];
+    private              int                                           TraderColorIndex        = -1;
     private              GameObject<GameEngine3D>                      instance;
-    private              boolean                                       lastSelected                 = false;
-    private              long                                          lastTransaction              = 0;
-    private              int                                           lightMode                    = 0;
-    private              int                                           lightTimer                   = 0;
+    private              boolean                                       lastSelected            = false;
+    private              long                                          lastTransaction         = 0;
+    //    private              int                                           lightMode                    = 0;
+//    private              float                                         lightTimer                   = 0;
     private              MercatorSynthesizer                           synth;
 
     public Trader3DRenderer(final Trader trader) {
@@ -96,7 +89,7 @@ public class Trader3DRenderer extends ObjectRenderer<GameEngine3D> {
     public void create(final RenderEngine3D<GameEngine3D> renderEngine) {
         try {
             createTrader(renderEngine);
-//            createLights(renderEngine);
+            createLights(renderEngine);
             createGoods(renderEngine);
             synth = renderEngine.getGameEngine().audioEngine.createAudioProducer(MercatorSynthesizer.class);
         } catch (final Exception e) {
@@ -113,7 +106,7 @@ public class Trader3DRenderer extends ObjectRenderer<GameEngine3D> {
             color = TRADER_COLOR;
         }
         if (!trader.traderStatus.isGood()) {
-            color = TADER_COLOR_IS_GOOD;
+            color = TRADER_COLOR_IS_GOOD;
         }
         final float x = translation.x;
         final float y = translation.y;
@@ -174,16 +167,22 @@ public class Trader3DRenderer extends ObjectRenderer<GameEngine3D> {
     }
 
     private void createLights(final RenderEngine3D<GameEngine3D> renderEngine) {
+        final float[] dx = {
+                TRADER_SIZE_X / 2 + LIGHT_DISTANCE,//
+                -TRADER_SIZE_X / 2 - LIGHT_DISTANCE,//
+                +TRADER_SIZE_X / 2 + LIGHT_DISTANCE,//
+                -TRADER_SIZE_X / 2 - LIGHT_DISTANCE//
+        };
+        final float[] dz = {
+                +TRADER_SIZE_Z / 2 + LIGHT_DISTANCE,//
+                +TRADER_SIZE_Z / 2 + LIGHT_DISTANCE,//
+                -TRADER_SIZE_Z / 2 - LIGHT_DISTANCE,//
+                -TRADER_SIZE_Z / 2 - LIGHT_DISTANCE//
+        };
         //TODO reuse instances
-        final ColorAttribute emissiveAttribute = ColorAttribute.createEmissive(Good3DRenderer.getColor(getColorIndex()));
         for (int i = 0; i < NUMBER_OF_LIGHTS; i++) {
-            pointLights.add(new PointLight());
-//            renderEngine.add(pointLights.get(i), true);
-//            renderEngine.addDynamic(lightGameObjects.get(i));
-            final GameObject<GameEngine3D> go = new GameObject<GameEngine3D>(new ModelInstanceHack(renderEngine.getGameEngine().assetManager.emissiveModel), trader);
-            go.instance.materials.get(0).set(emissiveAttribute);
-            lightGameObjects.add(go);
-            renderEngine.addDynamic(go);
+//            final GameObject<GameEngine3D> go = ;
+            strobeLights.add(new StrobeLight(renderEngine, dx[i], TRADER_SIZE_Y / 2 + GameEngine3D.SPACE_BETWEEN_OBJECTS, dz[i], new GameObject<GameEngine3D>(new ModelInstanceHack(renderEngine.getGameEngine().assetManager.redEmissiveModel), trader)));
         }
     }
 
@@ -222,7 +221,7 @@ public class Trader3DRenderer extends ObjectRenderer<GameEngine3D> {
             color = TRADER_COLOR;
         }
         if (!trader.traderStatus.isGood()) {
-            color = TADER_COLOR_IS_GOOD;
+            color = TRADER_COLOR_IS_GOOD;
         }
         final float x = translation.x;
         final float y = translation.y;
@@ -272,10 +271,10 @@ public class Trader3DRenderer extends ObjectRenderer<GameEngine3D> {
 
     private void update(final RenderEngine3D<GameEngine3D> renderEngine, final long currentTime, final int index, final boolean selected) throws Exception {
         updateTrader(renderEngine, index, selected);
-//        updateLights(renderEngine, currentTime);
+        updateLights(renderEngine, currentTime);
         if (lastTransaction != trader.lastTransaction) {
             createGoods(renderEngine);
-            updateLightColor(renderEngine);
+//            updateLightColor(renderEngine);
             lastTransaction = trader.lastTransaction;
         }
         updateGoods(renderEngine);
@@ -316,28 +315,15 @@ public class Trader3DRenderer extends ObjectRenderer<GameEngine3D> {
         }
     }
 
-    private void updateLightColor(final RenderEngine3D<GameEngine3D> renderEngine) {
-        //TODO reuse instances
-        final ColorAttribute emissiveAttribute = ColorAttribute.createEmissive(Good3DRenderer.getColor(getColorIndex()));
-        for (final GameObject go : lightGameObjects) {
-            go.instance.materials.get(0).set(emissiveAttribute);
-        }
-    }
+//    private void updateLightColor(final RenderEngine3D<GameEngine3D> renderEngine) {
+//        //TODO reuse instances
+//        final ColorAttribute emissiveAttribute = ColorAttribute.createEmissive(Good3DRenderer.getColor(getColorIndex()));
+//        for (final GameObject go : lightGameObjects) {
+//            go.instance.materials.get(0).set(emissiveAttribute);
+//        }
+//    }
 
     private void updateLights(final RenderEngine3D<GameEngine3D> renderEngine, final long currentTime) {
-        final float[] dx = {
-                translation.x + TRADER_SIZE_X / 2 + LIGHT_DISTANCE,//
-                translation.x - TRADER_SIZE_X / 2 - LIGHT_DISTANCE,//
-                translation.x + TRADER_SIZE_X / 2 + LIGHT_DISTANCE,//
-                translation.x - TRADER_SIZE_X / 2 - LIGHT_DISTANCE//
-        };
-        final float[] dz = {
-                translation.z + TRADER_SIZE_Z / 2 + LIGHT_DISTANCE,//
-                translation.z + TRADER_SIZE_Z / 2 + LIGHT_DISTANCE,//
-                translation.z - TRADER_SIZE_Z / 2 - LIGHT_DISTANCE,//
-                translation.z - TRADER_SIZE_Z / 2 - LIGHT_DISTANCE//
-        };
-        lightTranslation.y = translation.y /*- TRADER_SIZE_Y / 2 + GameEngine3D.SPACE_BETWEEN_OBJECTS * 10*/;
         //		lightTranslation.set(translation);
 //        if (trader.targetWaypoint != null) {
 //            final float intensitiy = LIGHT_INTENSITY;
@@ -364,49 +350,12 @@ public class Trader3DRenderer extends ObjectRenderer<GameEngine3D> {
         {
             // in port
 //            final float intensity = (float) Math.abs(Math.sin((currentTime) / (2000f)) * LIGHT_MAX_INTENSITY);
-            final float intensity = (float) Math.abs(Math.sin(lightTimer / LIGHT_ON_DURATION) * LIGHT_MAX_INTENSITY);
+//            final float intensity = (float) Math.abs(Math.sin(lightTimer / LIGHT_ON_DURATION) * LIGHT_MAX_INTENSITY);
             //			lightTranslation.y = translation.y - TRADER_Y_SIZE / 2 + Screen3D.SPACE_BETWEEN_OBJECTS * 10;
-            for (int i = 0; i < NUMBER_OF_LIGHTS; i++) {
-                lightTranslation.x = dx[i];
-                lightTranslation.z = dz[i];
-                //				lightTranslation.y = lightTranslation.y - TRADER_Y_SIZE / 2 + Trader3DRenderer.TRADER_Z_SIZE + Screen3D.SPACE_BETWEEN_OBJECTS;
-                lightGameObjects.get(i).instance.transform.setToTranslationAndScaling(lightTranslation, lightScaling);
-                lightGameObjects.get(i).update();
-                pointLights.get(i).set(Color.RED, lightTranslation, intensity);
-            }
 
         }
-        if (lightTimer == 0) {
-            //lightMode
-            // 0, wait
-            switch (lightMode) {
-                case 0: {
-                    lightTimer = AVERAGE_LIGHT_OFF_DURATION + LIGHT_OFF_DURATION_DEVIATION / 2 - (int) (LIGHT_OFF_DURATION_DEVIATION * Math.random());
-                    lightMode  = 1;//wait for light to go on
-                    for (int i = 0; i < NUMBER_OF_LIGHTS; i++) {
-                        renderEngine.remove(pointLights.get(i), true);
-                    }
-                    if (trader.getName().equals("T-25")) {
-                        logger.info("lights off");
-                    }
-                }
-                break;
-                case 1: {
-                    lightTimer = LIGHT_ON_DURATION;
-                    lightMode  = 0;//wait for light to go off
-                    final float intensity = (float) Math.abs(Math.sin(lightTimer / LIGHT_ON_DURATION) * LIGHT_MAX_INTENSITY);
-                    for (int i = 0; i < NUMBER_OF_LIGHTS; i++) {
-                        pointLights.get(i).set(Color.RED, lightTranslation, intensity);
-                        renderEngine.add(pointLights.get(i), true);
-                    }
-                    if (trader.getName().equals("T-25")) {
-                        logger.info("lights on");
-                    }
-                }
-                break;
-            }
-        } else {
-            lightTimer--;
+        for (StrobeLight strobeLight : strobeLights) {
+            strobeLight.update(renderEngine, translation, direction);
         }
     }
 

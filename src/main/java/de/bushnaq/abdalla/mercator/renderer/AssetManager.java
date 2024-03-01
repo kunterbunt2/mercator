@@ -51,13 +51,13 @@ public class AssetManager {
     //    public SceneAsset              cubeAluminiumBrushed;
     public Model                   cubeBase1;
     public Model                   cubeModel;//used for debugging
-    public Model                   emissiveModel;
     //    public SceneAsset              cubeGoldLeaves;
     public Model                   goodContainer;
     public Model                   jumpGate;
     public Model                   land;
     public Model                   mirrorModel;
     public Model                   planetModel;
+    public Model                   redEmissiveModel;
     public Model                   sector;
     public ShowGood                showGood = ShowGood.Name;
     public SceneAsset              trader;
@@ -107,7 +107,7 @@ public class AssetManager {
         createTrader();
         createGoodContainer(modelBuilder);
 
-        createEmissiveModel(modelCreator);
+        createRedEmissiveModel(modelCreator);
         createPlanet(modelCreator);
         {
             final Attribute color     = new PBRColorAttribute(PBRColorAttribute.BaseColorFactor, Color.DARK_GRAY);
@@ -166,12 +166,6 @@ public class AssetManager {
         cubeModel = modelBuilder.createBox(1.0f, 1.0f, 1.0f, material, Usage.Position | Usage.Normal);
     }
 
-    private void createEmissiveModel(ModelCreator modelCreator) {
-        final Attribute emissive = ColorAttribute.createEmissive(Color.WHITE);
-        final Material  material = new Material(emissive);
-        emissiveModel = modelCreator.createBox(material);
-    }
-
     private void createGoodContainer(ModelBuilder modelBuilder) {
         final Attribute color = new PBRColorAttribute(PBRColorAttribute.BaseColorFactor, Color.WHITE);
         //			Attribute culface = IntAttribute.createCullFace(1);
@@ -210,6 +204,12 @@ public class AssetManager {
         final Attribute roughness = PBRFloatAttribute.createRoughness(0.5f);
         final Material  material  = new Material(metallic, roughness, color);
         planetModel = modelCreator.createBox(material);
+    }
+
+    private void createRedEmissiveModel(ModelCreator modelCreator) {
+        final Attribute emissive = ColorAttribute.createEmissive(Color.RED);
+        final Material  material = new Material(emissive);
+        redEmissiveModel = modelCreator.createBox(material);
     }
 
     private Model createSquare(final ModelBuilder modelBuilder, final float sx, final float sz, final Material material) {

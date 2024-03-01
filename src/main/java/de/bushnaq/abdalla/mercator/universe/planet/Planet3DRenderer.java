@@ -112,7 +112,7 @@ public class Planet3DRenderer extends ObjectRenderer<GameEngine3D> {
 
     @Override
     public void create(final RenderEngine3D<GameEngine3D> renderEngine) {
-        createPlanet(renderEngine);
+        createPlanet3D(renderEngine);
     }
 
     public void render2D(final RenderEngine3D<GameEngine3D> renderEngine, final int index, final boolean selected) {
@@ -256,15 +256,16 @@ public class Planet3DRenderer extends ObjectRenderer<GameEngine3D> {
             go.controller.setAnimation(go.instance.getAnimation("rotate"), -1);
             animatedObjects.add(go);
             renderEngine.addDynamic(go);
-            go = new GameObject<>(new ModelInstanceHack(renderEngine.getGameEngine().assetManager.emissiveModel), planet);
+            go = new GameObject<>(new ModelInstanceHack(renderEngine.getGameEngine().assetManager.redEmissiveModel), planet);
             go.instance.materials.get(0).set(emissiveAttribute);
             go.instance.transform.setToTranslationAndScaling(fx, 0f, fz, 1.0f, 1.0f, 1.0f);
             pointLightObjects.add(go);
-            renderEngine.addStatic(go);
+            //todo decide if city should have light
+//            renderEngine.addStatic(go);
         }
     }
 
-    private void createPlanet(final RenderEngine3D<GameEngine3D> renderEngine) {
+    private void createPlanet3D(final RenderEngine3D<GameEngine3D> renderEngine) {
         final float x = planet.x;
         final float z = planet.z;
         //planet
@@ -273,7 +274,7 @@ public class Planet3DRenderer extends ObjectRenderer<GameEngine3D> {
             gameObject.instance.transform.setToTranslationAndScaling(x, -PLANET_HIGHT / 2, z, PLANET_3D_SIZE, PLANET_HIGHT, PLANET_3D_SIZE);
             gameObject.update();
             renderEngine.addStatic(gameObject);
-
+            //todo decide if city should have light
             final PointLight light = new PointLight().set(Color.WHITE, x, LIGHT_HIGHT, z, LIGHT_DAY_INTENSITY);
             pointLight.add(light);
             //			renderMaster.sceneClusterManager.add(light, false);
@@ -481,8 +482,7 @@ public class Planet3DRenderer extends ObjectRenderer<GameEngine3D> {
         for (final GameObject<GameEngine3D> go : animatedObjects) {
             if (ProductionFacility.class.isInstance(go.interactive)) {
                 final ProductionFacility pf = (ProductionFacility) go.interactive;
-                if (pf.status == ProductionFacilityStatus.PRODUCING)
-                    go.controller.update(Gdx.graphics.getDeltaTime());
+                if (pf.status == ProductionFacilityStatus.PRODUCING) go.controller.update(Gdx.graphics.getDeltaTime());
             }
         }
         //animate lights

@@ -17,7 +17,6 @@
 package de.bushnaq.abdalla.mercator.renderer;
 
 import com.badlogic.gdx.*;
-import com.badlogic.gdx.assets.loaders.resolvers.InternalFileHandleResolver;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Cubemap;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -54,9 +53,10 @@ import de.bushnaq.abdalla.mercator.util.TimeUnit;
 import net.mgsx.gltf.scene3d.attributes.PBRCubemapAttribute;
 import net.mgsx.gltf.scene3d.attributes.PBRFloatAttribute;
 import net.mgsx.gltf.scene3d.attributes.PBRTextureAttribute;
+import net.mgsx.gltf.scene3d.lights.DirectionalLightEx;
 import net.mgsx.gltf.scene3d.model.ModelInstanceHack;
 import net.mgsx.gltf.scene3d.scene.SceneSkybox;
-import net.mgsx.gltf.scene3d.utils.EnvironmentUtil;
+import net.mgsx.gltf.scene3d.utils.IBLBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -187,17 +187,17 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
             renderEngine.getMirror().setReflectivity(0.6f);
             renderEngine.setShadowEnabled(true);
             renderEngine.getFog().setEnabled(true);
-            renderEngine.getFog().setColor(Color.WHITE);
-            renderEngine.getFog().setBeginDistance(3000f);
-            renderEngine.getFog().setFullDistance(5000f);
+            renderEngine.getFog().setColor(Color.BLACK);
+            renderEngine.getFog().setBeginDistance(2000f);
+            renderEngine.getFog().setFullDistance(3000f);
             renderEngine.setReflectionClippingPlane(-(context.getWaterLevel() - 2));
             renderEngine.setRefractionClippingPlane((context.getWaterLevel() - 2));
             renderEngine.setDynamicDayTime(true);
-            renderEngine.setSkyBox(true);
+            renderEngine.setSkyBox(false);
             renderEngine.setSceneBoxMin(new Vector3(-1000, -1000, -1000));
             renderEngine.setSceneBoxMax(new Vector3(1000, 1000, 1000));
-            renderEngine.setDayAmbientLight(1f, 1f, 1f, 20f);
-            renderEngine.setNightAmbientLight(.01f, .01f, .01f, 10f);
+            renderEngine.setDayAmbientLight(1f, 1f, 1f, 1f);
+            renderEngine.setNightAmbientLight(.01f, .01f, .01f, 1f);
             createInputProcessor(this, this);
 
             try {
@@ -213,10 +213,10 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
             audioEngine.create();
             audioEngine.enableHrtf(0);
 
-            createStone();
+//            createStone();
             createTraders();
 //			createRing();
-            createWater();
+//            createWater();
             createPlanets();
 //			createLand();
             createJumpGates();
@@ -313,6 +313,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
                 renderEngine.setDaySkyBox(new SceneSkybox(environmentDayCubemap));
                 renderEngine.setNightSkyBox(new SceneSkybox(environmentNightCubemap));
             }
+
             renderEngine.environment.set(PBRCubemapAttribute.createDiffuseEnv(diffuseCubemap));
             renderEngine.environment.set(PBRCubemapAttribute.createSpecularEnv(specularCubemap));
             renderEngine.environment.set(new PBRTextureAttribute(PBRTextureAttribute.BRDFLUTTexture, brdfLUT));
@@ -1095,11 +1096,11 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
     //	}
 
     private void setupImageBasedLightingByFaceNames(final String name, final String diffuseExtension, final String environmentExtension, final String specularExtension, final int specularIterations) {
-        diffuseCubemap          = EnvironmentUtil.createCubemap(new InternalFileHandleResolver(), AtlasManager.getAssetsFolderName() + "/textures/" + name + "/diffuse/diffuse_", "_0." + diffuseExtension, EnvironmentUtil.FACE_NAMES_FULL);
-        environmentDayCubemap   = EnvironmentUtil.createCubemap(new InternalFileHandleResolver(), AtlasManager.getAssetsFolderName() + "/textures/" + name + "/environmentDay/environment_", "_0." + environmentExtension, EnvironmentUtil.FACE_NAMES_FULL);
-        environmentNightCubemap = EnvironmentUtil.createCubemap(new InternalFileHandleResolver(), AtlasManager.getAssetsFolderName() + "/textures/" + name + "/environmentNight/environment_", "_0." + environmentExtension, EnvironmentUtil.FACE_NAMES_FULL);
-        specularCubemap         = EnvironmentUtil.createCubemap(new InternalFileHandleResolver(), AtlasManager.getAssetsFolderName() + "/textures/" + name + "/specular/specular_", "_", "." + specularExtension, specularIterations, EnvironmentUtil.FACE_NAMES_FULL);
-        brdfLUT                 = new Texture(Gdx.files.classpath("net/mgsx/gltf/shaders/brdfLUT.png"));
+//        diffuseCubemap          = EnvironmentUtil.createCubemap(new InternalFileHandleResolver(), AtlasManager.getAssetsFolderName() + "/textures/" + name + "/diffuse/diffuse_", "_0." + diffuseExtension, EnvironmentUtil.FACE_NAMES_FULL);
+//        environmentDayCubemap   = EnvironmentUtil.createCubemap(new InternalFileHandleResolver(), AtlasManager.getAssetsFolderName() + "/textures/" + name + "/environmentDay/environment_", "_0." + environmentExtension, EnvironmentUtil.FACE_NAMES_FULL);
+//        environmentNightCubemap = EnvironmentUtil.createCubemap(new InternalFileHandleResolver(), AtlasManager.getAssetsFolderName() + "/textures/" + name + "/environmentNight/environment_", "_0." + environmentExtension, EnvironmentUtil.FACE_NAMES_FULL);
+//        specularCubemap         = EnvironmentUtil.createCubemap(new InternalFileHandleResolver(), AtlasManager.getAssetsFolderName() + "/textures/" + name + "/specular/specular_", "_", "." + specularExtension, specularIterations, EnvironmentUtil.FACE_NAMES_FULL);
+        brdfLUT = new Texture(Gdx.files.classpath("net/mgsx/gltf/shaders/brdfLUT.png"));
 
         // // setup quick IBL (image based lighting)
         // DirectionalLightEx light = new DirectionalLightEx();
@@ -1110,6 +1111,17 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
         // diffuseCubemap = iblBuilder.buildIrradianceMap(256);
         // specularCubemap = iblBuilder.buildRadianceMap(10);
         // iblBuilder.dispose();
+        DirectionalLightEx light = new DirectionalLightEx();
+        light.direction.set(1, -3, 1).nor();
+        light.color.set(Color.WHITE);
+        IBLBuilder iblBuilder         = IBLBuilder.createOutdoor(light);
+        Cubemap    environmentCubemap = iblBuilder.buildEnvMap(1024);
+        diffuseCubemap  = iblBuilder.buildIrradianceMap(256);
+        specularCubemap = iblBuilder.buildRadianceMap(10);
+        iblBuilder.dispose();
+        environmentDayCubemap   = environmentCubemap;
+        environmentNightCubemap = environmentCubemap;
+
     }
 
     private void startDemoMode() throws OpenAlException {

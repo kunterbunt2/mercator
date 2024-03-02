@@ -20,7 +20,6 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.PolygonSpriteBatch;
-import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
@@ -32,14 +31,13 @@ import de.bushnaq.abdalla.mercator.renderer.GameEngine2D;
 import de.bushnaq.abdalla.mercator.renderer.GameEngine3D;
 import de.bushnaq.abdalla.mercator.universe.Universe;
 import de.bushnaq.abdalla.mercator.universe.sim.trader.Trader;
-import net.mgsx.gltf.scene3d.attributes.PBRColorAttribute;
 import net.mgsx.gltf.scene3d.model.ModelInstanceHack;
 
 public class JumpGate3DRenderer extends ObjectRenderer<GameEngine3D> {
-    public static final  float JUMP_GATE_SIZE   = 2 / Universe.WORLD_SCALE;
+    public static final  float JUMP_GATE_SIZE   = 8 / Universe.WORLD_SCALE;
     static final         Color JUMPGATE_COLOR   = new Color(0.275f, 0.314f, 0.314f, 1.0f);
     private static final float JUMP_GATE_DEPTH  = 0 / Universe.WORLD_SCALE /*+ Planet3DRenderer.WATER_Y*/;
-    private static final float JUMP_GATE_HEIGHT = 2 / Universe.WORLD_SCALE;
+    private static final float JUMP_GATE_HEIGHT = 8 / Universe.WORLD_SCALE;
     private static final Color PATH_NAME_COLOR  = Color.BLUE;
     private final        Path  jumpGate;
     //	Matrix4 rotationMatrix = new Matrix4();
@@ -205,28 +203,28 @@ public class JumpGate3DRenderer extends ObjectRenderer<GameEngine3D> {
     //	}
 
     private void drawJumpGate(final float x, final float y, final float z, final RenderEngine3D<GameEngine3D> renderEngine, final long currentTime, final boolean selected) {
-        if (instance != null && (selected != lastSelected || jumpGate.source.trader != lastTrader)) {
-            if (selected) {
-//				if (jumpGate.source.trader != null) {
-//					instance.instance.materials.get(0).set(new PBRColorAttribute(ColorAttribute.Emissive, Color.RED));
-//				} else {
-                instance.instance.materials.get(0).set(new PBRColorAttribute(ColorAttribute.Emissive, Color.YELLOW));
-//				}
-                instance.instance.materials.get(0).remove(PBRColorAttribute.BaseColorFactor);
-            } else {
-//				if (jumpGate.source.trader != null) {
-//					instance.instance.materials.get(0).set(new PBRColorAttribute(ColorAttribute.Emissive, Color.RED));
-//					instance.instance.materials.get(0).remove(PBRColorAttribute.BaseColorFactor);
-//				} else
-                {
-                    instance.instance.materials.get(0).remove(ColorAttribute.Emissive);
-                    final PBRColorAttribute ca = (PBRColorAttribute) renderEngine.getGameEngine().assetManager.cubeBase1.materials.get(0).get(PBRColorAttribute.BaseColorFactor);
-                    instance.instance.materials.get(0).set(new PBRColorAttribute(PBRColorAttribute.BaseColorFactor, ca.color));
-                }
-            }
-            lastSelected = selected;
-            lastTrader   = jumpGate.source.trader;
-        }
+//        if (instance != null && (selected != lastSelected || jumpGate.source.trader != lastTrader)) {
+//            if (selected) {
+////				if (jumpGate.source.trader != null) {
+////					instance.instance.materials.get(0).set(new PBRColorAttribute(ColorAttribute.Emissive, Color.RED));
+////				} else {
+//                instance.instance.materials.get(0).set(new PBRColorAttribute(ColorAttribute.Emissive, Color.YELLOW));
+////				}
+//                instance.instance.materials.get(0).remove(PBRColorAttribute.BaseColorFactor);
+//            } else {
+////				if (jumpGate.source.trader != null) {
+////					instance.instance.materials.get(0).set(new PBRColorAttribute(ColorAttribute.Emissive, Color.RED));
+////					instance.instance.materials.get(0).remove(PBRColorAttribute.BaseColorFactor);
+////				} else
+//                {
+//                    instance.instance.materials.get(0).remove(ColorAttribute.Emissive);
+//                    final PBRColorAttribute ca = (PBRColorAttribute) renderEngine.getGameEngine().assetManager.cubeBase1.materials.get(0).get(PBRColorAttribute.BaseColorFactor);
+//                    instance.instance.materials.get(0).set(new PBRColorAttribute(PBRColorAttribute.BaseColorFactor, ca.color));
+//                }
+//            }
+//            lastSelected = selected;
+//            lastTrader   = jumpGate.source.trader;
+//        }
     }
 
     public void render2Da(final RenderEngine2D<GameEngine3D> renderEngine, final int index, final boolean selected) {

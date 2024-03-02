@@ -34,7 +34,6 @@ import de.bushnaq.abdalla.mercator.universe.good.Good;
 import de.bushnaq.abdalla.mercator.universe.good.Good3DRenderer;
 import de.bushnaq.abdalla.mercator.universe.good.GoodType;
 import de.bushnaq.abdalla.mercator.universe.planet.Planet3DRenderer;
-import net.mgsx.gltf.scene3d.attributes.PBRColorAttribute;
 import net.mgsx.gltf.scene3d.model.ModelInstanceHack;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,9 +48,13 @@ public class Trader3DRenderer extends ObjectRenderer<GameEngine3D> {
     public static final  Color                                         TRADER_COLOR            = new Color(.7f, .7f, .7f, 0.45f); // 0xffcc5555;
     public static final  Color                                         TRADER_COLOR_IS_GOOD    = Color.LIGHT_GRAY; // 0xaaaaaa
     public static final  float                                         TRADER_SIZE_Z           = (8 + 80 + 8)/*16*/ / Universe.WORLD_SCALE;
-    public static final  float                                         TRADER_WIDTH            = 16;
-    private static final float                                         LIGHT_DISTANCE          = 0f;
+    public static final  float                                         TRADER_WIDTH            = 16f;
+    private static final float                                         ANTENNA_LENGTH          = 8f;
+    //    private static final float                                         LIGHT_DISTANCE          = 0.1f;
     private static final int                                           NUMBER_OF_LIGHTS        = 4;
+    private static final float                                         TRADER_ANTENNA_MARGINE  = 1f;
+    private static final float                                         TRADER_COCKPIT_SIZE_Z   = 16f;
+    private static final float                                         TRADER_ENGINE_SIZE_Z    = 16f;
     private static final Color                                         TRADER_NAME_COLOR       = Color.ORANGE;
     private static final float                                         TRADER_SIZE_X           = 16 / Universe.WORLD_SCALE;
     private static final float                                         TRADER_SIZE_Y           = 16 / Universe.WORLD_SCALE;
@@ -75,6 +78,7 @@ public class Trader3DRenderer extends ObjectRenderer<GameEngine3D> {
     private final        float[]                                       velocity                = new float[3];
     private              int                                           TraderColorIndex        = -1;
     private              GameObject<GameEngine3D>                      instance;
+    private              GameObject<GameEngine3D>                      instance1;
     private              boolean                                       lastSelected            = false;
     private              long                                          lastTransaction         = 0;
     //    private              int                                           lightMode                    = 0;
@@ -167,28 +171,23 @@ public class Trader3DRenderer extends ObjectRenderer<GameEngine3D> {
     }
 
     private void createLights(final RenderEngine3D<GameEngine3D> renderEngine) {
-        final float[] dx = {
-                TRADER_SIZE_X / 2 + LIGHT_DISTANCE,//
-                -TRADER_SIZE_X / 2 - LIGHT_DISTANCE,//
-                +TRADER_SIZE_X / 2 + LIGHT_DISTANCE,//
-                -TRADER_SIZE_X / 2 - LIGHT_DISTANCE//
+        final Vector3[] delta = {
+                //20.1 - 33,7
+                new Vector3(TRADER_SIZE_X / 2 + ANTENNA_LENGTH + StrobeLight.LIGHT_SIZE / 2, TRADER_SIZE_Y / 2 - TRADER_ANTENNA_MARGINE, TRADER_SIZE_Z / 2 - TRADER_ENGINE_SIZE_Z + TRADER_ANTENNA_MARGINE),//back/right/top
+                new Vector3(TRADER_SIZE_X / 2 - TRADER_ANTENNA_MARGINE, TRADER_SIZE_Y / 2 - TRADER_ANTENNA_MARGINE, -TRADER_SIZE_Z / 2 - ANTENNA_LENGTH - StrobeLight.LIGHT_SIZE / 2),//front/right/top
+                new Vector3(-TRADER_SIZE_X / 2 - ANTENNA_LENGTH - StrobeLight.LIGHT_SIZE / 2, -TRADER_SIZE_Y / 2 + TRADER_ANTENNA_MARGINE, -TRADER_SIZE_Z / 2 + +TRADER_COCKPIT_SIZE_Z - TRADER_ANTENNA_MARGINE),//front/left/bottom
+                new Vector3(-TRADER_SIZE_X / 2 + TRADER_ANTENNA_MARGINE, -TRADER_SIZE_Y / 2 - ANTENNA_LENGTH - StrobeLight.LIGHT_SIZE / 2, TRADER_SIZE_Z / 2 - TRADER_ENGINE_SIZE_Z / 2 + 2),//back/left/bottom
         };
-        final float[] dz = {
-                +TRADER_SIZE_Z / 2 + LIGHT_DISTANCE,//
-                +TRADER_SIZE_Z / 2 + LIGHT_DISTANCE,//
-                -TRADER_SIZE_Z / 2 - LIGHT_DISTANCE,//
-                -TRADER_SIZE_Z / 2 - LIGHT_DISTANCE//
-        };
-        //TODO reuse instances
         for (int i = 0; i < NUMBER_OF_LIGHTS; i++) {
-//            final GameObject<GameEngine3D> go = ;
-            strobeLights.add(new StrobeLight(renderEngine, dx[i], TRADER_SIZE_Y / 2 + GameEngine3D.SPACE_BETWEEN_OBJECTS, dz[i], new GameObject<GameEngine3D>(new ModelInstanceHack(renderEngine.getGameEngine().assetManager.redEmissiveModel), trader)));
+            strobeLights.add(new StrobeLight(renderEngine, delta[i], new GameObject<GameEngine3D>(new ModelInstanceHack(renderEngine.getGameEngine().assetManager.redEmissiveModel), trader)));
         }
     }
 
     private void createTrader(final RenderEngine3D<GameEngine3D> renderEngine) {
         instance = new GameObject<GameEngine3D>(new ModelInstanceHack(renderEngine.getGameEngine().assetManager.trader.scene.model), trader, this);
         renderEngine.addDynamic(instance);
+        instance1 = new GameObject<GameEngine3D>(new ModelInstanceHack(renderEngine.getGameEngine().assetManager.cubeTrans1), trader, this);
+        renderEngine.addDynamic(instance1);
     }
 
     private int getColorIndex() {
@@ -253,7 +252,7 @@ public class Trader3DRenderer extends ObjectRenderer<GameEngine3D> {
                 final Vector3 yVector = new Vector3(0, 1, 0);
                 m.setToTranslation(x - height * scaling / 2.0f - dy, y + TRADER_SIZE_Y / 2.0f + 0.2f, z + width * scaling / 2.0f - dx);
                 m.rotateTowardDirection(direction, Vector3.Y);
-                m.translate(/*-8*/0, 0, -TRADER_SIZE_Z / 2 + 8);
+                m.translate(/*-8*/0, 0, +TRADER_SIZE_Z / 2 + 8);
                 m.rotate(yVector, 90);
                 m.rotate(xVector, -90);
                 m.scale(scaling, scaling, 1f);
@@ -421,6 +420,7 @@ public class Trader3DRenderer extends ObjectRenderer<GameEngine3D> {
 //        scaling.set(TRADER_SIZE_X, TRADER_SIZE_Y, TRADER_SIZE_Z);
         scaling.set(1, 1, 1);
         instance.instance.transform.setToTranslation(translation);
+        instance1.instance.transform.setToTranslation(translation);
 
         //		pole.instance.transform.setToTranslation(translation);
 
@@ -429,9 +429,9 @@ public class Trader3DRenderer extends ObjectRenderer<GameEngine3D> {
             //			instance.instance.transform.rotateTowardTarget(target, Vector3.Y);
             instance.instance.transform.rotateTowardDirection(direction, Vector3.Y);
             instance.instance.transform.scale(scaling.x, scaling.y, scaling.z);
-            //			pole.instance.transform.rotateTowardDirection(direction, Vector3.Y);
-            //			pole.instance.transform.translate(-TRADER_X_SIZE / 2, POLE_Y_SIZE / 2, -TRADER_Z_SIZE / 2);
-            //			pole.instance.transform.scale(1f, POLE_Y_SIZE, 1f);
+//            instance.instance.transform.scale(scaling.x * 17, scaling.y * 17, scaling.z * (96));
+            instance1.instance.transform.rotateTowardDirection(direction, Vector3.Y);
+            instance1.instance.transform.scale(scaling.x * 17, scaling.y * 17, scaling.z * (96 - 32));
         }
 
         //		if (trader.getName().equals("T-50")) {
@@ -442,12 +442,14 @@ public class Trader3DRenderer extends ObjectRenderer<GameEngine3D> {
         trader.y = translation.y;
         trader.z = translation.z;
         instance.update();
+        instance1.update();
         //		pole.update();
         if (selected != lastSelected) {
             if (selected) {
 //                instance.instance.materials.get(0).set(new PBRColorAttribute(ColorAttribute.Emissive, Color.YELLOW));
 //                instance.instance.materials.get(0).remove(PBRColorAttribute.BaseColorFactor);
-                instance.instance.materials.get(0).set(new PBRColorAttribute(PBRColorAttribute.BaseColorFactor, Color.DARK_GRAY));
+//                instance.instance.materials.get(0).set(new PBRColorAttribute(PBRColorAttribute.BaseColorFactor, Color.DARK_GRAY));
+//                instance1.instance.materials.get(0).set(new PBRColorAttribute(PBRColorAttribute.BaseColorFactor, Color.DARK_GRAY));
             } else {
                 //				instance.instance.materials.get(0).remove(ColorAttribute.Emissive);
                 //				final PBRColorAttribute ca = (PBRColorAttribute) renderMaster.trader.materials.get(0).get(PBRColorAttribute.BaseColorFactor);

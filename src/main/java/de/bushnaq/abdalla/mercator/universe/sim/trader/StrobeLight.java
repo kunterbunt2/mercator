@@ -27,18 +27,25 @@ import de.bushnaq.abdalla.mercator.renderer.GameEngine3D;
 public class StrobeLight {
     public static final  float                    LIGHT_MAX_INTENSITY          = 10000f;
     public static final  float                    LIGHT_OFF_DURATION_AVERAGE   = 3f;
-    public static final  float                    LIGHT_OFF_DURATION_DEVIATION = 1f;
+    public static final  float                    LIGHT_OFF_DURATION_DEVIATION = 0.1f;
     public static final  float                    LIGHT_ON_DURATION            = 0.1f;
+    public static final  float                    LIGHT_SIZE                   = .2f;
     private static final float                    PY2                          = 3.14159f / 2;
     public final         GameObject<GameEngine3D> gameObject;
     public final         PointLight               pointLight;
-    private final        Vector3                  lightScaling                 = new Vector3(.1f, .1f, .1f);
+    private final        Vector3                  lightScaling                 = new Vector3(LIGHT_SIZE, LIGHT_SIZE, LIGHT_SIZE);
     public               Vector3                  delta                        = new Vector3();
     public               int                      lightMode                    = 0;
     public               float                    lightTimer                   = 0;
 
-    public StrobeLight(RenderEngine3D<GameEngine3D> renderEngine, float deltaX, float deltaY, float deltaZ, GameObject<GameEngine3D> gameObject) {
-        delta.set(deltaX, deltaY, deltaZ);
+    //    public StrobeLight(RenderEngine3D<GameEngine3D> renderEngine, float deltaX, float deltaY, float deltaZ, GameObject<GameEngine3D> gameObject) {
+//        delta.set(deltaX, deltaY, deltaZ);
+//        this.gameObject = gameObject;
+//        this.pointLight = new PointLight();
+//        renderEngine.addDynamic(gameObject);
+//    }
+    public StrobeLight(RenderEngine3D<GameEngine3D> renderEngine, Vector3 delta, GameObject<GameEngine3D> gameObject) {
+        this.delta.set(delta);
         this.gameObject = gameObject;
         this.pointLight = new PointLight();
         renderEngine.addDynamic(gameObject);
@@ -89,14 +96,17 @@ public class StrobeLight {
     }
 
     public void update(RenderEngine3D<GameEngine3D> renderEngine, Vector3 translation, Vector3 direction) {
-        final float intensity = calculateIntensity();
-        gameObject.instance.transform.setToTranslation(translation.x, translation.y, translation.z);
-        gameObject.instance.transform.rotateTowardDirection(direction, Vector3.Y);
-        gameObject.instance.transform.translate(delta);
-        gameObject.instance.transform.scale(lightScaling.x, lightScaling.y, lightScaling.z);
-        gameObject.update();
-        Vector3 lightTranslation = new Vector3();
-        pointLight.set(Color.RED, gameObject.instance.transform.getTranslation(lightTranslation), intensity);
-        animate(renderEngine);
+        if (direction.x != 0f || direction.y != 0f || direction.z != 0f) {
+            final float intensity = calculateIntensity();
+            gameObject.instance.transform.setToTranslation(translation.x, translation.y, translation.z);
+            gameObject.instance.transform.rotateTowardDirection(direction, Vector3.Y);
+            gameObject.instance.transform.translate(delta);
+            gameObject.instance.transform.scale(lightScaling.x, lightScaling.y, lightScaling.z);
+            gameObject.update();
+            Vector3 lightTranslation = new Vector3();
+            gameObject.instance.transform.getTranslation(lightTranslation);
+            pointLight.set(Color.RED, lightTranslation.x + 0.2f, lightTranslation.y, lightTranslation.z, intensity);
+            animate(renderEngine);
+        }
     }
 }

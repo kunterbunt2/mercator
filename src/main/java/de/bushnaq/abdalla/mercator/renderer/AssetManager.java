@@ -24,6 +24,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g3d.Attribute;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Model;
+import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
@@ -51,6 +52,8 @@ public class AssetManager {
     //    public SceneAsset              cubeAluminiumBrushed;
     public Model                   cubeBase1;
     public Model                   cubeModel;//used for debugging
+    public Model                   cubeTrans1;
+    public Model                   cubeTrans2;
     //    public SceneAsset              cubeGoldLeaves;
     public Model                   goodContainer;
     public Model                   jumpGate;
@@ -104,7 +107,7 @@ public class AssetManager {
             final Material material = new Material(metallic, roughness, color /*, culling, normal, occlusion, shininess */);
             cubeBase1 = modelCreator.createBox(material);
         }
-        createTrader();
+        createTrader(modelBuilder, modelCreator);
         createGoodContainer(modelBuilder);
 
         createRedEmissiveModel(modelCreator);
@@ -143,6 +146,7 @@ public class AssetManager {
         createWater(texture, modelBuilder);
         createMirror(texture, modelBuilder);
         createCube(modelBuilder);
+        createTransparentCube(modelBuilder);
     }
 
     private void createBuilding(ModelBuilder modelBuilder) {
@@ -181,12 +185,12 @@ public class AssetManager {
     private void createJumpgate(ModelBuilder modelBuilder) {
         final Attribute color     = new PBRColorAttribute(PBRColorAttribute.BaseColorFactor, Color.WHITE);
         final Attribute metallic  = PBRFloatAttribute.createMetallic(1f);
-        final Attribute roughness = PBRFloatAttribute.createRoughness(0.5f);
-        final Attribute occlusion = PBRFloatAttribute.createOcclusionStrength(1.0f);
+        final Attribute roughness = PBRFloatAttribute.createRoughness(0.1f);
+//        final Attribute occlusion = PBRFloatAttribute.createOcclusionStrength(1.0f);
         //			final Attribute culling = IntAttribute.createCullFace(1);
         //			final Material material = new Material(metallic, roughness, color);
         //			final Material material = new Material(metallic, roughness, color, culling/*, normal*/, occlusion/*, shininess */);
-        final Material material = new Material(metallic, roughness, color, occlusion);
+        final Material material = new Material(metallic, roughness, color);
         jumpGate = modelBuilder.createBox(1.0f, 1.0f, 1.0f, material, Usage.Position | Usage.Normal);
     }
 
@@ -207,8 +211,12 @@ public class AssetManager {
     }
 
     private void createRedEmissiveModel(ModelCreator modelCreator) {
-        final Attribute emissive = ColorAttribute.createEmissive(Color.RED);
-        final Material  material = new Material(emissive);
+        final Material material = new Material();
+        material.set(PBRColorAttribute.createBaseColorFactor(new Color(Color.WHITE).fromHsv(15, .9f, .8f)));
+        material.set(PBRColorAttribute.createEmissive(new Color(Color.RED)));
+
+//        final Attribute emissive = ColorAttribute.createEmissive(Color.RED);
+//        final Material  material = new Material(emissive);
         redEmissiveModel = modelCreator.createBox(material);
     }
 
@@ -216,24 +224,52 @@ public class AssetManager {
         return modelBuilder.createRect(-sx, 0f, sz, sx, 0f, sz, sx, 0f, -sz, -sx, 0f, -sz, 0f, 1f, 0f, material, Usage.Position | Usage.Normal | Usage.TextureCoordinates);
     }
 
-    private void createTrader() {
-        final Attribute metallic  = PBRFloatAttribute.createMetallic(0.7f);
-        final Attribute roughness = PBRFloatAttribute.createRoughness(0.3f);
-        final Attribute color     = PBRColorAttribute.createBaseColorFactor(Color.BLACK);
-        //			Attribute normal = PBRFloatAttribute.createNormalScale(0.0f);
-        //			Attribute occlusion = PBRFloatAttribute.createOcclusionStrength(0.0f);
-        //			Attribute culling = IntAttribute.createCullFace(0);
-        //			Attribute shininess = PBRFloatAttribute.createShininess(1.0f);
-        final Material material = new Material(metallic, roughness, color/* , culling, normal, occlusion, shininess */);
+    private void createTrader(ModelBuilder modelBuilder, ModelCreator modelCreator) {
+//        final Attribute color     = new PBRColorAttribute(PBRColorAttribute.BaseColorFactor, Color.BLACK);
+//        final Attribute metallic  = PBRFloatAttribute.createMetallic(0f);
+//        final Attribute roughness = PBRFloatAttribute.createRoughness(1f);
+//        final Material material = new Material(metallic, roughness, color/* , culling, normal, occlusion, shininess */);
         //			trader = modelCreator.createBox(material);
-//            trader      = modelBuilder.createBox(1.0f, 1.0f, 1.0f, material, Usage.Position | Usage.Normal);
+//        trader = modelBuilder.createBox(1.0f, 1.0f, 1.0f, material, Usage.Position | Usage.Normal);//does NOT work with light
+//        trader = modelCreator.createBox(material);//works with light
+//        {//works with light
+//            ModelBuilder mb = new ModelBuilder();
+//            mb.begin();
+//            MeshPartBuilder mpb = mb.part("cube", GL20.GL_TRIANGLES, Usage.Position | Usage.Normal, material);
+//            BoxShapeBuilder.build(mpb, 1f, 1f, 1f);
+//            Model model = mb.end();
+//            trader = model;
+//        }
+
+
         trader = new GLBLoader().load(Gdx.files.internal(String.format(AtlasManager.getAssetsFolderName() + "/models/trader.glb")));
-        for (Material m : trader.scene.model.materials) {
-//        Material m = trader.scene.model.materials.get(0);
-            m.set(metallic);
-            m.set(roughness);
-            m.set(color);
+//        for (Material m : trader.scene.model.materials) {
+//            if (m.id.equals("body.material"))
+//            m.set(metallic, roughness, color);
+//        }
+    }
+
+    private void createTransparentCube(ModelBuilder modelBuilder) {
+        {
+            final Attribute metallic  = PBRFloatAttribute.createMetallic(0.9f);
+            final Attribute roughness = PBRFloatAttribute.createRoughness(0.5f);
+            final Attribute color     = new PBRColorAttribute(PBRColorAttribute.BaseColorFactor, Color.GOLDENROD);
+            final Attribute blending  = new BlendingAttribute(0.2f); // opacity is set by pbrMetallicRoughness below
+            final Material  material  = new Material(metallic, roughness, color/* , culling, normal, occlusion, shininess */, blending);
+//            final Attribute color     = new PBRColorAttribute(PBRColorAttribute.BaseColorFactor, Color.WHITE);
+//            final Attribute metallic  = PBRFloatAttribute.createMetallic(0.5f);
+//            final Attribute roughness = PBRFloatAttribute.createRoughness(0.5f);
+//            final Material  material  = new Material(metallic, roughness, color);
+//            cubeTrans1 = modelCreator.createBox(material);
+            cubeTrans1 = modelBuilder.createBox(1.0f, 1.0f, 1.0f, material, Usage.Position | Usage.Normal);
         }
+//        {
+//            final Attribute metallic  = PBRFloatAttribute.createMetallic(1.0f);
+//            final Attribute roughness = PBRFloatAttribute.createRoughness(0.0f);
+//            final Material  material  = new Material(metallic, roughness/*, color , culling, normal, occlusion, shininess , blending*/);
+////            cubeTrans2 = modelCreator.createBox(material);
+//            cubeTrans2 = modelBuilder.createBox(1.0f, 1.0f, 1.0f, material, Usage.Position | Usage.Normal);
+//        }
     }
 
     private void createTurbine() {

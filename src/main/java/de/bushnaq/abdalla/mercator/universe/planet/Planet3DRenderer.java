@@ -55,7 +55,7 @@ public class Planet3DRenderer extends ObjectRenderer<GameEngine3D> {
     public static final  Color                          PLANET_COLOR           = new Color(0.5f, 0.5f, 0.8f, 1.0f); // 0xff8888cc;
     public static final  float                          PLANET_CORE_SIZE       = Good3DRenderer.GOOD_X * 2;
     //	public static final float PLANET_DISTANCE = 512/* PLANET_SIZE * 2 */;
-    public static final  float                          PLANET_HIGHT           = 1000;
+    public static final  float                          PLANET_HIGHT           = 3000;
     public static final  int                            PLANET_MAX_SHIFT       = Planet.PLANET_DISTANCE / 4;
     public static final  int                            PLANET_SPAN_SPACE      = Planet.PLANET_DISTANCE + PLANET_BORDER;
     public static final  float                          SECTOR_HIGHT           = 8;

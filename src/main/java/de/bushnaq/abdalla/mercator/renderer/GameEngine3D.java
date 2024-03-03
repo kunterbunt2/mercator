@@ -87,6 +87,8 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
     public static final  float                        SPACE_BETWEEN_OBJECTS           = 0.1f / Universe.WORLD_SCALE;
     public static final  Color                        TEXT_COLOR                      = Color.WHITE; // 0xffffffff;
     public static final  int                          TIME_MACHINE_FONT_SIZE          = 10;
+    static final         Color                        DEBUG_GRID_BORDER_COLOR         = new Color(1f, 1f, 1f, 0.2f);
+    static final         Color                        DEBUG_GRID_COLOR                = new Color(.0f, .0f, .0f, 0.2f);
     private static final float                        RENDER_2D_UNTIL                 = 1500;
     private static final float                        RENDER_3D_UNTIL                 = 2000;
     //	private static final String RENDER_DURATION = "render()";
@@ -183,7 +185,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
             renderEngine.getWater().setWaveStrength(0.01f / Universe.WORLD_SCALE);
             renderEngine.getWater().setWaveSpeed(0.01f);
             renderEngine.getWater().setRefractiveMultiplicator(1f);
-            renderEngine.getMirror().setPresent(false);
+            renderEngine.getMirror().setPresent(true);
             renderEngine.getMirror().setReflectivity(0.6f);
             renderEngine.setShadowEnabled(true);
             renderEngine.getFog().setEnabled(true);
@@ -216,7 +218,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
 //            createStone();
             createTraders();
 //			createRing();
-//            createWater();
+            createWater();
             createPlanets();
 //			createLand();
             createJumpGates();
@@ -401,18 +403,17 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
     }
 
     private void createWater() {
+        final float delta = (universe.size + 1) * Planet.PLANET_DISTANCE * 2;
+        //water
         if (renderEngine.getWater().isPresent()) {
-            final float delta = (universe.size + 1) * Planet.PLANET_DISTANCE * 2;
-            //sector
+            //bottom
             {
-                //			final Color sectorColor = renderMaster.getDistinctiveColor(planet.sector.type);
                 final GameObject<GameEngine3D> sectorInstance = new GameObject<>(new ModelInstanceHack(assetManager.sector), null);
                 sectorInstance.instance.transform.setToTranslationAndScaling(0, Planet3DRenderer.SECTOR_Y, 0, delta, 8, delta);
                 sectorInstance.update();
                 renderEngine.addStatic(sectorInstance);
 
             }
-            //water
             {
                 final GameObject<GameEngine3D> sectorInstance = new GameObject<>(new ModelInstanceHack(assetManager.waterModel), null);
                 sectorInstance.instance.transform.setToTranslationAndScaling(0, Planet3DRenderer.WATER_Y, 0, delta, 1, delta);
@@ -420,11 +421,43 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
                 renderEngine.addStatic(sectorInstance);
             }
         }
+        if (renderEngine.getMirror().isPresent()) {
+            final GameObject<GameEngine3D> sectorInstance = new GameObject<>(new ModelInstanceHack(assetManager.mirrorModel), null);
+            sectorInstance.instance.transform.setToTranslationAndScaling(0, Planet3DRenderer.MIRROR_Y, 0, delta, 1, delta);
+            sectorInstance.update();
+            renderEngine.addStatic(sectorInstance);
+        }
+    }
+
+    private void drawDebugGrid() {
+        for (int y = -universe.size; y < universe.size; y++) {
+            for (int x = -universe.size; x < universe.size; x++) {
+                {
+                    final float tx1 = x * Planet.PLANET_DISTANCE - Planet.PLANET_DISTANCE / 2 + 1;
+                    final float tz1 = y * Planet.PLANET_DISTANCE - Planet.PLANET_DISTANCE / 2 + 1;
+                    final float tx2 = x * Planet.PLANET_DISTANCE + Planet.PLANET_DISTANCE - Planet.PLANET_DISTANCE / 2 - 2;
+                    final float tz2 = y * Planet.PLANET_DISTANCE + Planet.PLANET_DISTANCE - Planet.PLANET_DISTANCE / 2 - 2;
+                    renderEngine.renderutils2Dxz.bar(atlasManager.systemTextureRegion, tx1, 0, tz1, tx2, 0, tz2, DEBUG_GRID_BORDER_COLOR);
+                }
+                {
+                    final float tx1 = x * Planet.PLANET_DISTANCE - Planet.PLANET_DISTANCE / 2/* + Planet3DRenderer.PLANET_BORDER*/;
+                    final float tz1 = y * Planet.PLANET_DISTANCE - Planet.PLANET_DISTANCE / 2/* + Planet3DRenderer.PLANET_BORDER*/;
+                    final float tx2 = x * Planet.PLANET_DISTANCE + Planet.PLANET_DISTANCE - Planet.PLANET_DISTANCE / 2/* - Planet3DRenderer.PLANET_BORDER*/ - 1;
+                    final float tz2 = y * Planet.PLANET_DISTANCE + Planet.PLANET_DISTANCE - Planet.PLANET_DISTANCE / 2/* - Planet3DRenderer.PLANET_BORDER*/ - 1;
+                    renderEngine.renderutils2Dxz.bar(atlasManager.systemTextureRegion, tx1, 0, tz1, tx2, 0, tz2, DEBUG_GRID_COLOR);
+                }
+            }
+        }
     }
 
     private void exit() {
         Gdx.app.exit();
     }
+
+
+//    public int getMaxFramesPerSecond() {
+//        return maxFramesPerSecond;
+//    }
 
     private void export(final String fileName, final List<DemoString> Strings) throws IOException {
         final FileWriter  fileWriter  = new FileWriter(fileName);
@@ -438,6 +471,69 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
     public AtlasManager getAtlasManager() {
         return atlasManager;
     }
+
+    //	Sector3DRenderer sector3DRenderer = new Sector3DRenderer();
+    //
+    //	private void drawSectors() {
+    //		for (int y = 0; y < universe.size * 2; y++) {
+    //			for (int x = 0; x < universe.size * 2; x++) {
+    //				Sector sector = universe.sectorList.sectorMap[x][y];
+    //				if (sector != null) {
+    //					sector3DRenderer.render(x - renderMaster.universe.size, y - renderMaster.universe.size, sector,
+    //							renderMaster, 0, false);
+    //				}
+    //			}
+    //		}
+    //	}
+
+    //	private void drawStatistics() {
+    //		float x = universe.size * Planet3DRenderer.PLANET_DISTANCE;
+    //		float y = universe.size * Planet3DRenderer.PLANET_DISTANCE;
+    //		int delta = FONT_SIZE;
+    //		for (String statisticName : universe.timeStatisticManager.getSet()) {
+    //			TimeStatistic statistic = universe.timeStatisticManager.getStatistic(statisticName);
+    //			renderMaster.text(x, y, Color.WHITE, TEXT_COLOR, String.format("%s %dms %dms %dms %dms", statisticName,
+    //					statistic.lastTime, statistic.minTime, statistic.averageTime, statistic.maxTime));
+    //			y += delta;
+    //		}
+    //		renderMaster.text(x, y, Color.WHITE, TEXT_COLOR, String.format("%dps", myCanvas.getGraphics().getFramesPerSecond()));
+    //	}
+
+    //	private void drawGoodTraffic() {
+    //		shapeRenderer.setProjectionMatrix(camera.combined);
+    //		shapeRenderer.begin(ShapeType.Filled);
+    //		for (Planet planet : universe.planetList) {
+    //			drawGoodTraffic(planet);
+    //		}
+    //		shapeRenderer.end();
+    //	}
+
+    //	private void drawGoodTraffic( Planet planet ) { int planetX = planet.x *
+    //	  PLANET_DISTANCE; int planetY = planet.y * PLANET_DISTANCE; int color =
+    //	  Color.white.getRGB(); // ---Find max int maxAmount = 32; for ( Planet
+    //	  fromPlanet : universe.planetList ) { int amount =
+    //	  planet.statisticManager.getAmount( fromPlanet.name ); if ( amount > maxAmount
+    //	  ) maxAmount = amount; }
+    //
+    //	  Stroke defaultStroke = graphics.getStroke(); float dash[] = { 1.0f };
+    //	 BasicStroke stroke = new BasicStroke( 1.7f, BasicStroke.CAP_SQUARE,
+    //	  BasicStroke.JOIN_MITER, 10.0f, dash, 0.0f ); graphics.setStroke( stroke );
+    //
+    //	  for ( Planet fromPlanet : universe.planetList ) { if ( planet != fromPlanet )
+    //	  { if ( maxAmount != 0 ) { int thickness = (
+    //	  planet.statisticManager.getAmount( fromPlanet.name ) * 32 ) / maxAmount; if (
+    //	  thickness != 0 ) { int fromPlanetX = fromPlanet.x * PLANET_DISTANCE; int
+    //	  fromPlanetY = fromPlanet.y * PLANET_DISTANCE; if ( universe.selectedPlanet ==
+    //	  planet || universe.selectedPlanet == fromPlanet ) { lineBar( fromPlanetX,
+    //	  fromPlanetY, planetX, planetY, trafficStartColor, trafficEndColor, thickness
+    //	  ); } else {
+    //
+    //	  // lineBar( fromPlanetX, fromPlanetY, planetX, // planetY,
+    //	  RcColor.colorMerger( Color.green, // Color.white, 0.7f ),
+    //	  RcColor.colorMerger( // Color.red, Color.white, 0.7f ), thickness ); } } } }
+    //	  }
+    //
+    //	  graphics.setStroke( defaultStroke ); }
 
     private void initColors() {
         {
@@ -490,14 +586,32 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
         // distinctiveColorArray = distinctiveColorlist.toArray( new Color[0] );
     }
 
-
-//    public int getMaxFramesPerSecond() {
-//        return maxFramesPerSecond;
-//    }
-
     public boolean isInfoVisible() {
         return infoVisible;
     }
+
+    /*
+     * private void drawPlanetGraph( Planet planet ) { int pd = PLANET_DISTANCE - 2;
+     * int hpd = PLANET_DISTANCE / 2; int qpd = PLANET_DISTANCE / 4 - 2; int planetX
+     * = planet.x * PLANET_DISTANCE - hpd; int planetY = planet.y * PLANET_DISTANCE
+     * - hpd; int x[] = new int[planet.creditHistory.size()]; int y[] = new
+     * int[planet.creditHistory.size()]; boolean draw = true; // ---Find max int
+     * maxY = Planet.PLANET_START_CREDITS; for ( int i = 0; i <
+     * planet.creditHistory.size(); i++ ) { int ty = planet.creditHistory.get( i );
+     * if ( ty > maxY ) maxY = ty; } for ( int i = 0; i <
+     * planet.creditHistory.size(); i++ ) { x[i] = transformX( planetX + ( i * pd )
+     * / Planet.CREDIT_HISTORY_SIZE ); y[i] = transformY( planetY + pd - ( (
+     * planet.creditHistory.get( i ) * qpd ) / maxY ) ); } graphics.setColor(
+     * queryCreditColor( planet ) ); if ( draw ) { Stroke defaultStroke =
+     * graphics.getStroke(); float dash[] = { 1.0f }; BasicStroke stroke = new
+     * BasicStroke( 1.7f, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_MITER, 10.0f,
+     * dash, 0.0f ); graphics.setStroke( stroke ); graphics.drawPolyline( x, y,
+     * planet.creditHistory.size() ); graphics.setStroke( defaultStroke ); } }
+     */
+
+    //	public Canvas getCanvas() {
+    //		return myCanvas.getCanvas();
+    //	}
 
     @Override
     public boolean keyDown(final int keycode) {
@@ -580,69 +694,6 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
 
     }
 
-    //	Sector3DRenderer sector3DRenderer = new Sector3DRenderer();
-    //
-    //	private void drawSectors() {
-    //		for (int y = 0; y < universe.size * 2; y++) {
-    //			for (int x = 0; x < universe.size * 2; x++) {
-    //				Sector sector = universe.sectorList.sectorMap[x][y];
-    //				if (sector != null) {
-    //					sector3DRenderer.render(x - renderMaster.universe.size, y - renderMaster.universe.size, sector,
-    //							renderMaster, 0, false);
-    //				}
-    //			}
-    //		}
-    //	}
-
-    //	private void drawStatistics() {
-    //		float x = universe.size * Planet3DRenderer.PLANET_DISTANCE;
-    //		float y = universe.size * Planet3DRenderer.PLANET_DISTANCE;
-    //		int delta = FONT_SIZE;
-    //		for (String statisticName : universe.timeStatisticManager.getSet()) {
-    //			TimeStatistic statistic = universe.timeStatisticManager.getStatistic(statisticName);
-    //			renderMaster.text(x, y, Color.WHITE, TEXT_COLOR, String.format("%s %dms %dms %dms %dms", statisticName,
-    //					statistic.lastTime, statistic.minTime, statistic.averageTime, statistic.maxTime));
-    //			y += delta;
-    //		}
-    //		renderMaster.text(x, y, Color.WHITE, TEXT_COLOR, String.format("%dps", myCanvas.getGraphics().getFramesPerSecond()));
-    //	}
-
-    //	private void drawGoodTraffic() {
-    //		shapeRenderer.setProjectionMatrix(camera.combined);
-    //		shapeRenderer.begin(ShapeType.Filled);
-    //		for (Planet planet : universe.planetList) {
-    //			drawGoodTraffic(planet);
-    //		}
-    //		shapeRenderer.end();
-    //	}
-
-    //	private void drawGoodTraffic( Planet planet ) { int planetX = planet.x *
-    //	  PLANET_DISTANCE; int planetY = planet.y * PLANET_DISTANCE; int color =
-    //	  Color.white.getRGB(); // ---Find max int maxAmount = 32; for ( Planet
-    //	  fromPlanet : universe.planetList ) { int amount =
-    //	  planet.statisticManager.getAmount( fromPlanet.name ); if ( amount > maxAmount
-    //	  ) maxAmount = amount; }
-    //
-    //	  Stroke defaultStroke = graphics.getStroke(); float dash[] = { 1.0f };
-    //	 BasicStroke stroke = new BasicStroke( 1.7f, BasicStroke.CAP_SQUARE,
-    //	  BasicStroke.JOIN_MITER, 10.0f, dash, 0.0f ); graphics.setStroke( stroke );
-    //
-    //	  for ( Planet fromPlanet : universe.planetList ) { if ( planet != fromPlanet )
-    //	  { if ( maxAmount != 0 ) { int thickness = (
-    //	  planet.statisticManager.getAmount( fromPlanet.name ) * 32 ) / maxAmount; if (
-    //	  thickness != 0 ) { int fromPlanetX = fromPlanet.x * PLANET_DISTANCE; int
-    //	  fromPlanetY = fromPlanet.y * PLANET_DISTANCE; if ( universe.selectedPlanet ==
-    //	  planet || universe.selectedPlanet == fromPlanet ) { lineBar( fromPlanetX,
-    //	  fromPlanetY, planetX, planetY, trafficStartColor, trafficEndColor, thickness
-    //	  ); } else {
-    //
-    //	  // lineBar( fromPlanetX, fromPlanetY, planetX, // planetY,
-    //	  RcColor.colorMerger( Color.green, // Color.white, 0.7f ),
-    //	  RcColor.colorMerger( // Color.red, Color.white, 0.7f ), thickness ); } } } }
-    //	  }
-    //
-    //	  graphics.setStroke( defaultStroke ); }
-
     @Override
     public boolean keyUp(final int keycode) {
         switch (keycode) {
@@ -666,29 +717,6 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
     public boolean keyTyped(final char character) {
         return false;
     }
-
-    /*
-     * private void drawPlanetGraph( Planet planet ) { int pd = PLANET_DISTANCE - 2;
-     * int hpd = PLANET_DISTANCE / 2; int qpd = PLANET_DISTANCE / 4 - 2; int planetX
-     * = planet.x * PLANET_DISTANCE - hpd; int planetY = planet.y * PLANET_DISTANCE
-     * - hpd; int x[] = new int[planet.creditHistory.size()]; int y[] = new
-     * int[planet.creditHistory.size()]; boolean draw = true; // ---Find max int
-     * maxY = Planet.PLANET_START_CREDITS; for ( int i = 0; i <
-     * planet.creditHistory.size(); i++ ) { int ty = planet.creditHistory.get( i );
-     * if ( ty > maxY ) maxY = ty; } for ( int i = 0; i <
-     * planet.creditHistory.size(); i++ ) { x[i] = transformX( planetX + ( i * pd )
-     * / Planet.CREDIT_HISTORY_SIZE ); y[i] = transformY( planetY + pd - ( (
-     * planet.creditHistory.get( i ) * qpd ) / maxY ) ); } graphics.setColor(
-     * queryCreditColor( planet ) ); if ( draw ) { Stroke defaultStroke =
-     * graphics.getStroke(); float dash[] = { 1.0f }; BasicStroke stroke = new
-     * BasicStroke( 1.7f, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_MITER, 10.0f,
-     * dash, 0.0f ); graphics.setStroke( stroke ); graphics.drawPolyline( x, y,
-     * planet.creditHistory.size() ); graphics.setStroke( defaultStroke ); } }
-     */
-
-    //	public Canvas getCanvas() {
-    //		return myCanvas.getCanvas();
-    //	}
 
     @Override
     public boolean touchDown(final int screenX, final int screenY, final int pointer, final int button) {
@@ -864,13 +892,14 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
         renderPlanets();
         renderGoods();
         renderTraders();
+        drawDebugGrid();
     }
 
     private void renderDemo() throws IOException {
         if (launchMode == LaunchMode.demo) {
             final float lineHeightFactor = 2f;
             if (demoText.isEmpty()) {
-                demoText.add(new DemoString("Mercator", getAtlasManager().demoBigFont));
+                demoText.add(new DemoString("Mercator", getAtlasManager().bold128Font));
                 demoText.add(new DemoString("A computer game implementation of a closed economical simulation.", getAtlasManager().demoMidFont));
                 demoText.add(new DemoString(String.format("The current world is generated proceduraly and includes %d cities, %d factories, %d traders and %d sims.", universe.planetList.size(), universe.planetList.size() * 2, universe.traderList.size(), universe.simList.size()), getAtlasManager().demoMidFont));
                 demoText.add(new DemoString("The amount of wealth in the system, including products and money is constant at all times. ", getAtlasManager().demoMidFont));

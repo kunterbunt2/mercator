@@ -1,3 +1,10 @@
 Vertices = 3D position in space
 indices = index to Vertices forming a triangle
 
+
+            model.instance.transform.setToTranslation(translation.x, translation.y, translation.z);
+            model.instance.transform.rotateTowardDirection(direction, Vector3.Y);
+            model.instance.transform.translate(x, y, z);
+            model.instance.transform.scale(Good3DRenderer.GOOD_X - Good3DRenderer.SPACE_BETWEEN_GOOD, Good3DRenderer.GOOD_Y - Good3DRenderer.SPACE_BETWEEN_GOOD, Good3DRenderer.GOOD_Z - Good3DRenderer.SPACE_BETWEEN_GOOD);
+            model.update();
+

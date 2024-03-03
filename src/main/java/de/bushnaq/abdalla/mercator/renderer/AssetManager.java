@@ -183,9 +183,9 @@ public class AssetManager {
     }
 
     private void createJumpgate(ModelBuilder modelBuilder) {
-        final Attribute color     = new PBRColorAttribute(PBRColorAttribute.BaseColorFactor, Color.WHITE);
-        final Attribute metallic  = PBRFloatAttribute.createMetallic(1f);
-        final Attribute roughness = PBRFloatAttribute.createRoughness(0.1f);
+        final Attribute color     = new PBRColorAttribute(PBRColorAttribute.BaseColorFactor, Color.BLACK);
+        final Attribute metallic  = PBRFloatAttribute.createMetallic(.8f);
+        final Attribute roughness = PBRFloatAttribute.createRoughness(0.2f);
 //        final Attribute occlusion = PBRFloatAttribute.createOcclusionStrength(1.0f);
         //			final Attribute culling = IntAttribute.createCullFace(1);
         //			final Material material = new Material(metallic, roughness, color);

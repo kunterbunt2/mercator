@@ -47,7 +47,7 @@ public class Trader3DRenderer extends ObjectRenderer<GameEngine3D> {
 
     public static final  Color                                         TRADER_COLOR            = new Color(.7f, .7f, .7f, 0.45f); // 0xffcc5555;
     public static final  Color                                         TRADER_COLOR_IS_GOOD    = Color.LIGHT_GRAY; // 0xaaaaaa
-    public static final  float                                         TRADER_SIZE_Z           = (8 + 80 + 8)/*16*/ / Universe.WORLD_SCALE;
+    public static final  float                                         TRADER_SIZE_Z           = (16 + 64 + 16)/*16*/ / Universe.WORLD_SCALE;
     public static final  float                                         TRADER_WIDTH            = 16f;
     private static final float                                         ANTENNA_LENGTH          = 8f;
     //    private static final float                                         LIGHT_DISTANCE          = 0.1f;
@@ -55,7 +55,7 @@ public class Trader3DRenderer extends ObjectRenderer<GameEngine3D> {
     private static final float                                         TRADER_ANTENNA_MARGINE  = 1f;
     private static final float                                         TRADER_COCKPIT_SIZE_Z   = 16f;
     private static final float                                         TRADER_ENGINE_SIZE_Z    = 16f;
-    private static final Color                                         TRADER_NAME_COLOR       = Color.ORANGE;
+    private static final Color                                         TRADER_NAME_COLOR       = new Color(0xffa500ff);
     private static final float                                         TRADER_SIZE_X           = 16 / Universe.WORLD_SCALE;
     private static final float                                         TRADER_SIZE_Y           = 16 / Universe.WORLD_SCALE;
     private static final float                                         TRADER_TRAVELING_HEIGHT = -TRADER_SIZE_Y / 2 + Planet3DRenderer.WATER_Y;
@@ -123,10 +123,12 @@ public class Trader3DRenderer extends ObjectRenderer<GameEngine3D> {
 
     @Override
     public void renderText(final RenderEngine3D<GameEngine3D> renderEngine, final int index, final boolean selected) {
-        renderTextOnTop(renderEngine, 0, 0, trader.getName().substring(2), 16);
-        renderTextOnTop(renderEngine, -6, -7, "" + (int) velocity[0], 3);//x speed
-        renderTextOnTop(renderEngine, 6, -7, "" + (int) velocity[2], 3);//z speed
-        renderTextOnTop(renderEngine, 0, -7, "" + Float.toString(toOneDigitPrecision(synth.getGain())), 3);//bass gain
+        renderTextOnTop(renderEngine, 0, 0, trader.getName().substring(2), TRADER_ENGINE_SIZE_Z);
+        if (renderEngine.isDebugMode()) {
+            renderTextOnTop(renderEngine, -6, -7, "" + (int) velocity[0], 3);//x speed
+            renderTextOnTop(renderEngine, 6, -7, "" + (int) velocity[2], 3);//z speed
+            renderTextOnTop(renderEngine, 0, -7, "" + Float.toString(toOneDigitPrecision(synth.getGain())), 3);//bass gain
+        }
     }
 
     @Override
@@ -237,7 +239,7 @@ public class Trader3DRenderer extends ObjectRenderer<GameEngine3D> {
         final float z = translation.z;
         //draw text
         final PolygonSpriteBatch batch = renderEngine.renderEngine2D.batch;
-        final BitmapFont         font  = renderEngine.getGameEngine().getAtlasManager().modelFont;
+        final BitmapFont         font  = renderEngine.getGameEngine().getAtlasManager().bold256Font;
         {
             final Matrix4     m        = new Matrix4();
             final float       fontSize = font.getLineHeight();
@@ -250,11 +252,17 @@ public class Trader3DRenderer extends ObjectRenderer<GameEngine3D> {
             {
                 final Vector3 xVector = new Vector3(1, 0, 0);
                 final Vector3 yVector = new Vector3(0, 1, 0);
-                m.setToTranslation(x - height * scaling / 2.0f - dy, y + TRADER_SIZE_Y / 2.0f + 0.2f, z + width * scaling / 2.0f - dx);
+
+                //move center of text to center of trader
+                m.setToTranslation(x, y + TRADER_SIZE_Y / 2.0f + 0.2f, z);
                 m.rotateTowardDirection(direction, Vector3.Y);
-                m.translate(/*-8*/0, 0, +TRADER_SIZE_Z / 2 + 8);
-                m.rotate(yVector, 90);
+                //move to the top and back on engine
+                m.translate(-width * scaling / 2 - dx, 0, +TRADER_SIZE_Z / 2 - TRADER_ENGINE_SIZE_Z + (TRADER_ENGINE_SIZE_Z / 2 - height * scaling / 2 - dy));
+                //rotate into the xz layer
                 m.rotate(xVector, -90);
+
+//                m.translate(-width * scaling / 2 - dx, 0, 0);
+                //scale to fit trader engine
                 m.scale(scaling, scaling, 1f);
 
             }
@@ -295,7 +303,6 @@ public class Trader3DRenderer extends ObjectRenderer<GameEngine3D> {
 //            go.update();
             final GameObject<GameEngine3D> go = goodInstances.get(i);
             go.instance.transform.setToTranslation(translation.x, translation.y, translation.z);
-
             go.instance.transform.rotateTowardDirection(direction, Vector3.Y);
 
             final int   xEdgeSize  = (int) (TRADER_SIZE_X / Good3DRenderer.GOOD_X);
@@ -429,9 +436,8 @@ public class Trader3DRenderer extends ObjectRenderer<GameEngine3D> {
             //			instance.instance.transform.rotateTowardTarget(target, Vector3.Y);
             instance.instance.transform.rotateTowardDirection(direction, Vector3.Y);
             instance.instance.transform.scale(scaling.x, scaling.y, scaling.z);
-//            instance.instance.transform.scale(scaling.x * 17, scaling.y * 17, scaling.z * (96));
             instance1.instance.transform.rotateTowardDirection(direction, Vector3.Y);
-            instance1.instance.transform.scale(scaling.x * 17, scaling.y * 17, scaling.z * (96 - 32));
+            instance1.instance.transform.scale(scaling.x * 17, scaling.y * 17, scaling.z * (TRADER_SIZE_Z - 32));
         }
 
         //		if (trader.getName().equals("T-50")) {

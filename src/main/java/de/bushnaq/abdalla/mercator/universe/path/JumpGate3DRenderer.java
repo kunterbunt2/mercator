@@ -34,10 +34,10 @@ import de.bushnaq.abdalla.mercator.universe.sim.trader.Trader;
 import net.mgsx.gltf.scene3d.model.ModelInstanceHack;
 
 public class JumpGate3DRenderer extends ObjectRenderer<GameEngine3D> {
-    public static final  float JUMP_GATE_SIZE   = 8 / Universe.WORLD_SCALE;
+    public static final  float JUMP_GATE_WIDTH  = 16 / Universe.WORLD_SCALE;
     static final         Color JUMPGATE_COLOR   = new Color(0.275f, 0.314f, 0.314f, 1.0f);
     private static final float JUMP_GATE_DEPTH  = 0 / Universe.WORLD_SCALE /*+ Planet3DRenderer.WATER_Y*/;
-    private static final float JUMP_GATE_HEIGHT = 8 / Universe.WORLD_SCALE;
+    private static final float JUMP_GATE_HEIGHT = 16 / Universe.WORLD_SCALE;
     private static final Color PATH_NAME_COLOR  = Color.BLUE;
     private final        Path  jumpGate;
     //	Matrix4 rotationMatrix = new Matrix4();
@@ -83,7 +83,7 @@ public class JumpGate3DRenderer extends ObjectRenderer<GameEngine3D> {
     public void renderText(final RenderEngine3D<GameEngine3D> renderEngine, final int index, final boolean selected) {
         if (renderEngine.isDebugMode()) {
             final String text1 = jumpGate.target.getName();
-            renderTextOnTop(renderEngine, 0f, 0f, text1, JUMP_GATE_SIZE / 4);
+            renderTextOnTop(renderEngine, 0f, 0f, text1, JUMP_GATE_WIDTH / 4);
 //		if (jumpGate.source.trader != null) {
 //			final String text2 = jumpGate.source.trader.getName();
 //			renderTextOnTop(sceneManager, 0f, 10f, text2, JUMP_GATE_SIZE/2);
@@ -122,7 +122,7 @@ public class JumpGate3DRenderer extends ObjectRenderer<GameEngine3D> {
         //		int itx = (int) (tx / Planet.PLANET_DISTANCE);
         //		int ity = (int) (ty / Planet.PLANET_DISTANCE);
         //		int itz = (int) (tz / Planet.PLANET_DISTANCE);
-        //		float sign = Math.signum(scalez);
+        float sign = Math.signum(scalez);
 
 		/*if (ix == itx && iz > itz) {
 			scalex = (tx - x);
@@ -169,8 +169,8 @@ public class JumpGate3DRenderer extends ObjectRenderer<GameEngine3D> {
         //		direction.nor();
         final Vector3 targetVector = new Vector3(tx, ty, tz /*- sign * Planet3DRenderer.PLANET_SIZE / 2*/);
         instance.instance.transform.rotateTowardTarget(targetVector, Vector3.Y);
-        instance.instance.transform.translate(0, /*-sign*JUMP_GATE_HIGHT / 2 -*/ GameEngine3D.SPACE_BETWEEN_OBJECTS, -directionLength / 2);
-        instance.instance.transform.scale(JUMP_GATE_SIZE, JUMP_GATE_HEIGHT, directionLength);
+        instance.instance.transform.translate(0, /*-sign **/ -JUMP_GATE_HEIGHT / 2, -directionLength / 2);
+        instance.instance.transform.scale(JUMP_GATE_WIDTH, JUMP_GATE_HEIGHT - GameEngine3D.SPACE_BETWEEN_OBJECTS, directionLength);
         instance.update();
     }
 

@@ -35,9 +35,10 @@ public class AtlasManager {
     private static      String       assetsFolderName;
     public              TextureAtlas atlas;
     public              AtlasRegion  barTextureRegion;
+    public              BitmapFont   bold128Font;
+    public              BitmapFont   bold256Font;
     public              BitmapFont   chartFont;
     public              BitmapFont   defaultFont;
-    public              BitmapFont   demoBigFont;
     public              BitmapFont   demoMidFont;
     public              AtlasRegion  dottedLineTextureRegion;
     public              AtlasRegion  factoryTextureRegion;
@@ -48,7 +49,8 @@ public class AtlasManager {
             new FontData("menu-font", Context.getAppFolderName() + "/assets/fonts/Roboto-Regular.ttf", GameEngine2D.MENU_FONT_SIZE),//
             new FontData("menu-font-bold", Context.getAppFolderName() + "/assets/fonts/Roboto-bold.ttf", GameEngine2D.MENU_FONT_SIZE),//
             new FontData("model-font", Context.getAppFolderName() + "/assets/fonts/Roboto-Bold.ttf", 64),//
-            new FontData("demo-big-font", Context.getAppFolderName() + "/assets/fonts/Roboto-Bold.ttf", 128),//
+            new FontData("bold-128", Context.getAppFolderName() + "/assets/fonts/Roboto-Bold.ttf", 128),//
+            new FontData("bold-256", Context.getAppFolderName() + "/assets/fonts/Roboto-Bold.ttf", 256),//
             new FontData("demo-mid-font", Context.getAppFolderName() + "/assets/fonts/Roboto-Regular.ttf", 32)//
     };
     public              AtlasRegion  gaugeTextureRegion;
@@ -112,8 +114,9 @@ public class AtlasManager {
         menuFont          = fontDataList[4].font;
         menuBoldFont      = fontDataList[5].font;
         modelFont         = fontDataList[6].font;
-        demoBigFont       = fontDataList[7].font;
-        demoMidFont       = fontDataList[8].font;
+        bold128Font       = fontDataList[7].font;
+        bold256Font       = fontDataList[8].font;
+        demoMidFont       = fontDataList[9].font;
     }
 
     private void initTextures() {

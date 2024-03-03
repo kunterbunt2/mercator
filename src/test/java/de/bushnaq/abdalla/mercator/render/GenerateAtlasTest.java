@@ -42,7 +42,7 @@ import java.io.File;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 public class GenerateAtlasTest implements ApplicationListener {
-    private static final int MAX_ITERATIONS = 20;
+    private static final int MAX_ITERATIONS = 64;
 
     private int calculatePageSize(final int i) {
         return 64 * i;

@@ -42,7 +42,7 @@ public class UniverseGenerator {
     //	public static final float PLANET_MAX_JUMP_GATE_DISTANCE = 1610;// TODO adapt to 2D 1636
     public static final int                     PLANET_CHANCE_DICE_SIZE     = 10;
     public static final int                     PLANET_MAX_HIGHT            = 256;
-    public static final int                     PLANET_MAX_SHIFT            = Planet.PLANET_DISTANCE / 4;
+    public static final int                     PLANET_MAX_SHIFT            = Planet.PLANET_DISTANCE / 2;
     public static final float                   PLANET_MAX_SHIFT_JUMP_GATE  = (float) Planet.PLANET_DISTANCE + PLANET_MAX_SHIFT + 10;
     final               int                     MAX_NUMBER_OF_TRADERS       = 1;
     private final       Logger                  logger                      = LoggerFactory.getLogger(this.getClass());
@@ -332,9 +332,9 @@ public class UniverseGenerator {
                         // ---Create planet
                         index++;
                         final String name   = generatePlanetName(index, x, z);
-                        final float  tx     = x * Planet.PLANET_DISTANCE + randomGenerator.nextInt(0, this, PLANET_MAX_SHIFT);
+                        final float  tx     = x * Planet.PLANET_DISTANCE + randomGenerator.nextInt(0, this, PLANET_MAX_SHIFT) / 2;
                         final float  ty     = 0/*randomGenerator.nextInt(0, this, PLANET_MAX_HIGHT)*/;
-                        final float  tz     = z * Planet.PLANET_DISTANCE + randomGenerator.nextInt(0, this, PLANET_MAX_SHIFT);
+                        final float  tz     = z * Planet.PLANET_DISTANCE + randomGenerator.nextInt(0, this, PLANET_MAX_SHIFT) / 2;
                         final Planet planet = new Planet(name, tx, ty, tz, universe);
                         planet.create(randomGenerator);
                         count++;

@@ -137,7 +137,7 @@ public class Universe {
                 timeDelta += System.currentTimeMillis() - lastTime;
             if (timeDelta > 1000)
                 timeDelta = 0;
-            if (timeDelta >= fixedDelta)
+//            if (timeDelta >= fixedDelta)
             //			float[] before = queryDetailedCredits(false);
             {
                 timeDelta -= fixedDelta;

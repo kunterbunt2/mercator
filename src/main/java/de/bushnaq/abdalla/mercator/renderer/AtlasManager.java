@@ -41,17 +41,18 @@ public class AtlasManager {
     public              BitmapFont   demoMidFont;
     public              AtlasRegion  dottedLineTextureRegion;
     public              AtlasRegion  factoryTextureRegion;
-    public              FontData[]   fontDataList     = {
-            new FontData("default-font", Context.getAppFolderName() + "/assets/fonts/Roboto-Bold.ttf", GameEngine2D.FONT_SIZE),//
+    public              FontData[]   fontDataList     = {new FontData("default-font", Context.getAppFolderName() + "/assets/fonts/Roboto-Bold.ttf", GameEngine2D.FONT_SIZE),//
             new FontData("zoomin-default-font", Context.getAppFolderName() + "/assets/fonts/Roboto-Bold.ttf", SOOMIN_FONT_SIZE),//
             new FontData("time-machine-font", Context.getAppFolderName() + "/assets/fonts/Roboto-Bold.ttf", GameEngine2D.TIME_MACHINE_FONT_SIZE),//
             new FontData("chart-font", Context.getAppFolderName() + "/assets/fonts/Roboto-bold.ttf", GameEngine2D.CHART_FONT_SIZE),//
             new FontData("menu-font", Context.getAppFolderName() + "/assets/fonts/Roboto-Regular.ttf", GameEngine2D.MENU_FONT_SIZE),//
+            new FontData("menu-font-bold", Context.getAppFolderName() + "/assets/fonts/Roboto-bold.ttf", GameEngine2D.MENU_FONT_SIZE),//
             new FontData("model-font", Context.getAppFolderName() + "/assets/fonts/Roboto-Bold.ttf", 64),//
             new FontData("demo-big-font", Context.getAppFolderName() + "/assets/fonts/Roboto-Bold.ttf", 128),//
             new FontData("demo-mid-font", Context.getAppFolderName() + "/assets/fonts/Roboto-Regular.ttf", 32)//
     };
     public              AtlasRegion  gaugeTextureRegion;
+    public              BitmapFont   menuBoldFont;
     //	public Texture good_baseColor;
     //	public AtlasRegion good_baseColorRegion;
     //	public Texture good_normal;
@@ -109,9 +110,10 @@ public class AtlasManager {
         timeMachineFont   = fontDataList[2].font;
         chartFont         = fontDataList[3].font;
         menuFont          = fontDataList[4].font;
-        modelFont         = fontDataList[5].font;
-        demoBigFont       = fontDataList[6].font;
-        demoMidFont       = fontDataList[7].font;
+        menuBoldFont      = fontDataList[5].font;
+        modelFont         = fontDataList[6].font;
+        demoBigFont       = fontDataList[7].font;
+        demoMidFont       = fontDataList[8].font;
     }
 
     private void initTextures() {

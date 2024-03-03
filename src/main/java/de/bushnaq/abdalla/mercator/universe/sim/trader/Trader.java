@@ -489,6 +489,8 @@ public class Trader extends Sim {
         // used jump gates.
         //		markJumpGateUsage();//TODO!!!
         final float delta = (getMaxEngineSpeed() * timeDelta) / TimeUnit.TICKS_PER_DAY;
+//        if (getName().equals("T-25"))
+//            logger.info("timeDelta=" + timeDelta);
         if (pathIsClear())
             traderStatus = TraderStatus.TRADER_STATUS_BUYING;
         if (traderStatus != TraderStatus.TRADER_STATUS_WAITING_FOR_WAYPOINT) {

@@ -46,12 +46,9 @@ public class Good3DRenderer extends ObjectRenderer<GameEngine3D> {
 
     public static final  int                            CONTAINER_EDGE_SIZE        = 4;
     public static final  float                          GOOD_HEIGHT                = 8f;
-    //	public static final Color GOOD_COLOR = Color.RED; // 0xff000000;
     public static final  float                          GOOD_X                     = 7f / Universe.WORLD_SCALE;
     public static final  float                          GOOD_Y                     = 7f / Universe.WORLD_SCALE;
     public static final  float                          GOOD_Z                     = 7f / Universe.WORLD_SCALE;
-    //	private static Color magentaColor = new Color(1.0f, 0.0f, 1.0f, 1f);
-    //	private static Color cyanColor = new Color(0.0f, 1.0f, 1.0f, 1f);
     public static final  Color                          NOT_TRADED_GOOD_COLOR      = Color.LIGHT_GRAY; // 0xffbbbbbb;
     public static final  Color                          SELECTED_GOOD_COLOR        = Color.LIGHT_GRAY; // 0xffeeeeee;
     public static final  float                          SPACE_BETWEEN_GOOD         = GameEngine3D.SPACE_BETWEEN_OBJECTS * 2;

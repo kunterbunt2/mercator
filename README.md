@@ -41,6 +41,7 @@ Then you can start mercator by one of its starting classes
 | 1                     | enable/disable always day      |
 | 2                     | enable/disable demo mode       |
 | 3                     | enable/disable depth filter    |
+| 4                     | enable/disable debug graphs    |
 
 ## Issues
 
@@ -53,3 +54,8 @@ Then you can start mercator by one of its starting classes
 1. skybox top not oriented correctly (see reflection screenshot)
 2. shadow depth buffer lower half is strange
 4. if depth of field is disabled, and info panel is shown, screen becomes red
+
+## TODO
+
+1. ship speed must not be influenced by frame rate
+2. realistic acceleration/deceleration 

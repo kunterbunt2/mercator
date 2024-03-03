@@ -177,8 +177,8 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
             atlasManager = new AtlasManager();
             atlasManager.init();
             initColors();
-            renderEngine = new RenderEngine3D<GameEngine3D>(context, this, camera, camera2D, getAtlasManager().menuFont, getAtlasManager().systemTextureRegion);
-            renderEngine.getWater().setPresent(true);
+            renderEngine = new RenderEngine3D<GameEngine3D>(context, this, camera, camera2D, getAtlasManager().menuFont, getAtlasManager().menuBoldFont, getAtlasManager().systemTextureRegion);
+            renderEngine.getWater().setPresent(false);
             renderEngine.getWater().setTiling(universe.size * 2 * 4 * 2 * 4 / Universe.WORLD_SCALE);
             renderEngine.getWater().setWaveStrength(0.01f / Universe.WORLD_SCALE);
             renderEngine.getWater().setWaveSpeed(0.01f);
@@ -532,6 +532,9 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
                 return true;
             case Input.Keys.NUM_3:
                 renderEngine.setDepthOfField(!renderEngine.isDepthOfField());
+                return true;
+            case Input.Keys.NUM_4:
+                renderEngine.setShowGraphs(!renderEngine.isShowGraphs());
                 return true;
             case Input.Keys.V:
                 vsyncEnabled = !vsyncEnabled;

@@ -33,23 +33,23 @@ public class MyCameraInputController extends CameraInputController {
     private final Vector3      tmpV1  = new Vector3();
     private final Vector3      tmpV2  = new Vector3();
     ZoomCoordinates[] zoomFactors = {//
-            new ZoomCoordinates(0, 100, 40),//
-            new ZoomCoordinates(0, 120, 50),//
-            new ZoomCoordinates(0, 140, 60),//
-            new ZoomCoordinates(0, 200, 100),//
-            new ZoomCoordinates(0, 400, 200),//
-            new ZoomCoordinates(0, 500, 300),//
-            new ZoomCoordinates(0, 600, 400),//
-            new ZoomCoordinates(0, 1000, 380),//
-            new ZoomCoordinates(0, 1500, 300),//
-            new ZoomCoordinates(0, 2000, 200),//
-            new ZoomCoordinates(0, 2500, 100),//
+            new ZoomCoordinates(0, 100, 200),//
+            new ZoomCoordinates(0, 120, 300),//
+            new ZoomCoordinates(0, 140, 350),//
+            new ZoomCoordinates(0, 200, 400),//
+            new ZoomCoordinates(0, 400, 500),//
+            new ZoomCoordinates(0, 500, 400),//
+            new ZoomCoordinates(0, 600, 300),//
+            new ZoomCoordinates(0, 1000, 200),//
+            new ZoomCoordinates(0, 1500, 100),//
+            new ZoomCoordinates(0, 2000, 50),//
+            new ZoomCoordinates(0, 2500, 10),//
             new ZoomCoordinates(0, 3000, 0),//
             new ZoomCoordinates(0, 4000, 0),//
             new ZoomCoordinates(0, 6000, 0),//
             new ZoomCoordinates(0, 10000, 0),//
     };
-    int               zoomIndex   = 0;
+    int               zoomIndex   = 3;
 
     public MyCameraInputController(final Camera camera, GameEngine3D gameEngine) throws Exception {
         super(camera);

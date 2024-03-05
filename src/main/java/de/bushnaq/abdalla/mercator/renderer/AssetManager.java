@@ -150,8 +150,8 @@ public class AssetManager {
     }
 
     private void createBuilding(ModelBuilder modelBuilder) {
-        final Attribute color     = new PBRColorAttribute(PBRColorAttribute.BaseColorFactor, Color.WHITE);
-        final Attribute metallic  = PBRFloatAttribute.createMetallic(0.5f);
+        final Attribute color     = new PBRColorAttribute(PBRColorAttribute.BaseColorFactor, Color.BLACK);
+        final Attribute metallic  = PBRFloatAttribute.createMetallic(0.2f);
         final Attribute roughness = PBRFloatAttribute.createRoughness(0.5f);
         final Attribute occlusion = PBRFloatAttribute.createOcclusionStrength(1.0f);
         //			final Attribute culling = IntAttribute.createCullFace(1);
@@ -183,7 +183,7 @@ public class AssetManager {
     }
 
     private void createJumpgate(ModelBuilder modelBuilder) {
-        final Attribute color     = new PBRColorAttribute(PBRColorAttribute.BaseColorFactor, Color.BLACK);
+        final Attribute color     = new PBRColorAttribute(PBRColorAttribute.BaseColorFactor, Color.ORANGE);
         final Attribute metallic  = PBRFloatAttribute.createMetallic(.8f);
         final Attribute roughness = PBRFloatAttribute.createRoughness(0.2f);
 //        final Attribute occlusion = PBRFloatAttribute.createOcclusionStrength(1.0f);
@@ -203,8 +203,8 @@ public class AssetManager {
     }
 
     private void createPlanet(ModelCreator modelCreator) {
-        final Attribute color     = new PBRColorAttribute(PBRColorAttribute.BaseColorFactor, Color.WHITE);
-        final Attribute metallic  = PBRFloatAttribute.createMetallic(0.5f);
+        final Attribute color     = new PBRColorAttribute(PBRColorAttribute.BaseColorFactor, Color.BLACK);
+        final Attribute metallic  = PBRFloatAttribute.createMetallic(0.2f);
         final Attribute roughness = PBRFloatAttribute.createRoughness(0.5f);
         final Material  material  = new Material(metallic, roughness, color);
         planetModel = modelCreator.createBox(material);

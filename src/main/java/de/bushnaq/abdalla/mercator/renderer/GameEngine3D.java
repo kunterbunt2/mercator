@@ -87,7 +87,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
     public static final  float                        SPACE_BETWEEN_OBJECTS           = 0.1f / Universe.WORLD_SCALE;
     public static final  Color                        TEXT_COLOR                      = Color.WHITE; // 0xffffffff;
     public static final  int                          TIME_MACHINE_FONT_SIZE          = 10;
-    static final         Color                        DEBUG_GRID_BORDER_COLOR         = new Color(1f, 1f, 1f, 0.2f);
+    static final         Color                        DEBUG_GRID_BORDER_COLOR         = new Color(1f, 1f, 1f, 0.1f);
     static final         Color                        DEBUG_GRID_COLOR                = new Color(.0f, .0f, .0f, 0.2f);
     private static final float                        RENDER_2D_UNTIL                 = 1500;
     private static final float                        RENDER_3D_UNTIL                 = 2000;
@@ -439,13 +439,13 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
                     final float tz2 = y * Planet.PLANET_DISTANCE + Planet.PLANET_DISTANCE - Planet.PLANET_DISTANCE / 2 - 2;
                     renderEngine.renderutils2Dxz.bar(atlasManager.systemTextureRegion, tx1, 0, tz1, tx2, 0, tz2, DEBUG_GRID_BORDER_COLOR);
                 }
-                {
-                    final float tx1 = x * Planet.PLANET_DISTANCE - Planet.PLANET_DISTANCE / 2/* + Planet3DRenderer.PLANET_BORDER*/;
-                    final float tz1 = y * Planet.PLANET_DISTANCE - Planet.PLANET_DISTANCE / 2/* + Planet3DRenderer.PLANET_BORDER*/;
-                    final float tx2 = x * Planet.PLANET_DISTANCE + Planet.PLANET_DISTANCE - Planet.PLANET_DISTANCE / 2/* - Planet3DRenderer.PLANET_BORDER*/ - 1;
-                    final float tz2 = y * Planet.PLANET_DISTANCE + Planet.PLANET_DISTANCE - Planet.PLANET_DISTANCE / 2/* - Planet3DRenderer.PLANET_BORDER*/ - 1;
-                    renderEngine.renderutils2Dxz.bar(atlasManager.systemTextureRegion, tx1, 0, tz1, tx2, 0, tz2, DEBUG_GRID_COLOR);
-                }
+//                {
+//                    final float tx1 = x * Planet.PLANET_DISTANCE - Planet.PLANET_DISTANCE / 2/* + Planet3DRenderer.PLANET_BORDER*/;
+//                    final float tz1 = y * Planet.PLANET_DISTANCE - Planet.PLANET_DISTANCE / 2/* + Planet3DRenderer.PLANET_BORDER*/;
+//                    final float tx2 = x * Planet.PLANET_DISTANCE + Planet.PLANET_DISTANCE - Planet.PLANET_DISTANCE / 2/* - Planet3DRenderer.PLANET_BORDER*/ - 1;
+//                    final float tz2 = y * Planet.PLANET_DISTANCE + Planet.PLANET_DISTANCE - Planet.PLANET_DISTANCE / 2/* - Planet3DRenderer.PLANET_BORDER*/ - 1;
+//                    renderEngine.renderutils2Dxz.bar(atlasManager.systemTextureRegion, tx1, 0, tz1, tx2, 0, tz2, DEBUG_GRID_COLOR);
+//                }
             }
         }
     }
@@ -895,7 +895,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
         drawDebugGrid();
     }
 
-    private void renderDemo() throws IOException {
+    private void renderDemo() throws IOException, OpenAlException {
         if (launchMode == LaunchMode.demo) {
             final float lineHeightFactor = 2f;
             if (demoText.isEmpty()) {
@@ -915,8 +915,9 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
             }
 
             Color demoTextColor;
-            if (renderEngine.isNight()) demoTextColor = new Color(1f, 1f, 1f, 0.2f);
-            else demoTextColor = new Color(0f, 0f, 0f, 0.6f);
+//            if (renderEngine.isNight())
+            demoTextColor = new Color(1f, 1f, 1f, 0.2f);
+//            else demoTextColor = new Color(0f, 0f, 0f, 0.6f);
             float deltaY = 0;
 
             final GlyphLayout layout = new GlyphLayout();
@@ -1160,8 +1161,8 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
         renderEngine.setDepthOfField(true);
         renderEngine.setAlwaysDay(false);
         mp3Player = audioEngine.createAudioProducer(Mp3Player.class);
-        mp3Player.setFile(Gdx.files.internal(AtlasManager.getAssetsFolderName() + "/audio/02-methodica.ogg"));
-        mp3Player.setGain(1.0f);
+        mp3Player.setFile(Gdx.files.internal(AtlasManager.getAssetsFolderName() + "/audio/06-abyss(m).ogg"));
+        mp3Player.setGain(150.0f);
         mp3Player.play();
         AudioEngine.checkAlError("Failed to set listener orientation with error #");
     }

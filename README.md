@@ -53,9 +53,15 @@ Then you can start mercator by one of its starting classes
 3. Economy is not stable, all sims eventually die of hunger.
 1. skybox top not oriented correctly (see reflection screenshot)
 2. shadow depth buffer lower half is strange
-4. if depth of field is disabled, and info panel is shown, screen becomes red
+3. strobe light blinking even when paused.
 
 ## TODO
 
 1. ship speed must not be influenced by frame rate
-2. realistic acceleration/deceleration 
+2. realistic acceleration/deceleration
+3. remove spline path
+4. introduce slow rotation of traders
+3. simulation advanceintime is triggered every frame.
+4. ensure adding/removing lights does not causing any cahing to get dirty.
+5. optimize selected path performance
+6. introduce tts to generate text snippets of atc communication

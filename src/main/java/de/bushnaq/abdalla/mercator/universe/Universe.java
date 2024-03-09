@@ -136,8 +136,8 @@ public class Universe {
             else
                 timeDelta += System.currentTimeMillis() - lastTime;
             if (timeDelta > 1000)
-                timeDelta = 0;
-//            if (timeDelta >= fixedDelta)
+                timeDelta = 0;//reset every second
+            if (timeDelta >= fixedDelta)
             //			float[] before = queryDetailedCredits(false);
             {
                 timeDelta -= fixedDelta;
@@ -490,6 +490,10 @@ public class Universe {
     }
 
     public void setSelected(final Object selected, final boolean setDirty) throws Exception {
+        if (this.selected instanceof Trader) {
+            selectedTrader = (Trader) this.selected;
+            selectedTrader.unselect();
+        }
         this.selected              = selected;
         selectedPlanet             = null;
         selectedTrader             = null;
@@ -497,23 +501,24 @@ public class Universe {
         selectedProductionFacility = null;
         selectedGood               = null;
         if (selected != null) {
-            if (Planet.class.isInstance(selected)) {
+            if (selected instanceof Planet) {
                 selectedPlanet = (Planet) selected;
                 if (ScreenListener != null)
                     ScreenListener.setCamera(selectedPlanet.x, selectedPlanet.z, setDirty);
-            } else if (Trader.class.isInstance(selected)) {
+            } else if (selected instanceof Trader) {
                 selectedTrader = (Trader) selected;
                 if (ScreenListener != null)
                     ScreenListener.setCamera(selectedTrader.x, selectedTrader.z, setDirty);
-            } else if (Sim.class.isInstance(selected)) {
+                selectedTrader.select();
+            } else if (selected instanceof Sim) {
                 selectedSim = (Sim) selected;
                 if (ScreenListener != null)
                     ScreenListener.setCamera(selectedSim.planet.x, selectedSim.planet.z, setDirty);
-            } else if (ProductionFacility.class.isInstance(selected)) {
+            } else if (selected instanceof ProductionFacility) {
                 selectedProductionFacility = (ProductionFacility) selected;
                 if (ScreenListener != null)
                     ScreenListener.setCamera(selectedProductionFacility.planet.x, selectedProductionFacility.planet.z, setDirty);
-            } else if (Good.class.isInstance(selected)) {
+            } else if (selected instanceof Good) {
                 selectedGood = (Good) selected;
             }
         } else {

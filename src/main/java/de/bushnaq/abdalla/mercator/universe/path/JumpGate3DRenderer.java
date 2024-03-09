@@ -31,6 +31,7 @@ import de.bushnaq.abdalla.mercator.renderer.GameEngine2D;
 import de.bushnaq.abdalla.mercator.renderer.GameEngine3D;
 import de.bushnaq.abdalla.mercator.universe.Universe;
 import de.bushnaq.abdalla.mercator.universe.sim.trader.Trader;
+import de.bushnaq.abdalla.mercator.universe.sim.trader.Trader3DRenderer;
 import net.mgsx.gltf.scene3d.model.ModelInstanceHack;
 
 public class JumpGate3DRenderer extends ObjectRenderer<GameEngine3D> {
@@ -40,17 +41,48 @@ public class JumpGate3DRenderer extends ObjectRenderer<GameEngine3D> {
     private static final float JUMP_GATE_HEIGHT = 16 / Universe.WORLD_SCALE;
     private static final Color PATH_NAME_COLOR  = Color.BLUE;
     private final        Path  jumpGate;
+    float   directionLength;
+    //	private void renderTextOnTop(final SceneManager sceneManager, final String text1) {
+    //		final float x = jumpGate.target.x;
+    //		final float y = jumpGate.target.y - 10 / Universe.WORLD_SCALE;
+    //		final float z = jumpGate.target.z;
+    //
+    //		final float size = JUMP_GATE_SIZE * 2;
+    //		//draw text
+    //		final PolygonSpriteBatch batch = sceneManager.batch2D;
+    //		final BitmapFont font = sceneManager.getAtlasManager().modelFont;
+    //		{
+    //			final Matrix4 m = new Matrix4();
+    //			final float fontSize = font.getLineHeight();
+    //			final float scaling = size / fontSize;
+    //			final GlyphLayout layout = new GlyphLayout();
+    //			layout.setText(font, text1);
+    //			final float width = layout.width;// contains the width of the current set text
+    //			final float height = layout.height; // contains the height of the current set text
+    //			m.setToTranslation(x - height * scaling / 2.0f, y + 0.2f, z + width * scaling / 2.0f);
+    //			//			m.setToTranslation(x - size/2, y + 0.1f, z - size / 2);
+    //			m.rotate(Vector3.Y, 90);
+    //			m.rotate(Vector3.X, -90);
+    //			m.scale(scaling, scaling, 1f);
+    //			batch.setTransformMatrix(m);
+    //			font.setColor(PATH_NAME_COLOR);
+    //			font.draw(batch, text1, 0, 0);
+    //		}
+    //	}
+    boolean instance2AddedToEngine = false;
     //	Matrix4 rotationMatrix = new Matrix4();
     //	protected Quaternion rotation = new Quaternion();
-    boolean lastSelected = false;
-    float   r            = 45;
+    boolean lastSelected           = false;
+    float   r                      = 45;
+    Vector3 targetVector;
     //	private static final Color SELECTED_JUMPGATE_COLOR = Color.WHITE;
     //	private static final Color JUMPGATE_COLOR = new Color(0.3f, 0.3f, 0.3f, 1.0f); // 0xff5555cc
     //	static final Color JUMPGATE_COLOR = new Color(0.275f, 0.314f, 0.314f, 1.0f);
     //	private static final float JUMP_GATE_MIN_RADIUS = Planet3DRenderer.PLANET_SIZE * 4.0f + 3;
     // static final Color SELECTED_JUMPGATE_COLOR = Color.ORANGE;
-    private GameObject instance;
-    private Trader     lastTrader;
+    private GameObject<GameEngine3D> instance;
+    private GameObject<GameEngine3D> instanceOfSelected;//visible if path is selected
+    private Trader                   lastTrader;
 
     public JumpGate3DRenderer(final Path jumpGate) {
         this.jumpGate = jumpGate;
@@ -103,106 +135,49 @@ public class JumpGate3DRenderer extends ObjectRenderer<GameEngine3D> {
 
     private void createJumpGate(final float x, final float y, final float z, final RenderEngine3D<GameEngine3D> renderEngine) {
         //jump gate
-        //			Vector2 target = new Vector2(jumpGate.targetPlanet.x, jumpGate.targetPlanet.y);
-        //			Vector2 start = new Vector2(x, y);
-        //			Vector2 line = target.sub(start);
-        //			float length = line.len();
-        final float tx = jumpGate.target.x;
-        final float ty = jumpGate.target.y + JUMP_GATE_DEPTH;
-        final float tz = jumpGate.target.z;
-        //			float x1 = x + (tx - x) * JUMP_GATE_MIN_RADIUS / length;
-        //			float y1 = y + (ty - y) * JUMP_GATE_MIN_RADIUS / length;
+        final float tx     = jumpGate.target.x;
+        final float ty     = jumpGate.target.y + JUMP_GATE_DEPTH;
+        final float tz     = jumpGate.target.z;
         final float scalex = (tx - x);
         final float scaley = (ty - y - JUMP_GATE_DEPTH);
         final float scalez = (tz - z);
-        //lets start with north gateway, e.g. from planet to target in the north
-        //		int ix = (int) (x / Planet.PLANET_DISTANCE);
-        //		int iy = (int) (y / Planet.PLANET_DISTANCE);
-        //		int iz = (int) (z / Planet.PLANET_DISTANCE);
-        //		int itx = (int) (tx / Planet.PLANET_DISTANCE);
-        //		int ity = (int) (ty / Planet.PLANET_DISTANCE);
-        //		int itz = (int) (tz / Planet.PLANET_DISTANCE);
-        float sign = Math.signum(scalez);
-
-		/*if (ix == itx && iz > itz) {
-			scalex = (tx - x);
-			scaley = (ty - y);
-			scalez = (tz - z + Planet3DRenderer.PLANET_SIZE);
-		} else if (ix == itx && iz < itz) {
-			scalex = (tx - x);
-			scaley = (ty - y);
-			scalez = (tz - z - Planet3DRenderer.PLANET_SIZE);
-		} else {
-			return;
-		}*/
-
-        //			Color color;
-        //			if (jumpGate.closed) {
-        //				color = Color.RED;
-        //			} else if (jumpGate.selected) {
-        //				color = Screen2D.SELECTED_COLOR;
-        //			} else if (jumpGate.planet.sector == jumpGate.targetPlanet.sector) {
-        //				color = renderMaster.distinctiveTransparentColorlist.get(jumpGate.planet.sector.type);
-        //			} else {
-        //				color = JUMPGATE_COLOR;
-        //			}
-        //			Color c = new Color(color);
-        //			c.a = 0.45f;
 
         final Vector3 direction = new Vector3(scalex, scaley, scalez);
-        //		Vector3 up = new Vector3(0, scalez, scaley);
-        //		up.nor();
 
-        instance = new GameObject(new ModelInstanceHack(renderEngine.getGameEngine().assetManager.jumpGate), null, this);
-        //			instance = new ModelInstance(renderMaster.boxModel2);
-        //			instance.materials.get(0).set(ColorAttribute.createDiffuse(JUMPGATE_COLOR));
-        //		final Color sectorColor = renderMaster.getDistinctiveColor(jumpGate.planet.sector.type);
-        //		instance.instance.materials.get(0).set(new PBRColorAttribute(PBRColorAttribute.BaseColorFactor, sectorColor));
-        renderEngine.addStatic(instance);
-        final float directionLength = direction.len() + GameEngine3D.SPACE_BETWEEN_OBJECTS;
+        instance        = new GameObject(new ModelInstanceHack(renderEngine.getGameEngine().assetManager.jumpGate), null, this);
+        directionLength = direction.len() + GameEngine3D.SPACE_BETWEEN_OBJECTS;
+        targetVector    = new Vector3(tx, ty, tz /*- sign * Planet3DRenderer.PLANET_SIZE / 2*/);
 
-        //		final Vector3 shift = new Vector3(-direction.z, direction.y, direction.x);
-        //		shift.nor();
-        //		shift.scl(Planet.CHANNEL_SIZE/2);
         instance.instance.transform.setToTranslation(x/* + shift.x*/, y/* + shift.y*/ + JUMP_GATE_DEPTH, z/* + shift.z*//*+sign * Planet3DRenderer.PLANET_SIZE / 2*/);
-        //		instance.instance.transform.setToTranslation(x, y, z + sign * Planet3DRenderer.PLANET_SIZE / 2);
-        //		direction.nor();
-        final Vector3 targetVector = new Vector3(tx, ty, tz /*- sign * Planet3DRenderer.PLANET_SIZE / 2*/);
         instance.instance.transform.rotateTowardTarget(targetVector, Vector3.Y);
-        instance.instance.transform.translate(0, /*-sign **/ -JUMP_GATE_HEIGHT / 2, -directionLength / 2);
+        instance.instance.transform.translate(0, /*-sign **/ -JUMP_GATE_HEIGHT / 2 + 10, -directionLength / 2);
         instance.instance.transform.scale(JUMP_GATE_WIDTH, JUMP_GATE_HEIGHT - GameEngine3D.SPACE_BETWEEN_OBJECTS, directionLength);
         instance.update();
+        renderEngine.addStatic(instance);
+
+        instanceOfSelected = new GameObject(new ModelInstanceHack(renderEngine.getGameEngine().assetManager.jumpGateArrow), null, this);
+        instanceOfSelected.instance.transform.setToTranslation(x/* + shift.x*/, y/* + shift.y*/ + JUMP_GATE_DEPTH, z/* + shift.z*//*+sign * Planet3DRenderer.PLANET_SIZE / 2*/);
+        instanceOfSelected.instance.transform.rotateTowardTarget(targetVector, Vector3.Y);
+        instanceOfSelected.instance.transform.translate(0, /*-sign **/ Trader3DRenderer.TRADER_SIZE_Y, -directionLength / 2);
+        instanceOfSelected.instance.transform.scale(JUMP_GATE_WIDTH / 2, 1, directionLength);
+        instanceOfSelected.update();
+//        renderEngine.addStatic(instance2);
     }
 
-    //	private void renderTextOnTop(final SceneManager sceneManager, final String text1) {
-    //		final float x = jumpGate.target.x;
-    //		final float y = jumpGate.target.y - 10 / Universe.WORLD_SCALE;
-    //		final float z = jumpGate.target.z;
-    //
-    //		final float size = JUMP_GATE_SIZE * 2;
-    //		//draw text
-    //		final PolygonSpriteBatch batch = sceneManager.batch2D;
-    //		final BitmapFont font = sceneManager.getAtlasManager().modelFont;
-    //		{
-    //			final Matrix4 m = new Matrix4();
-    //			final float fontSize = font.getLineHeight();
-    //			final float scaling = size / fontSize;
-    //			final GlyphLayout layout = new GlyphLayout();
-    //			layout.setText(font, text1);
-    //			final float width = layout.width;// contains the width of the current set text
-    //			final float height = layout.height; // contains the height of the current set text
-    //			m.setToTranslation(x - height * scaling / 2.0f, y + 0.2f, z + width * scaling / 2.0f);
-    //			//			m.setToTranslation(x - size/2, y + 0.1f, z - size / 2);
-    //			m.rotate(Vector3.Y, 90);
-    //			m.rotate(Vector3.X, -90);
-    //			m.scale(scaling, scaling, 1f);
-    //			batch.setTransformMatrix(m);
-    //			font.setColor(PATH_NAME_COLOR);
-    //			font.draw(batch, text1, 0, 0);
-    //		}
-    //	}
-
     private void drawJumpGate(final float x, final float y, final float z, final RenderEngine3D<GameEngine3D> renderEngine, final long currentTime, final boolean selected) {
+        if (selected && !instance2AddedToEngine) {
+            renderEngine.addStatic(instanceOfSelected);
+            instance2AddedToEngine = true;
+        } else if (!selected && instance2AddedToEngine) {
+            renderEngine.removeStatic(instanceOfSelected);
+            instance2AddedToEngine = false;
+        }
+//        instanceOfSelected.instance.transform.translate(0, /*-sign **/ JUMP_GATE_HEIGHT / 2 + 3 + (float) Math.sin((currentTime % 100) * Math.PI), -directionLength / 2);
+//        instanceOfSelected.instance.transform.rotateTowardTarget(targetVector, Vector3.Y);
+//        instanceOfSelected.instance.transform.translate(0, /*-sign **/ JUMP_GATE_HEIGHT / 2 + 3, -directionLength / 2);
+//        instanceOfSelected.instance.transform.scale(JUMP_GATE_WIDTH, 1, directionLength);
+//        instanceOfSelected.update();
+//        instanceOfSelected.instance.transform.translate(0, , 0);
 //        if (instance != null && (selected != lastSelected || jumpGate.source.trader != lastTrader)) {
 //            if (selected) {
 ////				if (jumpGate.source.trader != null) {
@@ -247,7 +222,7 @@ public class JumpGate3DRenderer extends ObjectRenderer<GameEngine3D> {
 
     private void renderTextOnTop(final RenderEngine3D<GameEngine3D> renderEngine, final float dx, final float dy, final String text, final float size) {
         final float x = jumpGate.target.x;
-        final float y = jumpGate.target.y + JUMP_GATE_HEIGHT / 2/*- 10 / Universe.WORLD_SCALE*/;
+        final float y = jumpGate.target.y + JUMP_GATE_HEIGHT / 2 + 10;
         final float z = jumpGate.target.z;
         //draw text
         final PolygonSpriteBatch batch = renderEngine.renderEngine2D.batch;

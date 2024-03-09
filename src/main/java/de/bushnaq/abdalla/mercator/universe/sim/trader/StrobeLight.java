@@ -30,6 +30,7 @@ public class StrobeLight {
     public static final  float                    LIGHT_OFF_DURATION_DEVIATION = 0.1f;
     public static final  float                    LIGHT_ON_DURATION            = 0.1f;
     public static final  float                    LIGHT_SIZE                   = .2f;
+    final static         Vector3                  yVector                      = new Vector3(0, 1, 0);
     private static final float                    PY2                          = 3.14159f / 2;
     public final         GameObject<GameEngine3D> gameObject;
     public final         PointLight               pointLight;
@@ -95,11 +96,13 @@ public class StrobeLight {
         lightTimer = LIGHT_ON_DURATION;
     }
 
-    public void update(RenderEngine3D<GameEngine3D> renderEngine, Vector3 translation, Vector3 direction) {
-        if (direction.x != 0f || direction.y != 0f || direction.z != 0f) {
+    public void update(RenderEngine3D<GameEngine3D> renderEngine, Vector3 translation, float rotation) {
+//        if (direction.x != 0f || direction.y != 0f || direction.z != 0f)
+        {
             final float intensity = calculateIntensity();
             gameObject.instance.transform.setToTranslation(translation.x, translation.y, translation.z);
-            gameObject.instance.transform.rotateTowardDirection(direction, Vector3.Y);
+//            gameObject.instance.transform.rotateTowardDirection(direction, Vector3.Y);
+            gameObject.instance.transform.rotate(yVector, rotation);
             gameObject.instance.transform.translate(delta);
             gameObject.instance.transform.scale(lightScaling.x, lightScaling.y, lightScaling.z);
             gameObject.update();

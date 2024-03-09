@@ -16,40 +16,22 @@
 
 package de.bushnaq.abdalla.mercator.universe.sim.trader;
 
-public enum TraderStatus {
-    TRADER_STATUS_BUYING("Buy", true),//
-    TRADER_STATUS_CANNOT_BUY("X buy", false),//
-    TRADER_STATUS_CANNOT_SELL("X sell", false),//
-    TRADER_STATUS_RESTING("Rest", true),//
-    TRADER_STATUS_SELLING("Sell", true),//
-    TRADER_STATUS_UNKNOWN("Unknown", false),//
-    TRADER_STATUS_WAITING_FOR_GOOD_PRICE_TO_BUY("Waiting for a good price to buy...", true),//
-    TRADER_STATUS_WAITING_TO_SELL("Waiting to sell...", true);
+public enum TraderSubStatus {
+    TRADER_STATUS_NA("N/A"),//
+    TRADER_STATUS_ALIGNING("Maneuvering"),//
+    TRADER_STATUS_WAITING_FOR_WAYPOINT("In-Queue"),//
+    TRADER_STATUS_TRAVELLING("Travelling");//
+    private String name;
 
-    private boolean good;
-    private String  name;
-
-    TraderStatus(final String name, final boolean good) {
+    TraderSubStatus(final String name) {
         this.setName(name);
-        this.setGood(good);
     }
 
     public String getName() {
         return name;
     }
 
-
-    public boolean isGood() {
-        return good;
-    }
-
-    public void setGood(final boolean good) {
-        this.good = good;
-    }
-
     public void setName(final String name) {
         this.name = name;
     }
-
 }
-

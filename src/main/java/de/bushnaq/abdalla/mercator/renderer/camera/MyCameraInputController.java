@@ -33,10 +33,10 @@ public class MyCameraInputController extends CameraInputController {
     private final Vector3      tmpV1  = new Vector3();
     private final Vector3      tmpV2  = new Vector3();
     ZoomCoordinates[] zoomFactors = {//
-            new ZoomCoordinates(0, 100, 200),//
-            new ZoomCoordinates(0, 120, 300),//
-            new ZoomCoordinates(0, 140, 350),//
-            new ZoomCoordinates(0, 200, 400),//
+            new ZoomCoordinates(0, 75, 75),//
+            new ZoomCoordinates(0, 150, 200),//
+            new ZoomCoordinates(0, 150, 300),//
+            new ZoomCoordinates(0, 300, 400),//
             new ZoomCoordinates(0, 400, 500),//
             new ZoomCoordinates(0, 500, 400),//
             new ZoomCoordinates(0, 600, 300),//

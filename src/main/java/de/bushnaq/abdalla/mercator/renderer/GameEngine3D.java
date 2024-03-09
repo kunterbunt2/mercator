@@ -725,8 +725,8 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
                 //did we select an object?
                 //			renderMaster.sceneClusterManager.createCoordinates();
                 final GameObject<GameEngine3D> selected = renderEngine.getGameObject(screenX, screenY);
-                System.out.println("selected " + selected);
                 if (selected != null) try {
+                    System.out.println("selected " + selected.interactive);
                     universe.setSelected(selected.interactive, true);
                 } catch (final Exception e) {
                     // TODO Auto-generated catch block

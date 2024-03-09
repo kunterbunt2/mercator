@@ -350,14 +350,17 @@ public class Info {
                     numberOfGoods++;
                 }
             }
-            final int size = 18 + 1 + numberOfGoods + 1 + 1 + trader.simNeedsList.size();
+            final int size = 20 + 1 + numberOfGoods + 1 + 1 + trader.simNeedsList.size();
             clearUnmatchedSizeAndType(size, Trader.class);
             updateNameAndValue("name", trader.getName(), NAME_LABEL);
             updateNameAndValue("status", trader.status.getName(), VARIABLE_LABEL);
             updateNameAndValue("traderStatus", trader.traderStatus.getName(), VARIABLE_LABEL);
+            updateNameAndValue("traderSubStatus", trader.getSubStatus().getName(), VARIABLE_LABEL);
             updateNameAndValue("start credits", Sim.SIM_START_CREDITS, STATIC_LABEL);
             updateNameAndValue("cargo size", trader.goodSpace, STATIC_LABEL);
-            updateNameAndValue("speed", trader.getMaxEngineSpeed(), STATIC_LABEL);
+            updateNameAndValue("engine speed", trader.getEngineSpeed(), STATIC_LABEL);
+            updateNameAndValue("engine accelleration", trader.getEngineSpeed(), STATIC_LABEL);
+            updateNameAndValue("rotation speed", trader.rotationSpeed, STATIC_LABEL);
             updateNameAndValue("credits", String.format("%.2f", trader.getCredits()), VARIABLE_LABEL);
             updateNameAndValue("creditsToSave", String.format("%.2f", trader.creditsToSave), VARIABLE_LABEL);
             updateNameAndValue("factory", trader.productionFacility != null ? trader.productionFacility.getName() : "-", NAME_LABEL);

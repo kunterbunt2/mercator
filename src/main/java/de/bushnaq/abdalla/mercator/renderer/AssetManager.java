@@ -57,6 +57,7 @@ public class AssetManager {
     //    public SceneAsset              cubeGoldLeaves;
     public Model                   goodContainer;
     public Model                   jumpGate;
+    public Model                   jumpGateArrow;
     public Model                   land;
     public Model                   mirrorModel;
     public Model                   planetModel;
@@ -121,6 +122,7 @@ public class AssetManager {
         }
         createBuilding(modelBuilder);
         createJumpgate(modelBuilder);
+        createJumpgateArraw(modelBuilder, modelCreator);
 //        {
 //            wheel = new GLTFLoader().load(Gdx.files.internal(AtlasManager.getAssetsFolderName() + "/models/glTF/wheel/wheel.gltf"));
 //            final Material material = wheel.scene.model.materials.get(0);
@@ -192,6 +194,18 @@ public class AssetManager {
         //			final Material material = new Material(metallic, roughness, color, culling/*, normal*/, occlusion/*, shininess */);
         final Material material = new Material(metallic, roughness, color);
         jumpGate = modelBuilder.createBox(1.0f, 1.0f, 1.0f, material, Usage.Position | Usage.Normal);
+    }
+
+    private void createJumpgateArraw(ModelBuilder modelBuilder, ModelCreator modelCreator) {
+        final Attribute color     = new PBRColorAttribute(PBRColorAttribute.BaseColorFactor, new Color(1, 1, 1, 0.5f));
+        final Attribute metallic  = PBRFloatAttribute.createMetallic(.8f);
+        final Attribute roughness = PBRFloatAttribute.createRoughness(0.2f);
+//        final Attribute occlusion = PBRFloatAttribute.createOcclusionStrength(1.0f);
+        //			final Attribute culling = IntAttribute.createCullFace(1);
+        //			final Material material = new Material(metallic, roughness, color);
+        //			final Material material = new Material(metallic, roughness, color, culling/*, normal*/, occlusion/*, shininess */);
+        final Material material = new Material(metallic, roughness, color);
+        jumpGateArrow = modelBuilder.createBox(1.0f, 1.0f, 1.0f, material, Usage.Position | Usage.Normal);
     }
 
     private void createMirror(Texture texture, ModelBuilder modelBuilder) {

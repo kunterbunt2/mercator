@@ -104,7 +104,7 @@ public class Trader2DRenderer extends ObjectRenderer<GameEngine2D> {
 
             speed.nor();
             //			final float engineSpeed = trader.getMaxEngineSpeed();
-            speed.scl(trader.getMaxEngineSpeed());
+            speed.scl(trader.getEngineSpeed());
             velocity[0] = speed.x;
             velocity[1] = 0;
             velocity[2] = speed.z;

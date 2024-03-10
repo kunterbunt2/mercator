@@ -358,9 +358,9 @@ public class Info {
             updateNameAndValue("traderSubStatus", trader.getSubStatus().getName(), VARIABLE_LABEL);
             updateNameAndValue("start credits", Sim.SIM_START_CREDITS, STATIC_LABEL);
             updateNameAndValue("cargo size", trader.goodSpace, STATIC_LABEL);
-            updateNameAndValue("engine speed", trader.getEngineSpeed(), STATIC_LABEL);
-            updateNameAndValue("engine accelleration", trader.getEngineSpeed(), STATIC_LABEL);
-            updateNameAndValue("rotation speed", trader.rotationSpeed, STATIC_LABEL);
+            updateNameAndValue("engine speed", trader.getEngine().getEngineSpeed(), STATIC_LABEL);
+            updateNameAndValue("engine accelleration", trader.getEngine().getEngineSpeed(), STATIC_LABEL);
+            updateNameAndValue("rotation speed", trader.getThruster().rotationSpeed, STATIC_LABEL);
             updateNameAndValue("credits", String.format("%.2f", trader.getCredits()), VARIABLE_LABEL);
             updateNameAndValue("creditsToSave", String.format("%.2f", trader.creditsToSave), VARIABLE_LABEL);
             updateNameAndValue("factory", trader.productionFacility != null ? trader.productionFacility.getName() : "-", NAME_LABEL);

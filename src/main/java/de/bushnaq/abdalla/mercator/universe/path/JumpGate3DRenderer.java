@@ -217,7 +217,7 @@ public class JumpGate3DRenderer extends ObjectRenderer<GameEngine3D> {
         }
         final Color c = new Color(color);
         c.a = 0.45f;
-        renderEngine.line(renderEngine.getGameEngine().getAtlasManager().dottedLineTextureRegion, start.x, start.y, target.x, target.y, c, thickness);
+        renderEngine.batch.line(renderEngine.getGameEngine().getAtlasManager().dottedLineTextureRegion, start.x, start.y, target.x, target.y, c, thickness);
     }
 
     private void renderTextOnTop(final RenderEngine3D<GameEngine3D> renderEngine, final float dx, final float dy, final String text, final float size) {

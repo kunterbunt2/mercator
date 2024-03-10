@@ -47,13 +47,13 @@ public class Universe {
     private static final String                  ADVANCE_IN_TIME_PLANET_DURATION   = "planet   AIT";
     private static final String                  ADVANCE_IN_TIME_TRADER_DURATION   = "trader   AIT";
     private static final String                  ADVANCE_IN_TIME_UNIVERSE_DURATION = "All      AIT";
-    private final        long                    fixedDelta                        = 20L;
+    private static final long                    SIMULATION_DELTA                  = 20L;//ms
     private final        GraphicsDimentions      graphicsDimentions;
     private final        TimeStatisticManager    timeStatisticManager              = new TimeStatisticManager();
     //	private static final String APPLICATION_VERSION_STRING = "0.1.0.0";
     public               PieChartData            amountPieChart                    = new PieChartData("volumen");
     public               PieChartData            creditPieChart                    = new PieChartData("credits");
-    public               long                    currentTime                       = 0L;
+    public               long                    currentTime                       = 0L;//simulation time in milliseconds
     public               PlanetList              deadPlanetList                    = new PlanetList();
     public               SimList                 deadSimList                       = new SimList(null);
     public               GraphChartData          deadSimStatistics                 = new GraphChartData("dead sims", Color.RED);
@@ -132,16 +132,17 @@ public class Universe {
     public void advanceInTime(final boolean enable) throws Exception {
         if (enable) {
             if (useFixedDelta)
-                timeDelta = fixedDelta;
+                timeDelta = SIMULATION_DELTA;
             else
                 timeDelta += System.currentTimeMillis() - lastTime;
+            lastTime = System.currentTimeMillis();
             if (timeDelta > 1000)
-                timeDelta = 0;//reset every second
-            if (timeDelta >= fixedDelta)
+                timeDelta -= 1000;//reset every second
+            if (timeDelta >= SIMULATION_DELTA)//we update the simulation only every 20ms
             //			float[] before = queryDetailedCredits(false);
             {
-                timeDelta -= fixedDelta;
-                currentTime += fixedDelta;
+                timeDelta -= SIMULATION_DELTA;
+                currentTime += SIMULATION_DELTA;
                 timeStatisticManager.start(ADVANCE_IN_TIME_UNIVERSE_DURATION);
                 {
                     timeStatisticManager.start(ADVANCE_IN_TIME_PLANET_DURATION);
@@ -197,7 +198,6 @@ public class Universe {
                 }
                 timeStatisticManager.stop(ADVANCE_IN_TIME_UNIVERSE_DURATION);
             }
-            lastTime = System.currentTimeMillis();
         }
     }
 

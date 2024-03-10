@@ -20,9 +20,9 @@ package de.bushnaq.abdalla.mercator.util;
  * @author abdalla Keeps the number accurate to the second decimal
  */
 public class TimeUnit {
-    public static final long DAYS_PER_YEAR  = 100L;
-    public static final long TICKS_PER_DAY  = 100L;
-    public static final long TICKS_PER_YEAR = DAYS_PER_YEAR * TICKS_PER_DAY;
+    public static final long DAYS_PER_YEAR  = 100L;//one year is 100 days
+    public static final long TICKS_PER_DAY  = 100L;//one day is 100ms
+    public static final long TICKS_PER_YEAR = DAYS_PER_YEAR * TICKS_PER_DAY;//one year is 10s
 
     public static long days(final long time) {
         return time / TimeUnit.TICKS_PER_DAY;

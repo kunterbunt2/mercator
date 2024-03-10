@@ -96,7 +96,7 @@ public class Trader2DRenderer extends ObjectRenderer<GameEngine2D> {
             position[0] = translation.x;
             position[1] = translation.y;
             position[2] = translation.z;
-            trader.calculateEngineSpeed();
+//            trader.getEngine().calculateEngineSpeed();
             if (trader.sourceWaypoint != null)
                 speed.set(trader.targetWaypoint.x - trader.sourceWaypoint.x, 0, trader.targetWaypoint.z - trader.sourceWaypoint.z);
             else
@@ -104,7 +104,7 @@ public class Trader2DRenderer extends ObjectRenderer<GameEngine2D> {
 
             speed.nor();
             //			final float engineSpeed = trader.getMaxEngineSpeed();
-            speed.scl(trader.getEngineSpeed());
+            speed.scl(trader.getEngine().getEngineSpeed());
             velocity[0] = speed.x;
             velocity[1] = 0;
             velocity[2] = speed.z;

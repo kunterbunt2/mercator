@@ -18,7 +18,7 @@ package de.bushnaq.abdalla.mercator.audio.synthesis;
 
 import de.bushnaq.abdalla.engine.audio.OpenAlException;
 import de.bushnaq.abdalla.engine.audio.synthesis.*;
-import de.bushnaq.abdalla.mercator.universe.sim.trader.Trader;
+import de.bushnaq.abdalla.mercator.universe.sim.trader.Engine;
 
 /**
  * use 2 saw oscillators with 5 cent vibrato, one generator is detuned -2.5 cent while the other is detuned 2.5 cent
@@ -65,14 +65,14 @@ public class MercatorSynthesizer extends Synthesizer {
 
     @Override
     public void adaptToVelocity(float speed) throws OpenAlException {
-        speed = Math.min(Trader.MAX_ENGINE_SPEED, speed);
-        speed = Math.max(Trader.MIN_ENGINE_SPEED, speed);
+        speed = Math.min(Engine.MAX_ENGINE_SPEED, speed);
+        speed = Math.max(Engine.MIN_ENGINE_SPEED, speed);
 
-        final float frequency  = LOWEST_FREQUENCY + (HIGHEST_FREQUENCY - LOWEST_FREQUENCY) * (speed - Trader.MIN_ENGINE_SPEED) / (Trader.MAX_ENGINE_SPEED - Trader.MIN_ENGINE_SPEED);
+        final float frequency  = LOWEST_FREQUENCY + (HIGHEST_FREQUENCY - LOWEST_FREQUENCY) * (speed - Engine.MIN_ENGINE_SPEED) / (Engine.MAX_ENGINE_SPEED - Engine.MIN_ENGINE_SPEED);
         final float detune     = 2.5f;//cent
         final float frequency1 = (float) (frequency * Math.pow(2, detune / 1200));
 
-        final float bassGain = 1 - (speed - Trader.MIN_ENGINE_SPEED) / (Trader.MAX_ENGINE_SPEED - Trader.MIN_ENGINE_SPEED);
+        final float bassGain = 1 - (speed - Engine.MIN_ENGINE_SPEED) / (Engine.MAX_ENGINE_SPEED - Engine.MIN_ENGINE_SPEED);
 
         //		sin1.setOscillator(frequency1);
         //		sin1.setLfo(1f, 5f);
@@ -96,7 +96,7 @@ public class MercatorSynthesizer extends Synthesizer {
         sin2.setOscillator(frequency2 * 2);
         sin2.setLfo(.85f, 15f);
 
-        final float factor = (speed - Trader.MIN_ENGINE_SPEED) / (Trader.MAX_ENGINE_SPEED - Trader.MIN_ENGINE_SPEED);
+        final float factor = (speed - Engine.MIN_ENGINE_SPEED) / (Engine.MAX_ENGINE_SPEED - Engine.MIN_ENGINE_SPEED);
         //		setGain( 10.0f);
         setGain(0.1f + bassGain * 20);
         lfo1.setFrequency(1f + 5f * factor, 0.1f);

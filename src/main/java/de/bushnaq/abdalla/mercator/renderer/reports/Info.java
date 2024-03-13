@@ -22,6 +22,7 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g3d.attributes.PointLightsAttribute;
+import com.badlogic.gdx.graphics.g3d.environment.PointLight;
 import com.badlogic.gdx.graphics.profiling.GLProfiler;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -214,19 +215,23 @@ public class Info {
                     updateNameAndValue("Dynamic Models", stringBuilder.toString(), VARIABLE_LABEL);
                 }
                 //			 light
-                {
-                    stringBuilder.setLength(0);
-                    final int count      = renderEngine.visibleStaticLightCount;
-                    final int totalCount = renderEngine.environment.get(PointLightsAttribute.class, PointLightsAttribute.Type).lights.size;
-                    stringBuilder.append(count).append(" / ").append(totalCount);
-                    updateNameAndValue("Static PointLights", stringBuilder.toString(), VARIABLE_LABEL);
-                }
-                {
-                    stringBuilder.setLength(0);
-                    final int count      = renderEngine.visibleDynamicLightCount;
-                    final int totalCount = renderEngine.environment.get(PointLightsAttribute.class, PointLightsAttribute.Type).lights.size;
-                    stringBuilder.append(count).append(" / ").append(totalCount);
-                    updateNameAndValue("Dynamic PointLights", stringBuilder.toString(), VARIABLE_LABEL);
+                PointLightsAttribute pointLightsAttribute = renderEngine.environment.get(PointLightsAttribute.class, PointLightsAttribute.Type);
+                if (pointLightsAttribute != null) {
+                    Array<PointLight> lights = pointLightsAttribute.lights;
+                    {
+                        stringBuilder.setLength(0);
+                        final int count      = renderEngine.visibleStaticLightCount;
+                        final int totalCount = lights.size;
+                        stringBuilder.append(count).append(" / ").append(totalCount);
+                        updateNameAndValue("Static PointLights", stringBuilder.toString(), VARIABLE_LABEL);
+                    }
+                    {
+                        stringBuilder.setLength(0);
+                        final int count      = renderEngine.visibleDynamicLightCount;
+                        final int totalCount = lights.size;
+                        stringBuilder.append(count).append(" / ").append(totalCount);
+                        updateNameAndValue("Dynamic PointLights", stringBuilder.toString(), VARIABLE_LABEL);
+                    }
                 }
             }
 

@@ -18,7 +18,6 @@ package de.bushnaq.abdalla.mercator.universe.sim.trader;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
 import de.bushnaq.abdalla.engine.CustomizedSpriteBatch;
@@ -48,7 +47,7 @@ public class Thruster {
         this.direction.set(direction);
         this.rotationDirection = rotationDirection;
         this.gameObject        = gameObject;
-        renderEngine.addDynamic(gameObject);
+//        renderEngine.addDynamic(gameObject);
     }
 
     private void animate(RenderEngine3D<GameEngine3D> renderEngine) {
@@ -92,9 +91,8 @@ public class Thruster {
     public void update(RenderEngine3D<GameEngine3D> renderEngine, Vector3 translation, float rotation, RotationDirection rotationDirection) {
 //        if (direction.x != 0f || direction.y != 0f || direction.z != 0f)
         if (this.rotationDirection == rotationDirection) {
-            TextureAtlas.AtlasRegion    systemTextureRegion = renderEngine.getGameEngine().getAtlasManager().systemTextureRegion;
-            final CustomizedSpriteBatch batch               = renderEngine.renderEngine2D.batch;
-            final Matrix4               m                   = new Matrix4();
+            final CustomizedSpriteBatch batch = renderEngine.renderEngine2D.batch;
+            final Matrix4               m     = new Matrix4();
             {
                 //move center of text to center of trader
                 m.setToTranslation(translation.x, translation.y, translation.z);
@@ -116,7 +114,7 @@ public class Thruster {
             batch.setColor(Color.WHITE);
             float thickness = .3f + t / 2;
 
-            batch.line(systemTextureRegion, 0, 0, direction.x + x, direction.z + z, c, thickness);
+            batch.line(renderEngine.getGameEngine().getAtlasManager().systemTextureRegion, 0, 0, direction.x + x, direction.z + z, c, thickness);
             animate(renderEngine);
         }
     }

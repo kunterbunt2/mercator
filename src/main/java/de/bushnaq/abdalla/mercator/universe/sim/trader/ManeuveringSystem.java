@@ -135,8 +135,10 @@ public class ManeuveringSystem {
     }
 
     public void updateThrusters(final RenderEngine3D<GameEngine3D> renderEngine, final Vector3 translation) {
-        for (Thruster thruster : thrusters) {
-            thruster.update(renderEngine, translation, rotation, rotationDirection);
+        if (renderEngine.getCamera().frustum.pointInFrustum(translation.x, translation.y, translation.z)) {
+            for (Thruster thruster : thrusters) {
+                thruster.update(renderEngine, translation, rotation, rotationDirection);
+            }
         }
     }
 

@@ -134,35 +134,33 @@ public class Planet3DRenderer extends ObjectRenderer<GameEngine3D> {
     //	}
     @Override
     public void renderText(final RenderEngine3D<GameEngine3D> renderEngine, final int index, final boolean selected) {
-        final float size = 64;
-        final float x    = planet.x;
-        final float z    = planet.z;
-        //draw text
-        final PolygonSpriteBatch batch = renderEngine.renderEngine2D.batch;
-        final BitmapFont         font  = renderEngine.getGameEngine().getAtlasManager().bold256Font;
-        {
-            String            text     = planet.getName();
-            final Matrix4     m        = new Matrix4();
-            final float       fontSize = font.getLineHeight();
-            final float       scaling  = size / fontSize;
-            final GlyphLayout layout   = new GlyphLayout();
-            layout.setText(font, text);
-            final float width = layout.width;// contains the width of the current set text
-//            final float height = layout.height; // contains the height of the current set text
-            final Vector3 xVector = new Vector3(1, 0, 0);
-//            final Vector3 yVector = new Vector3(0, 1, 0);
-//            final Vector3 zVector = new Vector3(0, 0, 1);
-            m.setToTranslation(x + PLANET_3D_SIZE / 2 - width * scaling, 1, z + PLANET_3D_SIZE / 2);
-//            m.rotate(yVector, 90);
-            m.rotate(xVector, -90);
-            m.scale(scaling, scaling, 1f);
-            batch.setTransformMatrix(m);
-            font.setColor(PLANET_NAME_COLOR);
-            font.draw(batch, text, 0, 0);
-        }
-        int i = 0;
-        for (final Good good : planet.getGoodList()) {
-            good.get3DRenderer().renderText(planet.x, planet.y, planet.z, renderEngine, i++);
+        if (renderEngine.getCamera().frustum.boundsInFrustum(gameObject.transformedBoundingBox)) {
+            final float size = 64;
+            final float x    = planet.x;
+            final float z    = planet.z;
+            //draw text
+            final PolygonSpriteBatch batch = renderEngine.renderEngine2D.batch;
+            final BitmapFont         font  = renderEngine.getGameEngine().getAtlasManager().bold256Font;
+            {
+                String            text     = planet.getName();
+                final Matrix4     m        = new Matrix4();
+                final float       fontSize = font.getLineHeight();
+                final float       scaling  = size / fontSize;
+                final GlyphLayout layout   = new GlyphLayout();
+                layout.setText(font, text);
+                final float   width   = layout.width;// contains the width of the current set text
+                final Vector3 xVector = new Vector3(1, 0, 0);
+                m.setToTranslation(x + PLANET_3D_SIZE / 2 - width * scaling, 1, z + PLANET_3D_SIZE / 2);
+                m.rotate(xVector, -90);
+                m.scale(scaling, scaling, 1f);
+                batch.setTransformMatrix(m);
+                font.setColor(PLANET_NAME_COLOR);
+                font.draw(batch, text, 0, 0);
+            }
+            int i = 0;
+            for (final Good good : planet.getGoodList()) {
+                good.get3DRenderer().renderText(planet.x, planet.y, planet.z, renderEngine, i++);
+            }
         }
     }
 

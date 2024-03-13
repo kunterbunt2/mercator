@@ -55,7 +55,7 @@ public class PlanetDeathPerformanceTest {
         if (!bestUniverse.deadPlanetList.isEmpty()) {
             bestUniverse.deadPlanetList.get(0).eventManager.print(System.out);
             for (final Universe universe : universeList) {
-                System.out.printf("%s\n", TimeUnit.toString(universe.deadPlanetList.get(0).lastTimeAdvancement));
+                System.out.printf("%s\n", TimeUnit.toString(universe.deadPlanetList.get(0).currentTime));
                 // System.out.printf( "%s\n", TimeUnit.toString( universe.deadTraderList.get(
                 // universe.deadTraderList.size() - 1 ).lastTimeAdvancement ) );
             }

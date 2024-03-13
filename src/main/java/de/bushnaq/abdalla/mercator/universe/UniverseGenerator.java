@@ -390,7 +390,8 @@ public class UniverseGenerator {
     }
 
     private String generatePlanetName(final int index, final int x, final int z) {
-        return String.format("P-%02d%02d", x + size, z + size);
+//        return String.format("P-%02d%02d", x + size, z + size);
+        return String.format("P-%d", index);
     }
 
     private SectorList generateSectorList() {

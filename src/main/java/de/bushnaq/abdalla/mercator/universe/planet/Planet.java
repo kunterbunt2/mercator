@@ -31,18 +31,23 @@ import de.bushnaq.abdalla.mercator.universe.sim.SimList;
 import de.bushnaq.abdalla.mercator.universe.sim.trader.TraderList;
 import de.bushnaq.abdalla.mercator.util.*;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.ListIterator;
+
 /**
  * @author bushnaq Created 13.02.2005
  */
-public class Planet extends Waypoint implements TradingPartner {
+public class Planet extends Waypoint implements TradingPartner, CommunicationPartner {
     public static final float                  CHANNEL_SIZE           = 32 / Universe.WORLD_SCALE;
     //    public final static float                  MIN_PLANET_DISTANCE    = 30;
     public static final int                    PLANET_DISTANCE        = 2048;
     public final static int                    PLANET_MAX_SIMS        = 10;
     public final static float                  PLANET_START_CREDITS   = 20000;
+    public static final long                   RADIO_ANSWER_DELAY     = 1000;//ms
+    public              long                   currentTime            = 0;
     public              SimList                deadSimList            = new SimList(this);
     public              PlanetEventManager     eventManager;
-    public              long                   lastTimeAdvancement    = 0;
     public              long                   lastTransaction        = 0;
     //	private String name = null;
     public              float                  orbitAngle             = 0.0f;
@@ -54,9 +59,10 @@ public class Planet extends Waypoint implements TradingPartner {
     public              long                   timeDelta              = 0;
     public              TraderList             traderList             = new TraderList();
     public              Universe               universe;
-    private             float                  credits                = PLANET_START_CREDITS;
-    private             GoodList               goodList               = new GoodList();
-    private             HistoryManager         historyManager;
+    List<RadioMessage> radioMessages = new ArrayList<>();
+    private float          credits  = PLANET_START_CREDITS;
+    private GoodList       goodList = new GoodList();
+    private HistoryManager historyManager;
 
     public Planet(final String name, final float x, final float y, final float z, final Universe universe) {
         super(name, x, y, z);
@@ -70,11 +76,12 @@ public class Planet extends Waypoint implements TradingPartner {
 
     public void advanceInTime(final long currentTime, final MercatorRandomGenerator randomGenerator)// OK
     {
-        timeDelta = currentTime - lastTimeAdvancement;
+        timeDelta = currentTime - this.currentTime;
         // timeDelta = currentTime - lastTimeAdvancement;
-        lastTimeAdvancement = currentTime;
+        this.currentTime = currentTime;
         orbitAngle -= (Math.PI * ((float) timeDelta / TimeUnit.TICKS_PER_DAY)) / 360f;
         if (TimeUnit.isInt(currentTime)/* ( currentTime - (int)currentTime ) == 0.0f */) {
+            handleRadioMessage();
             pathList.reduceUsage();
             getGoodList().calculatePrice(currentTime);
             distributeEnigneers();
@@ -238,6 +245,11 @@ public class Planet extends Waypoint implements TradingPartner {
         return this;
     }
 
+    @Override
+    public void setCredits(final float credits) {
+        this.credits = credits;
+    }
+
     // @Override
     // public void pay( long currentTime, float price, float transactionAmount,
     // TradingPartner transaction )
@@ -248,11 +260,6 @@ public class Planet extends Waypoint implements TradingPartner {
     // getHistoryManager().get( currentTime ).buy( null, price * transactionAmount,
     // transactionAmount, transaction.getPlanet() );
     // }
-
-    @Override
-    public void setCredits(final float credits) {
-        this.credits = credits;
-    }
 
     @Override
     public void setLastTransaction(final long currentTime) {
@@ -279,6 +286,46 @@ public class Planet extends Waypoint implements TradingPartner {
             return 0;
         else
             return satisfaction / simList.size();
+    }
+
+    private void handleRadioMessage() {
+        boolean changed;
+        do {
+            changed = false;
+            ListIterator<RadioMessage> crunchifyIterator = radioMessages.listIterator();
+            // hasNext(): Returns true if this list iterator has more elements when traversing the list in the forward direction.
+            // (In other words, returns true if next would return an element rather than throwing an exception.)
+            while (crunchifyIterator.hasNext()) {
+                RadioMessage rm = crunchifyIterator.next();
+
+                if (currentTime - rm.time > RADIO_ANSWER_DELAY) {
+                    switch (rm.id) {
+                        case REQUEST_TO_DOCK -> {
+                            String string = String.format("%s to %s, request to dock approved.", getName(), rm.from.getName());
+                            rm.from.radio(new RadioMessage(currentTime, this, rm.from, RadioMessageId.APPROVE_TO_DOCK, string));
+//                            radioMessages.remove(rm);
+                            crunchifyIterator.remove();
+                            changed = true;
+                            break;
+                        }
+                    }
+                }
+
+            }
+//            for (RadioMessage rm : radioMessages) {
+//            }
+        }
+        while (changed);
+    }
+
+    @Override
+    public boolean isSelected() {
+        return false;
+    }
+
+    public void radio(RadioMessage message) {
+        radioMessages.add(message);
+        universe.say(message);
     }
 
     public float queryAverageFoodPrice() {

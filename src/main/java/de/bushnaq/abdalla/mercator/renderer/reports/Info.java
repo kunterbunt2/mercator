@@ -360,7 +360,7 @@ public class Info {
             updateNameAndValue("cargo size", trader.goodSpace, STATIC_LABEL);
             updateNameAndValue("engine speed", trader.getEngine().getEngineSpeed(), STATIC_LABEL);
             updateNameAndValue("engine accelleration", trader.getEngine().getEngineSpeed(), STATIC_LABEL);
-            updateNameAndValue("rotation speed", trader.getThruster().rotationSpeed, STATIC_LABEL);
+            updateNameAndValue("rotation speed", trader.getManeuveringSystem().rotationSpeed, STATIC_LABEL);
             updateNameAndValue("credits", String.format("%.2f", trader.getCredits()), VARIABLE_LABEL);
             updateNameAndValue("creditsToSave", String.format("%.2f", trader.creditsToSave), VARIABLE_LABEL);
             updateNameAndValue("factory", trader.productionFacility != null ? trader.productionFacility.getName() : "-", NAME_LABEL);

@@ -82,6 +82,10 @@ public class Good extends Renderable implements Cloneable {
         return good;
     }
 
+    public String toString() {
+        return type.getName();
+    }
+
     public void consume(final int volume) {
         this.amount -= volume;
         statistic.consumed += volume;

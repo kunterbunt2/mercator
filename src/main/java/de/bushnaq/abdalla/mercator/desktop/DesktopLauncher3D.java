@@ -160,6 +160,7 @@ public class DesktopLauncher3D implements ApplicationListener {
             }
             contextFactory.getContext().dispose();
             restart = contextFactory.getContext().restart;
+            universe.dispose();
         } while (restart);
     }
 

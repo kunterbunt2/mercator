@@ -30,6 +30,7 @@ import de.bushnaq.abdalla.mercator.universe.land.LandList;
 import de.bushnaq.abdalla.mercator.universe.path.PathList;
 import de.bushnaq.abdalla.mercator.universe.planet.Planet;
 import de.bushnaq.abdalla.mercator.universe.planet.PlanetList;
+import de.bushnaq.abdalla.mercator.universe.planet.RadioMessage;
 import de.bushnaq.abdalla.mercator.universe.ring.Ring;
 import de.bushnaq.abdalla.mercator.universe.sector.SectorList;
 import de.bushnaq.abdalla.mercator.universe.sim.Sim;
@@ -38,6 +39,8 @@ import de.bushnaq.abdalla.mercator.universe.sim.trader.Trader;
 import de.bushnaq.abdalla.mercator.universe.sim.trader.TraderList;
 import de.bushnaq.abdalla.mercator.universe.tools.Tools;
 import de.bushnaq.abdalla.mercator.util.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author bushnaq Created 13.02.2005
@@ -49,6 +52,7 @@ public class Universe {
     private static final String                  ADVANCE_IN_TIME_UNIVERSE_DURATION = "All      AIT";
     private static final long                    SIMULATION_DELTA                  = 20L;//ms
     private final        GraphicsDimentions      graphicsDimentions;
+    private final        Logger                  logger                            = LoggerFactory.getLogger(this.getClass());
     private final        TimeStatisticManager    timeStatisticManager              = new TimeStatisticManager();
     //	private static final String APPLICATION_VERSION_STRING = "0.1.0.0";
     public               PieChartData            amountPieChart                    = new PieChartData("volumen");
@@ -82,13 +86,16 @@ public class Universe {
     public               PieChartData            traderDeadReasonPieChart          = new PieChartData("trader death");
     public               TraderList              traderList                        = new TraderList();
     public               MercatorRandomGenerator universeRG;
+    //    Voice   helloVoice;
     boolean useFixedDelta = false;
+    //    VoiceManager voiceManager;
     private ScreenListener ScreenListener;
     private float          credits; // ---credits at creation time, should never change
     private boolean        enableTime  = true;
     private HistoryManager historyManager;
     private long           lastTime    = 0;
     private String         name;
+    private RadioTTS       radioTTS;
     private Event          selectedEvent;
     private int            selectedGoodIndex;
     private long           universeAge = 100L * TimeUnit.TICKS_PER_DAY;
@@ -98,7 +105,9 @@ public class Universe {
         this.graphicsDimentions = graphicsDimentions;
         eventManager            = new EventManager(level, eventFilter);
         setHistoryManager(new HistoryManager());
+
     }
+
 
     public void advanceInTime() throws Exception {
         advanceInTime(enableTime);
@@ -243,7 +252,12 @@ public class Universe {
         // advanceInTime( true );
         // currentTime = 0;
         useFixedDelta = true;
+        radioTTS      = new RadioTTS(this);
         advanceInTime(age);
+    }
+
+    public void dispose() {
+        radioTTS.dispose();
     }
 
     public Planet findBusyCenterPlanet() {
@@ -260,6 +274,7 @@ public class Universe {
         }
         return planet;
     }
+
 
     public GraphicsDimentions getGraphicsDimentions() {
         return graphicsDimentions;
@@ -464,14 +479,21 @@ public class Universe {
         }
     }
 
-    //	public void selectTrader(final Trader aTrader) {
-    //		setSelected(aTrader);
-    //		planetList.markTraderPath(selectedTrader);
-    //	}
+    public void say(RadioMessage rm) {
+        if (rm.from.isSelected() || rm.to.isSelected()) {
+            radioTTS.speak(rm.message);
+            logger.info(rm.message);
+        }
+    }
 
     public void selectEvent(final Event event) {
         selectedEvent = event;
     }
+
+    //	public void selectTrader(final Trader aTrader) {
+    //		setSelected(aTrader);
+    //		planetList.markTraderPath(selectedTrader);
+    //	}
 
     public void setEnableTime(final boolean enableTime) {
         this.enableTime = enableTime;
@@ -524,5 +546,39 @@ public class Universe {
         } else {
         }
     }
+
+//    private void windowstts() {
+//        SpeechEngine speechEngine = null;
+//        try {
+//            speechEngine = SpeechEngineNative.getInstance();
+//            List<Voice> voices = speechEngine.getAvailableVoices();
+//
+//            //            System.out.println("For now the following voices are supported:\n");
+//            String text = "The answer to the ultimate question of life, the universe, and everything is 42";
+//            for (Voice voice : voices) {
+//                System.out.printf("%s%n", voice);
+//            }
+//            // We want to find a voice according our preferences
+//            VoicePreferences voicePreferences = new VoicePreferences();
+//            voicePreferences.setLanguage("en"); //  ISO-639-1
+//            voicePreferences.setCountry("GB"); // ISO 3166-1 Alpha-2 code
+//            voicePreferences.setGender(VoicePreferences.Gender.FEMALE);
+//            Voice voice = speechEngine.findVoiceByPreferences(voicePreferences);
+//
+//            // simple fallback just in case our preferences didn't match any voice
+//            if (voice == null) {
+//                System.out.printf("Warning: Voice has not been found by the voice preferences %s%n", voicePreferences);
+//                voice = voices.get(0); // it is guaranteed that the speechEngine supports at least one voice
+//                System.out.printf("Using \"%s\" instead.%n", voice);
+//            }
+//
+//            speechEngine.setVoice(voice.getName());
+//            speechEngine.say(text);
+//        } catch (SpeechEngineCreationException e) {
+//            throw new RuntimeException(e);
+//        } catch (IOException e) {
+//            throw new RuntimeException(e);
+//        }
+//    }
 
 }

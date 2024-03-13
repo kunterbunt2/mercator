@@ -38,6 +38,8 @@ public class AtlasManager {
     public              BitmapFont   bold128Font;
     public              BitmapFont   bold256Font;
     public              BitmapFont   chartFont;
+    public              AtlasRegion  dashTextureRegion;
+    public              AtlasRegion  dashTextureRegion16;
     public              BitmapFont   defaultFont;
     public              BitmapFont   demoMidFont;
     public              AtlasRegion  dottedLineTextureRegion;
@@ -63,6 +65,8 @@ public class AtlasManager {
     //	public AtlasRegion good_occlusionRoughnessMetallicRegion;
     public              BitmapFont   menuFont;
     public              BitmapFont   modelFont;
+    public              AtlasRegion  patternCircle12;
+    public              AtlasRegion  patternCircle24;
     public              AtlasRegion  planetTextureRegion;
     public              AtlasRegion  simTextureRegion;
     public              AtlasRegion  systemTextureRegion;
@@ -127,6 +131,10 @@ public class AtlasManager {
         factoryTextureRegion = atlas.findRegion("factory");
         gaugeTextureRegion   = atlas.findRegion("gauge");
         traderTextureRegion  = atlas.findRegion("trader");
+        dashTextureRegion    = atlas.findRegion("dash");
+        dashTextureRegion16  = atlas.findRegion("dash16");
+        patternCircle12      = atlas.findRegion("pattern-circle-12");
+        patternCircle24      = atlas.findRegion("pattern-circle-24");
         //		good_baseColorRegion = atlas.findRegion("good_baseColor");
         //		good_normalRegion = atlas.findRegion("good_normal");
         //		good_occlusionRoughnessMetallicRegion = atlas.findRegion("good_occlusionRoughnessMetallic");

@@ -20,7 +20,8 @@ public enum TraderSubStatus {
     TRADER_STATUS_NA("N/A"),//
     TRADER_STATUS_ALIGNING("Maneuvering"),//
     TRADER_STATUS_WAITING_FOR_WAYPOINT("In-Queue"),//
-    TRADER_STATUS_TRAVELLING("Travelling");//
+    TRADER_STATUS_ACCELERATING("Accelerating"),//
+    TRADER_STATUS_DECELERATING("Decelerating");//
     private String name;
 
     TraderSubStatus(final String name) {

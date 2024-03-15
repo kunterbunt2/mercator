@@ -20,7 +20,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
-import com.badlogic.gdx.graphics.g2d.PolygonSpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.PointLight;
@@ -85,7 +84,18 @@ public class Planet3DRenderer extends ObjectRenderer<GameEngine3D> {
     private final        Planet                         planet;
     private final        List<PointLight>               pointLight        = new ArrayList<>();
     private final        List<GameObject<GameEngine3D>> pointLightObjects = new ArrayList<>();
-    int index = 0;
+    int     index       = 0;
+    //	private void renderFactory(Planet planet, Render3DMaster renderMaster) {
+    //		{
+    //			int index = 0;
+    //			for (ProductionFacility productionFacility : planet.productionFacilityList) {
+    //				//				productionFacility.getRenderer().render(planet.x, planet.y, renderMaster, index++, false);
+    //				// TODO uncomment
+    //			}
+    //
+    //		}
+    //	}
+    Vector3 translation = new Vector3();
     private boolean                  dayMode = true;
     //	Scene scene;
     private GameObject<GameEngine3D> gameObject;
@@ -122,27 +132,18 @@ public class Planet3DRenderer extends ObjectRenderer<GameEngine3D> {
         renderPlanet2D(planet, renderEngine, selected);
     }
 
-    //	private void renderFactory(Planet planet, Render3DMaster renderMaster) {
-    //		{
-    //			int index = 0;
-    //			for (ProductionFacility productionFacility : planet.productionFacilityList) {
-    //				//				productionFacility.getRenderer().render(planet.x, planet.y, renderMaster, index++, false);
-    //				// TODO uncomment
-    //			}
-    //
-    //		}
-    //	}
     @Override
     public void renderText(final RenderEngine3D<GameEngine3D> renderEngine, final int index, final boolean selected) {
         if (renderEngine.getCamera().frustum.boundsInFrustum(gameObject.transformedBoundingBox)) {
             final float size = 64;
             final float x    = planet.x;
             final float z    = planet.z;
+            translation.set(planet.x, 0, planet.z);
             //draw text
-            final PolygonSpriteBatch batch = renderEngine.renderEngine2D.batch;
-            final BitmapFont         font  = renderEngine.getGameEngine().getAtlasManager().bold256Font;
+            final BitmapFont font = renderEngine.getGameEngine().getAtlasManager().bold256Font;
+            String           text = planet.getName();
+//            renderEngine.renderEngine25D.renderTextOnTop(translation, 0, -PLANET_3D_SIZE / 2, 10, -PLANET_3D_SIZE / 2, font, Color.BLACK, PLANET_NAME_COLOR, text, size);
             {
-                String            text     = planet.getName();
                 final Matrix4     m        = new Matrix4();
                 final float       fontSize = font.getLineHeight();
                 final float       scaling  = size / fontSize;
@@ -153,9 +154,8 @@ public class Planet3DRenderer extends ObjectRenderer<GameEngine3D> {
                 m.setToTranslation(x + PLANET_3D_SIZE / 2 - width * scaling, 1, z + PLANET_3D_SIZE / 2);
                 m.rotate(xVector, -90);
                 m.scale(scaling, scaling, 1f);
-                batch.setTransformMatrix(m);
-                font.setColor(PLANET_NAME_COLOR);
-                font.draw(batch, text, 0, 0);
+                renderEngine.renderEngine25D.setTransformMatrix(m);
+                renderEngine.renderEngine25D.text(0, 0, font, Color.BLACK, PLANET_NAME_COLOR, text);
             }
             int i = 0;
             for (final Good good : planet.getGoodList()) {

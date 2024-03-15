@@ -43,7 +43,7 @@ import java.util.List;
  * @author bushnaq Created 13.02.2005
  */
 public class Trader extends Sim implements CommunicationPartner {
-    public static final  int               MAX_GOOD_SPACE                      = 80;
+    public static final  int               MAX_GOOD_SPACE                      = 160;
     public static final  int               MIN_GOOD_SPACE                      = 30;
     public final static  int               TRADER_MAX_PORT_REST_TIME           = 3;
     public static final  float             TRADER_START_CREDITS                = 1000.0f;
@@ -622,7 +622,7 @@ public class Trader extends Sim implements CommunicationPartner {
             //align to waypoint
             alignToWaypoint();
         } else {
-            if (pathIsClear()) setSubStatus(TraderSubStatus.TRADER_STATUS_TRAVELLING);
+            if (pathIsClear()) setSubStatus(TraderSubStatus.TRADER_STATUS_ACCELERATING);
             else setSubStatus(TraderSubStatus.TRADER_STATUS_WAITING_FOR_WAYPOINT);
             if (destinationWaypointDistanceProgress >= destinationWaypointDistance && TimeUnit.isInt(currentTime)/* ( ( currentTime - (int)currentTime ) == 0.0f ) */) {
                 //we reached a waypoint

@@ -91,7 +91,7 @@ public class Thruster {
     public void update(RenderEngine3D<GameEngine3D> renderEngine, Vector3 translation, float rotation, RotationDirection rotationDirection) {
 //        if (direction.x != 0f || direction.y != 0f || direction.z != 0f)
         if (this.rotationDirection == rotationDirection) {
-            final CustomizedSpriteBatch batch = renderEngine.renderEngine2D.batch;
+            final CustomizedSpriteBatch batch = renderEngine.renderEngine25D.batch;
             final Matrix4               m     = new Matrix4();
             {
                 //move center of text to center of trader
@@ -114,7 +114,7 @@ public class Thruster {
             batch.setColor(Color.WHITE);
             float thickness = .3f + t / 2;
 
-            batch.line(renderEngine.getGameEngine().getAtlasManager().systemTextureRegion, 0, 0, direction.x + x, direction.z + z, c, thickness);
+            batch.line(renderEngine.getGameEngine().getAtlasManager().systemTextureRegion, 0, 0, 0, direction.x + x, 0, direction.z + z, c, thickness);
             animate(renderEngine);
         }
     }

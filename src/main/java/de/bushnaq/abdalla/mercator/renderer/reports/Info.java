@@ -43,6 +43,7 @@ import de.bushnaq.abdalla.mercator.universe.good.Good;
 import de.bushnaq.abdalla.mercator.universe.planet.Planet;
 import de.bushnaq.abdalla.mercator.universe.sim.Sim;
 import de.bushnaq.abdalla.mercator.universe.sim.SimNeed;
+import de.bushnaq.abdalla.mercator.universe.sim.trader.Engine;
 import de.bushnaq.abdalla.mercator.universe.sim.trader.Trader;
 import de.bushnaq.abdalla.mercator.util.TimeStatistic;
 import de.bushnaq.abdalla.mercator.util.TimeUnit;
@@ -363,7 +364,7 @@ public class Info {
             updateNameAndValue("traderSubStatus", trader.getSubStatus().getName(), VARIABLE_LABEL);
             updateNameAndValue("start credits", Sim.SIM_START_CREDITS, STATIC_LABEL);
             updateNameAndValue("cargo size", trader.goodSpace, STATIC_LABEL);
-            updateNameAndValue("engine speed", trader.getEngine().getEngineSpeed(), STATIC_LABEL);
+            updateNameAndValue("engine speed", trader.getEngine().getEngineSpeed() * Engine.ENGINE_TO_REALITY_FACTOR, STATIC_LABEL);
             updateNameAndValue("engine accelleration", trader.getEngine().getEngineSpeed(), STATIC_LABEL);
             updateNameAndValue("rotation speed", trader.getManeuveringSystem().rotationSpeed, STATIC_LABEL);
             updateNameAndValue("credits", String.format("%.2f", trader.getCredits()), VARIABLE_LABEL);

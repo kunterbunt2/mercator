@@ -207,7 +207,7 @@ public class Good3DRenderer extends ObjectRenderer<GameEngine3D> {
 
     private void renderTextOnTop(final float aX, final float aY, final float aZ, final RenderEngine3D<GameEngine3D> renderEngine, final float dx, final float dy, final float dz, final String text, final float size) {
         //draw text
-        final PolygonSpriteBatch batch = renderEngine.renderEngine2D.batch;
+        final PolygonSpriteBatch batch = renderEngine.renderEngine25D.batch;
         final BitmapFont         font  = renderEngine.getGameEngine().getAtlasManager().modelFont;
         {
             final Matrix4     m        = new Matrix4();

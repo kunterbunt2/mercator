@@ -49,7 +49,9 @@ public class MyCameraInputController extends CameraInputController {
             new ZoomCoordinates(0, 6000, 0),//
             new ZoomCoordinates(0, 10000, 0),//
     };
-    int               zoomIndex   = 3;
+    int               zoomIndex   = 5;
+    private float progress        = 0;
+    private int   targetZoomIndex = 3;
 
     public MyCameraInputController(final Camera camera, GameEngine3D gameEngine) throws Exception {
         super(camera);
@@ -58,6 +60,25 @@ public class MyCameraInputController extends CameraInputController {
         rotateButton = Buttons.MIDDLE;
         //		notifyListener(camera);
         pinchZoomFactor = 1f / Universe.WORLD_SCALE;
+    }
+
+    public void update() {
+        if (targetZoomIndex != zoomIndex) {
+            if (camera instanceof MovingCamera movingCamera) {
+                float cameraX = zoomFactors[zoomIndex].x + (zoomFactors[targetZoomIndex].x - zoomFactors[zoomIndex].x) * progress;
+                float cameraY = zoomFactors[zoomIndex].y + (zoomFactors[targetZoomIndex].y - zoomFactors[zoomIndex].y) * progress;
+                float cameraZ = zoomFactors[zoomIndex].z + (zoomFactors[targetZoomIndex].z - zoomFactors[zoomIndex].z) * progress;
+                float x       = cameraX - (camera.position.x - movingCamera.lookat.x);
+                float y       = cameraY - camera.position.y;
+                float z       = cameraZ - (camera.position.z - movingCamera.lookat.z);
+                camera.translate(x, y, z);
+                progress += 0.02f;
+                if (progress >= 1.0f) {
+                    progress  = 0;
+                    zoomIndex = targetZoomIndex;
+                }
+            }
+        }
     }
 
     @Override
@@ -105,15 +126,17 @@ public class MyCameraInputController extends CameraInputController {
         try {
             if (!alwaysScroll && activateKey != 0 && !activatePressed)
                 return false;
-            if (amount < 0 && zoomIndex < zoomFactors.length - 1) {
-                zoomIndex++;
-                zoomCamera();
-            } else if (amount > 0 && zoomIndex > 0) {
-                zoomIndex--;
-                zoomCamera();
+            if (amount < 0 && zoomIndex < zoomFactors.length - 1 && progress == 0f) {
+//                zoomIndex++;
+                targetZoomIndex = zoomIndex + 1;
+//                zoomCamera();
+            } else if (amount > 0 && zoomIndex > 0 && progress == 0f) {
+//                zoomIndex--;
+                targetZoomIndex = zoomIndex - 1;
+//                zoomCamera();
             }
 //            myCamera.translate(0, -amount * pinchZoomFactor, 0);
-            //todo need to find a fix for this otherwise camera rotatiosn will lead to starnge effects
+            //todo need to find a fix for this otherwise camera rotation will lead to strange effects
 //            camera.up.set(0, 1, 0);//careful, this will go wrong if camera is pointing directly at 0, 0, 0 from above.
             if (camera instanceof MovingCamera) {
                 final MovingCamera myCamera = (MovingCamera) camera;
@@ -130,9 +153,19 @@ public class MyCameraInputController extends CameraInputController {
     }
 
     private void zoomCamera() {
-        if (camera instanceof MovingCamera) {
-            final MovingCamera myCamera = (MovingCamera) camera;
-            camera.translate(zoomFactors[zoomIndex].x - (camera.position.x - myCamera.lookat.x), zoomFactors[zoomIndex].y - camera.position.y, zoomFactors[zoomIndex].z - (camera.position.z - myCamera.lookat.z));
+        if (camera instanceof MovingCamera movingCamera) {
+            float cameraX = zoomFactors[zoomIndex].x + (zoomFactors[targetZoomIndex].x - zoomFactors[zoomIndex].x) * progress;
+            float cameraY = zoomFactors[zoomIndex].y + (zoomFactors[targetZoomIndex].y - zoomFactors[zoomIndex].y) * progress;
+            float cameraZ = zoomFactors[zoomIndex].z + (zoomFactors[targetZoomIndex].z - zoomFactors[zoomIndex].z) * progress;
+            float x       = cameraX - (camera.position.x - movingCamera.lookat.x);
+            float y       = cameraY - camera.position.y;
+            float z       = cameraZ - (camera.position.z - movingCamera.lookat.z);
+            camera.translate(x, y, z);
+            progress += 0.1f;
+            if (progress >= 1.0f) {
+                progress  = 0;
+                zoomIndex = targetZoomIndex;
+            }
 //            camera.translate(0, zoomFactors[zoomIndex].y - camera.position.y, 0);
         }
     }

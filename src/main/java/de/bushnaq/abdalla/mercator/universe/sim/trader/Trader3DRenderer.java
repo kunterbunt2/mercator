@@ -19,14 +19,10 @@ package de.bushnaq.abdalla.mercator.universe.sim.trader;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.GlyphLayout;
-import com.badlogic.gdx.graphics.g2d.PolygonSpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
-import de.bushnaq.abdalla.engine.CustomizedSpriteBatch;
-import de.bushnaq.abdalla.engine.GameObject;
-import de.bushnaq.abdalla.engine.ObjectRenderer;
-import de.bushnaq.abdalla.engine.RenderEngine3D;
+import de.bushnaq.abdalla.engine.*;
 import de.bushnaq.abdalla.mercator.audio.synthesis.MercatorSynthesizer;
 import de.bushnaq.abdalla.mercator.renderer.GameEngine2D;
 import de.bushnaq.abdalla.mercator.renderer.GameEngine3D;
@@ -57,6 +53,7 @@ public class Trader3DRenderer extends ObjectRenderer<GameEngine3D> {
     final static         Vector3                                       yVectorNeg              = new Vector3(0, -1, 0);
     final static         Vector3                                       zVector                 = new Vector3(0, 0, 1);
     private static final float                                         ANTENNA_LENGTH          = 8f;
+    private static final int                                           DRAW_GOOD_FACTOR        = 5;// we only draw a portion of the actual good containers
     private static final int                                           NUMBER_OF_LIGHTS        = 4;
     private static final int                                           NUMBER_OF_THRUSTERS     = 4;
     private static final float                                         TRADER_ANTENNA_MARGINE  = 1f;
@@ -72,7 +69,7 @@ public class Trader3DRenderer extends ObjectRenderer<GameEngine3D> {
     private final        Logger                                        logger                  = LoggerFactory.getLogger(this.getClass());
     private final        float[]                                       position                = new float[3];
     private final        Vector3                                       scaling                 = new Vector3();//intermediate value
-    private final        Vector3                                       shift                   = new Vector3();//intermediate value
+    //    private final        Vector3                                       shift                   = new Vector3();//intermediate value
     private final        List<StrobeLight>                             strobeLights            = new ArrayList<>();
     private final        Vector3                                       target                  = new Vector3();//intermediate value
     private final        Trader                                        trader;
@@ -152,7 +149,7 @@ public class Trader3DRenderer extends ObjectRenderer<GameEngine3D> {
         for (final Good g : trader.getGoodList()) {
             final List<GameObject<GameEngine3D>> unused    = getUnusedGoodList(g.type);
             final List<GameObject<GameEngine3D>> used      = getUsedGoodList(g.type);
-            final int                            usedDelta = used.size() - g.getAmount() / 5;
+            final int                            usedDelta = used.size() - g.getAmount() / DRAW_GOOD_FACTOR;
             if (usedDelta > 0) {
                 for (int i = 0; i < usedDelta; i++) {
                     final GameObject<GameEngine3D> go = used.remove(used.size() - 1);
@@ -269,58 +266,103 @@ public class Trader3DRenderer extends ObjectRenderer<GameEngine3D> {
 
     private void renderDetails(RenderEngine3D<GameEngine3D> renderEngine) {
         if (renderEngine.getCamera().frustum.pointInFrustum(translation.x, translation.y, translation.z)) {
-//        final CustomizedSpriteBatch batch = renderEngine.renderEngine2D.batch;
-            final CustomizedSpriteBatch batch = renderEngine.renderEngine2D.batch;
+            float rotation = trader.getManeuveringSystem().rotation;
             {
                 final Matrix4 m = new Matrix4();
                 //move center of text to center of trader
                 m.setToTranslation(translation.x, translation.y, translation.z);
-                m.rotate(yVector, trader.getManeuveringSystem().rotation);
+                m.rotate(yVector, rotation);
                 //move to the top and back on engine
                 m.translate(0, -TRADER_SIZE_Y, 0);
                 //rotate into the xz layer
                 m.rotate(xVector, -90);
-                batch.setTransformMatrix(m);
+                renderEngine.renderEngine25D.setTransformMatrix(m);
             }
 
-            batch.setColor(new Color(.2f, .4f, .3f, 0.05f));
-            batch.fillCircle(renderEngine.getGameEngine().getAtlasManager().systemTextureRegion, 0, 0, TRADER_SIZE_Z, 128);
-            batch.setColor(new Color(.9f, .9f, .9f, .5f));
-            batch.circle(renderEngine.getGameEngine().getAtlasManager().patternCircle24, 0, 0, TRADER_SIZE_Z - .5f, 1f, 128);
+            TextureAtlas.AtlasRegion systemTextureRegion = renderEngine.getGameEngine().getAtlasManager().systemTextureRegion;
+            renderEngine.renderEngine25D.fillCircle(systemTextureRegion, 0, 0, TRADER_SIZE_Z * 2, 128, new Color(.2f, .4f, .3f, 0.05f));
+            renderEngine.renderEngine25D.circle(renderEngine.getGameEngine().getAtlasManager().patternCircle24, 0, 0, TRADER_SIZE_Z * 2 - .5f, 1f, new Color(.9f, .9f, .9f, .5f), 128);
+//            {
+//                final Matrix4 m = new Matrix4();
+//                //move center of text to center of trader
+//                m.setToTranslation(translation.x, translation.y, translation.z);
+//                m.rotate(yVector, trader.getManeuveringSystem().rotation);
+//                //move to the top and back on engine
+//                m.translate(0, 0, 0);
+//                //rotate into the xz layer
+//                m.rotate(xVector, -90);
+//                renderEngine.renderEngine25D.setTransformMatrix(m);
+//            }
+            BitmapFont modelFont = renderEngine.getGameEngine().getAtlasManager().modelFont;
+            if (trader.destinationPlanet != null) {
+                String name  = trader.getName();
+                String value = String.format("%.0f credits", trader.getCredits());
+                renderEngine.renderEngine25D.label(translation, rotation, systemTextureRegion, 0, 0, -TRADER_SIZE_Z / 2, TRADER_SIZE_Z * 1.25f, HAlignment.RIGHT, VAlignment.TOP, 0.2f, modelFont, Color.WHITE, name, TRADER_NAME_COLOR, value, Color.YELLOW);
+            }
+            if (trader.destinationPlanet != null) {
+                if (trader.traderStatus == TraderStatus.TRADER_STATUS_SELLING) {
+                    String name  = "Selling";
+                    String value = String.format("from %s to %s", trader.planet.getName(), trader.destinationPlanet.getName());
+                    renderEngine.renderEngine25D.label(translation, rotation, systemTextureRegion, 0, 0, -TRADER_SIZE_Z / 2, TRADER_SIZE_Z * 1.25f, HAlignment.LEFT, VAlignment.TOP, 0.2f, modelFont, Color.WHITE, name, TRADER_NAME_COLOR, value, Color.YELLOW);
+                } else if (trader.traderStatus == TraderStatus.TRADER_STATUS_BUYING) {
+                    String name  = "Buying";
+                    String value = String.format("from %s", trader.destinationPlanet.getName());
+                    renderEngine.renderEngine25D.label(translation, rotation, systemTextureRegion, 0, 0, -TRADER_SIZE_Z / 2, TRADER_SIZE_Z * 1.25f, HAlignment.RIGHT, VAlignment.TOP, 0.2f, modelFont, Color.WHITE, name, TRADER_NAME_COLOR, value, Color.YELLOW);
+                }
+            }
+            if (!trader.getGoodList().isEmpty()) {
+                for (Good good : trader.getGoodList()) {
+                    if (good.getAmount() > 0) {
+                        String name  = good.type.getName();
+                        String value = String.format("%d kt", good.getAmount());
+                        renderEngine.renderEngine25D.label(translation, rotation, systemTextureRegion, 0, 0, 0, TRADER_SIZE_Z * 1.25f, HAlignment.RIGHT, VAlignment.TOP, 0.2f, modelFont, Color.WHITE, name, TRADER_NAME_COLOR, value, Color.YELLOW);
+                    }
+                }
+            }
+            if (trader.subStatus == TraderSubStatus.TRADER_STATUS_ALIGNING) {
+                String value = String.format("%.1f °/s", trader.getThrusters().rotationSpeed);
+                renderEngine.renderEngine25D.label(translation, rotation, systemTextureRegion, 0, 0, TRADER_SIZE_Z / 2, TRADER_SIZE_Z * 1.25f, HAlignment.LEFT, VAlignment.BOTTOM, 0.2f, modelFont, Color.WHITE, "Aligning", TRADER_NAME_COLOR, value, Color.YELLOW);
+            } else if (trader.subStatus == TraderSubStatus.TRADER_STATUS_ACCELERATING) {
+                String value = String.format("%.1f m/s", trader.getEngine().getEngineSpeed() * Engine.ENGINE_TO_REALITY_FACTOR);
+                renderEngine.renderEngine25D.label(translation, rotation, systemTextureRegion, 0, 0, TRADER_SIZE_Z / 2, TRADER_SIZE_Z * 1.25f, HAlignment.RIGHT, VAlignment.BOTTOM, 0.2f, modelFont, Color.WHITE, "Accelerating", TRADER_NAME_COLOR, value, Color.YELLOW);
+            } else if (trader.subStatus == TraderSubStatus.TRADER_STATUS_DECELERATING) {
+                String value = String.format("%.1f m/s", trader.getEngine().getEngineSpeed() * Engine.ENGINE_TO_REALITY_FACTOR);
+                renderEngine.renderEngine25D.label(translation, rotation, systemTextureRegion, 0, 0, TRADER_SIZE_Z / 2, TRADER_SIZE_Z * 1.25f, HAlignment.RIGHT, VAlignment.BOTTOM, 0.2f, modelFont, Color.WHITE, "Decelerating", TRADER_NAME_COLOR, value, Color.YELLOW);
+            }
         }
     }
 
     private void renderTextOnTop(final RenderEngine3D<GameEngine3D> renderEngine, final float dx, final float dy, final String text, final float size) {
-        final float x = translation.x;
-        final float y = translation.y;
-        final float z = translation.z;
+//        final float x = translation.x;
+//        final float y = translation.y;
+//        final float z = translation.z;
         //draw text
-        final PolygonSpriteBatch batch = renderEngine.renderEngine2D.batch;
-        final BitmapFont         font  = renderEngine.getGameEngine().getAtlasManager().bold256Font;
-        {
-            final Matrix4     m        = new Matrix4();
-            final float       fontSize = font.getLineHeight();
-            final float       scaling  = size / fontSize;
-            final GlyphLayout layout   = new GlyphLayout();
-            layout.setText(font, text);
-            final float width  = layout.width;// contains the width of the current set text
-            final float height = layout.height; // contains the height of the current set text
-            //on top
-            {
-                //move center of text to center of trader
-                m.setToTranslation(x, y + TRADER_SIZE_Y / 2.0f + 0.2f, z);
-                m.rotate(yVector, trader.getManeuveringSystem().rotation);
-                //move to the top and back on engine
-                m.translate(-width * scaling / 2 - dx, 0, +TRADER_SIZE_Z / 2 - TRADER_ENGINE_SIZE_Z + (TRADER_ENGINE_SIZE_Z / 2 - height * scaling / 2 - dy));
-                //rotate into the xz layer
-                m.rotate(xVector, -90);
-                //scale to fit trader engine
-                m.scale(scaling, scaling, 1f);
-            }
-            batch.setTransformMatrix(m);
-            font.setColor(TRADER_NAME_COLOR);
-            font.draw(batch, text, 0, 0);
-        }
+//        final PolygonSpriteBatch batch = renderEngine.renderEngine25D.batch;
+        final BitmapFont font = renderEngine.getGameEngine().getAtlasManager().bold256Font;
+        renderEngine.renderEngine25D.renderTextCenterOnTop(translation, trader.getManeuveringSystem().rotation, dx, TRADER_SIZE_Y / 2.0f + 0.2f, dy - (+TRADER_SIZE_Z / 2 - TRADER_ENGINE_SIZE_Z + (TRADER_ENGINE_SIZE_Z / 2)), font, Color.BLACK, TRADER_NAME_COLOR, text, size);
+//        {
+//            final Matrix4     m        = new Matrix4();
+//            final float       fontSize = font.getLineHeight();
+//            final float       scaling  = size / fontSize;
+//            final GlyphLayout layout   = new GlyphLayout();
+//            layout.setText(font, text);
+//            final float width  = layout.width;// contains the width of the current set text
+//            final float height = layout.height; // contains the height of the current set text
+//            //on top
+//            {
+//                //move center of text to center of trader
+//                m.setToTranslation(x, y + TRADER_SIZE_Y / 2.0f + 0.2f, z);
+//                m.rotate(yVector, trader.getManeuveringSystem().rotation);
+//                //move to the top and back on engine
+//                m.translate(-width * scaling / 2 - dx, 0, +TRADER_SIZE_Z / 2 - TRADER_ENGINE_SIZE_Z + (TRADER_ENGINE_SIZE_Z / 2 - height * scaling / 2 - dy));
+//                //rotate into the xz layer
+//                m.rotate(xVector, -90);
+//                //scale to fit trader engine
+//                m.scale(scaling, scaling, 1f);
+//            }
+//            renderEngine.renderEngine25D.setTransformMatrix(m);
+//            renderEngine.renderEngine25D.text(0, 0, font, Color.BLACK, TRADER_NAME_COLOR, text);
+//        }
     }
 
     private float toOneDigitPrecision(final float value) {

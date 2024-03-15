@@ -21,20 +21,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Engine {
-    public static final  int    MAX_ENGINE_SPEED = 100;
-    public static final  float  MIN_ENGINE_SPEED = .1f;
-    private static final float  ENGINE_FORCE     = 3f;//newton
-    private final        Logger logger           = LoggerFactory.getLogger(this.getClass());
+    public static final  float  ENGINE_TO_REALITY_FACTOR = 10;
+    public static final  int    MAX_ENGINE_SPEED         = 100;
+    public static final  float  MIN_ENGINE_SPEED         = .1f;
+    private static final float  ENGINE_FORCE             = 3f;//newton
+    private final        Logger logger                   = LoggerFactory.getLogger(this.getClass());
     private final        Trader trader;
-    //    private              float  acceleration;
-    private              float  engineSpeed      = MIN_ENGINE_SPEED;
+    private              float  engineSpeed              = MIN_ENGINE_SPEED;
 
     public Engine(Trader trader) {
         this.trader = trader;
     }
 
     public void advanceInTime(float realTimeDelta) {
-        if (trader.subStatus == TraderSubStatus.TRADER_STATUS_TRAVELLING && realTimeDelta != 0) {
+        if ((trader.subStatus == TraderSubStatus.TRADER_STATUS_ACCELERATING || trader.subStatus == TraderSubStatus.TRADER_STATUS_DECELERATING) && realTimeDelta != 0) {
             calculateEngineSpeed(realTimeDelta);
             float delta = getEngineSpeed() * realTimeDelta * 10;
             trader.destinationWaypointDistanceProgress += delta;
@@ -54,7 +54,7 @@ public class Engine {
 
     void calculateEngineSpeed(float timeDelta) {
         // are we paused?
-        if (trader.subStatus == TraderSubStatus.TRADER_STATUS_TRAVELLING) {
+        if (trader.subStatus == TraderSubStatus.TRADER_STATUS_ACCELERATING || trader.subStatus == TraderSubStatus.TRADER_STATUS_DECELERATING) {
             if (trader.targetWaypoint == null || trader.destinationWaypointDistance == 0) {
                 engineSpeed = MIN_ENGINE_SPEED;
             } else {
@@ -62,12 +62,16 @@ public class Engine {
                 float progress     = trader.destinationWaypointDistanceProgress / trader.destinationWaypointDistance;
                 if (progress < 0.5) {
                     //accelerating
+                    if (trader.subStatus == TraderSubStatus.TRADER_STATUS_DECELERATING)
+                        trader.setSubStatus(TraderSubStatus.TRADER_STATUS_ACCELERATING);
                     engineSpeed = Math.min(engineSpeed + acceleration * timeDelta * 10, MAX_ENGINE_SPEED);
 //                    if (trader.getName().equals("T-1"))
 //                        logger.info("engineSpeed=" + engineSpeed + " acceleration=" + acceleration);
 //                    if (getName().equals("T-25")) logger.info("engine acceleration currentMaxEngineSpeed=" + engineSpeed);
                 } else /*if (destinationPlanetDistance - destinationPlanetDistanceProgress <= ACCELLERATION_DISTANCE)*/ {
                     //deceleration
+                    if (trader.subStatus == TraderSubStatus.TRADER_STATUS_ACCELERATING)
+                        trader.setSubStatus(TraderSubStatus.TRADER_STATUS_DECELERATING);
                     engineSpeed = Math.max(engineSpeed - acceleration * timeDelta * 10, MIN_ENGINE_SPEED);
 //                    if (getName().equals("T-25")) logger.info("engine deceleration currentMaxEngineSpeed=" + engineSpeed);
                 }

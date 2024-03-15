@@ -59,7 +59,7 @@ public class JumpGate2DRenderer extends ObjectRenderer<GameEngine2D> {
         }
         final Color c = new Color(color);
         c.a = 0.45f;
-        renderEngine.getGameEngine().renderEngine.batch.line(renderEngine.getGameEngine().atlasManager.dottedLineTextureRegion, start.x, start.y, target.x, target.y, c, thickness);
+        renderEngine.getGameEngine().renderEngine.batch.line(renderEngine.getGameEngine().atlasManager.dottedLineTextureRegion, start.x, 0, start.y, target.x, 0, target.y, c, thickness);
 
     }
 

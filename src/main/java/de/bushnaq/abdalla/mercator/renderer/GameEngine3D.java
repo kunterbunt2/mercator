@@ -68,7 +68,7 @@ import java.util.List;
 
 public class GameEngine3D implements ScreenListener, ApplicationListener, InputProcessor, RenderEngineExtension {
     public static final  float                        CAMERA_OFFSET_X                 = 300f;
-    public static final  float                        CAMERA_OFFSET_Y                 = 200f;
+    public static final  float                        CAMERA_OFFSET_Y                 = 300f;
     public static final  float                        CAMERA_OFFSET_Z                 = 400f;
     //	private static final String BATCH_END_DURATION = "batch.end()";
     //	private static final String DRAW_DURATION = "draw()";
@@ -297,7 +297,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
         camera.position.set(lookat.x /*+ CAMERA_OFFSET_X / Universe.WORLD_SCALE*/, lookat.y + CAMERA_OFFSET_Y / Universe.WORLD_SCALE, lookat.z + CAMERA_OFFSET_Z / Universe.WORLD_SCALE);
         camera.up.set(0, 1, 0);
         camera.lookAt(lookat);
-        camera.near = 8f;
+        camera.near = 2f;
         camera.far  = 8000f;
         camera.update();
         camera.setDirty(true);
@@ -809,6 +809,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
             }
         }
         // must be called after moving the camera
+        camController.update();
         renderEngine.updateCamera(centerXD, 0f, centerYD);
 //        if (camera.position.y > 1000) {
 //            renderEngine.getFog().setBeginDistance(camera.position.y + 100);

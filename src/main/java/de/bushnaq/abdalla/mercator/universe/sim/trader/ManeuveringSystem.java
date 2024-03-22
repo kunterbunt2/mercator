@@ -123,9 +123,10 @@ public class ManeuveringSystem {
     public void create(AudioEngine audioEngine) {
         try {
             oggPlayer = audioEngine.createAudioProducer(OggPlayer.class);
-            oggPlayer.setFile(Gdx.files.internal(AtlasManager.getAssetsFolderName() + "/audio/thrusters_loopwav-14699.ogg"));
-            oggPlayer.setGain(150.0f);
+            oggPlayer.setFile(Gdx.files.internal(AtlasManager.getAssetsFolderName() + "/audio/thrusters_loop.ogg"));
+            oggPlayer.setGain(1.0f);
             oggPlayer.setAmbient(false);
+            oggPlayer.setLoop(true);
         } catch (OpenAlException e) {
             throw new RuntimeException(e);
         }
@@ -199,6 +200,5 @@ public class ManeuveringSystem {
             }
         }
     }
-
 
 }

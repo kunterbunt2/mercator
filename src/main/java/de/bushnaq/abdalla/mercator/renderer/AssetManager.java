@@ -177,11 +177,11 @@ public class AssetManager {
     private void createFlame(ModelBuilder modelBuilder, ModelCreator modelCreator) {
         flame = new GLBLoader().load(Gdx.files.internal(String.format(AtlasManager.getAssetsFolderName() + "/models/flame.glb")));
         PBRColorAttribute baseColorFactor = PBRColorAttribute.createBaseColorFactor(new Color(Color.WHITE));
-        final Attribute   blending        = new BlendingAttribute(0.5f); // opacity is set by pbrMetallicRoughness below
-//        ColorAttribute    emissive        = PBRColorAttribute.createEmissive(new Color(Color.WHITE));
+//        final Attribute   blending        = new BlendingAttribute(0.5f); // opacity is set by pbrMetallicRoughness below
+        ColorAttribute emissive = PBRColorAttribute.createEmissive(new Color(Color.WHITE));
         for (Material m : flame.scene.model.materials) {
             if (m.id.equals("flame.material"))
-                m.set(baseColorFactor, blending/*, emissive*/);
+                m.set(baseColorFactor/*, blending*/, emissive);
         }
     }
 

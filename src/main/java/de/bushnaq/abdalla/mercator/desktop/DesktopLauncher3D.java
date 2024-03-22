@@ -139,7 +139,7 @@ public class DesktopLauncher3D implements ApplicationListener {
         boolean restart = false;
         do {
             if (restart)
-                logger.info(String.format("Restarting pluvia v%s.", MavenPropertiesProvider.getProperty("module.version")));
+                logger.info(String.format("Restarting mercator v%s.", MavenPropertiesProvider.getProperty("module.version")));
             {
                 // initialize a gdx environment, so that we can access files
                 Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
@@ -166,13 +166,13 @@ public class DesktopLauncher3D implements ApplicationListener {
 
     private void start() throws InterruptedException, Exception {
         logger.info("------------------------------------------------------------------------------");
-        logger.info(String.format("Starting pluvia v%s.", MavenPropertiesProvider.getProperty("project.version")));
+        logger.info(String.format("Starting mercator v%s.", MavenPropertiesProvider.getProperty("project.version")));
         logger.info("------------------------------------------------------------------------------");
         String property = System.getProperty("user.home");
         logger.info("user.home = " + property);
         loop();
         logger.info("------------------------------------------------------------------------------");
-        logger.info(String.format("Shutting down pluvia v%s.", MavenPropertiesProvider.getProperty("project.version")));
+        logger.info(String.format("Shutting down mercator v%s.", MavenPropertiesProvider.getProperty("project.version")));
         logger.info("------------------------------------------------------------------------------");
     }
 

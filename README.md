@@ -46,22 +46,13 @@ Then you can start mercator by one of its starting classes
 ## Issues
 
 1. Form selecting an item does not show info in the lower pane.
-1. Renderer statistics missing.
-1. Universe statistics never showing up.
-1. Cluster bounding box not working.
-2. Camera movement is still bad.
-3. Economy is not stable, all sims eventually die of hunger.
-1. skybox top not oriented correctly (see reflection screenshot)
-2. shadow depth buffer lower half is strange
-3. strobe light blinking even when paused.
+2. Economy is not stable, all sims eventually die of hunger.
+3. skybox top not oriented correctly (see reflection screenshot)
 
 ## TODO
 
 1. ship speed must not be influenced by frame rate
-2. realistic acceleration/deceleration
-3. remove spline path
-4. introduce slow rotation of traders
-3. simulation advanceintime is triggered every frame.
-4. ensure adding/removing lights does not causing any cahing to get dirty.
-5. optimize selected path performance
-6. introduce tts to generate text snippets of atc communication
+2. simulation advanceintime is triggered every frame.
+3. ensure adding/removing lights does not cause any caching to get dirty.
+4. optimize selected path performance
+5. introduce tts to generate text snippets of atc communication

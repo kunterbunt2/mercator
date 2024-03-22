@@ -37,6 +37,7 @@ public class Thruster {
     public static final  float                    LIGHT_SIZE                   = .2f;
     final static         Vector3                  xVector                      = new Vector3(1, 0, 0);
     final static         Vector3                  yVector                      = new Vector3(0, 1, 0);
+    final static         Vector3                  zVector                      = new Vector3(0, 0, 1);
     private static final float                    PY2                          = 3.14159f / 2;
     public final         GameObject<GameEngine3D> gameObject;
     public final         PointLight               pointLight;
@@ -56,7 +57,6 @@ public class Thruster {
         this.rotation          = rotation;
         this.gameObject        = gameObject;
         this.pointLight        = new PointLight();
-
     }
 
     private void animate(RenderEngine3D<GameEngine3D> renderEngine) {
@@ -71,7 +71,7 @@ public class Thruster {
 //                    renderEngine.remove(pointLight, true);
                     for (Material m : gameObject.instance.materials) {
                         if (m.id.equals("flame.material")) {
-                            PBRColorAttribute baseColorFactor = PBRColorAttribute.createBaseColorFactor(new Color(Color.BLUE));
+                            PBRColorAttribute baseColorFactor = PBRColorAttribute.createBaseColorFactor(new Color(Color.WHITE));
                             m.set(baseColorFactor);
                         }
                     }
@@ -149,7 +149,10 @@ public class Thruster {
             gameObject.instance.transform.setToTranslation(translation);
             gameObject.instance.transform.rotate(yVector, rotation);
             gameObject.instance.transform.translate(delta);
-            gameObject.instance.transform.rotate(yVector, this.rotation);
+            float factor = 2;
+            gameObject.instance.transform.rotate(Vector3.Y, this.rotation + factor - (float) Math.random() * factor * 2);
+            gameObject.instance.transform.rotate(Vector3.Z, factor - (float) Math.random() * factor * 2);
+            gameObject.instance.transform.rotate(Vector3.X, factor - (float) Math.random() * factor * 2);
 //            gameObject.instance.transform.scale(scaling.x, scaling.y, scaling.z);
             gameObject.update();
             final float intensity        = calculateIntensity();

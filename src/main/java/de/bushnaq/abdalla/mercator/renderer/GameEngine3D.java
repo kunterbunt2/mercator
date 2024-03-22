@@ -841,7 +841,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
         updatePlanets(currentTime);
         updateGoods(currentTime);
         updateTraders(currentTime);
-        audioEngine.begin(camera);
+        audioEngine.begin(camera, universe.isEnableTime());
         audioEngine.end();
         renderEngine.cpuGraph.end();
 
@@ -1214,16 +1214,20 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
     }
 
     private void updatePlanets(final long currentTime) throws Exception {
-        for (final Planet planet : universe.planetList) {
-            planet.get3DRenderer().update(renderEngine, currentTime, renderEngine.getTimeOfDay(), 0, planet == assetManager.universe.selectedPlanet);
+        if (universe.isEnableTime()) {
+            for (final Planet planet : universe.planetList) {
+                planet.get3DRenderer().update(renderEngine, currentTime, renderEngine.getTimeOfDay(), 0, planet == assetManager.universe.selectedPlanet);
+            }
         }
     }
 
     private void updateTraders(final long currentTime) throws Exception {
-        for (final Planet planet : assetManager.universe.planetList) {
-            int index = 0;
-            for (final Trader trader : planet.traderList) {
-                trader.get3DRenderer().update(renderEngine, currentTime, renderEngine.getTimeOfDay(), index++, trader == assetManager.universe.selectedTrader);
+        if (universe.isEnableTime()) {
+            for (final Planet planet : assetManager.universe.planetList) {
+                int index = 0;
+                for (final Trader trader : planet.traderList) {
+                    trader.get3DRenderer().update(renderEngine, currentTime, renderEngine.getTimeOfDay(), index++, trader == assetManager.universe.selectedTrader);
+                }
             }
         }
     }

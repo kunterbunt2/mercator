@@ -27,7 +27,7 @@ import de.bushnaq.abdalla.mercator.universe.sim.trader.Engine;
  */
 public class MercatorSynthesizer extends Synthesizer {
 
-    private static final float HIGHEST_FREQUENCY = 2 * 261.6256f;//C5
+    private static final float HIGHEST_FREQUENCY = 2 * 2 * 261.6256f;//C5
     private static final float LOWEST_FREQUENCY  = 32.70320f;//C1
 
     private final Lfo           lfo1;

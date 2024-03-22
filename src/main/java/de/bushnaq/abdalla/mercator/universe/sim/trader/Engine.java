@@ -159,8 +159,9 @@ public class Engine {
         try {
             oggPlayer = renderEngine.getGameEngine().audioEngine.createAudioProducer(OggPlayer.class);
             oggPlayer.setFile(Gdx.files.internal(AtlasManager.getAssetsFolderName() + "/audio/large-rocket-engine-86240.ogg"));
-            oggPlayer.setGain(150.0f);
+            oggPlayer.setGain(1.0f);
             oggPlayer.setAmbient(false);
+            oggPlayer.setLoop(true);
         } catch (OpenAlException e) {
             throw new RuntimeException(e);
         }
@@ -213,7 +214,11 @@ public class Engine {
             gameObject.instance.transform.setToTranslation(translation);
             gameObject.instance.transform.rotate(yVector, trader.getThrusters().rotation);
             gameObject.instance.transform.translate(0, 0, Trader3DRenderer.TRADER_SIZE_Z / 2);
-            gameObject.instance.transform.rotate(yVector, -90);
+//            gameObject.instance.transform.rotate(yVector, -90);
+            float factor = 4;
+            gameObject.instance.transform.rotate(Vector3.Y, -90 + factor - (float) Math.random() * factor * 2);
+            gameObject.instance.transform.rotate(Vector3.Z, factor - (float) Math.random() * factor * 2);
+            gameObject.instance.transform.rotate(Vector3.X, factor - (float) Math.random() * factor * 2);
             gameObject.instance.transform.scale(4, 4, 4);
             gameObject.update();
             final float intensity        = calculateIntensity();
@@ -237,7 +242,12 @@ public class Engine {
             gameObject.instance.transform.setToTranslation(translation);
             gameObject.instance.transform.rotate(yVector, trader.getThrusters().rotation);
             gameObject.instance.transform.translate(0, 0, -Trader3DRenderer.TRADER_SIZE_Z / 2);
-            gameObject.instance.transform.rotate(yVector, 90);
+//            gameObject.instance.transform.rotate(yVector, 90);
+            float factor = 4;
+            gameObject.instance.transform.rotate(Vector3.Y, 90 + factor - (float) Math.random() * factor * 2);
+            gameObject.instance.transform.rotate(Vector3.Z, factor - (float) Math.random() * factor * 2);
+            gameObject.instance.transform.rotate(Vector3.X, factor - (float) Math.random() * factor * 2);
+
             gameObject.instance.transform.scale(4, 4, 4);
             gameObject.update();
             final float intensity        = calculateIntensity();

@@ -483,7 +483,6 @@ public class Trader3DRenderer extends ObjectRenderer<GameEngine3D> {
     private void updateTrader(final RenderEngine3D<GameEngine3D> renderEngine, final int index, final boolean selected) throws Exception {
 
         if (trader.targetWaypoint != null) {
-
             position[0] = translation.x;
             position[1] = translation.y;
             position[2] = translation.z;

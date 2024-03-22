@@ -94,6 +94,7 @@ public class Trader3DRenderer extends ObjectRenderer<GameEngine3D> {
             createTrader(renderEngine);
             createLights(renderEngine);
             createThrusters(renderEngine);
+            createEngine(renderEngine);
             createGoods(renderEngine);
             synth = renderEngine.getGameEngine().audioEngine.createAudioProducer(MercatorSynthesizer.class);
         } catch (final Exception e) {
@@ -133,8 +134,7 @@ public class Trader3DRenderer extends ObjectRenderer<GameEngine3D> {
         renderTextOnTop(renderEngine, 6, 6.5f, String.format("%.1f", trader.getEngine().getEngineSpeed()), 3);
         renderTextOnTop(renderEngine, 0, 6.5f, String.format("%.1f", trader.getCredits()), 3);
         renderTextOnTop(renderEngine, 0, -6.5f, trader.subStatus.getName(), 3);
-        trader.getManeuveringSystem().updateThrusters(renderEngine, translation);
-        if (trader.isSelected()) {
+        if (trader.selected) {
             renderDetails(renderEngine);
         }
     }
@@ -142,6 +142,10 @@ public class Trader3DRenderer extends ObjectRenderer<GameEngine3D> {
     @Override
     public void update(final RenderEngine3D<GameEngine3D> renderEngine, final long currentTime, final float timeOfDay, final int index, final boolean selected) throws Exception {
         update(renderEngine, currentTime, index, selected);
+    }
+
+    private void createEngine(RenderEngine3D<GameEngine3D> renderEngine) {
+        trader.getEngine().create(renderEngine);
     }
 
     private void createGoods(final RenderEngine3D<GameEngine3D> renderEngine) {
@@ -211,8 +215,15 @@ public class Trader3DRenderer extends ObjectRenderer<GameEngine3D> {
                 RotationDirection.COUNTER_CLOCKWISE,//front/right/top
                 RotationDirection.COUNTER_CLOCKWISE,//back/left/bottom
         };
+        final float rotation[] = {//
+                180f,//front/left/bottom
+                0f,//back/right/top
+                0f,//front/right/top
+                180f,//back/left/bottom
+        };
+        trader.getThrusters().create(renderEngine.getGameEngine().getAudioEngine());
         for (int i = 0; i < NUMBER_OF_THRUSTERS; i++) {
-            trader.getManeuveringSystem().getThrusters().add(new Thruster(renderEngine, delta[i], direction[i], rotationDirection[i], new GameObject<GameEngine3D>(new ModelInstanceHack(renderEngine.getGameEngine().assetManager.redEmissiveModel), trader)));
+            trader.getManeuveringSystem().getThrusters().add(new Thruster(renderEngine, delta[i], direction[i], rotationDirection[i], rotation[i], new GameObject<GameEngine3D>(new ModelInstanceHack(renderEngine.getGameEngine().assetManager.flame.scene.model), trader)));
         }
     }
 
@@ -387,6 +398,8 @@ public class Trader3DRenderer extends ObjectRenderer<GameEngine3D> {
         trader.getManeuveringSystem().advanceInTime(realTimeDelta);
         updateTrader(renderEngine, index, selected);
         updateLights(renderEngine, currentTime);
+        trader.getManeuveringSystem().updateThrusters(renderEngine, translation);
+        trader.getEngine().update(renderEngine, translation);
         if (lastTransaction != trader.lastTransaction) {
             createGoods(renderEngine);
 //            updateLightColor(renderEngine);

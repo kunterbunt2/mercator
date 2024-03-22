@@ -96,24 +96,6 @@
             <version>${libgdxVersion}</version>
             <scope>test</scope>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/net.sf.sociaal/freetts -->
-        <dependency>
-            <groupId>net.sf.sociaal</groupId>
-            <artifactId>freetts</artifactId>
-            <version>1.2.2</version>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/org.mobicents.external.freetts/cmu_us_kal -->
-        <dependency>
-            <groupId>org.mobicents.external.freetts</groupId>
-            <artifactId>cmu_us_kal</artifactId>
-            <version>1.0</version>
-        </dependency>
-        <dependency>
-            <groupId>io.github.jonelo</groupId>
-            <artifactId>jadapter-for-native-tts</artifactId>
-            <version>0.12.0</version>
-            <scope>compile</scope>
-        </dependency>
     </dependencies>
 
     <build>

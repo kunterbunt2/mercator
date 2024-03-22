@@ -14,8 +14,16 @@
  * limitations under the License.
  */
 
-package de.bushnaq.abdalla.mercator.universe.planet;
+package de.bushnaq.abdalla.mercator.renderer.camera;
 
-public enum RadioMessageId {
-    REQUEST_TO_DOCK, APPROVE_TO_DOCK
+class CameraProperties {
+    public final float far;//the far clipping plane distance, has to be positive
+    public       float distanceXZ;//distance to lookat point
+    public       float y;//height of camera
+
+    public CameraProperties(float y, float distanceXZ, float far) {
+        this.y          = y;
+        this.distanceXZ = distanceXZ;
+        this.far        = far;
+    }
 }

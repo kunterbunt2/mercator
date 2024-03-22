@@ -21,7 +21,10 @@
  */
 package de.bushnaq.abdalla.mercator.universe;
 
+import de.bushnaq.abdalla.mercator.desktop.DesktopContextFactory;
 import de.bushnaq.abdalla.mercator.desktop.GraphicsDimentions;
+import de.bushnaq.abdalla.mercator.desktop.LaunchMode;
+import de.bushnaq.abdalla.mercator.renderer.GameEngine3D;
 import de.bushnaq.abdalla.mercator.universe.event.EventLevel;
 import de.bushnaq.abdalla.mercator.util.TimeUnit;
 import org.junit.jupiter.api.Test;
@@ -47,7 +50,7 @@ public class UniversePerformance {
         final long     time     = System.currentTimeMillis();
         final Universe universe = new Universe("U-fast", GraphicsDimentions.D2, EventLevel.none, null);
         universe.timeDelta = 100L;
-        universe.create(UNIVERSE_GENERATION_RANDOM_SEED, 10, 100000L * TimeUnit.TICKS_PER_DAY);
+        universe.create(new GameEngine3D(new DesktopContextFactory(), universe, LaunchMode.normal), UNIVERSE_GENERATION_RANDOM_SEED, 10, 100000L * TimeUnit.TICKS_PER_DAY);
         System.out.printf("%d planets\n", universe.planetList.size());
         System.out.printf("%d traders\n", universe.traderList.size());
         final long duration = System.currentTimeMillis() - time;
@@ -61,7 +64,7 @@ public class UniversePerformance {
         final long     time     = System.currentTimeMillis();
         final Universe universe = new Universe("U-slow", GraphicsDimentions.D2, EventLevel.none, null);
         universe.timeDelta = 10L;
-        universe.create(UNIVERSE_GENERATION_RANDOM_SEED, 10, 100000L * TimeUnit.TICKS_PER_DAY);
+        universe.create(new GameEngine3D(new DesktopContextFactory(), universe, LaunchMode.normal), UNIVERSE_GENERATION_RANDOM_SEED, 10, 100000L * TimeUnit.TICKS_PER_DAY);
         System.out.printf("%d planets\n", universe.planetList.size());
         System.out.printf("%d traders\n", universe.traderList.size());
         final long duration = System.currentTimeMillis() - time;
@@ -77,7 +80,7 @@ public class UniversePerformance {
                 final long time = System.currentTimeMillis();
                 System.out.printf("Universe seed = %d\n", universeIndex);
                 final Universe universe = new Universe("U-create", GraphicsDimentions.D2, EventLevel.none, null);
-                universe.create(universeIndex, i, 100L * TimeUnit.TICKS_PER_DAY);
+                universe.create(new GameEngine3D(new DesktopContextFactory(), universe, LaunchMode.normal), universeIndex, i, 100L * TimeUnit.TICKS_PER_DAY);
                 System.out.printf("%d planets, %d traders\n", universe.planetList.size(), universe.traderList.size());
                 final long duration = System.currentTimeMillis() - time;
                 assertTrue(duration < MAX_CREATE_TIME, String.format("Creading universe [seed %d and size %d] is taking too long (> 1000ms) %dms", universeIndex, i, duration));

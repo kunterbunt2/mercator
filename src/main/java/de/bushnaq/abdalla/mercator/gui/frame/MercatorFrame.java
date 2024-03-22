@@ -18,7 +18,6 @@ package de.bushnaq.abdalla.mercator.gui.frame;
 
 import de.bushnaq.abdalla.mercator.universe.Universe;
 import de.bushnaq.abdalla.mercator.universe.planet.Planet;
-import de.bushnaq.abdalla.mercator.util.TimeUnit;
 
 import javax.swing.*;
 import javax.swing.border.LineBorder;
@@ -657,7 +656,7 @@ public class MercatorFrame extends JFrame {
                 @Override
                 public void actionPerformed(final java.awt.event.ActionEvent e) {
                     try {
-                        universe.create(UNIVERSE_GENERATION_RANDOM_SEED, 10, 10L * TimeUnit.TICKS_PER_DAY);
+//                        universe.create(UNIVERSE_GENERATION_RANDOM_SEED, 10, 10L * TimeUnit.TICKS_PER_DAY, gameEngine);//TODO fix generating a new universe.
                     } catch (final Exception e1) {
                         // TODO Auto-generated catch block
                         e1.printStackTrace();

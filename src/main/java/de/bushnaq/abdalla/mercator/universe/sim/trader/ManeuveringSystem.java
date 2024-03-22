@@ -16,12 +16,19 @@
 
 package de.bushnaq.abdalla.mercator.universe.sim.trader;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import de.bushnaq.abdalla.engine.RenderEngine3D;
+import de.bushnaq.abdalla.engine.audio.AudioEngine;
+import de.bushnaq.abdalla.engine.audio.OggPlayer;
+import de.bushnaq.abdalla.engine.audio.OpenAlException;
+import de.bushnaq.abdalla.mercator.renderer.AtlasManager;
 import de.bushnaq.abdalla.mercator.renderer.GameEngine3D;
 import de.bushnaq.abdalla.mercator.universe.good.Good;
 import de.bushnaq.abdalla.mercator.universe.path.Waypoint;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,17 +41,23 @@ public class ManeuveringSystem {
     public static final  float          MIN_ROTATION_SPEED = 0.1f;
     final static         Vector2        zVector            = new Vector2(0, -1);
     private static final float          THRUSTER_FORCE     = 0.8f;//newton
+    private final        Logger         logger             = LoggerFactory.getLogger(this.getClass());
+    private final        float[]        position           = new float[3];
     private final        List<Thruster> thrusters          = new ArrayList<>();
     private final        Trader         trader;
+    private final        float[]        velocity           = new float[3];
     public               float          rotation           = 270;//0 degrees orientation
     public               float          rotationSpeed      = 0;
     float             endRotation   = 90;
+    OggPlayer         oggPlayer;
     float             progress      = 0;
     RotationDirection rotationDirection;
     float             startRotation = 1000;
+    private RotationAcelleration rotationAcelleration = RotationAcelleration.ACCELERATING;
 
     public ManeuveringSystem(Trader trader) {
         this.trader = trader;
+
     }
 
     public void advanceInTime(float timeDelta) {
@@ -96,12 +109,25 @@ public class ManeuveringSystem {
 //        float a2           = calculateAngleDifference(endRotation, startRotation);
         if (progress < 0.5) {
             //accelerating
+            rotationAcelleration = RotationAcelleration.ACCELERATING;
 //            if (getName().equals("T-25")) logger.info("rotation acceleration");
             return Math.min(rotationSpeed + acceleration * timeDelta * 10, MAX_ROTATION_SPEED);
         } else {
             //deceleration
+            rotationAcelleration = RotationAcelleration.DECELLERATING;
 //            if (getName().equals("T-25")) logger.info("rotation deceleration");
             return Math.max(rotationSpeed - acceleration * timeDelta * 10, MIN_ROTATION_SPEED);
+        }
+    }
+
+    public void create(AudioEngine audioEngine) {
+        try {
+            oggPlayer = audioEngine.createAudioProducer(OggPlayer.class);
+            oggPlayer.setFile(Gdx.files.internal(AtlasManager.getAssetsFolderName() + "/audio/thrusters_loopwav-14699.ogg"));
+            oggPlayer.setGain(150.0f);
+            oggPlayer.setAmbient(false);
+        } catch (OpenAlException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -134,12 +160,45 @@ public class ManeuveringSystem {
         }
     }
 
-    public void updateThrusters(final RenderEngine3D<GameEngine3D> renderEngine, final Vector3 translation) {
+    public void updateThrusters(final RenderEngine3D<GameEngine3D> renderEngine, final Vector3 translation) throws Exception {
         if (renderEngine.getCamera().frustum.pointInFrustum(translation.x, translation.y, translation.z)) {
+            boolean on = false;
             for (Thruster thruster : thrusters) {
-                thruster.update(renderEngine, translation, rotation, rotationDirection);
+                if (thruster.update(renderEngine, trader, translation, rotation, rotationDirection, rotationAcelleration))
+                    on = true;
+            }
+            if (on) {
+                position[0] = translation.x;
+                position[1] = translation.y;
+                position[2] = translation.z;
+                velocity[0] = trader.speed.x;
+                velocity[1] = 0;
+                velocity[2] = trader.speed.z;
+                oggPlayer.setPositionAndVelocity(position, velocity);
+                try {
+                    if (renderEngine.getCamera().position.dst(translation) < 1000) {
+//                        if (trader.getName().equals("T-25"))
+//                            logger.info("play");
+                        oggPlayer.play();
+                    } else {
+//                        if (trader.getName().equals("T-25"))
+//                            logger.info("pause");
+                        oggPlayer.pause();
+                    }
+                } catch (OpenAlException e) {
+                    throw new RuntimeException(e);
+                }
+            } else {
+                try {
+//                    if (trader.getName().equals("T-25"))
+//                        logger.info("pause");
+                    oggPlayer.pause();
+                } catch (OpenAlException e) {
+                    throw new RuntimeException(e);
+                }
             }
         }
     }
+
 
 }

@@ -18,16 +18,20 @@ package de.bushnaq.abdalla.mercator.universe.sim.trader;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g3d.Material;
+import com.badlogic.gdx.graphics.g3d.environment.PointLight;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
 import de.bushnaq.abdalla.engine.CustomizedSpriteBatch;
 import de.bushnaq.abdalla.engine.GameObject;
 import de.bushnaq.abdalla.engine.RenderEngine3D;
 import de.bushnaq.abdalla.mercator.renderer.GameEngine3D;
+import net.mgsx.gltf.scene3d.attributes.PBRColorAttribute;
 
 public class Thruster {
-    public static final  float                    LIGHT_MAX_INTENSITY          = 10000f;
-    public static final  float                    LIGHT_OFF_DURATION_AVERAGE   = 3f;
+    public static final  float                    LIGHT_MAX_INTENSITY          = 600f;
+    public static final  float                    LIGHT_MIN_INTENSITY          = 500f;
+    public static final  float                    LIGHT_OFF_DURATION_AVERAGE   = 0.2f;
     public static final  float                    LIGHT_OFF_DURATION_DEVIATION = 0.1f;
     public static final  float                    LIGHT_ON_DURATION            = 0.1f;
     public static final  float                    LIGHT_SIZE                   = .2f;
@@ -35,19 +39,24 @@ public class Thruster {
     final static         Vector3                  yVector                      = new Vector3(0, 1, 0);
     private static final float                    PY2                          = 3.14159f / 2;
     public final         GameObject<GameEngine3D> gameObject;
+    public final         PointLight               pointLight;
     private final        Vector3                  lightScaling                 = new Vector3(LIGHT_SIZE, LIGHT_SIZE, LIGHT_SIZE);
+    private final        float                    rotation;
     private final        RotationDirection        rotationDirection;
     public               Vector3                  delta                        = new Vector3();
     public               Vector3                  direction                    = new Vector3();
     public               int                      lightMode                    = 0;
     public               float                    lightTimer                   = 0;
+    private              boolean                  gameObjectAdded              = false;
 
-    public Thruster(RenderEngine3D<GameEngine3D> renderEngine, Vector3 delta, Vector3 direction, RotationDirection rotationDirection, GameObject<GameEngine3D> gameObject) {
+    public Thruster(RenderEngine3D<GameEngine3D> renderEngine, Vector3 delta, Vector3 direction, RotationDirection rotationDirection, float rotation, GameObject<GameEngine3D> gameObject) {
         this.delta.set(delta);
         this.direction.set(direction);
         this.rotationDirection = rotationDirection;
+        this.rotation          = rotation;
         this.gameObject        = gameObject;
-//        renderEngine.addDynamic(gameObject);
+        this.pointLight        = new PointLight();
+
     }
 
     private void animate(RenderEngine3D<GameEngine3D> renderEngine) {
@@ -60,14 +69,26 @@ public class Thruster {
                     resetLightOffTimer();
                     lightMode = 1;//wait for light to go on
 //                    renderEngine.remove(pointLight, true);
+                    for (Material m : gameObject.instance.materials) {
+                        if (m.id.equals("flame.material")) {
+                            PBRColorAttribute baseColorFactor = PBRColorAttribute.createBaseColorFactor(new Color(Color.BLUE));
+                            m.set(baseColorFactor);
+                        }
+                    }
                 }
                 break;
                 case 1: {
                     resetLightOnTimer();
                     lightMode = 0;//wait for light to go off
                     final float intensity = (float) Math.abs(Math.sin(PY2 * (lightTimer / LIGHT_ON_DURATION)) * LIGHT_MAX_INTENSITY);
-//                    pointLight.setIntensity(intensity);
+                    pointLight.setIntensity(intensity);
 //                    renderEngine.add(pointLight, true);
+                    for (Material m : gameObject.instance.materials) {
+                        if (m.id.equals("flame.material")) {
+                            PBRColorAttribute baseColorFactor = PBRColorAttribute.createBaseColorFactor(new Color(Color.WHITE));
+                            m.set(baseColorFactor);
+                        }
+                    }
                 }
                 break;
             }
@@ -77,7 +98,7 @@ public class Thruster {
     }
 
     public float calculateIntensity() {
-        return (float) Math.abs(Math.sin(PY2 * (lightTimer / LIGHT_ON_DURATION)) * LIGHT_MAX_INTENSITY);
+        return LIGHT_MIN_INTENSITY + (float) Math.abs(Math.sin(PY2 * (lightTimer / LIGHT_ON_DURATION)) * (LIGHT_MAX_INTENSITY - LIGHT_MIN_INTENSITY));
     }
 
     public void resetLightOffTimer() {
@@ -88,9 +109,18 @@ public class Thruster {
         lightTimer = LIGHT_ON_DURATION;
     }
 
-    public void update(RenderEngine3D<GameEngine3D> renderEngine, Vector3 translation, float rotation, RotationDirection rotationDirection) {
+    public boolean update(RenderEngine3D<GameEngine3D> renderEngine, Trader trader, Vector3 translation, float rotation, RotationDirection rotationDirection, RotationAcelleration rotationAcelleration) throws Exception {
+        boolean on = false;
 //        if (direction.x != 0f || direction.y != 0f || direction.z != 0f)
-        if (this.rotationDirection == rotationDirection) {
+//        mp3Player.setPositionAndVelocity(position, velocity);
+        if (rotationDirection != RotationDirection.NON && (this.rotationDirection == rotationDirection && rotationAcelleration == RotationAcelleration.ACCELERATING || this.rotationDirection != rotationDirection && rotationAcelleration == RotationAcelleration.DECELLERATING)) {
+            on = true;
+            if (!gameObjectAdded) {
+                renderEngine.addDynamic(gameObject);
+                renderEngine.add(pointLight, true);
+                gameObjectAdded = true;
+            }
+
             final CustomizedSpriteBatch batch = renderEngine.renderEngine25D.batch;
             final Matrix4               m     = new Matrix4();
             {
@@ -102,7 +132,6 @@ public class Thruster {
                 //rotate into the xz layer
                 m.rotate(xVector, -90);
                 //scale to fit trader engine
-
             }
             batch.setTransformMatrix(m);
             float cr = (float) Math.random();
@@ -114,8 +143,27 @@ public class Thruster {
             batch.setColor(Color.WHITE);
             float thickness = .3f + t / 2;
 
-            batch.line(renderEngine.getGameEngine().getAtlasManager().systemTextureRegion, 0, 0, 0, direction.x + x, 0, direction.z + z, c, thickness);
+//            batch.line(renderEngine.getGameEngine().getAtlasManager().systemTextureRegion, 0, 0, 0, direction.x + x, 0, direction.z + z, c, thickness);
             animate(renderEngine);
+
+            gameObject.instance.transform.setToTranslation(translation);
+            gameObject.instance.transform.rotate(yVector, rotation);
+            gameObject.instance.transform.translate(delta);
+            gameObject.instance.transform.rotate(yVector, this.rotation);
+//            gameObject.instance.transform.scale(scaling.x, scaling.y, scaling.z);
+            gameObject.update();
+            final float intensity        = calculateIntensity();
+            Vector3     lightTranslation = new Vector3();
+            gameObject.instance.transform.getTranslation(lightTranslation);
+            pointLight.set(Color.WHITE, lightTranslation.x + 0.2f, lightTranslation.y, lightTranslation.z, intensity);
+        } else {
+            on = false;
+            if (gameObjectAdded) {
+                renderEngine.remove(pointLight, true);
+                renderEngine.removeDynamic(gameObject);
+                gameObjectAdded = false;
+            }
         }
+        return on;
     }
 }

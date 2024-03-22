@@ -30,6 +30,8 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import de.bushnaq.abdalla.engine.IContextFactory;
 import de.bushnaq.abdalla.engine.RenderEngine2D;
 import de.bushnaq.abdalla.engine.RenderEngineExtension;
+import de.bushnaq.abdalla.engine.audio.AudioEngine;
+import de.bushnaq.abdalla.mercator.audio.synthesis.MercatorAudioEngine;
 import de.bushnaq.abdalla.mercator.desktop.Context;
 import de.bushnaq.abdalla.mercator.desktop.LaunchMode;
 import de.bushnaq.abdalla.mercator.renderer.reports.Info;
@@ -53,7 +55,7 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
-public class GameEngine2D implements ScreenListener, ApplicationListener, InputProcessor, Message, RenderEngineExtension {
+public class GameEngine2D implements ScreenListener, ApplicationListener, InputProcessor, Message, RenderEngineExtension, GameEngine {
     //	private static final String BATCH_END_DURATION = "batch.end()";
     public static final  int                          CHART_FONT_SIZE                 = 10;
     public static final  Color                        DARK_RED_COLOR                  = new Color(0.475f, 0.035f, 0.027f, 1.0f);
@@ -91,6 +93,7 @@ public class GameEngine2D implements ScreenListener, ApplicationListener, InputP
     private final        Logger                       logger                          = LoggerFactory.getLogger(this.getClass());
     private final        List<MercatorMessage>        messageQueue                    = new LinkedList<MercatorMessage>();
     public               AtlasManager                 atlasManager;
+    public               AudioEngine                  audioEngine                     = new MercatorAudioEngine();
     public               OrthographicCamera           camera;
     public               List<Color>                  distinctiveColorlist            = new ArrayList<Color>();
     public               List<Color>                  distinctiveTransparentColorlist = new ArrayList<Color>();
@@ -187,10 +190,6 @@ public class GameEngine2D implements ScreenListener, ApplicationListener, InputP
         info.resize(width, height);
     }
 
-    //	private void enableProfiler() {
-    //		//		GLProfiler.enable();
-    //	}
-
     @Override
     public void render() {
         try {
@@ -217,6 +216,14 @@ public class GameEngine2D implements ScreenListener, ApplicationListener, InputP
         }
     }
 
+    //	private void enableProfiler() {
+    //		//		GLProfiler.enable();
+    //	}
+
+    @Override
+    public void pause() {
+    }
+
     //	private int getMaxFramesPerSecond() {
     //		return maxFramesPerSecond;
     //	}
@@ -239,10 +246,6 @@ public class GameEngine2D implements ScreenListener, ApplicationListener, InputP
     //			}
     //		}
     //	}
-
-    @Override
-    public void pause() {
-    }
 
     @Override
     public void resume() {
@@ -319,6 +322,10 @@ public class GameEngine2D implements ScreenListener, ApplicationListener, InputP
         }
     }
 
+    private void exit() {
+        Gdx.app.exit();
+    }
+
     //	private void printStatistics() throws Exception {
     //		if (profiler.isEnabled()) {
     //			setMaxFramesPerSecond(Math.max(getMaxFramesPerSecond(), Gdx.graphics.getFramesPerSecond()));
@@ -349,8 +356,9 @@ public class GameEngine2D implements ScreenListener, ApplicationListener, InputP
     //		}
     //	}
 
-    private void exit() {
-        Gdx.app.exit();
+    @Override
+    public AudioEngine getAudioEngine() {
+        return audioEngine;
     }
 
     private Object getRendablePosition(final float x, final float y) {

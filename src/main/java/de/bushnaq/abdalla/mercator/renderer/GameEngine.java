@@ -14,20 +14,10 @@
  * limitations under the License.
  */
 
-package de.bushnaq.abdalla.mercator.universe.planet;
+package de.bushnaq.abdalla.mercator.renderer;
 
-public class RadioMessage {
-    public CommunicationPartner from;
-    public String               message;
-    public long                 time;
-    public CommunicationPartner to;
-    RadioMessageId id;
+import de.bushnaq.abdalla.engine.audio.AudioEngine;
 
-    public RadioMessage(long currentTime, CommunicationPartner from, CommunicationPartner to, RadioMessageId id, String message) {
-        time         = currentTime;
-        this.from    = from;
-        this.to      = to;
-        this.id      = id;
-        this.message = message;
-    }
+public interface GameEngine {
+    AudioEngine getAudioEngine();
 }

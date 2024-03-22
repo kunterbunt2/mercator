@@ -32,13 +32,13 @@ import de.bushnaq.abdalla.engine.IContextFactory;
 import de.bushnaq.abdalla.engine.RenderEngine3D;
 import de.bushnaq.abdalla.engine.RenderEngineExtension;
 import de.bushnaq.abdalla.engine.audio.AudioEngine;
-import de.bushnaq.abdalla.engine.audio.Mp3Player;
+import de.bushnaq.abdalla.engine.audio.OggPlayer;
 import de.bushnaq.abdalla.engine.audio.OpenAlException;
 import de.bushnaq.abdalla.engine.camera.MovingCamera;
 import de.bushnaq.abdalla.mercator.audio.synthesis.MercatorAudioEngine;
 import de.bushnaq.abdalla.mercator.desktop.Context;
 import de.bushnaq.abdalla.mercator.desktop.LaunchMode;
-import de.bushnaq.abdalla.mercator.renderer.camera.MyCameraInputController;
+import de.bushnaq.abdalla.mercator.renderer.camera.ZoomingCameraInputController;
 import de.bushnaq.abdalla.mercator.renderer.reports.Info;
 import de.bushnaq.abdalla.mercator.universe.Universe;
 import de.bushnaq.abdalla.mercator.universe.good.Good;
@@ -66,7 +66,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
-public class GameEngine3D implements ScreenListener, ApplicationListener, InputProcessor, RenderEngineExtension {
+public class GameEngine3D implements ScreenListener, ApplicationListener, InputProcessor, RenderEngineExtension, GameEngine {
     public static final  float                        CAMERA_OFFSET_X                 = 300f;
     public static final  float                        CAMERA_OFFSET_Y                 = 300f;
     public static final  float                        CAMERA_OFFSET_Z                 = 400f;
@@ -116,7 +116,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
     public               ShowGood                     showGood                        = ShowGood.Name;
     private              AtlasManager                 atlasManager;
     private              Texture                      brdfLUT;
-    private              MyCameraInputController      camController;
+    private              ZoomingCameraInputController camController;
     private              MovingCamera                 camera;
     private              OrthographicCamera           camera2D;
     private              float                        centerXD;
@@ -137,7 +137,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
     private              boolean                      infoVisible;
     private              GameObject<GameEngine3D>     instance;//TODO
     private              long                         lastCameraDirty                 = 0;
-    private              Mp3Player                    mp3Player;
+    private              OggPlayer                    oggPlayer;
     //    private              Render2DMaster               render2DMaster;
     private              boolean                      showFps;
     private              Cubemap                      specularCubemap;
@@ -175,6 +175,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
                 context = (Context) contextFactory.create();
             }
             showFps = context.getShowFpsProperty();
+
             createCamera();
             atlasManager = new AtlasManager();
             atlasManager.init();
@@ -212,8 +213,13 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
             assetManager.create();
             createEnvironment();
             createStage();
-            audioEngine.create();
+            audioEngine.create(AtlasManager.getAssetsFolderName());
             audioEngine.enableHrtf(0);
+//            renderAllTTSStrings();
+            audioEngine.radioTTS.loadResource(this.getClass());
+            audioEngine.radioTTS.loadAudio();
+            audioEngine.radioTTS.test();
+
 
 //            createStone();
             createTraders();
@@ -272,7 +278,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
     @Override
     public void dispose() {
         try {
-            if (mp3Player != null) mp3Player.dispose();
+            if (oggPlayer != null) oggPlayer.dispose();
             audioEngine.dispose();
             //		myCanvas.stop();
             assetManager.dispose();
@@ -326,10 +332,10 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
 
     private void createInputProcessor(final InputProcessor inputProcessor, GameEngine3D gameEngine) throws Exception {
         if (renderEngine.testCase == 1) {
-            camController = new MyCameraInputController(camera, gameEngine);
+            camController = new ZoomingCameraInputController(camera, gameEngine);
         }
         if (renderEngine.testCase == 2 || renderEngine.testCase == 3) {
-            camController = new MyCameraInputController(camera2D, gameEngine);
+            camController = new ZoomingCameraInputController(camera2D, gameEngine);
         }
         camController.scrollFactor   = -0.1f;
         camController.translateUnits = 1000f;
@@ -454,11 +460,6 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
         Gdx.app.exit();
     }
 
-
-//    public int getMaxFramesPerSecond() {
-//        return maxFramesPerSecond;
-//    }
-
     private void export(final String fileName, final List<DemoString> Strings) throws IOException {
         final FileWriter  fileWriter  = new FileWriter(fileName);
         final PrintWriter printWriter = new PrintWriter(fileWriter);
@@ -470,6 +471,67 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
 
     public AtlasManager getAtlasManager() {
         return atlasManager;
+    }
+
+
+//    public int getMaxFramesPerSecond() {
+//        return maxFramesPerSecond;
+//    }
+
+    @Override
+    public AudioEngine getAudioEngine() {
+        return audioEngine;
+    }
+
+    private void initColors() {
+        {
+            distinctiveColorlist.add(new Color(0.2f, 0.2f, 0.2f, 0.5f));
+            final float factor = (universe.sectorList.size() / 8) / 2.0f;
+            final int   c      = (int) Math.ceil(universe.sectorList.size() / 6.0);
+            for (float i = 0; i < Math.ceil(universe.sectorList.size() / 6.0); i++) {
+                final float low = 1.0f - (i + 1) * factor;
+                //				System.out.println(low * 255);
+                final float high  = 1.0f - i * factor;
+                final float alpha = 1.f;
+                // distinctiveColorlist.add( new Color( high, high, high, alpha ) );
+                distinctiveColorlist.add(new Color(high, high, low, alpha));
+                distinctiveColorlist.add(new Color(high, low, high, alpha));
+                distinctiveColorlist.add(new Color(low, high, high, alpha));
+                distinctiveColorlist.add(new Color(high, low, low, alpha));
+                distinctiveColorlist.add(new Color(low, low, high, alpha));
+                distinctiveColorlist.add(new Color(low, high, low, alpha));
+                // distinctiveColorlist.add( new Color( low, high, low, alpha ) );
+                // distinctiveColorlist.add( new Color( low, low, high, alpha ) );
+                // distinctiveColorlist.add( new Color( low, 1.0f, 1.0f, alpha ) );
+                // distinctiveColorlist.add( new Color( 1.0f, low, 1.0f, alpha ) );
+                // distinctiveColorlist.add( new Color( 1.0f, 1.0f, low, alpha ) );
+                // distinctiveColorlist.add( new Color( low, low, low, alpha ) );
+            }
+            // distinctiveColorArray = distinctiveColorlist.toArray( new Color[0] );
+        }
+        distinctiveTransparentColorlist.add(new Color(0.2f, 0.2f, 0.2f, 0.5f));
+        final float factor = (universe.sectorList.size() / 8) / 2.0f;
+        final int   c      = (int) Math.ceil(universe.sectorList.size() / 6.0);
+        for (float i = 0; i < Math.ceil(universe.sectorList.size() / 6.0); i++) {
+            final float low = 1.0f - (i + 1) * factor;
+            //			System.out.println(low * 255);
+            final float high  = 1.0f - i * factor;
+            final float alpha = 0.4f;
+            // distinctiveColorlist.add( new Color( high, high, high, alpha ) );
+            distinctiveTransparentColorlist.add(new Color(high, high, low, alpha));
+            distinctiveTransparentColorlist.add(new Color(high, low, high, alpha));
+            distinctiveTransparentColorlist.add(new Color(low, high, high, alpha));
+            distinctiveTransparentColorlist.add(new Color(high, low, low, alpha));
+            distinctiveTransparentColorlist.add(new Color(low, low, high, alpha));
+            distinctiveTransparentColorlist.add(new Color(low, high, low, alpha));
+            // distinctiveColorlist.add( new Color( low, high, low, alpha ) );
+            // distinctiveColorlist.add( new Color( low, low, high, alpha ) );
+            // distinctiveColorlist.add( new Color( low, 1.0f, 1.0f, alpha ) );
+            // distinctiveColorlist.add( new Color( 1.0f, low, 1.0f, alpha ) );
+            // distinctiveColorlist.add( new Color( 1.0f, 1.0f, low, alpha ) );
+            // distinctiveColorlist.add( new Color( low, low, low, alpha ) );
+        }
+        // distinctiveColorArray = distinctiveColorlist.toArray( new Color[0] );
     }
 
     //	Sector3DRenderer sector3DRenderer = new Sector3DRenderer();
@@ -535,83 +597,9 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
     //
     //	  graphics.setStroke( defaultStroke ); }
 
-    private void initColors() {
-        {
-            distinctiveColorlist.add(new Color(0.2f, 0.2f, 0.2f, 0.5f));
-            final float factor = (universe.sectorList.size() / 8) / 2.0f;
-            final int   c      = (int) Math.ceil(universe.sectorList.size() / 6.0);
-            for (float i = 0; i < Math.ceil(universe.sectorList.size() / 6.0); i++) {
-                final float low = 1.0f - (i + 1) * factor;
-                //				System.out.println(low * 255);
-                final float high  = 1.0f - i * factor;
-                final float alpha = 1.f;
-                // distinctiveColorlist.add( new Color( high, high, high, alpha ) );
-                distinctiveColorlist.add(new Color(high, high, low, alpha));
-                distinctiveColorlist.add(new Color(high, low, high, alpha));
-                distinctiveColorlist.add(new Color(low, high, high, alpha));
-                distinctiveColorlist.add(new Color(high, low, low, alpha));
-                distinctiveColorlist.add(new Color(low, low, high, alpha));
-                distinctiveColorlist.add(new Color(low, high, low, alpha));
-                // distinctiveColorlist.add( new Color( low, high, low, alpha ) );
-                // distinctiveColorlist.add( new Color( low, low, high, alpha ) );
-                // distinctiveColorlist.add( new Color( low, 1.0f, 1.0f, alpha ) );
-                // distinctiveColorlist.add( new Color( 1.0f, low, 1.0f, alpha ) );
-                // distinctiveColorlist.add( new Color( 1.0f, 1.0f, low, alpha ) );
-                // distinctiveColorlist.add( new Color( low, low, low, alpha ) );
-            }
-            // distinctiveColorArray = distinctiveColorlist.toArray( new Color[0] );
-        }
-        distinctiveTransparentColorlist.add(new Color(0.2f, 0.2f, 0.2f, 0.5f));
-        final float factor = (universe.sectorList.size() / 8) / 2.0f;
-        final int   c      = (int) Math.ceil(universe.sectorList.size() / 6.0);
-        for (float i = 0; i < Math.ceil(universe.sectorList.size() / 6.0); i++) {
-            final float low = 1.0f - (i + 1) * factor;
-            //			System.out.println(low * 255);
-            final float high  = 1.0f - i * factor;
-            final float alpha = 0.4f;
-            // distinctiveColorlist.add( new Color( high, high, high, alpha ) );
-            distinctiveTransparentColorlist.add(new Color(high, high, low, alpha));
-            distinctiveTransparentColorlist.add(new Color(high, low, high, alpha));
-            distinctiveTransparentColorlist.add(new Color(low, high, high, alpha));
-            distinctiveTransparentColorlist.add(new Color(high, low, low, alpha));
-            distinctiveTransparentColorlist.add(new Color(low, low, high, alpha));
-            distinctiveTransparentColorlist.add(new Color(low, high, low, alpha));
-            // distinctiveColorlist.add( new Color( low, high, low, alpha ) );
-            // distinctiveColorlist.add( new Color( low, low, high, alpha ) );
-            // distinctiveColorlist.add( new Color( low, 1.0f, 1.0f, alpha ) );
-            // distinctiveColorlist.add( new Color( 1.0f, low, 1.0f, alpha ) );
-            // distinctiveColorlist.add( new Color( 1.0f, 1.0f, low, alpha ) );
-            // distinctiveColorlist.add( new Color( low, low, low, alpha ) );
-        }
-        // distinctiveColorArray = distinctiveColorlist.toArray( new Color[0] );
-    }
-
     public boolean isInfoVisible() {
         return infoVisible;
     }
-
-    /*
-     * private void drawPlanetGraph( Planet planet ) { int pd = PLANET_DISTANCE - 2;
-     * int hpd = PLANET_DISTANCE / 2; int qpd = PLANET_DISTANCE / 4 - 2; int planetX
-     * = planet.x * PLANET_DISTANCE - hpd; int planetY = planet.y * PLANET_DISTANCE
-     * - hpd; int x[] = new int[planet.creditHistory.size()]; int y[] = new
-     * int[planet.creditHistory.size()]; boolean draw = true; // ---Find max int
-     * maxY = Planet.PLANET_START_CREDITS; for ( int i = 0; i <
-     * planet.creditHistory.size(); i++ ) { int ty = planet.creditHistory.get( i );
-     * if ( ty > maxY ) maxY = ty; } for ( int i = 0; i <
-     * planet.creditHistory.size(); i++ ) { x[i] = transformX( planetX + ( i * pd )
-     * / Planet.CREDIT_HISTORY_SIZE ); y[i] = transformY( planetY + pd - ( (
-     * planet.creditHistory.get( i ) * qpd ) / maxY ) ); } graphics.setColor(
-     * queryCreditColor( planet ) ); if ( draw ) { Stroke defaultStroke =
-     * graphics.getStroke(); float dash[] = { 1.0f }; BasicStroke stroke = new
-     * BasicStroke( 1.7f, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_MITER, 10.0f,
-     * dash, 0.0f ); graphics.setStroke( stroke ); graphics.drawPolyline( x, y,
-     * planet.creditHistory.size() ); graphics.setStroke( defaultStroke ); } }
-     */
-
-    //	public Canvas getCanvas() {
-    //		return myCanvas.getCanvas();
-    //	}
 
     @Override
     public boolean keyDown(final int keycode) {
@@ -693,6 +681,29 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
         return false;
 
     }
+
+    /*
+     * private void drawPlanetGraph( Planet planet ) { int pd = PLANET_DISTANCE - 2;
+     * int hpd = PLANET_DISTANCE / 2; int qpd = PLANET_DISTANCE / 4 - 2; int planetX
+     * = planet.x * PLANET_DISTANCE - hpd; int planetY = planet.y * PLANET_DISTANCE
+     * - hpd; int x[] = new int[planet.creditHistory.size()]; int y[] = new
+     * int[planet.creditHistory.size()]; boolean draw = true; // ---Find max int
+     * maxY = Planet.PLANET_START_CREDITS; for ( int i = 0; i <
+     * planet.creditHistory.size(); i++ ) { int ty = planet.creditHistory.get( i );
+     * if ( ty > maxY ) maxY = ty; } for ( int i = 0; i <
+     * planet.creditHistory.size(); i++ ) { x[i] = transformX( planetX + ( i * pd )
+     * / Planet.CREDIT_HISTORY_SIZE ); y[i] = transformY( planetY + pd - ( (
+     * planet.creditHistory.get( i ) * qpd ) / maxY ) ); } graphics.setColor(
+     * queryCreditColor( planet ) ); if ( draw ) { Stroke defaultStroke =
+     * graphics.getStroke(); float dash[] = { 1.0f }; BasicStroke stroke = new
+     * BasicStroke( 1.7f, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_MITER, 10.0f,
+     * dash, 0.0f ); graphics.setStroke( stroke ); graphics.drawPolyline( x, y,
+     * planet.creditHistory.size() ); graphics.setStroke( defaultStroke ); } }
+     */
+
+    //	public Canvas getCanvas() {
+    //		return myCanvas.getCanvas();
+    //	}
 
     @Override
     public boolean keyUp(final int keycode) {
@@ -819,6 +830,13 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
 //            renderEngine.getFog().setFullDistance(5000);
 //        }
 
+//        {
+//            final float[] positionArray = new float[]{1f, 1f, 1f};
+//            final float[] velocityArray = new float[]{0f, 0f, 0f};
+//            oggPlayer.setPositionAndVelocity(positionArray, velocityArray);
+//            if ((currentTime / 1000) * 1000 == currentTime)
+//                logger.info(String.format("%f %f %f", oggPlayer.getPosition().x, oggPlayer.getPosition().y, oggPlayer.getPosition().z));
+//        }
         updateJumpGates(currentTime);
         updatePlanets(currentTime);
         updateGoods(currentTime);
@@ -894,6 +912,17 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
         renderGoods();
         renderTraders();
         drawDebugGrid();
+    }
+
+    private void renderAllTTSStrings() {
+        List<String> names = new ArrayList<>();
+        for (Trader trader : universe.traderList) {
+            names.add(trader.getName());
+        }
+        for (Planet planet : universe.planetList) {
+            names.add(planet.getName());
+        }
+        audioEngine.radioTTS.renderAllTTSStrings(names);
     }
 
     private void renderDemo() throws IOException, OpenAlException {
@@ -992,16 +1021,16 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
             labels.get(labelIndex).setText(stringBuilder);
             labelIndex++;
         }
-        //camera y
+        //camera properties
         {
             stringBuilder.setLength(0);
-            stringBuilder.append(" camera height: ").append(camera.position.y);
+            stringBuilder.append(" camera: ").append(camera.position.x).append(" ").append(camera.position.y).append(" ").append(camera.position.z);
             labels.get(labelIndex++).setText(stringBuilder);
         }
         //audio sources
         {
             stringBuilder.setLength(0);
-            stringBuilder.append(" audio sources: ").append(audioEngine.getEnabledAudioSourceCount() + " / " + audioEngine.getDisabledAudioSourceCount());
+            stringBuilder.append(" audio sources: ").append(audioEngine.getEnabledAudioSourceCount() + " / " + audioEngine.getDisabledAudioSourceCount()).append(" " + audioEngine.getNumberOfSources());
             labels.get(labelIndex++).setText(stringBuilder);
         }
         //time
@@ -1161,10 +1190,10 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
     private void startDemoMode() throws OpenAlException {
         renderEngine.setDepthOfField(true);
         renderEngine.setAlwaysDay(false);
-        mp3Player = audioEngine.createAudioProducer(Mp3Player.class);
-        mp3Player.setFile(Gdx.files.internal(AtlasManager.getAssetsFolderName() + "/audio/06-abyss(m).ogg"));
-        mp3Player.setGain(150.0f);
-        mp3Player.play();
+        oggPlayer = audioEngine.createAudioProducer(OggPlayer.class);
+        oggPlayer.setFile(Gdx.files.internal(AtlasManager.getAssetsFolderName() + "/audio/06-abyss(m).ogg"));
+        oggPlayer.setGain(1.0f);
+        oggPlayer.play();
         AudioEngine.checkAlError("Failed to set listener orientation with error #");
     }
 

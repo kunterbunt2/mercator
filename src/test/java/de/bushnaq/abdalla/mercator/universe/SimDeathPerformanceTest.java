@@ -16,7 +16,10 @@
 
 package de.bushnaq.abdalla.mercator.universe;
 
+import de.bushnaq.abdalla.mercator.desktop.DesktopContextFactory;
 import de.bushnaq.abdalla.mercator.desktop.GraphicsDimentions;
+import de.bushnaq.abdalla.mercator.desktop.LaunchMode;
+import de.bushnaq.abdalla.mercator.renderer.GameEngine3D;
 import de.bushnaq.abdalla.mercator.universe.event.EventLevel;
 import de.bushnaq.abdalla.mercator.util.TimeUnit;
 import org.apache.commons.math3.util.Precision;
@@ -40,7 +43,7 @@ public class SimDeathPerformanceTest {
             universeList[i] = universe;
                               universe.timeDelta = 20L;
                               universe.useFixedDelta = true;
-            universe.create(i, UNIVERSE_SIZE, 0);
+            universe.create(new GameEngine3D(new DesktopContextFactory(), universe, LaunchMode.normal), i, UNIVERSE_SIZE, 0);
         }
         Universe  bestUniverse = null;
         long      bestTime     = 0;
@@ -59,8 +62,7 @@ public class SimDeathPerformanceTest {
             System.out.printf(universe.getName() + "\n");
             //			System.out.printf("%s\n", TimeUnit.toString(universe.deadSimList.get(0).lastTimeAdvancement));
             System.out.printf("%s\n", Precision.round((universe.simList.size() / (universe.simList.size() + universe.deadSimList.size())) * 100, 0));
-            if (universe.deadSimList.size() > 0)
-                universe.deadSimList.get(0).eventManager.print(System.out);
+            if (universe.deadSimList.size() > 0) universe.deadSimList.get(0).eventManager.print(System.out);
             System.out.printf("-------------------------------------------------------\n");
         }
         if (bestUniverse != null) {

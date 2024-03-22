@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-package de.bushnaq.abdalla.mercator.universe;
+package de.bushnaq.abdalla.mercator.universe.sim.trader;
 
-public class TTSToken {
-    String message;
-
+public enum RotationAcelleration {
+    ACCELERATING, DECELLERATING
 }

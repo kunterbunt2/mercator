@@ -18,8 +18,7 @@ package de.bushnaq.abdalla.mercator.universe.sim.trader;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector3;
-import de.bushnaq.abdalla.engine.audio.TTSPlayer;
-import de.bushnaq.abdalla.mercator.universe.RadioTTS;
+import de.bushnaq.abdalla.mercator.renderer.GameEngine;
 import de.bushnaq.abdalla.mercator.universe.event.EventLevel;
 import de.bushnaq.abdalla.mercator.universe.event.SimEventType;
 import de.bushnaq.abdalla.mercator.universe.good.Good;
@@ -28,7 +27,8 @@ import de.bushnaq.abdalla.mercator.universe.path.Path;
 import de.bushnaq.abdalla.mercator.universe.path.Waypoint;
 import de.bushnaq.abdalla.mercator.universe.path.WaypointList;
 import de.bushnaq.abdalla.mercator.universe.path.WaypointProxy;
-import de.bushnaq.abdalla.mercator.universe.planet.*;
+import de.bushnaq.abdalla.mercator.universe.planet.Planet;
+import de.bushnaq.abdalla.mercator.universe.planet.PlanetList;
 import de.bushnaq.abdalla.mercator.universe.sim.Sim;
 import de.bushnaq.abdalla.mercator.util.MercatorRandomGenerator;
 import de.bushnaq.abdalla.mercator.util.TimeUnit;
@@ -36,51 +36,47 @@ import de.bushnaq.abdalla.mercator.util.Transaction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * @author bushnaq Created 13.02.2005
  */
-public class Trader extends Sim implements CommunicationPartner {
-    public static final  int               MAX_GOOD_SPACE                      = 160;
-    public static final  int               MIN_GOOD_SPACE                      = 30;
-    public final static  int               TRADER_MAX_PORT_REST_TIME           = 3;
-    public static final  float             TRADER_START_CREDITS                = 1000.0f;
+public class Trader extends Sim {
+    public static final  int                        MAX_GOOD_SPACE                      = 160;
+    public static final  int                        MIN_GOOD_SPACE                      = 30;
+    public final static  int                        TRADER_MAX_PORT_REST_TIME           = 3;
+    public static final  float                      TRADER_START_CREDITS                = 1000.0f;
     //    public final static  int             TRADER_STATUS_FILTER_BAD            = 0xF0;
-    private static final float             JUMP_UNIT_COST                      = 1f / (1000f);
-    public final         Vector3           speed                               = new Vector3(0, 0, 0);
-    private final        Engine            engine                              = new Engine(this);
-    private final        Logger            logger                              = LoggerFactory.getLogger(this.getClass());
-    private final        ManeuveringSystem maneuveringSystem                   = new ManeuveringSystem(this);
-    private final        int               numberOfWaypointsBetweenTraders     = 1;
-    public               long              currentTime                         = 0;
-    public               Planet            destinationPlanet                   = null; // ---The planet we want to reach ultimately
-    public               float             destinationPlanetDistanceProgress   = 0;
-    public               float             destinationWaypointDistance         = 0;
-    public               float             destinationWaypointDistanceProgress = 0;
-    public               int               destinationWaypointIndex            = 0; // ---The index into the WaypointList
-    public               int               goodSpace                           = 0;
-    public               int               lastYearTransportedAmount;
-    public               long              portRestingTime                     = 0; // ---After a transaction or to wait for better prices, we recreate at a port
-    public               Planet            sourcePlanet                        = null; // ---The planet origin of the good we are currently selling
-    public               Waypoint          sourceWaypoint                      = null; // ---The previous waypoint we reach in our way to the destinationPlanet
-    public               TraderSubStatus   subStatus                           = TraderSubStatus.TRADER_STATUS_NA;
-    public               Waypoint          targetWaypoint                      = null; // ---The next waypoint we want to reach in our way to the destinationPlanet
-    public               TraderStatus      traderStatus                        = TraderStatus.TRADER_STATUS_RESTING;
-    public               WaypointList      waypointList                        = new WaypointList();
-    public               float             x;
-    public               float             y;
-    public               float             z;
-    List<RadioMessage> radioMessages = new ArrayList<>();
-    boolean            selected      = false;
-    private int       currentTransportedAmount;
-    private float     destinationPlanetDistance;
-    private boolean   foundTradedGood = false;
-    private float     realTimeDelta;
-    private GoodType  targetGoodType  = null; // ---Used to remember the index of good that we where to sell
-    private long      timeDelta       = 0;
-    private TTSPlayer ttsSynth;
+    private static final float                      JUMP_UNIT_COST                      = 1f / (1000f);
+    public final         Vector3                    speed                               = new Vector3(0, 0, 0);
+    private final        Engine                     engine                              = new Engine(this);
+    private final        Logger                     logger                              = LoggerFactory.getLogger(this.getClass());
+    private final        ManeuveringSystem          maneuveringSystem                   = new ManeuveringSystem(this);
+    private final        int                        numberOfWaypointsBetweenTraders     = 1;
+    public               TraderCommunicationPartner communicationPartner                = new TraderCommunicationPartner(this);
+    public               long                       currentTime                         = 0;
+    public               Planet                     destinationPlanet                   = null; // ---The planet we want to reach ultimately
+    public               float                      destinationPlanetDistanceProgress   = 0;
+    public               float                      destinationWaypointDistance         = 0;
+    public               float                      destinationWaypointDistanceProgress = 0;
+    public               int                        destinationWaypointIndex            = 0; // ---The index into the WaypointList
+    public               int                        goodSpace                           = 0;
+    public               int                        lastYearTransportedAmount;
+    public               long                       portRestingTime                     = 0; // ---After a transaction or to wait for better prices, we recreate at a port
+    public               Planet                     sourcePlanet                        = null; // ---The planet origin of the good we are currently selling
+    public               Waypoint                   sourceWaypoint                      = null; // ---The previous waypoint we reach in our way to the destinationPlanet
+    public               TraderSubStatus            subStatus                           = TraderSubStatus.TRADER_STATUS_NA;
+    public               Waypoint                   targetWaypoint                      = null; // ---The next waypoint we want to reach in our way to the destinationPlanet
+    public               TraderStatus               traderStatus                        = TraderStatus.TRADER_STATUS_RESTING;
+    public               WaypointList               waypointList                        = new WaypointList();
+    public               float                      x;
+    public               float                      y;
+    public               float                      z;
+    boolean selected = false;
+    private int      currentTransportedAmount;
+    private float    destinationPlanetDistance;
+    private boolean  foundTradedGood = false;
+    private float    realTimeDelta;
+    private GoodType targetGoodType  = null; // ---Used to remember the index of good that we where to sell
+    private long     timeDelta       = 0;
 
     public Trader(final Planet planet, final String name, final float credits) throws Exception {
         super(planet, name, credits);
@@ -145,7 +141,7 @@ public class Trader extends Sim implements CommunicationPartner {
                     sell(currentTime, randomGenerator);
                 } else {
                     //we need to travel somewhere to actually sell
-                    informControlTower();
+                    communicationPartner.informControlTower();
                     extractWaypointList();
                     sourceWaypoint = sourcePlanet;
                     targetWaypoint = waypointList.get(1).waypoint;
@@ -201,7 +197,7 @@ public class Trader extends Sim implements CommunicationPartner {
                     destinationWaypointDistance = 0;
                     buy(currentTime, randomGenerator);
                 } else {
-                    informControlTower();
+                    communicationPartner.informControlTower();
                     extractWaypointList();
                     sourceWaypoint              = null;
                     targetWaypoint              = waypointList.get(0).waypoint;
@@ -385,7 +381,7 @@ public class Trader extends Sim implements CommunicationPartner {
 //        }
 //    }
 
-    public void create(final MercatorRandomGenerator randomGenerator) {
+    public void create(GameEngine gameEngine, final MercatorRandomGenerator randomGenerator) {
         goodSpace       = Trader.MIN_GOOD_SPACE + randomGenerator.nextInt(0, this, Trader.MAX_GOOD_SPACE - Trader.MIN_GOOD_SPACE);
         portRestingTime = randomGenerator.nextInt(0, this, Trader.TRADER_MAX_PORT_REST_TIME) * TimeUnit.TICKS_PER_DAY;
     }
@@ -433,33 +429,6 @@ public class Trader extends Sim implements CommunicationPartner {
 //        if (rotation > 360)
 //            rotation -= 360;
 //    }
-
-    private void handleRadioMessage() {
-        for (RadioMessage rm : radioMessages) {
-            if (currentTime - rm.time > Planet.RADIO_ANSWER_DELAY) {
-
-            }
-        }
-    }
-
-    private void informControlTower() {
-        String string = String.format(RadioTTS.REQUESTING_APPROVAL_TO_DOCK_01, getName(), destinationPlanet.getName());
-        say(string);
-        RadioMessage rm = new RadioMessage(currentTime, this, destinationPlanet, RadioMessageId.REQUEST_TO_DOCK, string);
-        planet.universe.say(rm);
-        destinationPlanet.radio(rm);
-    }
-
-    @Override
-    public boolean isSelected() {
-        return selected;
-    }
-
-    @Override
-    public void radio(RadioMessage message) {
-        radioMessages.add(message);
-        planet.universe.say(message);
-    }
 
     public void markJumpGateUsage() {
         // ---We are moving on a link
@@ -721,13 +690,6 @@ public class Trader extends Sim implements CommunicationPartner {
         for (int i = 0; i < numberOfWaypointsBetweenTraders - 2; i++) {
             //next waypoint must be either the last one, or the one after is also free
             if (destinationWaypointIndex + i < waypointList.size()) waypointList.get(destinationWaypointIndex + i).waypoint.trader = this;
-        }
-    }
-
-    public void say(String msg) {
-        if (isSelected()) {
-            ttsSynth.speak(msg);
-            logger.info(msg);
         }
     }
 

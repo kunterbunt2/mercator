@@ -16,7 +16,10 @@
 
 package de.bushnaq.abdalla.mercator.universe;
 
+import de.bushnaq.abdalla.mercator.desktop.DesktopContextFactory;
 import de.bushnaq.abdalla.mercator.desktop.GraphicsDimentions;
+import de.bushnaq.abdalla.mercator.desktop.LaunchMode;
+import de.bushnaq.abdalla.mercator.renderer.GameEngine3D;
 import de.bushnaq.abdalla.mercator.universe.event.EventLevel;
 import de.bushnaq.abdalla.mercator.util.TimeUnit;
 import org.junit.jupiter.api.Test;
@@ -38,7 +41,7 @@ public class PlanetDeathPerformanceTest {
             final Universe universe = new Universe("U-" + i, GraphicsDimentions.D2, EventLevel.none, null);
             universeList[i] = universe;
                               universe.timeDelta = 100L;
-            universe.create(i, UNIVERSE_SIZE, 0);
+            universe.create(new GameEngine3D(new DesktopContextFactory(), universe, LaunchMode.normal), i, UNIVERSE_SIZE, 0);
         }
         Universe  bestUniverse = null;
         long      bestTime     = 0;

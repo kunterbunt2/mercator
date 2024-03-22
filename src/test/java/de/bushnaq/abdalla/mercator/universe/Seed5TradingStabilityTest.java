@@ -16,7 +16,10 @@
 
 package de.bushnaq.abdalla.mercator.universe;
 
+import de.bushnaq.abdalla.mercator.desktop.DesktopContextFactory;
 import de.bushnaq.abdalla.mercator.desktop.GraphicsDimentions;
+import de.bushnaq.abdalla.mercator.desktop.LaunchMode;
+import de.bushnaq.abdalla.mercator.renderer.GameEngine3D;
 import de.bushnaq.abdalla.mercator.universe.event.EventLevel;
 import de.bushnaq.abdalla.mercator.universe.planet.Planet;
 import de.bushnaq.abdalla.mercator.universe.sim.Sim;
@@ -40,7 +43,7 @@ public class Seed5TradingStabilityTest {
         for (int i = 0; i < universeList.length; i++) {
             universeList[i]           = new Universe("U-" + i, GraphicsDimentions.D2, EventLevel.none, null);
             universeList[i].timeDelta = 100L;
-            universeList[i].create(5, UNIVERSE_SIZE, 100L * TimeUnit.TICKS_PER_DAY);
+            universeList[i].create(new GameEngine3D(new DesktopContextFactory(), universeList[i], LaunchMode.normal), 5, UNIVERSE_SIZE, 100L * TimeUnit.TICKS_PER_DAY);
         }
         for (float i = 1; i < 15f; i++) {
             for (int universeIndex = 0; universeIndex < universeList.length; universeIndex++) {

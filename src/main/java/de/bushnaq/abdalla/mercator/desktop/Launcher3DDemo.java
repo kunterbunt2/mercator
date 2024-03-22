@@ -141,8 +141,7 @@ public class Launcher3DDemo implements ApplicationListener {
         int                        monitor        = context.getMonitorProperty();
         final Graphics.DisplayMode primaryMode    = Lwjgl3ApplicationConfiguration.getDisplayMode(monitors[monitor]);
         boolean                    fullScreenMode = context.getFullscreenModeProperty();
-        if (fullScreenMode)
-            config.setFullscreenMode(primaryMode);
+        if (fullScreenMode) config.setFullscreenMode(primaryMode);
 //		config.setWindowPosition(0, 0);
 //		config.setWindowedMode(primaryMode.width, primaryMode.height);
 //		config.setMaximized(true);
@@ -152,20 +151,19 @@ public class Launcher3DDemo implements ApplicationListener {
     private void loop() throws Exception, InterruptedException {
         boolean restart = false;
         do {
-            if (restart)
-                logger.info(String.format("Restarting pluvia v%s.", MavenPropertiesProvider.getProperty("module.version")));
+            if (restart) logger.info(String.format("Restarting pluvia v%s.", MavenPropertiesProvider.getProperty("module.version")));
             {
                 // initialize a gdx environment, so that we can access files
                 Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
                 new Lwjgl3Application(this, config);
             }
 
-            final GraphicsDimentions gd       = GraphicsDimentions.D3;
-            final Universe           universe = new Universe("U-0", gd, EventLevel.warning, Sim.class);
-            universe.create(UNIVERSE_GENERATION_RANDOM_SEED, UNIVERSE_SIZE, 10L * TimeUnit.TICKS_PER_DAY);
+            final GraphicsDimentions gd         = GraphicsDimentions.D3;
+            final Universe           universe   = new Universe("U-0", gd, EventLevel.warning, Sim.class);
+            final GameEngine3D       gameEngine = new GameEngine3D(contextFactory, universe, launchMode);
+            universe.create(gameEngine, UNIVERSE_GENERATION_RANDOM_SEED, UNIVERSE_SIZE, 10L * TimeUnit.TICKS_PER_DAY);
 
-            final GameEngine3D                   gameEngine = new GameEngine3D(contextFactory, universe, launchMode);
-            final Lwjgl3ApplicationConfiguration config     = createConfig(contextFactory.getContext());
+            final Lwjgl3ApplicationConfiguration config = createConfig(contextFactory.getContext());
             try {
                 contextFactory.getContext().restart = false;
                 new Lwjgl3Application(gameEngine, config);

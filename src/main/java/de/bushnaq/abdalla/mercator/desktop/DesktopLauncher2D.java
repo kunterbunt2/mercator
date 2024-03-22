@@ -146,12 +146,12 @@ public class DesktopLauncher2D implements ApplicationListener {
                 new Lwjgl3Application(this, config);
             }
 
-            final GraphicsDimentions gd       = GraphicsDimentions.D3;
-            final Universe           universe = new Universe("U-0", gd, EventLevel.warning, Sim.class);
-            universe.create(UNIVERSE_GENERATION_RANDOM_SEED, UNIVERSE_SIZE, 10L * TimeUnit.TICKS_PER_DAY);
+            final GraphicsDimentions gd         = GraphicsDimentions.D3;
+            final Universe           universe   = new Universe("U-0", gd, EventLevel.warning, Sim.class);
+            final GameEngine2D       gameEngine = new GameEngine2D(contextFactory, universe, launchMode);
+            universe.create(gameEngine, UNIVERSE_GENERATION_RANDOM_SEED, UNIVERSE_SIZE, 10L * TimeUnit.TICKS_PER_DAY);
 
-            final GameEngine2D                   gameEngine = new GameEngine2D(contextFactory, universe, launchMode);
-            final Lwjgl3ApplicationConfiguration config     = createConfig(contextFactory.getContext());
+            final Lwjgl3ApplicationConfiguration config = createConfig(contextFactory.getContext());
             try {
                 contextFactory.getContext().restart = false;
                 new Lwjgl3Application(gameEngine, config);

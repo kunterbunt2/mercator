@@ -16,6 +16,7 @@
 
 package de.bushnaq.abdalla.mercator.universe;
 
+import de.bushnaq.abdalla.mercator.renderer.GameEngine;
 import de.bushnaq.abdalla.mercator.universe.good.GoodList;
 import de.bushnaq.abdalla.mercator.universe.land.Land;
 import de.bushnaq.abdalla.mercator.universe.land.LandList;
@@ -225,14 +226,14 @@ public class UniverseGenerator {
 //
 //    }
 
-    public void generate(final Universe universe) throws Exception {
+    public void generate(GameEngine gameEngine, final Universe universe) throws Exception {
         final long time = System.currentTimeMillis();
         logger.info(String.format("creating universe of %d light years across within %dms.", universe.size, System.currentTimeMillis() - time));
         size            = universe.size;
         universe.ring   = new Ring(universe);
         randomGenerator = universe.universeRG;
         sectorList      = generateSectorList();
-        planetList      = generatePlanetList(universe);
+        planetList      = generatePlanetList(gameEngine, universe);
         generatePaths();
         assignSectors();
         removeUnconnectedSectors();
@@ -240,7 +241,7 @@ public class UniverseGenerator {
         mapGalaxy();
         pathList   = generatePathList();
         landList   = generateLand(planetList, universe);
-        traderList = generateTraders();
+        traderList = generateTraders(gameEngine);
         // goodList = generateGoods();
         System.out.printf(" in %dms.\n", System.currentTimeMillis() - time);
         universe.sectorList = sectorList;
@@ -356,7 +357,7 @@ public class UniverseGenerator {
     }
 
     // ---Create the planets
-    private PlanetList generatePlanetList(final Universe universe) {
+    private PlanetList generatePlanetList(GameEngine gameEngine, final Universe universe) {
         final PlanetList planetList = new PlanetList();
         int              count      = 0;
         do {
@@ -373,7 +374,7 @@ public class UniverseGenerator {
                         final float  ty     = 0/*randomGenerator.nextInt(0, this, PLANET_MAX_HIGHT)*/;
                         final float  tz     = z * Planet.PLANET_DISTANCE + randomGenerator.nextInt(0, this, PLANET_MAX_SHIFT) / 2;
                         final Planet planet = new Planet(name, tx, ty, tz, universe);
-                        planet.create(randomGenerator);
+                        planet.create(gameEngine, randomGenerator);
                         count++;
                         planetList.add(planet);
 
@@ -400,7 +401,7 @@ public class UniverseGenerator {
         return sectorList;
     }
 
-    private TraderList generateTraders() throws Exception {
+    private TraderList generateTraders(GameEngine gameEngine) throws Exception {
         final TraderList traderList = new TraderList();
         int              count      = 0;
         for (final Planet planet : planetList) {
@@ -408,7 +409,7 @@ public class UniverseGenerator {
             final int number = 1 + randomGenerator.nextInt(0, this, MAX_NUMBER_OF_TRADERS);
             for (int i = 0; i < number; i++) {
                 final Trader trader = new Trader(planet, "T-" + count++, Trader.TRADER_START_CREDITS);
-                trader.create(randomGenerator);
+                trader.create(gameEngine, randomGenerator);
                 planet.traderList.add(trader);
                 traderList.add(trader);
             }

@@ -18,6 +18,7 @@ package de.bushnaq.abdalla.mercator.universe;
 
 import com.badlogic.gdx.graphics.Color;
 import de.bushnaq.abdalla.mercator.desktop.GraphicsDimentions;
+import de.bushnaq.abdalla.mercator.renderer.GameEngine;
 import de.bushnaq.abdalla.mercator.renderer.ScreenListener;
 import de.bushnaq.abdalla.mercator.renderer.reports.GraphChartData;
 import de.bushnaq.abdalla.mercator.renderer.reports.PieChartData;
@@ -30,7 +31,6 @@ import de.bushnaq.abdalla.mercator.universe.land.LandList;
 import de.bushnaq.abdalla.mercator.universe.path.PathList;
 import de.bushnaq.abdalla.mercator.universe.planet.Planet;
 import de.bushnaq.abdalla.mercator.universe.planet.PlanetList;
-import de.bushnaq.abdalla.mercator.universe.planet.RadioMessage;
 import de.bushnaq.abdalla.mercator.universe.ring.Ring;
 import de.bushnaq.abdalla.mercator.universe.sector.SectorList;
 import de.bushnaq.abdalla.mercator.universe.sim.Sim;
@@ -95,10 +95,10 @@ public class Universe {
     private HistoryManager historyManager;
     private long           lastTime    = 0;
     private String         name;
-    private RadioTTS       radioTTS;
     private Event          selectedEvent;
     private int            selectedGoodIndex;
     private long           universeAge = 100L * TimeUnit.TICKS_PER_DAY;
+
 
     public Universe(final String name, final GraphicsDimentions graphicsDimentions, final EventLevel level, final Class<?> eventFilter) {
         setName(name);
@@ -233,7 +233,7 @@ public class Universe {
         //		}
     }
 
-    public void create(final int randomGeneratorSeed, final int aUniverseSize, final long age) throws Exception {
+    public void create(GameEngine gameEngine, final int randomGeneratorSeed, final int aUniverseSize, final long age) throws Exception {
         universeAge = age;
         {
             size = aUniverseSize;
@@ -245,20 +245,19 @@ public class Universe {
             selectedTrader    = null;
             universeRG        = new MercatorRandomGenerator(randomGeneratorSeed, eventManager);
             final UniverseGenerator generator = new UniverseGenerator();
-            generator.generate(this);
+            generator.generate(gameEngine, this);
             credits = queryCredits(false);
         }
         // ---Reset all the lastTimeAdvancement values
         // advanceInTime( true );
         // currentTime = 0;
         useFixedDelta = true;
-        radioTTS      = new RadioTTS(this);
         advanceInTime(age);
     }
 
     public void dispose() {
-        radioTTS.dispose();
     }
+
 
     public Planet findBusyCenterPlanet() {
         Planet planet      = null;
@@ -479,12 +478,6 @@ public class Universe {
         }
     }
 
-    public void say(RadioMessage rm) {
-        if (rm.from.isSelected() || rm.to.isSelected()) {
-            radioTTS.speak(rm.message);
-            logger.info(rm.message);
-        }
-    }
 
     public void selectEvent(final Event event) {
         selectedEvent = event;

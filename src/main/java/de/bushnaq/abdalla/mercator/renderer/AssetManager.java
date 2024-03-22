@@ -54,6 +54,7 @@ public class AssetManager {
     public Model                   cubeModel;//used for debugging
     public Model                   cubeTrans1;
     public Model                   cubeTrans2;
+    public SceneAsset              flame;
     //    public SceneAsset              cubeGoldLeaves;
     public Model                   goodContainer;
     public Model                   jumpGate;
@@ -109,6 +110,7 @@ public class AssetManager {
             cubeBase1 = modelCreator.createBox(material);
         }
         createTrader(modelBuilder, modelCreator);
+        createFlame(modelBuilder, modelCreator);
         createGoodContainer(modelBuilder);
 
         createRedEmissiveModel(modelCreator);
@@ -170,6 +172,17 @@ public class AssetManager {
         final Attribute occlusion = PBRFloatAttribute.createOcclusionStrength(1.0f);
         final Material  material  = new Material(metallic, roughness, color, occlusion);
         cubeModel = modelBuilder.createBox(1.0f, 1.0f, 1.0f, material, Usage.Position | Usage.Normal);
+    }
+
+    private void createFlame(ModelBuilder modelBuilder, ModelCreator modelCreator) {
+        flame = new GLBLoader().load(Gdx.files.internal(String.format(AtlasManager.getAssetsFolderName() + "/models/flame.glb")));
+        PBRColorAttribute baseColorFactor = PBRColorAttribute.createBaseColorFactor(new Color(Color.WHITE));
+        final Attribute   blending        = new BlendingAttribute(0.5f); // opacity is set by pbrMetallicRoughness below
+//        ColorAttribute    emissive        = PBRColorAttribute.createEmissive(new Color(Color.WHITE));
+        for (Material m : flame.scene.model.materials) {
+            if (m.id.equals("flame.material"))
+                m.set(baseColorFactor, blending/*, emissive*/);
+        }
     }
 
     private void createGoodContainer(ModelBuilder modelBuilder) {

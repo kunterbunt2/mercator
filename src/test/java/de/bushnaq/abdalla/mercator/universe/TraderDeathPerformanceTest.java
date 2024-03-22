@@ -16,7 +16,10 @@
 
 package de.bushnaq.abdalla.mercator.universe;
 
+import de.bushnaq.abdalla.mercator.desktop.DesktopContextFactory;
 import de.bushnaq.abdalla.mercator.desktop.GraphicsDimentions;
+import de.bushnaq.abdalla.mercator.desktop.LaunchMode;
+import de.bushnaq.abdalla.mercator.renderer.GameEngine3D;
 import de.bushnaq.abdalla.mercator.universe.event.EventLevel;
 import de.bushnaq.abdalla.mercator.util.TimeUnit;
 import org.junit.jupiter.api.Test;
@@ -39,7 +42,7 @@ public class TraderDeathPerformanceTest {
             universeList[i] = universe;
                               universe.timeDelta = 20L;
                               universe.useFixedDelta = true;
-            universe.create(i, UNIVERSE_SIZE, 0);
+            universe.create(new GameEngine3D(new DesktopContextFactory(), universe, LaunchMode.normal), i, UNIVERSE_SIZE, 0);
             // universe.traderCreditBuffer = ( Trader.TRADER_START_CREDITS / (
             // universeList.length + 1 ) ) * i;
             universe.traderCreditBuffer = 50;

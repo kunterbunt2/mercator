@@ -148,10 +148,10 @@ public class DesktopLauncher3D implements ApplicationListener {
 
             final GraphicsDimentions gd       = GraphicsDimentions.D3;
             final Universe           universe = new Universe("U-0", gd, EventLevel.warning, Sim.class);
-            universe.create(UNIVERSE_GENERATION_RANDOM_SEED, UNIVERSE_SIZE, 10L * TimeUnit.TICKS_PER_DAY);
 
-            final GameEngine3D                   gameEngine = new GameEngine3D(contextFactory, universe, launchMode);
-            final Lwjgl3ApplicationConfiguration config     = createConfig(contextFactory.getContext());
+            final GameEngine3D gameEngine = new GameEngine3D(contextFactory, universe, launchMode);
+            universe.create(gameEngine, UNIVERSE_GENERATION_RANDOM_SEED, UNIVERSE_SIZE, 10L * TimeUnit.TICKS_PER_DAY);
+            final Lwjgl3ApplicationConfiguration config = createConfig(contextFactory.getContext());
             try {
                 contextFactory.getContext().restart = false;
                 new Lwjgl3Application(gameEngine, config);

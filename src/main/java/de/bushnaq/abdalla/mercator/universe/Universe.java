@@ -210,7 +210,7 @@ public class Universe {
     }
 
     public void advanceInTime(final long days) throws Exception {
-        logger.info("---");
+        logger.info("----------------------------------------------------------------------------------");
         eventManager.eventList.clear();
         final long time  = System.currentTimeMillis();
         final long start = currentTime;
@@ -227,7 +227,7 @@ public class Universe {
         if (days != 0) {
             logger.info(String.format("aged universe %s at %s for %s years in %dms.", getName(), TimeUnit.toString(start), TimeUnit.toString(days), System.currentTimeMillis() - time));
         }
-        logger.info("---");
+        logger.info("----------------------------------------------------------------------------------");
     }
 
     private void calculateSectorValue() {

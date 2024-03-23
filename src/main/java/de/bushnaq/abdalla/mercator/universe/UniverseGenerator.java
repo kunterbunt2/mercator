@@ -226,9 +226,9 @@ public class UniverseGenerator {
 //    }
 
     public void generate(GameEngine gameEngine, final Universe universe) throws Exception {
-        final long time = System.currentTimeMillis();
-        logger.info("---");
+        logger.info("----------------------------------------------------------------------------------");
         logger.info(String.format("creating universe of %d light years across.", universe.size));
+        final long time = System.currentTimeMillis();
         size            = universe.size;
         universe.ring   = new Ring(universe);
         randomGenerator = universe.universeRG;
@@ -244,8 +244,6 @@ public class UniverseGenerator {
         traderList = generateTraders(gameEngine);
         // goodList = generateGoods();
 //        System.out.printf(" in %dms.\n", System.currentTimeMillis() - time);
-        logger.info(String.format("generated universe of %d light years across within %dms.", universe.size, System.currentTimeMillis() - time));
-        logger.info("---");
         universe.sectorList = sectorList;
         universe.planetList = planetList;
         universe.traderList = traderList;
@@ -255,6 +253,8 @@ public class UniverseGenerator {
         //		for (final Planet planet : planetList) {
         //			logger.info(planet.getName());
         //		}
+        logger.info(String.format("generated universe of %d light years across within %dms.", universe.size, System.currentTimeMillis() - time));
+        logger.info("----------------------------------------------------------------------------------");
     }
 
     private LandList generateLand(final PlanetList planetList, final Universe universe) {
@@ -416,7 +416,7 @@ public class UniverseGenerator {
                 traderList.add(trader);
             }
         }
-        logger.info(String.format("generated %d traders.\n", traderList.size()));
+        logger.info(String.format("generated %d traders.", traderList.size()));
         return traderList;
     }
 
@@ -502,7 +502,7 @@ public class UniverseGenerator {
             final Sector sector = sectorList.get(i);
             if (sector.numberOfPlanets == 0) {
                 sectorList.remove(i);
-                System.out.println("Removed unused sector " + sector.name);
+                logger.info("Removed unused sector " + sector.name);
             } else {
                 i++;
             }

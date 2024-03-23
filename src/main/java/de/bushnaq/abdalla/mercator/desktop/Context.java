@@ -19,9 +19,9 @@ package de.bushnaq.abdalla.mercator.desktop;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
 import de.bushnaq.abdalla.engine.IContext;
-import de.bushnaq.abdalla.engine.util.logger.Logger;
-import de.bushnaq.abdalla.engine.util.logger.LoggerFactory;
 import de.bushnaq.abdalla.mercator.util.MavenPropertiesProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -34,19 +34,19 @@ enum OperatingSystem {
  * @author kunterbunt
  */
 public abstract class Context extends ApplicationProperties implements IContext {
-    protected static Logger          logger           = LoggerFactory.getLogger(Context.class);
-    private static   String          appFolderName    = "app";
-    private static   String          configFolderName = "app/config";
-    private static   String          homeFolderName;
-    public           long            currentTime      = 8L * 10000;
-    public           boolean         restart          = false;
-    public           Object          selected         = null;
-    public           long            timeDelta        = 0L;
-    private          String          appVersion       = "0.0.0";
-    private          boolean         enableTime       = true;
-    private          String          installationFolder;
-    private          long            lastTime         = 0;
-    private          OperatingSystem operatingSystem;
+    protected final static Logger          logger           = LoggerFactory.getLogger(Context.class);
+    private static         String          appFolderName    = "app";
+    private static         String          configFolderName = "app/config";
+    private static         String          homeFolderName;
+    public                 long            currentTime      = 8L * 10000;
+    public                 boolean         restart          = false;
+    public                 Object          selected         = null;
+    public                 long            timeDelta        = 0L;
+    private                String          appVersion       = "0.0.0";
+    private                boolean         enableTime       = true;
+    private                String          installationFolder;
+    private                long            lastTime         = 0;
+    private                OperatingSystem operatingSystem;
 
     public Context() {
         try {

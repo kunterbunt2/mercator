@@ -23,7 +23,11 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
+import com.badlogic.gdx.math.Intersector;
+import com.badlogic.gdx.math.Plane;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.math.collision.Ray;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.utils.Align;
@@ -623,7 +627,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
             case Input.Keys.Q:
                 exit();
                 return true;
-            case Input.Keys.P:
+            case Input.Keys.PAUSE:
                 assetManager.universe.setEnableTime(!assetManager.universe.isEnableTime());
                 return true;
             case Input.Keys.PRINT_SCREEN:
@@ -633,7 +637,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
                 renderEngine.setAlwaysDay(!renderEngine.isAlwaysDay());
                 return true;
             case Input.Keys.NUM_3:
-                renderEngine.setDepthOfField(!renderEngine.isDepthOfField());
+                renderEngine.getDepthOfFieldEffect().setEnabled(!renderEngine.getDepthOfFieldEffect().isEnabled());
                 return true;
             case Input.Keys.NUM_4:
                 renderEngine.setShowGraphs(!renderEngine.isShowGraphs());
@@ -822,6 +826,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
         // must be called after moving the camera
         camController.update();
         renderEngine.updateCamera(centerXD, 0f, centerYD);
+        updateDepthOfFieldFocusDistance();
 //        if (camera.position.y > 1000) {
 //            renderEngine.getFog().setBeginDistance(camera.position.y + 100);
 //            renderEngine.getFog().setBeginDistance(camera.position.y + 1000);
@@ -895,7 +900,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
 
         renderEngine.renderEngine2D.batch.begin();
         renderUniverse();
-        renderDemo();
+        renderDemo(deltaTime);
         renderEngine.renderEngine2D.batch.end();
 
         renderEngine.gpuGraph.end();
@@ -925,13 +930,14 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
         audioEngine.radioTTS.renderAllTTSStrings(names);
     }
 
-    private void renderDemo() throws IOException, OpenAlException {
+    private void renderDemo(float deltaTime) throws IOException, OpenAlException {
         if (launchMode == LaunchMode.demo) {
             final float lineHeightFactor = 2f;
             if (demoText.isEmpty()) {
                 demoText.add(new DemoString("Mercator", getAtlasManager().bold128Font));
                 demoText.add(new DemoString("A computer game implementation of a closed economical simulation.", getAtlasManager().demoMidFont));
                 demoText.add(new DemoString(String.format("The current world is generated proceduraly and includes %d cities, %d factories, %d traders and %d sims.", universe.planetList.size(), universe.planetList.size() * 2, universe.traderList.size(), universe.simList.size()), getAtlasManager().demoMidFont));
+                demoText.add(new DemoString(String.format("There exist %d static models, %d dynamic models, %d audio producers.", renderEngine.staticGameObjects.size, renderEngine.dynamicGameObjects.size, audioEngine.getNumberOfAudioProducers()), getAtlasManager().demoMidFont));
                 demoText.add(new DemoString("The amount of wealth in the system, including products and money is constant at all times. ", getAtlasManager().demoMidFont));
                 demoText.add(new DemoString("Factories pay wages to sims to produce goods that are sold on a free market.", getAtlasManager().demoMidFont));
                 demoText.add(new DemoString("Some sims are traders that buy products in one city and sell them with profit in another city.", getAtlasManager().demoMidFont));
@@ -979,7 +985,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
                 final GlyphLayout lastLayout = ds.font.draw(renderEngine.renderEngine2D.batch, ds.text, demoTextX, y, width, Align.left, true);
                 deltaY += lastLayout.height * lineHeightFactor;
             }
-            demoTextY += 1;
+            demoTextY += 100 * deltaTime;
             if (demoTextY - deltaY > renderEngine.renderEngine2D.height * lineHeightFactor) demoTextY = 0;
         }
     }
@@ -1188,13 +1194,32 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
     }
 
     private void startDemoMode() throws OpenAlException {
-        renderEngine.setDepthOfField(true);
+        renderEngine.getDepthOfFieldEffect().setEnabled(true);
+        updateDepthOfFieldFocusDistance();
         renderEngine.setAlwaysDay(false);
         oggPlayer = audioEngine.createAudioProducer(OggPlayer.class);
         oggPlayer.setFile(Gdx.files.internal(AtlasManager.getAssetsFolderName() + "/audio/06-abyss(m).ogg"));
         oggPlayer.setGain(1.0f);
         oggPlayer.play();
         AudioEngine.checkAlError("Failed to set listener orientation with error #");
+    }
+
+    private void updateDepthOfFieldFocusDistance() {
+        if (camera.isDirty()) {
+            Ray     pickRay      = camera.getPickRay(Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2);
+            Plane   plane        = new Plane(new Vector3(0, 1, 0), Vector3.Zero);
+            Vector3 intersection = new Vector3();
+            if (Intersector.intersectRayPlane(pickRay, plane, intersection)) {
+                //calculate distance to camera
+                intersection.sub(camera.position);
+                float focus = intersection.len();
+                float max   = focus * 2;
+                float min   = focus / 2;
+                renderEngine.getDepthOfFieldEffect().setFocusDistance(new Vector2(min, max));
+            } else {
+                // Not hit
+            }
+        }
     }
 
     private void updateGoods(final long currentTime) throws Exception {

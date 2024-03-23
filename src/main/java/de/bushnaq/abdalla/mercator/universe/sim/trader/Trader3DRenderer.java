@@ -291,8 +291,8 @@ public class Trader3DRenderer extends ObjectRenderer<GameEngine3D> {
             }
 
             TextureAtlas.AtlasRegion systemTextureRegion = renderEngine.getGameEngine().getAtlasManager().systemTextureRegion;
-            renderEngine.renderEngine25D.fillCircle(systemTextureRegion, 0, 0, TRADER_SIZE_Z * 2, 128, new Color(.2f, .4f, .3f, 0.05f));
-            renderEngine.renderEngine25D.circle(renderEngine.getGameEngine().getAtlasManager().patternCircle24, 0, 0, TRADER_SIZE_Z * 2 - .5f, 1f, new Color(.9f, .9f, .9f, .5f), 128);
+//            renderEngine.renderEngine25D.fillCircle(systemTextureRegion, 0, 0, TRADER_SIZE_Z * 2, 128, new Color(.2f, .4f, .3f, 0.05f));
+            renderEngine.renderEngine25D.circle(renderEngine.getGameEngine().getAtlasManager().patternCircle24, 0, 0, TRADER_SIZE_Z - .5f, 1f, new Color(.9f, .9f, .9f, .5f), 128);
 //            {
 //                final Matrix4 m = new Matrix4();
 //                //move center of text to center of trader
@@ -308,17 +308,17 @@ public class Trader3DRenderer extends ObjectRenderer<GameEngine3D> {
             if (trader.destinationPlanet != null) {
                 String name  = trader.getName();
                 String value = String.format("%.0f credits", trader.getCredits());
-                renderEngine.renderEngine25D.label(translation, rotation, systemTextureRegion, 0, 0, -TRADER_SIZE_Z / 2, TRADER_SIZE_Z * 1.25f, HAlignment.RIGHT, VAlignment.TOP, 0.2f, modelFont, Color.WHITE, name, TRADER_NAME_COLOR, value, Color.YELLOW);
+                renderEngine.renderEngine25D.label(translation, rotation, systemTextureRegion, 0, TRADER_SIZE_Y / 2, -TRADER_SIZE_Z / 2, TRADER_SIZE_Z * .75f, HAlignment.RIGHT, VAlignment.TOP, 0.2f, modelFont, Color.WHITE, name, TRADER_NAME_COLOR, value, Color.YELLOW);
             }
             if (trader.destinationPlanet != null) {
                 if (trader.traderStatus == TraderStatus.TRADER_STATUS_SELLING) {
                     String name  = "Selling";
                     String value = String.format("from %s to %s", trader.planet.getName(), trader.destinationPlanet.getName());
-                    renderEngine.renderEngine25D.label(translation, rotation, systemTextureRegion, 0, 0, -TRADER_SIZE_Z / 2, TRADER_SIZE_Z * 1.25f, HAlignment.LEFT, VAlignment.TOP, 0.2f, modelFont, Color.WHITE, name, TRADER_NAME_COLOR, value, Color.YELLOW);
+                    renderEngine.renderEngine25D.label(translation, rotation, systemTextureRegion, 0, TRADER_SIZE_Y / 2, -TRADER_SIZE_Z / 2, TRADER_SIZE_Z * .75f, HAlignment.LEFT, VAlignment.TOP, 0.2f, modelFont, Color.WHITE, name, TRADER_NAME_COLOR, value, Color.YELLOW);
                 } else if (trader.traderStatus == TraderStatus.TRADER_STATUS_BUYING) {
                     String name  = "Buying";
                     String value = String.format("from %s", trader.destinationPlanet.getName());
-                    renderEngine.renderEngine25D.label(translation, rotation, systemTextureRegion, 0, 0, -TRADER_SIZE_Z / 2, TRADER_SIZE_Z * 1.25f, HAlignment.RIGHT, VAlignment.TOP, 0.2f, modelFont, Color.WHITE, name, TRADER_NAME_COLOR, value, Color.YELLOW);
+                    renderEngine.renderEngine25D.label(translation, rotation, systemTextureRegion, 0, TRADER_SIZE_Y / 2, -TRADER_SIZE_Z / 2, TRADER_SIZE_Z * .75f, HAlignment.RIGHT, VAlignment.TOP, 0.2f, modelFont, Color.WHITE, name, TRADER_NAME_COLOR, value, Color.YELLOW);
                 }
             }
             if (!trader.getGoodList().isEmpty()) {
@@ -326,19 +326,19 @@ public class Trader3DRenderer extends ObjectRenderer<GameEngine3D> {
                     if (good.getAmount() > 0) {
                         String name  = good.type.getName();
                         String value = String.format("%d kt", good.getAmount());
-                        renderEngine.renderEngine25D.label(translation, rotation, systemTextureRegion, 0, 0, 0, TRADER_SIZE_Z * 1.25f, HAlignment.RIGHT, VAlignment.TOP, 0.2f, modelFont, Color.WHITE, name, TRADER_NAME_COLOR, value, Color.YELLOW);
+                        renderEngine.renderEngine25D.label(translation, rotation, systemTextureRegion, 0, TRADER_SIZE_Y / 2, 0, TRADER_SIZE_Z * .75f, HAlignment.RIGHT, VAlignment.TOP, 0.2f, modelFont, Color.WHITE, name, TRADER_NAME_COLOR, value, Color.YELLOW);
                     }
                 }
             }
             if (trader.subStatus == TraderSubStatus.TRADER_STATUS_ALIGNING) {
                 String value = String.format("%.1f °/s", trader.getThrusters().rotationSpeed);
-                renderEngine.renderEngine25D.label(translation, rotation, systemTextureRegion, 0, 0, TRADER_SIZE_Z / 2, TRADER_SIZE_Z * 1.25f, HAlignment.LEFT, VAlignment.BOTTOM, 0.2f, modelFont, Color.WHITE, "Aligning", TRADER_NAME_COLOR, value, Color.YELLOW);
+                renderEngine.renderEngine25D.label(translation, rotation, systemTextureRegion, 0, TRADER_SIZE_Y / 2, TRADER_SIZE_Z / 2, TRADER_SIZE_Z * .75f, HAlignment.LEFT, VAlignment.BOTTOM, 0.2f, modelFont, Color.WHITE, "Aligning", TRADER_NAME_COLOR, value, Color.YELLOW);
             } else if (trader.subStatus == TraderSubStatus.TRADER_STATUS_ACCELERATING) {
                 String value = String.format("%.1f m/s", trader.getEngine().getEngineSpeed() * Engine.ENGINE_TO_REALITY_FACTOR);
-                renderEngine.renderEngine25D.label(translation, rotation, systemTextureRegion, 0, 0, TRADER_SIZE_Z / 2, TRADER_SIZE_Z * 1.25f, HAlignment.RIGHT, VAlignment.BOTTOM, 0.2f, modelFont, Color.WHITE, "Accelerating", TRADER_NAME_COLOR, value, Color.YELLOW);
+                renderEngine.renderEngine25D.label(translation, rotation, systemTextureRegion, 0, TRADER_SIZE_Y / 2, TRADER_SIZE_Z / 2, TRADER_SIZE_Z * .75f, HAlignment.RIGHT, VAlignment.BOTTOM, 0.2f, modelFont, Color.WHITE, "Accelerating", TRADER_NAME_COLOR, value, Color.YELLOW);
             } else if (trader.subStatus == TraderSubStatus.TRADER_STATUS_DECELERATING) {
                 String value = String.format("%.1f m/s", trader.getEngine().getEngineSpeed() * Engine.ENGINE_TO_REALITY_FACTOR);
-                renderEngine.renderEngine25D.label(translation, rotation, systemTextureRegion, 0, 0, TRADER_SIZE_Z / 2, TRADER_SIZE_Z * 1.25f, HAlignment.RIGHT, VAlignment.BOTTOM, 0.2f, modelFont, Color.WHITE, "Decelerating", TRADER_NAME_COLOR, value, Color.YELLOW);
+                renderEngine.renderEngine25D.label(translation, rotation, systemTextureRegion, 0, TRADER_SIZE_Y / 2, TRADER_SIZE_Z / 2, TRADER_SIZE_Z * .75f, HAlignment.RIGHT, VAlignment.BOTTOM, 0.2f, modelFont, Color.WHITE, "Decelerating", TRADER_NAME_COLOR, value, Color.YELLOW);
             }
         }
     }

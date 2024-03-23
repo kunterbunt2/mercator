@@ -45,45 +45,44 @@ import java.util.List;
 
 public class Planet3DRenderer extends ObjectRenderer<GameEngine3D> {
 
-    public static final  float CIRCLE_SIZE            = 512;
-    public static final  float CITY_SIZE              = 360;
-    public static final  float LIGHT_HIGHT            = 128;
-    public static final  float MIRROR_Y               = -16;//TODO should use context.getWaterLevel()
-    public static final  float PLANET_2D_SIZE         = 64;
-    public static final  float PLANET_3D_SIZE         = 512;
-    public static final  float PLANET_ATMOSPHARE_SIZE = 9.6f;
-    public static final  int   PLANET_BORDER          = 256;
-    public static final  Color PLANET_COLOR           = new Color(0.5f, 0.5f, 0.8f, 1.0f); // 0xff8888cc;
-    public static final  float PLANET_CORE_SIZE       = Good3DRenderer.GOOD_X * 2;
+    public static final  float                          CIRCLE_SIZE            = 512;
+    public static final  float                          CITY_SIZE              = 360;
+    public static final  float                          LIGHT_HIGHT            = 128;
+    public static final  float                          MIRROR_Y               = -16;//TODO should use context.getWaterLevel()
+    public static final  float                          PLANET_2D_SIZE         = 64;
+    public static final  float                          PLANET_3D_SIZE         = 512;
+    public static final  float                          PLANET_ATMOSPHARE_SIZE = 9.6f;
+    public static final  int                            PLANET_BORDER          = 256;
+    public static final  Color                          PLANET_COLOR           = new Color(0.5f, 0.5f, 0.8f, 1.0f); // 0xff8888cc;
+    public static final  float                          PLANET_CORE_SIZE       = Good3DRenderer.GOOD_X * 2;
     //	public static final float PLANET_DISTANCE = 512/* PLANET_SIZE * 2 */;
-    public static final  float PLANET_HIGHT           = 3000;
-    public static final  int   PLANET_MAX_SHIFT       = Planet.PLANET_DISTANCE / 4;
-    public static final  int   PLANET_SPAN_SPACE      = Planet.PLANET_DISTANCE + PLANET_BORDER;
-    public static final  float SECTOR_HIGHT           = 8;
-    public static final  float SECTOR_SIZE            = Planet.PLANET_DISTANCE - GameEngine3D.SPACE_BETWEEN_OBJECTS;
-    public static final  float SECTOR_Y               = -500;
-    public static final  float WATER_HIGHT            = 1;
-    public static final  float WATER_SIZE             = SECTOR_SIZE;
-    public static final  float WATER_Y                = -10;//TODO should use context.getWaterLevel()
-    private static final Color BRIGHT_WHITE           = new Color(0xfefefeff);
-    private static final int   BUILDING_BLOCK_SIZE    = 13;
-    private static final int   BUILDING_BLOCK_SIZE_2  = BUILDING_BLOCK_SIZE / 2;
-    private static final Color DEEP_YELLOW            = new Color(0xf29917ff);
-    private static final Color FOUNDRY_RED            = new Color(0xf71212ff);
-    private static final Color HAWAIIAN_BLUE          = new Color(0x7892cdff);
-    private static final float LIGHT_DAY_INTENSITY    = 10000f;
-    private static final float LIGHT_NIGHT_INTENSITY  = 10000f;
-    private static final Color ORANGE_YELLOW          = new Color(0xf07e02ff);
-    private static final Color PEACOCK_BLUE           = new Color(0x092f5cff);
-    private static final Color PLANET_NAME_COLOR      = new Color(0xffa500ff);
-
-    private static final Color                          SKY_BLUE          = new Color(0x3980c2ff);
-    private static final float                          TURBINE_SIZE      = 4;
-    private final        List<GameObject<GameEngine3D>> animatedObjects   = new ArrayList<>();
+    public static final  float                          PLANET_HIGHT           = 3000;
+    public static final  int                            PLANET_MAX_SHIFT       = Planet.PLANET_DISTANCE / 4;
+    public static final  int                            PLANET_SPAN_SPACE      = Planet.PLANET_DISTANCE + PLANET_BORDER;
+    public static final  float                          SECTOR_HIGHT           = 8;
+    public static final  float                          SECTOR_SIZE            = Planet.PLANET_DISTANCE - GameEngine3D.SPACE_BETWEEN_OBJECTS;
+    public static final  float                          SECTOR_Y               = -500;
+    public static final  float                          WATER_HIGHT            = 1;
+    public static final  float                          WATER_SIZE             = SECTOR_SIZE;
+    public static final  float                          WATER_Y                = -10;//TODO should use context.getWaterLevel()
+    private static final Color                          BRIGHT_WHITE           = new Color(0xfefefeff);
+    private static final int                            BUILDING_BLOCK_SIZE    = 13;
+    private static final int                            BUILDING_BLOCK_SIZE_2  = BUILDING_BLOCK_SIZE / 2;
+    private static final Color                          DEEP_YELLOW            = new Color(0xf29917ff);
+    private static final Color                          FOUNDRY_RED            = new Color(0xf71212ff);
+    private static final Color                          HAWAIIAN_BLUE          = new Color(0x7892cdff);
+    private static final float                          LIGHT_DAY_INTENSITY    = 10000f;
+    private static final float                          LIGHT_NIGHT_INTENSITY  = 10000f;
+    private static final Color                          ORANGE_YELLOW          = new Color(0xf07e02ff);
+    private static final Color                          PEACOCK_BLUE           = new Color(0x092f5cff);
+    private static final Color                          PLANET_NAME_COLOR      = new Color(0xffa500ff);
+    private static final Color                          SKY_BLUE               = new Color(0x3980c2ff);
+    private static final float                          TURBINE_SIZE           = 4;
+    private final        List<GameObject<GameEngine3D>> animatedObjects        = new ArrayList<>();
     //	private GameObject ganeObject;
     private final        Planet                         planet;
-    private final        List<PointLight>               pointLight        = new ArrayList<>();
-    private final        List<GameObject<GameEngine3D>> pointLightObjects = new ArrayList<>();
+    private final        List<PointLight>               pointLight             = new ArrayList<>();
+    private final        List<GameObject<GameEngine3D>> pointLightObjects      = new ArrayList<>();
     int     index       = 0;
     //	private void renderFactory(Planet planet, Render3DMaster renderMaster) {
     //		{
@@ -170,11 +169,15 @@ public class Planet3DRenderer extends ObjectRenderer<GameEngine3D> {
     }
 
     private void createCity(final RenderEngine3D<GameEngine3D> renderEngine, final float x, final float z) {
-        final int   iteration           = 20;
-        final float scale               = (CITY_SIZE / 2) / (iteration - 1);
-        final float averageBuildingHigh = 16f;
+        final int iteration = 20;
+//        final float scale               = (CITY_SIZE / 2) / (iteration - 1);
+        final float scale               = ((PLANET_3D_SIZE / 3) / 2) / (iteration - 1);
+        final float averageBuildingHigh = 8f;
         //		if (planet.getName().equals("P-0202"))
-        createCity(renderEngine, x, z, iteration, scale, averageBuildingHigh);
+        createCity(renderEngine, x - PLANET_3D_SIZE / 4, z - PLANET_3D_SIZE / 4, iteration, scale, averageBuildingHigh);
+        createCity(renderEngine, x + PLANET_3D_SIZE / 4, z - PLANET_3D_SIZE / 4, iteration, scale, averageBuildingHigh);
+        createCity(renderEngine, x - PLANET_3D_SIZE / 4, z + PLANET_3D_SIZE / 4, iteration, scale, averageBuildingHigh);
+        createCity(renderEngine, x + PLANET_3D_SIZE / 4, z + PLANET_3D_SIZE / 4, iteration, scale, averageBuildingHigh);
     }
 
     private void createCity(final RenderEngine3D<GameEngine3D> renderEngine, final float x, final float z, int iteration, final float scale, float averrageBuildingHight) {

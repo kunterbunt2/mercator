@@ -31,7 +31,7 @@ Then you can start mercator by one of its starting classes
 | a, w, d, s            | move camera (still broken)     |
 | left, up, right, down | move camera (still broken)     |
 | q                     | quit                           |
-| p                     | pause/unpause                  |
+| pause                 | pause/unpause                  |
 | print                 | print screen/                  |
 | v                     | enable/disable vsync           |
 | n                     | enable/disable scene manager   |
@@ -48,13 +48,11 @@ Then you can start mercator by one of its starting classes
 1. Form selecting an item does not show info in the lower pane.
 2. Economy is not stable, all sims eventually die of hunger.
 3. skybox top not oriented correctly (see reflection screenshot)
-4. ship speed must not be influenced by frame rate
-5. simulation advanceintime is triggered every frame.
-6. ensure adding/removing lights does not cause any caching to get dirty.
-7. optimize selected path performance
-8. introduce tts to generate text snippets of atc communication
-9. ships cannot navigate from planet to planet.
-10. Global lighting image generation is not fitting to space theme
-11. tts is not working
+4. simulation advanceintime is triggered every frame.
+5. ensure adding/removing lights does not cause any caching to get dirty.
+6. optimize selected path performance
+7. ships cannot navigate from planet to planet.
+8. Global lighting image generation is not fitting to space theme
+9. tts is not working
 
 

@@ -150,7 +150,7 @@ public class JumpGate3DRenderer extends ObjectRenderer<GameEngine3D> {
 
         instance.instance.transform.setToTranslation(x/* + shift.x*/, y/* + shift.y*/ + JUMP_GATE_DEPTH, z/* + shift.z*//*+sign * Planet3DRenderer.PLANET_SIZE / 2*/);
         instance.instance.transform.rotateTowardTarget(targetVector, Vector3.Y);
-        instance.instance.transform.translate(0, /*-sign **/ -JUMP_GATE_HEIGHT / 2 + 10, -directionLength / 2);
+        instance.instance.transform.translate(0, /*-sign **/ -JUMP_GATE_HEIGHT / 2 - 1, -directionLength / 2);
         instance.instance.transform.scale(JUMP_GATE_WIDTH, JUMP_GATE_HEIGHT - GameEngine3D.SPACE_BETWEEN_OBJECTS, directionLength);
         instance.update();
         renderEngine.addStatic(instance);

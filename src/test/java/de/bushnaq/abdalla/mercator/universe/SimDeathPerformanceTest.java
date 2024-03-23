@@ -24,6 +24,8 @@ import de.bushnaq.abdalla.mercator.universe.event.EventLevel;
 import de.bushnaq.abdalla.mercator.util.TimeUnit;
 import org.apache.commons.math3.util.Precision;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -32,7 +34,8 @@ import static org.junit.jupiter.api.Assertions.fail;
  * 36,00 export has stopped for one year
  */
 public class SimDeathPerformanceTest {
-    private static final int UNIVERSE_SIZE = 10;
+    private static final int    UNIVERSE_SIZE = 10;
+    private final        Logger logger        = LoggerFactory.getLogger(this.getClass());
 
     @Test
     public void testTrading() throws Exception {
@@ -58,15 +61,15 @@ public class SimDeathPerformanceTest {
             }
         }
         for (final Universe universe : universeList) {
-            System.out.printf("-------------------------------------------------------\n");
-            System.out.printf(universe.getName() + "\n");
+            logger.info("-------------------------------------------------------");
+            logger.info(universe.getName());
             //			System.out.printf("%s\n", TimeUnit.toString(universe.deadSimList.get(0).lastTimeAdvancement));
-            System.out.printf("%s\n", Precision.round((universe.simList.size() / (universe.simList.size() + universe.deadSimList.size())) * 100, 0));
+            logger.info(String.format("%s", Precision.round((universe.simList.size() / (universe.simList.size() + universe.deadSimList.size())) * 100, 0)));
             if (universe.deadSimList.size() > 0) universe.deadSimList.get(0).eventManager.print(System.out);
-            System.out.printf("-------------------------------------------------------\n");
+            logger.info("-------------------------------------------------------");
         }
         if (bestUniverse != null) {
-            System.out.println(String.format("Best result was %s in %s", bestUniverse.getName(), TimeUnit.toString(bestTime)));
+            logger.info(String.format("Best result was %s in %s", bestUniverse.getName(), TimeUnit.toString(bestTime)));
             //			if (bestUniverse.deadSimList.size() > 0)
             //				bestUniverse.deadSimList.get(0).eventManager.print(System.out);
         } else {

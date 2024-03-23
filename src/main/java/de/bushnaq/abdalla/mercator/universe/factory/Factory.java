@@ -22,9 +22,10 @@ import de.bushnaq.abdalla.mercator.universe.good.Good;
 import de.bushnaq.abdalla.mercator.universe.good.GoodList;
 import de.bushnaq.abdalla.mercator.universe.planet.Planet;
 import de.bushnaq.abdalla.mercator.universe.sim.Sim;
-import de.bushnaq.abdalla.mercator.universe.tools.Tools;
 import de.bushnaq.abdalla.mercator.util.TimeUnit;
 import de.bushnaq.abdalla.mercator.util.Transaction;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author bushnaq
@@ -40,7 +41,8 @@ import de.bushnaq.abdalla.mercator.util.Transaction;
  * @author abdalla bushnaq
  */
 public class Factory extends ProductionFacility {
-    public GoodList inputGood;
+    private final Logger   logger = LoggerFactory.getLogger(this.getClass());
+    public        GoodList inputGood;
 
     public Factory(final Planet planet, final GoodList inputGood, final Good producedGood) {
         super(planet, producedGood);
@@ -82,7 +84,7 @@ public class Factory extends ProductionFacility {
                 final float profit = (producedGood.getAveragePrice() - engineeringCost - goodCost);
                 if (profit < 0) {
                     status = ProductionFacilityStatus.NO_PROFIT;
-                    Tools.print("Factory %s on planet %s cannot afford to produce.\n", getName(), planet.getName());
+                    logger.info(String.format("Factory %s on planet %s cannot afford to produce.", getName(), planet.getName()));
                     //					Tools.speak(String.format("Factory %s on planet %s cannot afford to produce.\n", getName(), planet.getName()));
                     return;
                 }

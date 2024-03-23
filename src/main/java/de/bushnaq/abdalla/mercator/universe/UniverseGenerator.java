@@ -125,7 +125,6 @@ public class UniverseGenerator {
             }
         }
         logger.info(String.format("%d planets left after assigning sectors.", planetList.size()));
-        logger.info("");
     }
 
     private void connectPlanets(final Planet sourcePlanet, final Planet targetPlanet, final float zSign, final float xSign, final String name) {
@@ -228,7 +227,8 @@ public class UniverseGenerator {
 
     public void generate(GameEngine gameEngine, final Universe universe) throws Exception {
         final long time = System.currentTimeMillis();
-        logger.info(String.format("creating universe of %d light years across within %dms.", universe.size, System.currentTimeMillis() - time));
+        logger.info("---");
+        logger.info(String.format("creating universe of %d light years across.", universe.size));
         size            = universe.size;
         universe.ring   = new Ring(universe);
         randomGenerator = universe.universeRG;
@@ -243,7 +243,9 @@ public class UniverseGenerator {
         landList   = generateLand(planetList, universe);
         traderList = generateTraders(gameEngine);
         // goodList = generateGoods();
-        System.out.printf(" in %dms.\n", System.currentTimeMillis() - time);
+//        System.out.printf(" in %dms.\n", System.currentTimeMillis() - time);
+        logger.info(String.format("generated universe of %d light years across within %dms.", universe.size, System.currentTimeMillis() - time));
+        logger.info("---");
         universe.sectorList = sectorList;
         universe.planetList = planetList;
         universe.traderList = traderList;

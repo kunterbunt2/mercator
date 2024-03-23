@@ -37,7 +37,6 @@ import de.bushnaq.abdalla.mercator.universe.sim.Sim;
 import de.bushnaq.abdalla.mercator.universe.sim.SimList;
 import de.bushnaq.abdalla.mercator.universe.sim.trader.Trader;
 import de.bushnaq.abdalla.mercator.universe.sim.trader.TraderList;
-import de.bushnaq.abdalla.mercator.universe.tools.Tools;
 import de.bushnaq.abdalla.mercator.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -174,7 +173,7 @@ public class Universe {
                             trader.planet.setCredits(trader.planet.getCredits() + trader.getCredits());
                             trader.setCredits(0);
                             traderList.kill(trader);
-                            Tools.print(String.format("%s.%s is dead.\n", trader.planet.getName(), trader.getName()));
+                            logger.warn(String.format("%s.%s is dead.", trader.planet.getName(), trader.getName()));
                             deadTraderList.add(trader);
                             deadTraderStatistics.add(currentTime);
                             // trader.eventManager.print();
@@ -201,7 +200,7 @@ public class Universe {
                 final float newCredits = queryCredits(newYear);
                 if (Math.abs(credits - newCredits) > 1000.0f) {
                     // TODO why are we loosing so much money?
-                    Tools.error("Universe %s at %s credits has changed, expecting %f but is %f", getName(), TimeUnit.toString(currentTime), credits, newCredits);
+                    logger.error(String.format("Universe %s at %s credits has changed, expecting %f but is %f", getName(), TimeUnit.toString(currentTime), credits, newCredits));
                     final float[] after = queryDetailedCredits(false);
                     throw new Exception("credit discrepancy found");
                 }
@@ -210,18 +209,25 @@ public class Universe {
         }
     }
 
-    public void advanceInTime(final long age) throws Exception {
+    public void advanceInTime(final long days) throws Exception {
+        logger.info("---");
         eventManager.eventList.clear();
-        {
-            final long time  = System.currentTimeMillis();
-            final long start = currentTime;
-            while (currentTime < start + age) {
-                advanceInTime();
-            }
-            if (age != 0) {
-                System.out.printf("aged universe %s at %s for %s years in %dms.\n", getName(), TimeUnit.toString(start), TimeUnit.toString(age), System.currentTimeMillis() - time);
-            }
+        final long time  = System.currentTimeMillis();
+        final long start = currentTime;
+        logger.info(String.format("aging universe %s at %s for %s years...", getName(), TimeUnit.toString(start), TimeUnit.toString(days)));
+//        long lastProgress = 0;
+        while (currentTime < start + days * TimeUnit.TICKS_PER_DAY) {
+            advanceInTime();
+            long progress = (currentTime - start) * 100 / (days * TimeUnit.TICKS_PER_DAY);
+//            if (progress - lastProgress > 10) {
+//                logger.info(String.format("%d%%", progress));
+//                lastProgress = progress;
+//            }
         }
+        if (days != 0) {
+            logger.info(String.format("aged universe %s at %s for %s years in %dms.", getName(), TimeUnit.toString(start), TimeUnit.toString(days), System.currentTimeMillis() - time));
+        }
+        logger.info("---");
     }
 
     private void calculateSectorValue() {
@@ -233,10 +239,19 @@ public class Universe {
         //		}
     }
 
-    public void create(GameEngine gameEngine, final int randomGeneratorSeed, final int aUniverseSize, final long age) throws Exception {
-        universeAge = age;
+    /**
+     * Create a random universe aging it to given days
+     *
+     * @param gameEngine
+     * @param randomGeneratorSeed seed to use in the random generator, enables predictability
+     * @param universeSize        size of universe in sectors, universe will be universeSize x universeSize sectors, every sector can have one planet
+     * @param days                days of universe in days
+     * @throws Exception
+     */
+    public void create(GameEngine gameEngine, final int randomGeneratorSeed, final int universeSize, final long days) throws Exception {
+        universeAge = days;
         {
-            size = aUniverseSize;
+            size = universeSize;
             // EventLogManager.Clear();
             // eventLogManager.add( "UNN", Level.FINE, "<<<<<<< Starting Merkator v" +
             // APPLICATION_VERSION_STRING + " >>>>>>>" );
@@ -252,7 +267,7 @@ public class Universe {
         // advanceInTime( true );
         // currentTime = 0;
         useFixedDelta = true;
-        advanceInTime(age);
+        advanceInTime(days);
     }
 
     public void dispose() {
@@ -422,17 +437,17 @@ public class Universe {
         final float[] delta = new float[3];
         for (final Planet planet : planetList) {
             if (print)
-                System.out.printf("planet %s %f\n", planet.getName(), planet.getCredits());
+                logger.info(String.format("planet %s %f", planet.getName(), planet.getCredits()));
             delta[0] += planet.getCredits();
         }
         for (final Sim trader : traderList) {
             if (print)
-                System.out.printf("trader %s %f\n", trader.getName(), trader.getCredits());
+                logger.info(String.format("trader %s %f", trader.getName(), trader.getCredits()));
             delta[1] += trader.getCredits();
         }
         for (final Sim sim : simList) {
             if (print)
-                System.out.printf("sim %s %f\n", sim.getName(), sim.getCredits());
+                logger.info(String.format("sim %s %f", sim.getName(), sim.getCredits()));
             delta[2] += sim.getCredits();
         }
         return delta;

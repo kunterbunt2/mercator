@@ -17,14 +17,16 @@
 package de.bushnaq.abdalla.mercator.universe.sim;
 
 import de.bushnaq.abdalla.mercator.universe.planet.Planet;
-import de.bushnaq.abdalla.mercator.universe.tools.Tools;
 import de.bushnaq.abdalla.mercator.util.MercatorRandomGenerator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Vector;
 
 public class SimList extends Vector<Sim> {
-    private static final long serialVersionUID = 3312851264723041047L;
-    Planet planet;
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
+    private final Planet planet;
+
 
     public SimList(final Planet planet) {
         this.planet = planet;
@@ -80,7 +82,7 @@ public class SimList extends Vector<Sim> {
     }
 
     public void kill(final Sim sim) {
-        Tools.print(String.format("%s.%s is dead.\n", sim.planet.getName(), sim.getName()));
+        logger.info(String.format("%s.%s is dead.\n", sim.planet.getName(), sim.getName()));
         planet.remove(sim);
         remove(sim);
     }

@@ -266,7 +266,7 @@ public class GameEngine2D implements ScreenListener, ApplicationListener, InputP
 
     public void createCamera() {
         camera = new OrthographicCamera(300, 300 * (600 / 800));
-        Planet planet = universe.findBusyCenterPlanet();
+        Planet planet = universe.planetList.findBusyCenterPlanet();
         if (planet == null) planet = universe.planetList.get(0);
         camera.position.set(planet.x, planet.z, 0);
         camera.zoom = 1.0f;

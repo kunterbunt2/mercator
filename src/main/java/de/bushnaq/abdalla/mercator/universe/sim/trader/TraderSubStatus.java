@@ -16,6 +16,13 @@
 
 package de.bushnaq.abdalla.mercator.universe.sim.trader;
 
+/**
+ * subStatus should change in following order
+ * TRADER_STATUS_ALIGNING
+ * TRADER_STATUS_WAITING_FOR_WAYPOINT
+ * TRADER_STATUS_ACCELERATING
+ * TRADER_STATUS_DECELERATING
+ */
 public enum TraderSubStatus {
     TRADER_STATUS_NA("N/A"),//
     TRADER_STATUS_ALIGNING("Maneuvering"),//

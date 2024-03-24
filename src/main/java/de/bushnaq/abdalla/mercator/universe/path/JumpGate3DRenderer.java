@@ -19,7 +19,6 @@ package de.bushnaq.abdalla.mercator.universe.path;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
-import com.badlogic.gdx.graphics.g2d.PolygonSpriteBatch;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
@@ -159,7 +158,7 @@ public class JumpGate3DRenderer extends ObjectRenderer<GameEngine3D> {
         instanceOfSelected.instance.transform.setToTranslation(x/* + shift.x*/, y/* + shift.y*/ + JUMP_GATE_DEPTH, z/* + shift.z*//*+sign * Planet3DRenderer.PLANET_SIZE / 2*/);
         instanceOfSelected.instance.transform.rotateTowardTarget(targetVector, Vector3.Y);
         instanceOfSelected.instance.transform.translate(0, /*-sign **/ Trader3DRenderer.TRADER_SIZE_Y, -directionLength / 2);
-        instanceOfSelected.instance.transform.scale(JUMP_GATE_WIDTH / 2, 1, directionLength);
+        instanceOfSelected.instance.transform.scale(JUMP_GATE_WIDTH / 8, .2f, directionLength);
         instanceOfSelected.update();
 //        renderEngine.addStatic(instance2);
     }
@@ -225,8 +224,8 @@ public class JumpGate3DRenderer extends ObjectRenderer<GameEngine3D> {
         final float y = jumpGate.target.y + JUMP_GATE_HEIGHT / 2 + 10;
         final float z = jumpGate.target.z;
         //draw text
-        final PolygonSpriteBatch batch = renderEngine.renderEngine2D.batch;
-        final BitmapFont         font  = renderEngine.getGameEngine().getAtlasManager().modelFont;
+//        final PolygonSpriteBatch batch = renderEngine.renderEngine2D.batch;
+        final BitmapFont font = renderEngine.getGameEngine().getAtlasManager().modelFont;
         {
             final Matrix4     m        = new Matrix4();
             final float       fontSize = font.getLineHeight();
@@ -243,9 +242,9 @@ public class JumpGate3DRenderer extends ObjectRenderer<GameEngine3D> {
                 m.scale(scaling, scaling, 1f);
 
             }
-            batch.setTransformMatrix(m);
-            font.setColor(PATH_NAME_COLOR);
-            font.draw(batch, text, 0, 0);
+            renderEngine.renderEngine25D.setTransformMatrix(m);
+//            font.setColor(PATH_NAME_COLOR);
+            renderEngine.renderEngine25D.text(0, 0, font, Color.BLACK, PATH_NAME_COLOR, text);
         }
     }
 }

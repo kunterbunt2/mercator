@@ -16,8 +16,9 @@
 
 package de.bushnaq.abdalla.mercator.audio.synthesis;
 
-import de.bushnaq.abdalla.engine.audio.synthesis.AbstractSynthesizerFactory;
+import de.bushnaq.abdalla.engine.audio.AudioEngine;
 import de.bushnaq.abdalla.engine.audio.OpenAlException;
+import de.bushnaq.abdalla.engine.audio.synthesis.AbstractSynthesizerFactory;
 
 public class MercatorSynthesizerFactory extends AbstractSynthesizerFactory<MercatorSynthesizer> {
 
@@ -27,7 +28,7 @@ public class MercatorSynthesizerFactory extends AbstractSynthesizerFactory<Merca
     }
 
     @Override
-    public MercatorSynthesizer uncacheSynth() throws OpenAlException {
+    public MercatorSynthesizer uncacheSynth(AudioEngine audioEngine) throws OpenAlException {
         return new MercatorSynthesizer();
     }
 

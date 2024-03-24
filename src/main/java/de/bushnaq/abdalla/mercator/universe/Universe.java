@@ -274,22 +274,6 @@ public class Universe {
     }
 
 
-    public Planet findBusyCenterPlanet() {
-        Planet planet      = null;
-        float  minDistance = Float.MAX_VALUE;
-        for (final Planet p : planetList) {
-            if (p.pathList.size() > 3) {
-                final float distance = p.x * p.x + p.z * p.z;
-                if (distance < minDistance) {
-                    minDistance = distance;
-                    planet      = p;
-                }
-            }
-        }
-        return planet;
-    }
-
-
     public GraphicsDimentions getGraphicsDimentions() {
         return graphicsDimentions;
     }

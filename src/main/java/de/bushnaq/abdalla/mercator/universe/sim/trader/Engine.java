@@ -125,24 +125,27 @@ public class Engine {
 
     void calculateEngineSpeed(float timeDelta) {
         // are we paused?
-        if (trader.subStatus == TraderSubStatus.TRADER_STATUS_ACCELERATING || trader.subStatus == TraderSubStatus.TRADER_STATUS_DECELERATING) {
+//        if (trader.subStatus == TraderSubStatus.TRADER_STATUS_ACCELERATING || trader.subStatus == TraderSubStatus.TRADER_STATUS_DECELERATING)
+        {
             if (trader.targetWaypoint == null || trader.destinationWaypointDistance == 0) {
                 engineSpeed = MIN_ENGINE_SPEED;
+                if (trader.getName().equals("T-33"))
+                    logger.info("*** min engine speed");
             } else {
                 float acceleration = calculateAcceleration();
                 float progress     = trader.destinationWaypointDistanceProgress / trader.destinationWaypointDistance;
                 if (progress < 0.5) {
                     //accelerating
-                    if (trader.subStatus == TraderSubStatus.TRADER_STATUS_DECELERATING)
-                        trader.setSubStatus(TraderSubStatus.TRADER_STATUS_ACCELERATING);
+//                    if (trader.subStatus == TraderSubStatus.TRADER_STATUS_DECELERATING)
+                    trader.setSubStatus(TraderSubStatus.TRADER_STATUS_ACCELERATING);
                     engineSpeed = Math.min(engineSpeed + acceleration * timeDelta * 10, MAX_ENGINE_SPEED);
-//                    if (trader.getName().equals("T-1"))
+//                    if (trader.getName().equals("T-33"))
 //                        logger.info("engineSpeed=" + engineSpeed + " acceleration=" + acceleration);
-//                    if (getName().equals("T-25")) logger.info("engine acceleration currentMaxEngineSpeed=" + engineSpeed);
+//                    if (getName().equals("T-33")) logger.info("engine acceleration currentMaxEngineSpeed=" + engineSpeed);
                 } else /*if (destinationPlanetDistance - destinationPlanetDistanceProgress <= ACCELLERATION_DISTANCE)*/ {
                     //deceleration
-                    if (trader.subStatus == TraderSubStatus.TRADER_STATUS_ACCELERATING)
-                        trader.setSubStatus(TraderSubStatus.TRADER_STATUS_DECELERATING);
+//                    if (trader.subStatus == TraderSubStatus.TRADER_STATUS_ACCELERATING)
+                    trader.setSubStatus(TraderSubStatus.TRADER_STATUS_DECELERATING);
                     engineSpeed = Math.max(engineSpeed - acceleration * timeDelta * 10, MIN_ENGINE_SPEED);
 //                    if (getName().equals("T-25")) logger.info("engine deceleration currentMaxEngineSpeed=" + engineSpeed);
                 }

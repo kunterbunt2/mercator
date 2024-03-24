@@ -92,8 +92,8 @@ public class Good3DRenderer extends ObjectRenderer<GameEngine3D> {
 
     public static GameObject<GameEngine3D> instanciateGoodGameObject(final Good good, final RenderEngine3D<GameEngine3D> renderEngine) {
         GameObject<GameEngine3D> scene     = null;
-        final Material           material1 = renderEngine.getGameEngine().assetManager.goodContainer.materials.get(0);
-        scene = new GameObject<GameEngine3D>(new ModelInstanceHack(renderEngine.getGameEngine().assetManager.goodContainer), good);
+        final Material           material1 = renderEngine.getGameEngine().assetManager.goodContainer.scene.model.materials.get(0);
+        scene = new GameObject<GameEngine3D>(new ModelInstanceHack(renderEngine.getGameEngine().assetManager.goodContainer.scene.model), good);
         //TODO reuse instances
         final Material            material2 = scene.instance.materials.get(0);
         final Iterator<Attribute> i         = material1.iterator();

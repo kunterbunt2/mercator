@@ -30,8 +30,10 @@ public class TraderCommunicationPartner implements CommunicationPartner {
     private AudioEngine audioEngine;
     private TTSPlayer   ttsSynth;
 
-    public TraderCommunicationPartner(Trader trader) {
-        this.trader = trader;
+    public TraderCommunicationPartner(AudioEngine audioEngine, Trader trader) {
+        this.trader      = trader;
+        this.audioEngine = audioEngine;
+        ttsSynth         = new TTSPlayer(audioEngine);
     }
 
     @Override
@@ -47,7 +49,7 @@ public class TraderCommunicationPartner implements CommunicationPartner {
     @Override
     public void radio(RadioMessage message) {
         radioMessages.add(message);
-        say(message.message);
+//        say(message.message);
     }
 
     private void handleRadioMessage() {
@@ -59,11 +61,13 @@ public class TraderCommunicationPartner implements CommunicationPartner {
     }
 
     public void informControlTower() {
-        String string = String.format(RadioTTS.REQUESTING_APPROVAL_TO_DOCK_01, getName(), trader.destinationPlanet.getName());
-        say(string);
-        RadioMessage rm = new RadioMessage(trader.currentTime, this, trader.destinationPlanet.communicationPartner, RadioMessageId.REQUEST_TO_DOCK, string);
-        say(rm.message);
-        trader.destinationPlanet.communicationPartner.radio(rm);
+        if (audioEngine.radioTTS != null) {
+            String string = String.format(audioEngine.radioTTS.resolveString(RadioTTS.REQUESTING_APPROVAL_TO_DOCK_01), getName(), trader.destinationPlanet.getName());
+            say(string);
+            RadioMessage rm = new RadioMessage(trader.currentTime, this, trader.destinationPlanet.communicationPartner, RadioMessageId.REQUEST_TO_DOCK, string);
+//        say(rm.message);
+            trader.destinationPlanet.communicationPartner.radio(rm);// send to partner
+        }
     }
 
     public void say(String msg) {

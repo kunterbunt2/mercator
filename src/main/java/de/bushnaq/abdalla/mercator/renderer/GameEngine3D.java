@@ -297,8 +297,9 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
     }
 
     private void createCamera() throws Exception {
-        camera = new MovingCamera(67f, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-        Planet planet = universe.findBusyCenterPlanet();
+        camera = new MovingCamera(26f, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        Planet planet = universe.planetList.findBusyCenterPlanet();
+//        Planet planet = universe.planetList.findByName("P-130");
         if (planet == null && !universe.planetList.isEmpty()) planet = universe.planetList.get(0);
         Vector3 lookat;
         if (planet != null) lookat = new Vector3(planet.x, 0, planet.z);

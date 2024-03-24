@@ -48,6 +48,29 @@ public class PlanetList extends Vector<Planet> {
         }
     }
 
+    public Planet findBusyCenterPlanet() {
+        Planet planet      = null;
+        float  minDistance = Float.MAX_VALUE;
+        for (final Planet p : this) {
+            if (p.pathList.size() > 3) {
+                final float distance = p.x * p.x + p.z * p.z;
+                if (distance < minDistance) {
+                    minDistance = distance;
+                    planet      = p;
+                }
+            }
+        }
+        return planet;
+    }
+
+    public Planet findByName(String name) {
+        for (final Planet p : this) {
+            if (p.getName().equals(name))
+                return p;
+        }
+        return null;
+    }
+
     public int getIndex(final Planet planet) {
         int index = 0;
         for (final Planet p : this) {

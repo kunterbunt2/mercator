@@ -190,12 +190,12 @@ public class ZoomingCameraInputController extends CameraInputController {
             if (amount < 0 && zoomIndex < zoomFactors.length - 1 && progress == 0f) {
 //                zoomIndex++;
                 targetZoomIndex = zoomIndex + 1;
-                logger.info(String.format("targetZoomIndex=%d", targetZoomIndex));
+//                logger.info(String.format("targetZoomIndex=%d", targetZoomIndex));
 //                zoomCamera();
             } else if (amount > 0 && zoomIndex > 0 && progress == 0f) {
 //                zoomIndex--;
                 targetZoomIndex = zoomIndex - 1;
-                logger.info(String.format("targetZoomIndex=%d", targetZoomIndex));
+//                logger.info(String.format("targetZoomIndex=%d", targetZoomIndex));
 //                zoomCamera();
             }
 //            myCamera.translate(0, -amount * pinchZoomFactor, 0);

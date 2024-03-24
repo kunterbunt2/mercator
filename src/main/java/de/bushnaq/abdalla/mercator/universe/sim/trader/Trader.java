@@ -51,7 +51,7 @@ public class Trader extends Sim {
     private final        Logger                     logger                              = LoggerFactory.getLogger(this.getClass());
     private final        ManeuveringSystem          maneuveringSystem                   = new ManeuveringSystem(this);
     private final        int                        numberOfWaypointsBetweenTraders     = 1;
-    public               TraderCommunicationPartner communicationPartner                = new TraderCommunicationPartner(this);
+    public               TraderCommunicationPartner communicationPartner;
     public               long                       currentTime                         = 0;
     public               Planet                     destinationPlanet                   = null; // ---The planet we want to reach ultimately
     public               float                      destinationPlanetDistanceProgress   = 0;
@@ -151,6 +151,7 @@ public class Trader extends Sim {
                     destinationPlanetDistance = planet.queryDistance(waypointList);
                     destinationWaypointIndex  = 1;
                     setSubStatus(TraderSubStatus.TRADER_STATUS_ALIGNING);
+                    maneuveringSystem.startRotation();
                     planet.universe.eventManager.add(EventLevel.trace, currentTime, this, String.format("departing %s to reach %s", planet.getName(), destinationPlanet.city.getName()));
                     //						if (pathIsClear()) {
                     //							sourceWaypoint.trader = this;
@@ -205,6 +206,7 @@ public class Trader extends Sim {
                     destinationWaypointDistance = 0;
                     destinationPlanetDistance   = planet.queryDistance(waypointList);
                     setSubStatus(TraderSubStatus.TRADER_STATUS_ALIGNING);
+                    maneuveringSystem.startRotation();
                     planet.universe.eventManager.add(EventLevel.trace, currentTime, this, String.format("departing %s to reach %s", planet.getName(), destinationPlanet.city.getName()));
                     //						if (pathIsClear()) {
                     //							sourceWaypoint.trader = this;
@@ -231,17 +233,22 @@ public class Trader extends Sim {
         return false;
     }
 
-    private void alignToWaypoint() {
-        if (subStatus == TraderSubStatus.TRADER_STATUS_ALIGNING) {
-            if (destinationWaypointIndex < waypointList.size()) {
-                maneuveringSystem.startRotation();
-                if (maneuveringSystem.reachedTarget()) {
-                    maneuveringSystem.endRotation();
-                    setSubStatus(TraderSubStatus.TRADER_STATUS_WAITING_FOR_WAYPOINT);
-                }
-            }
-        }
-    }
+//    private void alignToWaypoint() {
+//        if (subStatus == TraderSubStatus.TRADER_STATUS_ALIGNING) {
+//            if (destinationWaypointIndex < waypointList.size()) {
+//                maneuveringSystem.startRotation();
+//            } else {
+//                //destinationWaypointIndex is always looking one waypoint ahead
+//                if (getName().equals("T-33"))
+//                    logger.info("cannot startRotation");
+//            }
+////            } else
+//            {
+////                if (getName().equals("T-34"))
+////                    logger.info(String.format("destinationWaypointIndex=%d waypointList.size()=%d", destinationWaypointIndex, waypointList.size()));
+//            }
+//        }
+//    }
 
     public void buy(final long currentTime, final MercatorRandomGenerator randomGenerator) {
         // ---Buy
@@ -290,10 +297,104 @@ public class Trader extends Sim {
         return planet.universe.traderCreditBuffer;
     }
 
-    float clamp(final float value, final float min, final float max) {
-        if (value > max) return max;
-        if (value < min) return min;
-        return value;
+    private void checkArriving(long currentTime, MercatorRandomGenerator randomGenerator) {
+        if (destinationWaypointDistanceProgress >= destinationWaypointDistance && TimeUnit.isInt(currentTime)/* ( ( currentTime - (int)currentTime ) == 0.0f ) */) {
+            //we reached a waypoint
+            //rotate towards next waypoint
+            //if next waypoint is still not a city?
+//            if (pathIsClear())
+            {
+                if (getSubStatus() != TraderSubStatus.TRADER_STATUS_WAITING_FOR_WAYPOINT) {
+                    //					if (sourceWaypoint.getName().equals(targetWaypoint.getName())) {
+                    //						System.out.println(sourceWaypoint.getName());
+                    //					}
+                    float d = 0;
+                    for (int i = 1; i < destinationWaypointIndex - 1; i++) {
+                        final WaypointProxy sw = waypointList.get(i - 1);
+                        final WaypointProxy tw = waypointList.get(i);
+                        d += sw.waypoint.queryDistance(tw.waypoint);
+                    }
+                    planet.universe.eventManager.add(EventLevel.trace, currentTime, this, String.format("reached waypoint %s %f %f %f", targetWaypoint.getName(), d + destinationWaypointDistanceProgress, destinationPlanetDistanceProgress, destinationPlanetDistance));
+                } else {
+                    planet.universe.eventManager.add(EventLevel.trace, currentTime, this, String.format("waiting for waypoint %s to become clear", targetWaypoint.getName()));
+                }
+                if (targetWaypoint.city == null) {
+                    if (getName().equals("T-33"))
+                        logger.info(String.format("reached waypoint %s %s %s", targetWaypoint.name, traderStatus.getName(), subStatus.getName()));
+                    // we reached the next waypoint
+                    if (sourceWaypoint != null) {
+                        sourceWaypoint.trader = null;//free
+                    }
+                    sourceWaypoint = targetWaypoint;
+                    reserveNextWaypoints();
+                    //					if (sourceWaypoint.getName().equals(targetWaypoint.getName())) {
+                    //						System.out.println(sourceWaypoint.getName());
+                    //					}
+                    destinationWaypointIndex++;
+                    targetWaypoint                      = waypointList.get(destinationWaypointIndex).waypoint;
+                    destinationWaypointDistanceProgress = destinationWaypointDistanceProgress - destinationWaypointDistance;
+                    destinationWaypointDistance         = sourceWaypoint.queryDistance(targetWaypoint);
+                    setSubStatus(TraderSubStatus.TRADER_STATUS_ALIGNING);
+                    if (getName().equals("T-33"))
+                        logger.info(String.format("startRotation"));
+                    maneuveringSystem.startRotation();
+                } else {
+                    //we reached a city
+                    if (getName().equals("T-33"))
+                        logger.info(String.format("reached city %s %s %s", targetWaypoint.name, traderStatus.getName(), subStatus.getName()));
+                    if (sourceWaypoint != null) freePrevWaypoints();
+                    // ---Pay for the jump
+                    final float costOfJump = costOfDistance(destinationWaypointDistance);
+                    setCredits(getCredits() - costOfJump);
+                    // TODO pay the planet
+                    //					targetWaypoint = waypointList.get(destinationWaypointIndex).waypoint;
+                    targetWaypoint.city.setCredits(targetWaypoint.city.getCredits() + costOfJump);
+                    eventManager.add(currentTime, getVolume(), SimEventType.payJump, getCredits(), String.format("and payed %5.2f to %s.", costOfJump, planet.getName()));
+                    // ---we reached a new port
+                    destinationWaypointDistance         = 0;
+                    destinationWaypointDistanceProgress = 0;
+                    planet.traderList.remove(this);
+                    planet = (Planet) targetWaypoint;
+                    planet.traderList.add(this);
+                    planet.universe.eventManager.add(EventLevel.trace, currentTime, this, String.format("arrived at %s", targetWaypoint.city.getName()));
+                    if (targetWaypoint == destinationPlanet) {
+                        destinationPlanetDistanceProgress = 0;
+                        destinationWaypointIndex          = 0;
+                        // ---We reached our destination
+                        destinationPlanet = null;
+                        targetWaypoint    = null;
+                        if (getGoodList().queryAmount() != 0) {
+                            sell(currentTime, randomGenerator);
+                        } else {
+                            buy(currentTime, randomGenerator);
+                        }
+                    } else {
+                        //we reached some city on the way
+                        // ---this is a multi city trip. Plan the next part of the trip
+                        //						destinationWaypointIndex++;
+                        sourceWaypoint = targetWaypoint;
+                        //						destinationWaypointIndex++;
+                        targetWaypoint = waypointList.get(destinationWaypointIndex).waypoint;
+                        destinationWaypointIndex++;
+                        reserveNextWaypoints();
+                        destinationWaypointDistance = sourceWaypoint.queryDistance(targetWaypoint);
+                        if (pathIsClear()) {
+                            //							if (sourceWaypoint.getName().equals(targetWaypoint.getName())) {
+                            //								System.out.println(sourceWaypoint.getName());
+                            //							}
+                            //							if (targetWaypoint != null) {
+                            //							} else {
+                            //							}
+                        } else {
+                            setSubStatus(TraderSubStatus.TRADER_STATUS_WAITING_FOR_WAYPOINT);
+                        }
+                    }
+                }
+            }
+//            else {
+//                setSubStatus(TraderSubStatus.TRADER_STATUS_WAITING_FOR_WAYPOINT);
+//            }
+        }
     }
 
 //    float calculateAcceleration() {
@@ -349,8 +450,10 @@ public class Trader extends Sim {
 //        }
 //    }
 
-    public float costOfDistance(final float distance) {
-        return JUMP_UNIT_COST * distance;
+    float clamp(final float value, final float min, final float max) {
+        if (value > max) return max;
+        if (value < min) return min;
+        return value;
     }
 
 //    float calculateRotationAcceleration() {
@@ -381,9 +484,14 @@ public class Trader extends Sim {
 //        }
 //    }
 
+    public float costOfDistance(final float distance) {
+        return JUMP_UNIT_COST * distance;
+    }
+
     public void create(GameEngine gameEngine, final MercatorRandomGenerator randomGenerator) {
-        goodSpace       = Trader.MIN_GOOD_SPACE + randomGenerator.nextInt(0, this, Trader.MAX_GOOD_SPACE - Trader.MIN_GOOD_SPACE);
-        portRestingTime = randomGenerator.nextInt(0, this, Trader.TRADER_MAX_PORT_REST_TIME) * TimeUnit.TICKS_PER_DAY;
+        goodSpace            = Trader.MIN_GOOD_SPACE + randomGenerator.nextInt(0, this, Trader.MAX_GOOD_SPACE - Trader.MIN_GOOD_SPACE);
+        portRestingTime      = randomGenerator.nextInt(0, this, Trader.TRADER_MAX_PORT_REST_TIME) * TimeUnit.TICKS_PER_DAY;
+        communicationPartner = new TraderCommunicationPartner(gameEngine.getAudioEngine(), this);
     }
 
     private void extractWaypointList() {
@@ -402,14 +510,14 @@ public class Trader extends Sim {
         sourceWaypoint.trader = null;//free
     }
 
-    public Engine getEngine() {
-        return engine;
-    }
-
 //    public float getEngineSpeed() {
 //        //max engine speed depends on how much goods we are carrying.
 //        return engineSpeed;
 //    }
+
+    public Engine getEngine() {
+        return engine;
+    }
 
     public ManeuveringSystem getManeuveringSystem() {
         return maneuveringSystem;
@@ -419,16 +527,16 @@ public class Trader extends Sim {
         return subStatus;
     }
 
-    public ManeuveringSystem getThrusters() {
-        return maneuveringSystem;
-    }
-
 //    private void normalizeRotation() {
 //        if (rotation < 0)
 //            rotation += 360;
 //        if (rotation > 360)
 //            rotation -= 360;
 //    }
+
+    public ManeuveringSystem getThrusters() {
+        return maneuveringSystem;
+    }
 
     public void markJumpGateUsage() {
         // ---We are moving on a link
@@ -587,101 +695,32 @@ public class Trader extends Sim {
         if (timeDelta == 0) return;
 //        if (getName().equals("T-25"))
 //            logger.info("timeDelta=" + timeDelta);
-        if (getSubStatus() == TraderSubStatus.TRADER_STATUS_ALIGNING) {
-            //align to waypoint
-            alignToWaypoint();
-        } else {
-            if (pathIsClear()) setSubStatus(TraderSubStatus.TRADER_STATUS_ACCELERATING);
-            else setSubStatus(TraderSubStatus.TRADER_STATUS_WAITING_FOR_WAYPOINT);
-            if (destinationWaypointDistanceProgress >= destinationWaypointDistance && TimeUnit.isInt(currentTime)/* ( ( currentTime - (int)currentTime ) == 0.0f ) */) {
-                //we reached a waypoint
-                //rotate towards next waypoint
-                //if next waypoint is still not a city?
+        switch (getSubStatus()) {
+            case TRADER_STATUS_ALIGNING:
+                //wait until we have aligned ourselves
+                break;
+            case TRADER_STATUS_WAITING_FOR_WAYPOINT:
                 if (pathIsClear()) {
-                    if (getSubStatus() != TraderSubStatus.TRADER_STATUS_WAITING_FOR_WAYPOINT) {
-                        //					if (sourceWaypoint.getName().equals(targetWaypoint.getName())) {
-                        //						System.out.println(sourceWaypoint.getName());
-                        //					}
-                        float d = 0;
-                        for (int i = 1; i < destinationWaypointIndex - 1; i++) {
-                            final WaypointProxy sw = waypointList.get(i - 1);
-                            final WaypointProxy tw = waypointList.get(i);
-                            d += sw.waypoint.queryDistance(tw.waypoint);
-                        }
-                        planet.universe.eventManager.add(EventLevel.trace, currentTime, this, String.format("reached waypoint %s %f %f %f", targetWaypoint.getName(), d + destinationWaypointDistanceProgress, destinationPlanetDistanceProgress, destinationPlanetDistance));
-                    } else {
-                        planet.universe.eventManager.add(EventLevel.trace, currentTime, this, String.format("waiting for waypoint %s to become clear", targetWaypoint.getName()));
-                    }
-                    if (targetWaypoint.city == null) {
-                        // we reached the next waypoint
-                        if (sourceWaypoint != null) {
-                            sourceWaypoint.trader = null;//free
-                        }
-                        sourceWaypoint = targetWaypoint;
-                        reserveNextWaypoints();
-                        targetWaypoint = waypointList.get(destinationWaypointIndex).waypoint;
-                        //					if (sourceWaypoint.getName().equals(targetWaypoint.getName())) {
-                        //						System.out.println(sourceWaypoint.getName());
-                        //					}
-                        destinationWaypointIndex++;
-                        destinationWaypointDistanceProgress = destinationWaypointDistanceProgress - destinationWaypointDistance;
-                        destinationWaypointDistance         = sourceWaypoint.queryDistance(targetWaypoint);
-                        setSubStatus(TraderSubStatus.TRADER_STATUS_ALIGNING);
-                    } else {
-                        //we reached a city
-                        if (sourceWaypoint != null) freePrevWaypoints();
-                        // ---Pay for the jump
-                        final float costOfJump = costOfDistance(destinationWaypointDistance);
-                        setCredits(getCredits() - costOfJump);
-                        // TODO pay the planet
-                        //					targetWaypoint = waypointList.get(destinationWaypointIndex).waypoint;
-                        targetWaypoint.city.setCredits(targetWaypoint.city.getCredits() + costOfJump);
-                        eventManager.add(currentTime, getVolume(), SimEventType.payJump, getCredits(), String.format("and payed %5.2f to %s.", costOfJump, planet.getName()));
-                        // ---we reached a new port
-                        destinationWaypointDistance         = 0;
-                        destinationWaypointDistanceProgress = 0;
-                        planet.traderList.remove(this);
-                        planet = (Planet) targetWaypoint;
-                        planet.traderList.add(this);
-                        planet.universe.eventManager.add(EventLevel.trace, currentTime, this, String.format("arrived at %s", targetWaypoint.city.getName()));
-                        if (targetWaypoint == destinationPlanet) {
-                            destinationPlanetDistanceProgress = 0;
-                            destinationWaypointIndex          = 0;
-                            // ---We reached our destination
-                            destinationPlanet = null;
-                            targetWaypoint    = null;
-                            if (getGoodList().queryAmount() != 0) {
-                                sell(currentTime, randomGenerator);
-                            } else {
-                                buy(currentTime, randomGenerator);
-                            }
-                        } else {
-                            //we reached some city on the way
-                            // ---this is a multi city trip. Plan the next part of the trip
-                            //						destinationWaypointIndex++;
-                            sourceWaypoint = targetWaypoint;
-                            //						destinationWaypointIndex++;
-                            targetWaypoint = waypointList.get(destinationWaypointIndex).waypoint;
-                            destinationWaypointIndex++;
-                            reserveNextWaypoints();
-                            destinationWaypointDistance = sourceWaypoint.queryDistance(targetWaypoint);
-                            if (pathIsClear()) {
-                                //							if (sourceWaypoint.getName().equals(targetWaypoint.getName())) {
-                                //								System.out.println(sourceWaypoint.getName());
-                                //							}
-                                //							if (targetWaypoint != null) {
-                                //							} else {
-                                //							}
-                            } else {
-                                setSubStatus(TraderSubStatus.TRADER_STATUS_WAITING_FOR_WAYPOINT);
-                            }
-                        }
-                    }
-                } else {
-                    setSubStatus(TraderSubStatus.TRADER_STATUS_WAITING_FOR_WAYPOINT);
+                    if (getName().equals("T-33"))
+                        logger.info(String.format("**** we are cleared for next waypoint %s", targetWaypoint.name));
+                    setSubStatus(TraderSubStatus.TRADER_STATUS_ACCELERATING);
                 }
+                break;
+            case TRADER_STATUS_ACCELERATING:
+                //wait until we start decelerating
+                break;
+            case TRADER_STATUS_DECELERATING: {
+                checkArriving(currentTime, randomGenerator);
             }
+            break;
         }
+//        if (getSubStatus() == TraderSubStatus.TRADER_STATUS_ALIGNING) {
+//        } else {
+//            if (subStatus == TraderSubStatus.TRADER_STATUS_WAITING_FOR_WAYPOINT) {
+//                if (pathIsClear())
+//                    setSubStatus(TraderSubStatus.TRADER_STATUS_ACCELERATING);
+//            }
+//        }
     }
 
     private void reserveNextWaypoints() {

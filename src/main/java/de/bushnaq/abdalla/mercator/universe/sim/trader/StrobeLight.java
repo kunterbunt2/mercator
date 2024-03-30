@@ -62,7 +62,7 @@ public class StrobeLight {
                     resetLightOffTimer();
                     lightMode = 1;//wait for light to go on
                     renderEngine.remove(pointLight, true);
-//                    if (trader.getName().equals("T-25")) {
+//                    if (Debug.isFilter(trader.getName())) {
 //                        logger.info("lights off");
 //                    }
                 }
@@ -73,7 +73,7 @@ public class StrobeLight {
                     final float intensity = (float) Math.abs(Math.sin(PY2 * (lightTimer / LIGHT_ON_DURATION)) * LIGHT_MAX_INTENSITY);
                     pointLight.setIntensity(intensity);
                     renderEngine.add(pointLight, true);
-//                    if (trader.getName().equals("T-25")) {
+//                    if (Debug.isFilter(trader.getName())) {
 //                        logger.info("lights on");
 //                    }
                 }

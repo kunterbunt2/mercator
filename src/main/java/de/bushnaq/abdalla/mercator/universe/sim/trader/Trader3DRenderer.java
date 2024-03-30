@@ -566,13 +566,13 @@ public class Trader3DRenderer extends ObjectRenderer<GameEngine3D> {
             if (update) {
                 synth.setPositionAndVelocity(position, velocity);
                 trader.communicationPartner.ttsPlayer.setPositionAndVelocity(position, velocity);
-                //				if (trader.getName().equals("T-6"))
+                //				if (Debug.isFilter(trader.getName()))
                 //					logger.info(String.format("%f %f  %f %f  %f %f", lastVelocity[0], velocity[0], lastVelocity[1], velocity[1], lastVelocity[2], velocity[2]));
                 for (int i = 0; i < 3; i++)
                      lastVelocity[i] = velocity[i];
             }
 
-            //			if (trader.getName().equals("T-6"))
+            //			if (Debug.isFilter(trader.getName()))
             synth.play();
             trader.communicationPartner.ttsPlayer.play();
             translation.y = TRADER_HEIGHT;
@@ -620,7 +620,7 @@ public class Trader3DRenderer extends ObjectRenderer<GameEngine3D> {
 //            instance2.instance.transform.scale(1f, 1f, 4000f);
         }
 
-        //		if (trader.getName().equals("T-50")) {
+        //		if (Debug.isFilter(trader.getName())) {
         //						System.out.println("x=" + position[0] + " y=" + position[1] + " z=" + position[2]);
         //		}
 

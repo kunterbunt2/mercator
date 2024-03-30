@@ -64,25 +64,27 @@ public class ManeuveringSystem {
         if (trader.subStatus == TraderSubStatus.TRADER_STATUS_ALIGNING) {
             progress      = calculateRotationProgress();
             rotationSpeed = calculateRotationSpeed(timeDelta);
-
             if (endRotation - rotation > 180) {
                 rotationDirection = RotationDirection.CLOCKWISE;
                 rotation -= rotationSpeed * timeDelta * 5;//other way around
-//                if (trader.getName().equals("T-33"))
-//                    logger.info(String.format("clockwise1-%f %s", progress, trader.subStatus.getName()));
+//                if (Debug.isFilter(trader.getName()))
+//                    logger.info(String.format("**** clockwise1 startRotation=%f rotation=%f endRotation=%f, progress=%f", startRotation, rotation, endRotation, progress));
             } else if (endRotation - rotation > 0) {
                 rotationDirection = RotationDirection.COUNTER_CLOCKWISE;
                 rotation += rotationSpeed * timeDelta * 5;
-//                if (trader.getName().equals("T-33"))
-//                    logger.info(String.format("counter-clockwise-%f %s", progress, trader.subStatus.getName()));
+//                if (Debug.isFilter(trader.getName()))
+//                    logger.info(String.format("**** counter-clockwise1 startRotation=%f rotation=%f endRotation=%f, progress=%f", startRotation, rotation, endRotation, progress));
+            } else if (endRotation - rotation < -180) {
+                rotationDirection = RotationDirection.COUNTER_CLOCKWISE;
+                rotation += rotationSpeed * timeDelta * 5;
+//                if (Debug.isFilter(trader.getName()))
+//                    logger.info(String.format("**** counter-clockwise2 startRotation=%f rotation=%f endRotation=%f, progress=%f", startRotation, rotation, endRotation, progress));
             } else {
                 rotationDirection = RotationDirection.CLOCKWISE;
                 rotation -= rotationSpeed * timeDelta * 5;
-//                if (trader.getName().equals("T-33"))
-//                    logger.info(String.format("clockwise2-%f %s", progress, trader.subStatus.getName()));
+//                if (Debug.isFilter(trader.getName()))
+//                    logger.info(String.format("**** clockwise2 startRotation=%f rotation=%f endRotation=%f, progress=%f", startRotation, rotation, endRotation, progress));
             }
-//            if (trader.getName().equals("T-33"))
-//                logger.info(String.format("rotationSpeed=%f rotation=%f endRotation=%f", rotationSpeed, rotation, endRotation));
 
             normalizeRotation();
             endRotation();
@@ -90,10 +92,31 @@ public class ManeuveringSystem {
     }
 
     float calculateAngleDifference(float end, float start) {
+
         if (end - start > 180) {
-            return 360 + start - end;//let's turn the other way is it is shorter
+            //359 - 1 -> 360 + 1 - 359 = 2
+//            if (Debug.isFilter(trader.getName())) {
+//                logger.info(String.format("case 1 startRotation=%f rotation=%f endRotation=%f progress0%f", startRotation, rotation, endRotation, progress));
+//            }
+            return 360 + start - end;//let's turn the other way as it is shorter
+        } else if (end - start > 0) {
+            //179 - 1 -> 179- 1 = 178
+//            if (Debug.isFilter(trader.getName())) {
+//                logger.info(String.format("case 2 startRotation=%f rotation=%f endRotation=%f progress0%f", startRotation, rotation, endRotation, progress));
+//            }
+            return end - start;
+        } else if (end - start < -180) {
+            //1 - 359 -> 360 + 1 - 359 = 2
+//            if (Debug.isFilter(trader.getName())) {
+//                logger.info(String.format("case 3 startRotation=%f rotation=%f endRotation=%f progress0%f", startRotation, rotation, endRotation, progress));
+//            }
+            return 350 + end - start;//let's turn the other way as it is shorter
         } else {
-            return Math.abs(end - start);
+            //1 - 179 -> 179- 1 = 178
+//            if (Debug.isFilter(trader.getName())) {
+//                logger.info(String.format("case 4 startRotation=%f rotation=%f endRotation=%f progress0%f", startRotation, rotation, endRotation, progress));
+//            }
+            return start - end;
         }
     }
 
@@ -106,30 +129,26 @@ public class ManeuveringSystem {
     }
 
     private float calculateRotationProgress() {
-        float p2 = calculateAngleDifference(rotation, startRotation);
-        float p3 = calculateAngleDifference(endRotation, startRotation);
-        float p1 = p2 / p3;
-//        if (trader.getName().equals("T-33")) {
-//            logger.info(String.format("calculateRotationProgress() startRotation=%f rotation=%f endRotation=%f", startRotation, rotation, endRotation));
-//            logger.info(String.format("p1=%f p2=%f p3=%f", p1, p2, p3));
+        float p1 = calculateAngleDifference(startRotation, rotation);
+        float p2 = calculateAngleDifference(startRotation, endRotation);
+        float p  = p1 / p2;
+//        if (Debug.isFilter(trader.getName())) {
+//            logger.info(String.format("progress=%f %f/%f", p, p1, p2));
 //        }
-        return p1;
+        return p;
     }
 
     private float calculateRotationSpeed(float timeDelta) {
-//        float deltaRealTime = Gdx.graphics.getDeltaTime();
         float acceleration = calculateRotationAcceleration();
-//        float a1           = calculateAngleDifference(rotation, startRotation);
-//        float a2           = calculateAngleDifference(endRotation, startRotation);
         if (progress < 0.5) {
             //accelerating
             rotationAcelleration = RotationAcelleration.ACCELERATING;
-//            if (getName().equals("T-25")) logger.info("rotation acceleration");
+//            if (Debug.isFilter(trader.getName())) logger.info("rotation acceleration");
             return Math.min(rotationSpeed + acceleration * timeDelta * 10, MAX_ROTATION_SPEED);
         } else {
             //deceleration
             rotationAcelleration = RotationAcelleration.DECELLERATING;
-//            if (getName().equals("T-25")) logger.info("rotation deceleration");
+//            if (Debug.isFilter(trader.getName())) logger.info("rotation deceleration");
             return Math.max(rotationSpeed - acceleration * timeDelta * 10, MIN_ROTATION_SPEED);
         }
     }
@@ -153,15 +172,14 @@ public class ManeuveringSystem {
     public void endRotation() {
         boolean reached = progress >= 1.0f;
         if (reached) {
-            if (trader.getName().equals("T-33"))
-                logger.info(String.format("**** endRotation rotation=%f endRotation=%f", rotation, endRotation));
+//            if (Debug.isFilter(trader.getName()))
+//                logger.info(String.format("**** startRotation=%f rotation=%f endRotation=%f progress=%f", startRotation, rotation, endRotation, progress));
             rotation = endRotation;
-//            if (trader.getName().equals("T-33"))
+//            if (Debug.isFilter(trader.getName()))
 //                logger.info("end");
-//            endRotation();
             trader.setSubStatus(TraderSubStatus.TRADER_STATUS_WAITING_FOR_WAYPOINT);
         } else {
-//            if (trader.getName().equals("T-33"))
+//            if (Debug.isFilter(trader.getName()))
 //                logger.info("not-end");
         }
     }
@@ -189,8 +207,8 @@ public class ManeuveringSystem {
             Vector2 d = new Vector2(scalex, scalez);
             endRotation = zVector.angleDeg(d);
             progress    = 0f;
-            if (trader.getName().equals("T-33"))
-                logger.info(String.format("**** startRotation() %s->%s endRotation=%f startRotation=%f rotation=%f", trader.sourceWaypoint.name, targetWaypoint.name, endRotation, startRotation, rotation));
+//            if (Debug.isFilter(trader.getName()))
+//                logger.info(String.format("**** %s->%s startRotation=%f rotation=%f endRotation=%f", trader.sourceWaypoint.name, targetWaypoint.name, startRotation, rotation, endRotation));
         }
     }
 
@@ -211,11 +229,11 @@ public class ManeuveringSystem {
                 oggPlayer.setPositionAndVelocity(position, velocity);
                 try {
                     if (renderEngine.getCamera().position.dst(translation) < 1000) {
-//                        if (trader.getName().equals("T-25"))
+//                        if (Debug.isFilter(trader.getName()))
 //                            logger.info("play");
                         oggPlayer.play();
                     } else {
-//                        if (trader.getName().equals("T-25"))
+//                        if (Debug.isFilter(trader.getName()))
 //                            logger.info("pause");
                         oggPlayer.pause();
                     }
@@ -224,7 +242,7 @@ public class ManeuveringSystem {
                 }
             } else {
                 try {
-//                    if (trader.getName().equals("T-25"))
+//                    if (Debug.isFilter(trader.getName()))
 //                        logger.info("pause");
                     oggPlayer.pause();
                 } catch (OpenAlException e) {

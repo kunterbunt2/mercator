@@ -117,13 +117,13 @@ public class Trader2DRenderer extends ObjectRenderer<GameEngine2D> {
             }
             if (update) {
 //			synth.setPositionAndVelocity(position, velocity);
-                //				if (trader.getName().equals("T-6"))
+                //				if (Debug.isFilter(trader.getName()))
                 //					logger.info(String.format("%f %f  %f %f  %f %f", lastVelocity[0], velocity[0], lastVelocity[1], velocity[1], lastVelocity[2], velocity[2]));
                 for (int i = 0; i < 3; i++)
                      lastVelocity[i] = velocity[i];
             }
 
-            //			if (trader.getName().equals("T-6"))
+            //			if (Debug.isFilter(trader.getName()))
 //		synth.play();
             // ---Traveling
             if (trader.destinationWaypointDistance != 0) {
@@ -165,7 +165,7 @@ public class Trader2DRenderer extends ObjectRenderer<GameEngine2D> {
             //			pole.instance.transform.scale(1f, POLE_Y_SIZE, 1f);
         }
 
-        //		if (trader.getName().equals("T-50")) {
+        //		if (Debug.isFilter(trader.getName())) {
         //						System.out.println("x=" + position[0] + " y=" + position[1] + " z=" + position[2]);
         //		}
 
@@ -202,7 +202,7 @@ public class Trader2DRenderer extends ObjectRenderer<GameEngine2D> {
             renderEngine.getGameEngine().renderEngine.lable(renderEngine.getGameEngine().atlasManager.dottedLineTextureRegion, trader.x - hps, trader.z - hps, Trader2DRenderer.TRADER_WIDTH, Trader2DRenderer.TRADER_HEIGHT, TRADER_WIDTH * 1, TRADER_WIDTH * 3, renderEngine.getGameEngine().atlasManager.defaultFont, color, trader.getName(), color, String.format("%.0f", trader.getCredits()), renderEngine.getGameEngine().queryCreditColor(trader.getCredits(), Trader.TRADER_START_CREDITS));
         }
         circle.setPosition(trader.x, trader.z);
-//        if (trader.getName().equals("T-13")) {
+//        if (Debug.isFilter(trader.getName())) {
 //            System.out.println(String.format("%f %f", trader.x, trader.z));
 //        }
     }

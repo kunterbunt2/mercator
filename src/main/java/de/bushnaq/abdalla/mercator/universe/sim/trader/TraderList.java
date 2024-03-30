@@ -26,6 +26,14 @@ import java.util.Vector;
 public class TraderList extends Vector<Trader> {
     private static final long serialVersionUID = 3695436401556359801L;
 
+    public Trader findByName(String name) {
+        for (final Trader t : this) {
+            if (t.getName().equals(name))
+                return t;
+        }
+        return null;
+    }
+
     /*
      * BcTrader* BcUniverse::GetTraderByLocation( int aX, int aY ) { for( BcTrader*
      * trader = TraderList.First(); trader; trader = trader->Next() ) { if(

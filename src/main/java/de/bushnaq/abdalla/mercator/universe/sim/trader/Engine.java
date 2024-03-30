@@ -28,6 +28,7 @@ import de.bushnaq.abdalla.engine.audio.OpenAlException;
 import de.bushnaq.abdalla.mercator.renderer.AtlasManager;
 import de.bushnaq.abdalla.mercator.renderer.GameEngine3D;
 import de.bushnaq.abdalla.mercator.universe.good.Good;
+import de.bushnaq.abdalla.mercator.util.Debug;
 import net.mgsx.gltf.scene3d.attributes.PBRColorAttribute;
 import net.mgsx.gltf.scene3d.model.ModelInstanceHack;
 import org.slf4j.Logger;
@@ -129,7 +130,7 @@ public class Engine {
         {
             if (trader.targetWaypoint == null || trader.destinationWaypointDistance == 0) {
                 engineSpeed = MIN_ENGINE_SPEED;
-                if (trader.getName().equals("T-33"))
+                if (Debug.isFilter(trader.getName()))
                     logger.info("*** min engine speed");
             } else {
                 float acceleration = calculateAcceleration();
@@ -139,15 +140,15 @@ public class Engine {
 //                    if (trader.subStatus == TraderSubStatus.TRADER_STATUS_DECELERATING)
                     trader.setSubStatus(TraderSubStatus.TRADER_STATUS_ACCELERATING);
                     engineSpeed = Math.min(engineSpeed + acceleration * timeDelta * 10, MAX_ENGINE_SPEED);
-//                    if (trader.getName().equals("T-33"))
+//                    if (Debug.isFilter(trader.getName()))
 //                        logger.info("engineSpeed=" + engineSpeed + " acceleration=" + acceleration);
-//                    if (getName().equals("T-33")) logger.info("engine acceleration currentMaxEngineSpeed=" + engineSpeed);
+//                    if (Debug.isFilter(trader.getName())) logger.info("engine acceleration currentMaxEngineSpeed=" + engineSpeed);
                 } else /*if (destinationPlanetDistance - destinationPlanetDistanceProgress <= ACCELLERATION_DISTANCE)*/ {
                     //deceleration
 //                    if (trader.subStatus == TraderSubStatus.TRADER_STATUS_ACCELERATING)
                     trader.setSubStatus(TraderSubStatus.TRADER_STATUS_DECELERATING);
                     engineSpeed = Math.max(engineSpeed - acceleration * timeDelta * 10, MIN_ENGINE_SPEED);
-//                    if (getName().equals("T-25")) logger.info("engine deceleration currentMaxEngineSpeed=" + engineSpeed);
+//                    if (Debug.isFilter(trader.getName())) logger.info("engine deceleration currentMaxEngineSpeed=" + engineSpeed);
                 }
             }
         }
@@ -197,11 +198,11 @@ public class Engine {
             oggPlayer.setPositionAndVelocity(position, velocity);
             try {
                 if (renderEngine.getCamera().position.dst(translation) < 1000) {
-//                        if (trader.getName().equals("T-25"))
+//                        if (Debug.isFilter(trader.getName()))
 //                            logger.info("play");
                     oggPlayer.play();
                 } else {
-//                        if (trader.getName().equals("T-25"))
+//                        if (Debug.isFilter(trader.getName()))
 //                            logger.info("pause");
                     oggPlayer.pause();
                 }
@@ -230,7 +231,7 @@ public class Engine {
             pointLight.set(Color.WHITE, lightTranslation.x + 0.2f, lightTranslation.y, lightTranslation.z, intensity);
         } else if (trader.subStatus == TraderSubStatus.TRADER_STATUS_DECELERATING) {
             try {
-//                    if (trader.getName().equals("T-25"))
+//                    if (Debug.isFilter(trader.getName()))
 //                        logger.info("pause");
                 oggPlayer.pause();
             } catch (OpenAlException e) {

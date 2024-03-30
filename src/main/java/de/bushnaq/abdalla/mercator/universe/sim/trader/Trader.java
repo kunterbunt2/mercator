@@ -31,6 +31,7 @@ import de.bushnaq.abdalla.mercator.universe.path.WaypointProxy;
 import de.bushnaq.abdalla.mercator.universe.planet.Planet;
 import de.bushnaq.abdalla.mercator.universe.planet.PlanetList;
 import de.bushnaq.abdalla.mercator.universe.sim.Sim;
+import de.bushnaq.abdalla.mercator.util.Debug;
 import de.bushnaq.abdalla.mercator.util.MercatorRandomGenerator;
 import de.bushnaq.abdalla.mercator.util.TimeUnit;
 import de.bushnaq.abdalla.mercator.util.Transaction;
@@ -240,12 +241,12 @@ public class Trader extends Sim {
 //                maneuveringSystem.startRotation();
 //            } else {
 //                //destinationWaypointIndex is always looking one waypoint ahead
-//                if (getName().equals("T-33"))
+//                if (Debug.isFilter(getName())
 //                    logger.info("cannot startRotation");
 //            }
 ////            } else
 //            {
-////                if (getName().equals("T-34"))
+////                if (Debug.isFilter(trader.getName()))
 ////                    logger.info(String.format("destinationWaypointIndex=%d waypointList.size()=%d", destinationWaypointIndex, waypointList.size()));
 //            }
 //        }
@@ -321,7 +322,7 @@ public class Trader extends Sim {
                 }
                 if (targetWaypoint.city == null) {
                     communicationPartner.informControlTower();
-                    if (getName().equals("T-33"))
+                    if (Debug.isFilter(getName()))
                         logger.info(String.format("reached waypoint %s %s %s", targetWaypoint.name, traderStatus.getName(), subStatus.getName()));
                     // we reached the next waypoint
                     if (sourceWaypoint != null) {
@@ -337,12 +338,12 @@ public class Trader extends Sim {
                     destinationWaypointDistanceProgress = destinationWaypointDistanceProgress - destinationWaypointDistance;
                     destinationWaypointDistance         = sourceWaypoint.queryDistance(targetWaypoint);
                     setSubStatus(TraderSubStatus.TRADER_STATUS_ALIGNING);
-                    if (getName().equals("T-33"))
+                    if (Debug.isFilter(getName()))
                         logger.info(String.format("startRotation"));
                     maneuveringSystem.startRotation();
                 } else {
                     //we reached a city
-                    if (getName().equals("T-33"))
+                    if (Debug.isFilter(getName()))
                         logger.info(String.format("reached city %s %s %s", targetWaypoint.name, traderStatus.getName(), subStatus.getName()));
                     if (sourceWaypoint != null) freePrevWaypoints();
                     // ---Pay for the jump
@@ -421,11 +422,11 @@ public class Trader extends Sim {
 //                if (progress < 0.5) {
 //                    //accelerating
 //                    engineSpeed = Math.max(engineSpeed + acceleration, MIN_ENGINE_SPEED);
-////                    if (getName().equals("T-25")) logger.info("engine acceleration currentMaxEngineSpeed=" + engineSpeed);
+////                    if (Debug.isFilter(getName())) logger.info("engine acceleration currentMaxEngineSpeed=" + engineSpeed);
 //                } else /*if (destinationPlanetDistance - destinationPlanetDistanceProgress <= ACCELLERATION_DISTANCE)*/ {
 //                    //deceleration
 //                    engineSpeed = Math.max(engineSpeed - acceleration, MIN_ENGINE_SPEED);
-////                    if (getName().equals("T-25")) logger.info("engine deceleration currentMaxEngineSpeed=" + engineSpeed);
+////                    if (Debug.isFilter(getName())) logger.info("engine deceleration currentMaxEngineSpeed=" + engineSpeed);
 //                }
 ////            else {
 ////            }
@@ -435,7 +436,7 @@ public class Trader extends Sim {
 ////                currentMaxEngineSpeed = Math.max(currentMaxEngineSpeed + accelleration, MIN_ENGINE_SPEED);
 ////            } else if (destinationPlanetDistance - destinationPlanetDistanceProgress <= ACCELLERATION_DISTANCE) {
 ////                //deceleration
-////                if (getName().equals("T-25"))
+////                if (Debug.isFilter(getName()))
 ////                    logger.info("deceleration");
 ////                currentMaxEngineSpeed = Math.max(currentMaxEngineSpeed - accelleration, MIN_ENGINE_SPEED);
 ////            } else {
@@ -477,11 +478,11 @@ public class Trader extends Sim {
 //        float a2            = calculateAngleDifference(endRotation, startRotation);
 //        if (rotationProgress < 0.5) {
 //            //accelerating
-////            if (getName().equals("T-25")) logger.info("rotation acceleration");
+////            if (Debug.isFilter(getName())) logger.info("rotation acceleration");
 //            return Math.min(rotationSpeed + acceleration * deltaRealTime * 10, MAX_ROTATION_SPEED);
 //        } else /*if (destinationPlanetDistance - destinationPlanetDistanceProgress <= ACCELLERATION_DISTANCE)*/ {
 //            //deceleration
-////            if (getName().equals("T-25")) logger.info("rotation deceleration");
+////            if (Debug.isFilter(getName())) logger.info("rotation deceleration");
 //            return Math.max(rotationSpeed - acceleration * deltaRealTime * 10, MIN_ROTATION_SPEED);
 //        }
 //    }
@@ -676,9 +677,6 @@ public class Trader extends Sim {
                     final float catering           = queryAverageFoodConsumption(portPlanet.pathSeeker.time) * p.queryAverageFoodPrice();
                     final float planetValuePerTime = (portPlanet.pathSeeker.planetValue - catering) / portPlanet.pathSeeker.time;
                     bestPlanetValuePerTime = Math.max(bestPlanetValuePerTime, planetValuePerTime);
-                    if (getName().equals("T-147") && currentTime == 72000) {
-                        final int a = 12;
-                    }
                     if (planetValuePerTime > maximumPlanetValuePerTime) {
                         maximumPlanetValuePerTime = planetValuePerTime;
                         bestPlanet                = p;
@@ -695,7 +693,7 @@ public class Trader extends Sim {
         //		markJumpGateUsage();//TODO!!!
 
         if (timeDelta == 0) return;
-//        if (getName().equals("T-25"))
+//        if (Debug.isFilter(getName()))
 //            logger.info("timeDelta=" + timeDelta);
         switch (getSubStatus()) {
             case TRADER_STATUS_ALIGNING:
@@ -703,7 +701,7 @@ public class Trader extends Sim {
                 break;
             case TRADER_STATUS_WAITING_FOR_WAYPOINT:
                 if (pathIsClear()) {
-                    if (getName().equals("T-33"))
+                    if (Debug.isFilter(getName()))
                         logger.info(String.format("**** we are cleared for next waypoint %s", targetWaypoint.name));
                     setSubStatus(TraderSubStatus.TRADER_STATUS_ACCELERATING);
                 }

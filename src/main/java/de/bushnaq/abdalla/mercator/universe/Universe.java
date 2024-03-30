@@ -167,7 +167,7 @@ public class Universe {
                         // for ( Trader trader : traderList )
                         // {
                         if (trader.advanceInTime(currentTime, universeRG, planetList, selectedTrader == trader)) {
-                            if (trader.getName().equals("T-179")) {
+                            if (Debug.isFilter(trader.getName())) {
                                 final int a = 23;
                             }
                             trader.planet.setCredits(trader.planet.getCredits() + trader.getCredits());

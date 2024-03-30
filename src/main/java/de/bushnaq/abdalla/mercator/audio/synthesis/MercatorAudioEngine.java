@@ -18,7 +18,7 @@ package de.bushnaq.abdalla.mercator.audio.synthesis;
 
 
 import de.bushnaq.abdalla.engine.audio.AudioEngine;
-import de.bushnaq.abdalla.engine.audio.Mp3PlayerFactory;
+import de.bushnaq.abdalla.engine.audio.OggPlayerFactory;
 import de.bushnaq.abdalla.engine.audio.TTSPlayerFactory;
 
 public class MercatorAudioEngine extends AudioEngine {
@@ -26,14 +26,14 @@ public class MercatorAudioEngine extends AudioEngine {
     public MercatorAudioEngine() {
         super(4410, 44100, 16);
         add(new MercatorSynthesizerFactory());
-        add(new Mp3PlayerFactory());
+        add(new OggPlayerFactory());
         add(new TTSPlayerFactory());
     }
 
     public MercatorAudioEngine(final int samples) {
         super(samples, 44100, 16);
         add(new MercatorSynthesizerFactory());
-        add(new Mp3PlayerFactory());
+        add(new OggPlayerFactory());
         add(new TTSPlayerFactory());
     }
 

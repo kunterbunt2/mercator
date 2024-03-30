@@ -29,7 +29,7 @@ public class PlanetCommunicationPartner implements CommunicationPartner {
     private final Planet planet;
     List<RadioMessage> radioMessages = new ArrayList<>();
     private AudioEngine audioEngine;
-    private TTSPlayer   ttsSynth;
+    private TTSPlayer   ttsPlayer;
 
     public PlanetCommunicationPartner(Planet planet) {
         this.planet = planet;
@@ -50,6 +50,19 @@ public class PlanetCommunicationPartner implements CommunicationPartner {
     public void radio(RadioMessage message) {
         radioMessages.add(message);
         say(message.message);
+    }
+
+    /**
+     * selecting this partner should enable its ttsPlayer
+     */
+    @Override
+    public void select() {
+        ttsPlayer.setOptIn(true);
+    }
+
+    @Override
+    public void unselect() {
+        ttsPlayer.setOptIn(false);
     }
 
     void handleRadioMessage() {
@@ -84,7 +97,7 @@ public class PlanetCommunicationPartner implements CommunicationPartner {
 
     public void say(String msg) {
         if (isSelected()) {
-            ttsSynth.speak(msg);
+            ttsPlayer.speak(msg);
             logger.info(msg);
         }
     }

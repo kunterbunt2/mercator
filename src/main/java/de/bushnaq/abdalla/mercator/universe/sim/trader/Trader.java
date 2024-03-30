@@ -18,6 +18,7 @@ package de.bushnaq.abdalla.mercator.universe.sim.trader;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector3;
+import de.bushnaq.abdalla.engine.audio.OpenAlException;
 import de.bushnaq.abdalla.mercator.renderer.GameEngine;
 import de.bushnaq.abdalla.mercator.universe.event.EventLevel;
 import de.bushnaq.abdalla.mercator.universe.event.SimEventType;
@@ -319,6 +320,7 @@ public class Trader extends Sim {
                     planet.universe.eventManager.add(EventLevel.trace, currentTime, this, String.format("waiting for waypoint %s to become clear", targetWaypoint.getName()));
                 }
                 if (targetWaypoint.city == null) {
+                    communicationPartner.informControlTower();
                     if (getName().equals("T-33"))
                         logger.info(String.format("reached waypoint %s %s %s", targetWaypoint.name, traderStatus.getName(), subStatus.getName()));
                     // we reached the next waypoint
@@ -488,7 +490,7 @@ public class Trader extends Sim {
         return JUMP_UNIT_COST * distance;
     }
 
-    public void create(GameEngine gameEngine, final MercatorRandomGenerator randomGenerator) {
+    public void create(GameEngine gameEngine, final MercatorRandomGenerator randomGenerator) throws OpenAlException {
         goodSpace            = Trader.MIN_GOOD_SPACE + randomGenerator.nextInt(0, this, Trader.MAX_GOOD_SPACE - Trader.MIN_GOOD_SPACE);
         portRestingTime      = randomGenerator.nextInt(0, this, Trader.TRADER_MAX_PORT_REST_TIME) * TimeUnit.TICKS_PER_DAY;
         communicationPartner = new TraderCommunicationPartner(gameEngine.getAudioEngine(), this);
@@ -732,7 +734,7 @@ public class Trader extends Sim {
         }
     }
 
-    public void select() {
+    public void select() throws OpenAlException {
         selected = true;
         for (int i = 0; i < waypointList.size() - 1; i++) {
             WaypointProxy waypointProxy     = waypointList.get(i);
@@ -741,6 +743,7 @@ public class Trader extends Sim {
                 if (p.target.equals(nextWaypointProxy.waypoint)) p.selected = true;
             }
         }
+        communicationPartner.select();
     }
 
     public void sell(final long currentTime, final MercatorRandomGenerator randomGenerator) {
@@ -783,12 +786,13 @@ public class Trader extends Sim {
         return getName();
     }
 
-    public void unselect() {
+    public void unselect() throws OpenAlException {
         selected = false;
         for (WaypointProxy wpp : waypointList) {
             for (Path p : wpp.waypoint.pathList) {
                 p.selected = false;
             }
         }
+        communicationPartner.unselect();
     }
 }

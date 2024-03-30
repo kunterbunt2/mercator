@@ -65,6 +65,7 @@ public class AssetManager {
     public Model                   redEmissiveModel;
     public Model                   sector;
     public ShowGood                showGood = ShowGood.Name;
+    public SceneAsset              station;
     public SceneAsset              trader;
     //    public SceneAsset              traderAsset;
     public SceneAsset              turbine;
@@ -110,6 +111,7 @@ public class AssetManager {
             cubeBase1 = modelCreator.createBox(material);
         }
         createTrader(modelBuilder, modelCreator);
+        createStation(modelBuilder, modelCreator);
         createFlame(modelBuilder, modelCreator);
         createGoodContainer(modelBuilder);
 
@@ -247,6 +249,11 @@ public class AssetManager {
     private Model createSquare(final ModelBuilder modelBuilder, final float sx, final float sz, final Material material) {
         return modelBuilder.createRect(-sx, 0f, sz, sx, 0f, sz, sx, 0f, -sz, -sx, 0f, -sz, 0f, 1f, 0f, material, Usage.Position | Usage.Normal | Usage.TextureCoordinates);
     }
+
+    private void createStation(ModelBuilder modelBuilder, ModelCreator modelCreator) {
+        station = new GLBLoader().load(Gdx.files.internal(String.format(AtlasManager.getAssetsFolderName() + "/models/station.glb")));
+    }
+
 
     private void createTrader(ModelBuilder modelBuilder, ModelCreator modelCreator) {
 //        final Attribute color     = new PBRColorAttribute(PBRColorAttribute.BaseColorFactor, Color.BLACK);

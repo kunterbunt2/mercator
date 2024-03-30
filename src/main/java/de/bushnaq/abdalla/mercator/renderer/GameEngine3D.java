@@ -219,16 +219,16 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
             createStage();
             audioEngine.create(AtlasManager.getAssetsFolderName());
             audioEngine.enableHrtf(0);
-//            renderAllTTSStrings();
             audioEngine.radioTTS.loadResource(this.getClass());
+//            renderAllTTSStrings();
             audioEngine.radioTTS.loadAudio();
-            audioEngine.radioTTS.test();
+//            audioEngine.radioTTS.test();
 
 
 //            createStone();
             createTraders();
 //			createRing();
-            createWater();
+//            createWater();
             createPlanets();
 //			createLand();
             createJumpGates();
@@ -297,7 +297,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
     }
 
     private void createCamera() throws Exception {
-        camera = new MovingCamera(26f, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        camera = new MovingCamera(46f, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         Planet planet = universe.planetList.findBusyCenterPlanet();
 //        Planet planet = universe.planetList.findByName("P-130");
         if (planet == null && !universe.planetList.isEmpty()) planet = universe.planetList.get(0);

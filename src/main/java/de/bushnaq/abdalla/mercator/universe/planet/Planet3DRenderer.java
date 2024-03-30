@@ -56,7 +56,7 @@ public class Planet3DRenderer extends ObjectRenderer<GameEngine3D> {
     public static final  Color                          PLANET_COLOR           = new Color(0.5f, 0.5f, 0.8f, 1.0f); // 0xff8888cc;
     public static final  float                          PLANET_CORE_SIZE       = Good3DRenderer.GOOD_X * 2;
     //	public static final float PLANET_DISTANCE = 512/* PLANET_SIZE * 2 */;
-    public static final  float                          PLANET_HIGHT           = 3000;
+    public static final  float                          PLANET_HIGHT           = 16;
     public static final  int                            PLANET_MAX_SHIFT       = Planet.PLANET_DISTANCE / 4;
     public static final  int                            PLANET_SPAN_SPACE      = Planet.PLANET_DISTANCE + PLANET_BORDER;
     public static final  float                          SECTOR_HIGHT           = 8;
@@ -95,9 +95,12 @@ public class Planet3DRenderer extends ObjectRenderer<GameEngine3D> {
     //		}
     //	}
     Vector3 translation = new Vector3();
-    private boolean                  dayMode = true;
+    private boolean                  dayMode       = true;
     //	Scene scene;
     private GameObject<GameEngine3D> gameObject;
+    private float                    rotation;
+    private float                    rotationSpeed = 1f;
+    private GameObject<GameEngine3D> stationGameObject;
 
     public Planet3DRenderer(final Planet planet) {
         this.planet = planet;
@@ -281,6 +284,10 @@ public class Planet3DRenderer extends ObjectRenderer<GameEngine3D> {
             gameObject.instance.transform.setToTranslationAndScaling(x, -PLANET_HIGHT / 2, z, PLANET_3D_SIZE, PLANET_HIGHT, PLANET_3D_SIZE);
             gameObject.update();
             renderEngine.addStatic(gameObject);
+            stationGameObject = new GameObject<GameEngine3D>(new ModelInstanceHack(renderEngine.getGameEngine().assetManager.station.scene.model), null, this);
+            stationGameObject.instance.transform.setToTranslation(x, -32, z);
+            stationGameObject.update();
+            renderEngine.addStatic(stationGameObject);
             //todo decide if city should have light
             final PointLight light = new PointLight().set(Color.WHITE, x, LIGHT_HIGHT, z, LIGHT_DAY_INTENSITY);
             pointLight.add(light);
@@ -317,7 +324,7 @@ public class Planet3DRenderer extends ObjectRenderer<GameEngine3D> {
         //																	renderMaster.sceneClusterManager.addDynamic(ganeObject);
         //																}
         createFactories(renderEngine);
-        createCity(renderEngine, x, z);
+//        createCity(renderEngine, x, z);
         //sector
         //		{
         //			//			final Color sectorColor = renderMaster.getDistinctiveColor(planet.sector.type);
@@ -485,6 +492,7 @@ public class Planet3DRenderer extends ObjectRenderer<GameEngine3D> {
     }
 
     private void updatePlanet(final RenderEngine3D<GameEngine3D> renderEngine) {
+        float realTimeDelta = Gdx.graphics.getDeltaTime();
         // animate factories
         for (final GameObject<GameEngine3D> go : animatedObjects) {
             if (ProductionFacility.class.isInstance(go.interactive)) {
@@ -504,6 +512,10 @@ public class Planet3DRenderer extends ObjectRenderer<GameEngine3D> {
             }
             dayMode = true;
         }
+        rotation += rotationSpeed * realTimeDelta;
+        stationGameObject.instance.transform.setToTranslation(planet.x, -16, planet.z);
+        stationGameObject.instance.transform.rotate(Vector3.Y, rotation);
+
     }
 
 }

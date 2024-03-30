@@ -27,13 +27,14 @@ public class TraderCommunicationPartner implements CommunicationPartner {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
     private final Trader trader;
     List<RadioMessage> radioMessages = new ArrayList<>();
+    TTSPlayer          ttsPlayer;
     private AudioEngine audioEngine;
-    private TTSPlayer   ttsSynth;
 
-    public TraderCommunicationPartner(AudioEngine audioEngine, Trader trader) {
+    public TraderCommunicationPartner(AudioEngine audioEngine, Trader trader) throws OpenAlException {
         this.trader      = trader;
         this.audioEngine = audioEngine;
-        ttsSynth         = new TTSPlayer(audioEngine);
+        ttsPlayer        = audioEngine.createAudioProducer(TTSPlayer.class);
+        ttsPlayer.setGain(1f);
     }
 
     @Override
@@ -52,6 +53,19 @@ public class TraderCommunicationPartner implements CommunicationPartner {
 //        say(message.message);
     }
 
+    /**
+     * selecting this partner should enable its ttsPlayer
+     */
+    @Override
+    public void select() {
+        ttsPlayer.setOptIn(true);
+    }
+
+    @Override
+    public void unselect() {
+        ttsPlayer.setOptIn(false);
+    }
+
     private void handleRadioMessage() {
         for (RadioMessage rm : radioMessages) {
             if (trader.currentTime - rm.time > CommunicationPartner.RADIO_ANSWER_DELAY) {
@@ -65,14 +79,14 @@ public class TraderCommunicationPartner implements CommunicationPartner {
             String string = String.format(audioEngine.radioTTS.resolveString(RadioTTS.REQUESTING_APPROVAL_TO_DOCK_01), getName(), trader.destinationPlanet.getName());
             say(string);
             RadioMessage rm = new RadioMessage(trader.currentTime, this, trader.destinationPlanet.communicationPartner, RadioMessageId.REQUEST_TO_DOCK, string);
-//        say(rm.message);
             trader.destinationPlanet.communicationPartner.radio(rm);// send to partner
+
         }
     }
 
     public void say(String msg) {
         if (isSelected()) {
-            ttsSynth.speak(msg);
+            ttsPlayer.speak(msg);
             logger.info(msg);
         }
     }

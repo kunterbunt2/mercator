@@ -20,7 +20,6 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.PolygonSpriteBatch;
-import com.badlogic.gdx.graphics.g3d.Attribute;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
@@ -39,7 +38,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 public class Good3DRenderer extends ObjectRenderer<GameEngine3D> {
@@ -95,14 +93,22 @@ public class Good3DRenderer extends ObjectRenderer<GameEngine3D> {
         final Material           material1 = renderEngine.getGameEngine().assetManager.goodContainer.scene.model.materials.get(0);
         scene = new GameObject<GameEngine3D>(new ModelInstanceHack(renderEngine.getGameEngine().assetManager.goodContainer.scene.model), good);
         //TODO reuse instances
-        final Material            material2 = scene.instance.materials.get(0);
-        final Iterator<Attribute> i         = material1.iterator();
-        material2.clear();
-        while (i.hasNext()) {
-            final Attribute a = i.next();
-            material2.set(a);
+//        final Material            material2 = scene.instance.materials.get(0);
+//        final Iterator<Attribute> i         = material1.iterator();
+//        material2.clear();
+//        while (i.hasNext()) {
+//            final Attribute a = i.next();
+//            material2.set(a);
+//        }
+        for (Material material : scene.instance.materials) {
+//            if (material.id.equals("m.type"))
+            {
+                material.set(new PBRColorAttribute(PBRColorAttribute.BaseColorFactor, getColor(good.type.ordinal())));
+            }
+
         }
-        scene.instance.materials.get(0).set(new PBRColorAttribute(PBRColorAttribute.BaseColorFactor, getColor(good.type.ordinal())));
+
+//        scene.instance.materials.get(0).set(new PBRColorAttribute(PBRColorAttribute.BaseColorFactor, getColor(good.type.ordinal())));
         return scene;
     }
 

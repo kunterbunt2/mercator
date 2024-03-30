@@ -34,10 +34,10 @@ import de.bushnaq.abdalla.mercator.universe.sim.trader.Trader3DRenderer;
 import net.mgsx.gltf.scene3d.model.ModelInstanceHack;
 
 public class JumpGate3DRenderer extends ObjectRenderer<GameEngine3D> {
-    public static final  float JUMP_GATE_WIDTH  = 16 / Universe.WORLD_SCALE;
+    public static final  float JUMP_GATE_WIDTH  = 1 / Universe.WORLD_SCALE;
     static final         Color JUMPGATE_COLOR   = new Color(0.275f, 0.314f, 0.314f, 1.0f);
     private static final float JUMP_GATE_DEPTH  = 0 / Universe.WORLD_SCALE /*+ Planet3DRenderer.WATER_Y*/;
-    private static final float JUMP_GATE_HEIGHT = 16 / Universe.WORLD_SCALE;
+    private static final float JUMP_GATE_HEIGHT = 1 / Universe.WORLD_SCALE;
     private static final Color PATH_NAME_COLOR  = Color.BLUE;
     private final        Path  jumpGate;
     float   directionLength;

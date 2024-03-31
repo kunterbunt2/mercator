@@ -35,32 +35,32 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Engine {
-    public static final  float      ENGINE_TO_REALITY_FACTOR     = 10;
-    public static final  float      LIGHT_MAX_INTENSITY          = 600f;
-    public static final  float      LIGHT_MIN_INTENSITY          = 500f;
-    public static final  float      LIGHT_OFF_DURATION_AVERAGE   = 0.2f;
-    public static final  float      LIGHT_OFF_DURATION_DEVIATION = 0.1f;
-    public static final  float      LIGHT_ON_DURATION            = 0.1f;
-    public static final  float      LIGHT_SIZE                   = .2f;
-    public static final  int        MAX_ENGINE_SPEED             = 100;
-    public static final  float      MIN_ENGINE_SPEED             = .1f;
-    final static         Vector3    yVector                      = new Vector3(0, 1, 0);
-    private static final float      ENGINE_FORCE                 = 3f;//newton
-    private static final float      PY2                          = 3.14159f / 2;
-    public final         PointLight pointLight;
-    private final        Logger     logger                       = LoggerFactory.getLogger(this.getClass());
-    private final        float[]    position                     = new float[3];
-    private final        Trader     trader;
-    private final        float[]    velocity                     = new float[3];
-    public               int        lightMode                    = 0;
+    public static final  float                    ENGINE_TO_REALITY_FACTOR     = 10;
+    public static final  float                    LIGHT_MAX_INTENSITY          = 600f;
+    public static final  float                    LIGHT_MIN_INTENSITY          = 500f;
+    public static final  float                    LIGHT_OFF_DURATION_AVERAGE   = 0.2f;
+    public static final  float                    LIGHT_OFF_DURATION_DEVIATION = 0.1f;
+    public static final  float                    LIGHT_ON_DURATION            = 0.1f;
+    public static final  float                    LIGHT_SIZE                   = .2f;
+    public static final  int                      MAX_ENGINE_SPEED             = 100;
+    public static final  float                    MIN_ENGINE_SPEED             = .1f;
+    final static         Vector3                  yVector                      = new Vector3(0, 1, 0);
+    private static final float                    ENGINE_FORCE                 = 3f;//newton
+    private static final float                    PY2                          = 3.14159f / 2;
+    public final         PointLight               pointLight;
+    private final        Logger                   logger                       = LoggerFactory.getLogger(this.getClass());
+    private final        float[]                  position                     = new float[3];
+    private final        Trader                   trader;
+    private final        float[]                  velocity                     = new float[3];
+    public               int                      lightMode                    = 0;
     //    public float getAcceleration() {
 //        return acceleration;
 //    }
-    public               float      lightTimer                   = 0;
-    OggPlayer oggPlayer;
-    private float                    engineSpeed     = MIN_ENGINE_SPEED;
-    private GameObject<GameEngine3D> gameObject;
-    private boolean                  gameObjectAdded = false;
+    public               float                    lightTimer                   = 0;
+    private              float                    engineSpeed                  = MIN_ENGINE_SPEED;
+    private              GameObject<GameEngine3D> gameObject;
+    private              boolean                  gameObjectAdded              = false;
+    private              OggPlayer                oggPlayer;
 
     public Engine(Trader trader) {
         this.trader     = trader;
@@ -130,7 +130,7 @@ public class Engine {
         {
             if (trader.targetWaypoint == null || trader.destinationWaypointDistance == 0) {
                 engineSpeed = MIN_ENGINE_SPEED;
-                if (Debug.isFilter(trader.getName()))
+                if (Debug.isFilterTrader(trader.getName()))
                     logger.info("*** min engine speed");
             } else {
                 float acceleration = calculateAcceleration();
@@ -163,7 +163,7 @@ public class Engine {
         try {
             oggPlayer = renderEngine.getGameEngine().audioEngine.createAudioProducer(OggPlayer.class);
             oggPlayer.setFile(Gdx.files.internal(AtlasManager.getAssetsFolderName() + "/audio/large-rocket-engine-86240.ogg"));
-            oggPlayer.setGain(1.0f);
+            oggPlayer.setGain(100.0f);
             oggPlayer.setAmbient(false);
             oggPlayer.setLoop(true);
         } catch (OpenAlException e) {
@@ -196,18 +196,14 @@ public class Engine {
             velocity[1] = 0;
             velocity[2] = trader.speed.z;
             oggPlayer.setPositionAndVelocity(position, velocity);
-            try {
-                if (renderEngine.getCamera().position.dst(translation) < 1000) {
+            if (renderEngine.getCamera().position.dst(translation) < 1000) {
 //                        if (Debug.isFilter(trader.getName()))
 //                            logger.info("play");
-                    oggPlayer.play();
-                } else {
+                oggPlayer.play();
+            } else {
 //                        if (Debug.isFilter(trader.getName()))
 //                            logger.info("pause");
-                    oggPlayer.pause();
-                }
-            } catch (OpenAlException e) {
-                throw new RuntimeException(e);
+                oggPlayer.pause();
             }
             if (!gameObjectAdded) {
                 renderEngine.addDynamic(gameObject);
@@ -230,12 +226,14 @@ public class Engine {
             gameObject.instance.transform.getTranslation(lightTranslation);
             pointLight.set(Color.WHITE, lightTranslation.x + 0.2f, lightTranslation.y, lightTranslation.z, intensity);
         } else if (trader.subStatus == TraderSubStatus.TRADER_STATUS_DECELERATING) {
-            try {
-//                    if (Debug.isFilter(trader.getName()))
-//                        logger.info("pause");
+            if (renderEngine.getCamera().position.dst(translation) < 1000) {
+//                        if (Debug.isFilter(trader.getName()))
+//                            logger.info("play");
+                oggPlayer.play();
+            } else {
+//                        if (Debug.isFilter(trader.getName()))
+//                            logger.info("pause");
                 oggPlayer.pause();
-            } catch (OpenAlException e) {
-                throw new RuntimeException(e);
             }
             if (!gameObjectAdded) {
                 renderEngine.addDynamic(gameObject);

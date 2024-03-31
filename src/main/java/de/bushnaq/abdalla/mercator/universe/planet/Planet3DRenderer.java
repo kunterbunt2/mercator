@@ -29,6 +29,7 @@ import de.bushnaq.abdalla.engine.GameObject;
 import de.bushnaq.abdalla.engine.ObjectRenderer;
 import de.bushnaq.abdalla.engine.RenderEngine2D;
 import de.bushnaq.abdalla.engine.RenderEngine3D;
+import de.bushnaq.abdalla.engine.audio.OpenAlException;
 import de.bushnaq.abdalla.mercator.renderer.GameEngine2D;
 import de.bushnaq.abdalla.mercator.renderer.GameEngine3D;
 import de.bushnaq.abdalla.mercator.universe.factory.ProductionFacility;
@@ -167,7 +168,7 @@ public class Planet3DRenderer extends ObjectRenderer<GameEngine3D> {
     }
 
     @Override
-    public void update(final RenderEngine3D<GameEngine3D> renderEngine, final long currentTime, final float timeOfDay, final int index, final boolean selected) {
+    public void update(final RenderEngine3D<GameEngine3D> renderEngine, final long currentTime, final float timeOfDay, final int index, final boolean selected) throws OpenAlException {
         renderPlanet(renderEngine, currentTime, timeOfDay, planet == renderEngine.getGameEngine().universe.selectedPlanet);
     }
 
@@ -280,11 +281,11 @@ public class Planet3DRenderer extends ObjectRenderer<GameEngine3D> {
         final float z = planet.z;
         //planet
         {
-            gameObject = new GameObject<GameEngine3D>(new ModelInstanceHack(renderEngine.getGameEngine().assetManager.planetModel), null, this);
+            gameObject = new GameObject<GameEngine3D>(new ModelInstanceHack(renderEngine.getGameEngine().assetManager.planetModel), planet, this);
             gameObject.instance.transform.setToTranslationAndScaling(x, -PLANET_HIGHT / 2, z, PLANET_3D_SIZE, PLANET_HIGHT, PLANET_3D_SIZE);
             gameObject.update();
             renderEngine.addStatic(gameObject);
-            stationGameObject = new GameObject<GameEngine3D>(new ModelInstanceHack(renderEngine.getGameEngine().assetManager.station.scene.model), null, this);
+            stationGameObject = new GameObject<GameEngine3D>(new ModelInstanceHack(renderEngine.getGameEngine().assetManager.station.scene.model), planet, this);
             stationGameObject.instance.transform.setToTranslation(x, -32, z);
             stationGameObject.update();
             renderEngine.addStatic(stationGameObject);
@@ -361,7 +362,7 @@ public class Planet3DRenderer extends ObjectRenderer<GameEngine3D> {
         }
     }
 
-    private void renderPlanet(final RenderEngine3D<GameEngine3D> renderEngine, final long currentTime, final float timeOfDay, final boolean selected) {
+    private void renderPlanet(final RenderEngine3D<GameEngine3D> renderEngine, final long currentTime, final float timeOfDay, final boolean selected) throws OpenAlException {
         //		float x = planet.x;
         //		float z = planet.y;
         //		float hps = PLANET_SIZE / 2;
@@ -491,7 +492,7 @@ public class Planet3DRenderer extends ObjectRenderer<GameEngine3D> {
         }
     }
 
-    private void updatePlanet(final RenderEngine3D<GameEngine3D> renderEngine) {
+    private void updatePlanet(final RenderEngine3D<GameEngine3D> renderEngine) throws OpenAlException {
         float realTimeDelta = Gdx.graphics.getDeltaTime();
         // animate factories
         for (final GameObject<GameEngine3D> go : animatedObjects) {
@@ -515,6 +516,8 @@ public class Planet3DRenderer extends ObjectRenderer<GameEngine3D> {
         rotation += rotationSpeed * realTimeDelta;
         stationGameObject.instance.transform.setToTranslation(planet.x, -16, planet.z);
         stationGameObject.instance.transform.rotate(Vector3.Y, rotation);
+        planet.communicationPartner.ttsPlayer.play();
+//        planet.communicationPartner.ttsPlayer.setPositionAndVelocity(position, velocity);
 
     }
 

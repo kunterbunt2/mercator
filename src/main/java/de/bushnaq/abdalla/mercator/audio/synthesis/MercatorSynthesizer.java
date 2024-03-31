@@ -27,8 +27,8 @@ import de.bushnaq.abdalla.mercator.universe.sim.trader.Engine;
  */
 public class MercatorSynthesizer extends Synthesizer {
 
-    private static final float HIGHEST_FREQUENCY = 2 * 2 * 261.6256f;//C5
-    private static final float LOWEST_FREQUENCY  = 32.70320f;//C1
+    private static final float HIGHEST_FREQUENCY = 6 * 2 * 261.6256f;//C5
+    private static final float LOWEST_FREQUENCY  = 6 * 32.70320f;//C1
 
     private final Lfo           lfo1;
     private final SawOscillator saw1;
@@ -69,7 +69,7 @@ public class MercatorSynthesizer extends Synthesizer {
         speed = Math.max(Engine.MIN_ENGINE_SPEED, speed);
 
         final float frequency  = LOWEST_FREQUENCY + (HIGHEST_FREQUENCY - LOWEST_FREQUENCY) * (speed - Engine.MIN_ENGINE_SPEED) / (Engine.MAX_ENGINE_SPEED - Engine.MIN_ENGINE_SPEED);
-        final float detune     = 2.5f;//cent
+        final float detune     = 1.5f;//cent
         final float frequency1 = (float) (frequency * Math.pow(2, detune / 1200));
 
         final float bassGain = 1 - (speed - Engine.MIN_ENGINE_SPEED) / (Engine.MAX_ENGINE_SPEED - Engine.MIN_ENGINE_SPEED);
@@ -108,12 +108,12 @@ public class MercatorSynthesizer extends Synthesizer {
         setFilterGain(lowGain, highGain);
         if (lowGain < 0.5f) {
             setFilter(false);
-            setBassBoost(false);
+            filters.setBassBoost(false);
         } else {
             setFilter(true);
-            setBassBoost(true);
+            filters.setBassBoost(true);
         }
-        setBassBoostGain(frequency / 2, bassGain * (24));
+        filters.setBassBoostGain(frequency / 2, bassGain * (24));
     }
     //	public void init(float speed) throws OpenAlException {
     //		speed = Math.min(MAX_SPEED, speed);

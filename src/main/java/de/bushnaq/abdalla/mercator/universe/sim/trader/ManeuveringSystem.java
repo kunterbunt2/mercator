@@ -157,7 +157,7 @@ public class ManeuveringSystem {
         try {
             oggPlayer = audioEngine.createAudioProducer(OggPlayer.class);
             oggPlayer.setFile(Gdx.files.internal(AtlasManager.getAssetsFolderName() + "/audio/thrusters_loop.ogg"));
-            oggPlayer.setGain(1.0f);
+            oggPlayer.setGain(100.0f);
             oggPlayer.setAmbient(false);
             oggPlayer.setLoop(true);
         } catch (OpenAlException e) {
@@ -178,6 +178,8 @@ public class ManeuveringSystem {
 //            if (Debug.isFilter(trader.getName()))
 //                logger.info("end");
             trader.setSubStatus(TraderSubStatus.TRADER_STATUS_WAITING_FOR_WAYPOINT);
+            if (trader.targetWaypoint.city != null)
+                trader.communicationPartner.informControlTower();
         } else {
 //            if (Debug.isFilter(trader.getName()))
 //                logger.info("not-end");

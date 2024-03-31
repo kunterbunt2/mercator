@@ -16,6 +16,7 @@
 
 package de.bushnaq.abdalla.mercator.universe;
 
+import de.bushnaq.abdalla.engine.audio.OpenAlException;
 import de.bushnaq.abdalla.mercator.renderer.GameEngine;
 import de.bushnaq.abdalla.mercator.universe.good.GoodList;
 import de.bushnaq.abdalla.mercator.universe.land.Land;
@@ -359,7 +360,7 @@ public class UniverseGenerator {
     }
 
     // ---Create the planets
-    private PlanetList generatePlanetList(GameEngine gameEngine, final Universe universe) {
+    private PlanetList generatePlanetList(GameEngine gameEngine, final Universe universe) throws OpenAlException {
         final PlanetList planetList = new PlanetList();
         int              count      = 0;
         do {

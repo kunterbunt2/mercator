@@ -167,7 +167,7 @@ public class Universe {
                         // for ( Trader trader : traderList )
                         // {
                         if (trader.advanceInTime(currentTime, universeRG, planetList, selectedTrader == trader)) {
-                            if (Debug.isFilter(trader.getName())) {
+                            if (Debug.isFilterTrader(trader.getName())) {
                                 final int a = 23;
                             }
                             trader.planet.setCredits(trader.planet.getCredits() + trader.getCredits());
@@ -507,8 +507,10 @@ public class Universe {
         if (this.selected instanceof Trader) {
             selectedTrader = (Trader) this.selected;
             selectedTrader.unselect();
+        } else if (this.selected instanceof Planet) {
+            selectedPlanet = (Planet) this.selected;
+            selectedPlanet.unselect();
         }
-        this.selected              = selected;
         selectedPlanet             = null;
         selectedTrader             = null;
         selectedSim                = null;
@@ -517,26 +519,28 @@ public class Universe {
         if (selected != null) {
             if (selected instanceof Planet) {
                 selectedPlanet = (Planet) selected;
-                if (ScreenListener != null)
+                if (ScreenListener != null && this.selected == selected)
                     ScreenListener.setCamera(selectedPlanet.x, selectedPlanet.z, setDirty);
+                selectedPlanet.select();
             } else if (selected instanceof Trader) {
                 selectedTrader = (Trader) selected;
-                if (ScreenListener != null)
+                if (ScreenListener != null && this.selected == selected)
                     ScreenListener.setCamera(selectedTrader.x, selectedTrader.z, setDirty);
                 selectedTrader.select();
             } else if (selected instanceof Sim) {
                 selectedSim = (Sim) selected;
-                if (ScreenListener != null)
+                if (ScreenListener != null && this.selected == selected)
                     ScreenListener.setCamera(selectedSim.planet.x, selectedSim.planet.z, setDirty);
             } else if (selected instanceof ProductionFacility) {
                 selectedProductionFacility = (ProductionFacility) selected;
-                if (ScreenListener != null)
+                if (ScreenListener != null && this.selected == selected)
                     ScreenListener.setCamera(selectedProductionFacility.planet.x, selectedProductionFacility.planet.z, setDirty);
             } else if (selected instanceof Good) {
                 selectedGood = (Good) selected;
             }
         } else {
         }
+        this.selected = selected;
     }
 
 //    private void windowstts() {

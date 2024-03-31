@@ -143,7 +143,7 @@ public class Trader extends Sim {
                     sell(currentTime, randomGenerator);
                 } else {
                     //we need to travel somewhere to actually sell
-                    communicationPartner.informControlTower();
+//                    communicationPartner.informControlTower();
                     extractWaypointList();
                     sourceWaypoint = sourcePlanet;
                     targetWaypoint = waypointList.get(1).waypoint;
@@ -200,7 +200,7 @@ public class Trader extends Sim {
                     destinationWaypointDistance = 0;
                     buy(currentTime, randomGenerator);
                 } else {
-                    communicationPartner.informControlTower();
+//                    communicationPartner.informControlTower();
                     extractWaypointList();
                     sourceWaypoint              = null;
                     targetWaypoint              = waypointList.get(0).waypoint;
@@ -321,8 +321,7 @@ public class Trader extends Sim {
                     planet.universe.eventManager.add(EventLevel.trace, currentTime, this, String.format("waiting for waypoint %s to become clear", targetWaypoint.getName()));
                 }
                 if (targetWaypoint.city == null) {
-                    communicationPartner.informControlTower();
-                    if (Debug.isFilter(getName()))
+                    if (Debug.isFilterTrader(getName()))
                         logger.info(String.format("reached waypoint %s %s %s", targetWaypoint.name, traderStatus.getName(), subStatus.getName()));
                     // we reached the next waypoint
                     if (sourceWaypoint != null) {
@@ -338,12 +337,12 @@ public class Trader extends Sim {
                     destinationWaypointDistanceProgress = destinationWaypointDistanceProgress - destinationWaypointDistance;
                     destinationWaypointDistance         = sourceWaypoint.queryDistance(targetWaypoint);
                     setSubStatus(TraderSubStatus.TRADER_STATUS_ALIGNING);
-                    if (Debug.isFilter(getName()))
+                    if (Debug.isFilterTrader(getName()))
                         logger.info(String.format("startRotation"));
                     maneuveringSystem.startRotation();
                 } else {
                     //we reached a city
-                    if (Debug.isFilter(getName()))
+                    if (Debug.isFilterTrader(getName()))
                         logger.info(String.format("reached city %s %s %s", targetWaypoint.name, traderStatus.getName(), subStatus.getName()));
                     if (sourceWaypoint != null) freePrevWaypoints();
                     // ---Pay for the jump
@@ -701,7 +700,7 @@ public class Trader extends Sim {
                 break;
             case TRADER_STATUS_WAITING_FOR_WAYPOINT:
                 if (pathIsClear()) {
-                    if (Debug.isFilter(getName()))
+                    if (Debug.isFilterTrader(getName()))
                         logger.info(String.format("**** we are cleared for next waypoint %s", targetWaypoint.name));
                     setSubStatus(TraderSubStatus.TRADER_STATUS_ACCELERATING);
                 }

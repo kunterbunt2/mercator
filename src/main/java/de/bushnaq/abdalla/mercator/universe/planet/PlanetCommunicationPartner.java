@@ -17,6 +17,7 @@
 package de.bushnaq.abdalla.mercator.universe.planet;
 
 import de.bushnaq.abdalla.engine.audio.*;
+import de.bushnaq.abdalla.mercator.util.Debug;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,14 +26,17 @@ import java.util.List;
 import java.util.ListIterator;
 
 public class PlanetCommunicationPartner implements CommunicationPartner {
-    private final Logger logger = LoggerFactory.getLogger(this.getClass());
-    private final Planet planet;
-    List<RadioMessage> radioMessages = new ArrayList<>();
-    private AudioEngine audioEngine;
-    private TTSPlayer   ttsPlayer;
+    final         TTSPlayer          ttsPlayer;
+    private final AudioEngine        audioEngine;
+    private final Logger             logger        = LoggerFactory.getLogger(this.getClass());
+    private final Planet             planet;
+    private final List<RadioMessage> radioMessages = new ArrayList<>();
 
-    public PlanetCommunicationPartner(Planet planet) {
-        this.planet = planet;
+    public PlanetCommunicationPartner(AudioEngine audioEngine, Planet planet) throws OpenAlException {
+        this.audioEngine = audioEngine;
+        this.planet      = planet;
+        this.ttsPlayer   = audioEngine.createAudioProducer(TTSPlayer.class);
+        this.ttsPlayer.setGain(1f);
     }
 
     @Override
@@ -42,7 +46,7 @@ public class PlanetCommunicationPartner implements CommunicationPartner {
 
     @Override
     public boolean isSelected() {
-        return false;
+        return planet.selected;
     }
 
 
@@ -74,14 +78,18 @@ public class PlanetCommunicationPartner implements CommunicationPartner {
             // (In other words, returns true if next would return an element rather than throwing an exception.)
             while (crunchifyIterator.hasNext()) {
                 RadioMessage rm = crunchifyIterator.next();
-
+//                if (Debug.isFilterPlanet(planet.getName()))
+//                    logger.info(String.format("%d messages to answer, waiting for right time to answer", radioMessages.size()));
                 if (planet.currentTime - rm.time > RADIO_ANSWER_DELAY) {
                     switch (rm.id) {
                         case REQUEST_TO_DOCK -> {
-                            String string = String.format(RadioTTS.REQUEST_TO_DOCK_APPROVED_01, getName(), rm.from.getName());
-                            rm.from.radio(new RadioMessage(planet.currentTime, this, rm.from, RadioMessageId.APPROVE_TO_DOCK, string));
-//                            radioMessages.remove(rm);
-                            crunchifyIterator.remove();
+//                            if (Debug.isFilterPlanet(planet.getName()))
+//                                logger.info(String.format("answering %s message", rm.id.name()));
+                            String string = String.format(audioEngine.radioTTS.resolveString(RadioTTS.REQUEST_TO_DOCK_APPROVED_01), getName(), rm.from.getName());
+                            say(string);
+                            RadioMessage replyMessage = new RadioMessage(planet.currentTime, this, rm.from, RadioMessageId.APPROVE_TO_DOCK, string);
+                            rm.from.radio(replyMessage);
+                            crunchifyIterator.remove();//remove message
                             changed = true;
                             break;
                         }
@@ -96,6 +104,9 @@ public class PlanetCommunicationPartner implements CommunicationPartner {
     }
 
     public void say(String msg) {
+        if (Debug.isFilterPlanet(planet.getName())) {
+            logger.info(String.format("say %s selected=%b", msg, isSelected()));
+        }
         if (isSelected()) {
             ttsPlayer.speak(msg);
             logger.info(msg);

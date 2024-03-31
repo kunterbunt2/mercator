@@ -16,6 +16,7 @@
 
 package de.bushnaq.abdalla.mercator.universe.planet;
 
+import de.bushnaq.abdalla.engine.audio.OpenAlException;
 import de.bushnaq.abdalla.mercator.renderer.GameEngine;
 import de.bushnaq.abdalla.mercator.universe.Universe;
 import de.bushnaq.abdalla.mercator.universe.factory.Factory;
@@ -41,7 +42,7 @@ public class Planet extends Waypoint implements TradingPartner {
     public static final int                        PLANET_DISTANCE        = 2048;
     public final static int                        PLANET_MAX_SIMS        = 10;
     public final static float                      PLANET_START_CREDITS   = 20000;
-    public              PlanetCommunicationPartner communicationPartner   = new PlanetCommunicationPartner(this);
+    public              PlanetCommunicationPartner communicationPartner;
     public              long                       currentTime            = 0;
     public              SimList                    deadSimList            = new SimList(this);
     public              PlanetEventManager         eventManager;
@@ -56,6 +57,7 @@ public class Planet extends Waypoint implements TradingPartner {
     public              long                       timeDelta              = 0;
     public              TraderList                 traderList             = new TraderList();
     public              Universe                   universe;
+    boolean selected;
     private             float                      credits                = PLANET_START_CREDITS;
     private             GoodList                   goodList               = new GoodList();
     private             HistoryManager             historyManager;
@@ -112,7 +114,7 @@ public class Planet extends Waypoint implements TradingPartner {
     // transported( producer.getPlanet(), transactionAmount );
     // from.sell( currentTime, goodType, price, transactionAmount, this );
     // }
-    public void create(GameEngine gameEngine, final MercatorRandomGenerator randomGenerator) {
+    public void create(GameEngine gameEngine, final MercatorRandomGenerator randomGenerator) throws OpenAlException {
         setHistoryManager(new HistoryManager());
         getGoodList().createGoodList(this);
         simList.create(this, Sim.SIM_START_CREDITS, /* Universe.randomGenerator.nextInt( 10 ) + 10 */5);
@@ -174,6 +176,7 @@ public class Planet extends Waypoint implements TradingPartner {
         // }
         // factoryList.add( factory );
         // }
+        communicationPartner = new PlanetCommunicationPartner(gameEngine.getAudioEngine(), this);
     }
 
     private void distributeEnigneers() {
@@ -246,6 +249,11 @@ public class Planet extends Waypoint implements TradingPartner {
         this.credits = credits;
     }
 
+    @Override
+    public void setLastTransaction(final long currentTime) {
+        lastTransaction = currentTime;
+    }
+
     // @Override
     // public void pay( long currentTime, float price, float transactionAmount,
     // TradingPartner transaction )
@@ -256,11 +264,6 @@ public class Planet extends Waypoint implements TradingPartner {
     // getHistoryManager().get( currentTime ).buy( null, price * transactionAmount,
     // transactionAmount, transaction.getPlanet() );
     // }
-
-    @Override
-    public void setLastTransaction(final long currentTime) {
-        lastTransaction = currentTime;
-    }
 
     // @Override
     // public void sell( long currentTime, GoodType goodType, float price, float
@@ -283,7 +286,6 @@ public class Planet extends Waypoint implements TradingPartner {
         else
             return satisfaction / simList.size();
     }
-
 
     public float queryAverageFoodPrice() {
         return goodList.getByType(GoodType.FOOD).getAveragePrice();
@@ -309,6 +311,11 @@ public class Planet extends Waypoint implements TradingPartner {
         universe.kill(sim);
     }
 
+    public void select() {
+        selected = true;
+        communicationPartner.select();
+    }
+
     //	public void setName(final String name) {
     //		this.name = name;
     //	}
@@ -330,5 +337,10 @@ public class Planet extends Waypoint implements TradingPartner {
             from.statisticManager.transported(this, -amount2);
             statisticManager.transported(from, amount - amount2);
         }
+    }
+
+    public void unselect() {
+        selected = false;
+        communicationPartner.unselect();
     }
 }

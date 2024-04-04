@@ -25,7 +25,7 @@ import com.badlogic.gdx.math.Vector3;
 import de.bushnaq.abdalla.engine.CustomizedSpriteBatch;
 import de.bushnaq.abdalla.engine.GameObject;
 import de.bushnaq.abdalla.engine.RenderEngine3D;
-import de.bushnaq.abdalla.mercator.renderer.GameEngine3D;
+import de.bushnaq.abdalla.mercator.engine.GameEngine3D;
 import net.mgsx.gltf.scene3d.attributes.PBRColorAttribute;
 
 public class Thruster {

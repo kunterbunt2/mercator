@@ -22,7 +22,7 @@ import com.badlogic.gdx.graphics.g3d.environment.PointLight;
 import com.badlogic.gdx.math.Vector3;
 import de.bushnaq.abdalla.engine.GameObject;
 import de.bushnaq.abdalla.engine.RenderEngine3D;
-import de.bushnaq.abdalla.mercator.renderer.GameEngine3D;
+import de.bushnaq.abdalla.mercator.engine.GameEngine3D;
 
 public class StrobeLight {
     public static final  float                    LIGHT_MAX_INTENSITY          = 10000f;

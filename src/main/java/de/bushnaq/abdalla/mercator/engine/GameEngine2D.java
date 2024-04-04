@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package de.bushnaq.abdalla.mercator.renderer;
+package de.bushnaq.abdalla.mercator.engine;
 
 import com.badlogic.gdx.*;
 import com.badlogic.gdx.Input.Buttons;
@@ -34,6 +34,10 @@ import de.bushnaq.abdalla.engine.audio.AudioEngine;
 import de.bushnaq.abdalla.mercator.audio.synthesis.MercatorAudioEngine;
 import de.bushnaq.abdalla.mercator.desktop.Context;
 import de.bushnaq.abdalla.mercator.desktop.LaunchMode;
+import de.bushnaq.abdalla.mercator.renderer.AtlasManager;
+import de.bushnaq.abdalla.mercator.renderer.MercatorMessage;
+import de.bushnaq.abdalla.mercator.renderer.ScreenListener;
+import de.bushnaq.abdalla.mercator.renderer.ShowGood;
 import de.bushnaq.abdalla.mercator.renderer.reports.Info;
 import de.bushnaq.abdalla.mercator.universe.Universe;
 import de.bushnaq.abdalla.mercator.universe.factory.ProductionFacility;

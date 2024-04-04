@@ -17,6 +17,8 @@
 package de.bushnaq.abdalla.mercator.renderer;
 
 import de.bushnaq.abdalla.engine.ObjectRenderer;
+import de.bushnaq.abdalla.mercator.engine.GameEngine2D;
+import de.bushnaq.abdalla.mercator.engine.GameEngine3D;
 import de.bushnaq.abdalla.mercator.util.Location3D;
 
 public class RenderablePosition extends Location3D {

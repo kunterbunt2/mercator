@@ -18,7 +18,7 @@ package de.bushnaq.abdalla.mercator.universe;
 
 import com.badlogic.gdx.graphics.Color;
 import de.bushnaq.abdalla.mercator.desktop.GraphicsDimentions;
-import de.bushnaq.abdalla.mercator.renderer.GameEngine;
+import de.bushnaq.abdalla.mercator.engine.GameEngine;
 import de.bushnaq.abdalla.mercator.renderer.ScreenListener;
 import de.bushnaq.abdalla.mercator.renderer.reports.GraphChartData;
 import de.bushnaq.abdalla.mercator.renderer.reports.PieChartData;

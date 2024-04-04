@@ -20,7 +20,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Vector2;
 import de.bushnaq.abdalla.engine.ObjectRenderer;
 import de.bushnaq.abdalla.engine.RenderEngine2D;
-import de.bushnaq.abdalla.mercator.renderer.GameEngine2D;
+import de.bushnaq.abdalla.mercator.engine.GameEngine2D;
 import de.bushnaq.abdalla.mercator.universe.planet.Planet2DRenderer;
 
 public class JumpGate2DRenderer extends ObjectRenderer<GameEngine2D> {

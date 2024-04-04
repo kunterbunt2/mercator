@@ -20,7 +20,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Circle;
 import de.bushnaq.abdalla.engine.ObjectRenderer;
 import de.bushnaq.abdalla.engine.RenderEngine2D;
-import de.bushnaq.abdalla.mercator.renderer.GameEngine2D;
+import de.bushnaq.abdalla.mercator.engine.GameEngine2D;
 import de.bushnaq.abdalla.mercator.universe.factory.ProductionFacility;
 import de.bushnaq.abdalla.mercator.universe.sim.Sim;
 import de.bushnaq.abdalla.mercator.universe.sim.trader.Trader2DRenderer;

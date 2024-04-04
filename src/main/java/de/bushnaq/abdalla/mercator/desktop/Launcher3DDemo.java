@@ -22,7 +22,7 @@ import com.badlogic.gdx.Graphics;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
-import de.bushnaq.abdalla.mercator.renderer.GameEngine3D;
+import de.bushnaq.abdalla.mercator.engine.GameEngine3D;
 import de.bushnaq.abdalla.mercator.universe.Universe;
 import de.bushnaq.abdalla.mercator.universe.event.EventLevel;
 import de.bushnaq.abdalla.mercator.universe.sim.Sim;

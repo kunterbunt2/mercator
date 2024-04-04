@@ -29,6 +29,7 @@ import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFont
 import com.kotcrab.vis.ui.VisUI;
 import de.bushnaq.abdalla.engine.util.FontData;
 import de.bushnaq.abdalla.mercator.desktop.Context;
+import de.bushnaq.abdalla.mercator.engine.GameEngine2D;
 
 public class AtlasManager {
     private static String       assetsFolderName;

@@ -17,7 +17,7 @@
 package de.bushnaq.abdalla.mercator.universe.planet;
 
 import de.bushnaq.abdalla.engine.audio.OpenAlException;
-import de.bushnaq.abdalla.mercator.renderer.GameEngine;
+import de.bushnaq.abdalla.mercator.engine.GameEngine;
 import de.bushnaq.abdalla.mercator.universe.Universe;
 import de.bushnaq.abdalla.mercator.universe.factory.Factory;
 import de.bushnaq.abdalla.mercator.universe.factory.ProductionFacility;

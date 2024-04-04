@@ -24,7 +24,7 @@ import de.bushnaq.abdalla.engine.audio.AudioEngine;
 import de.bushnaq.abdalla.engine.audio.OggPlayer;
 import de.bushnaq.abdalla.engine.audio.OpenAlException;
 import de.bushnaq.abdalla.mercator.renderer.AtlasManager;
-import de.bushnaq.abdalla.mercator.renderer.GameEngine3D;
+import de.bushnaq.abdalla.mercator.engine.GameEngine3D;
 import de.bushnaq.abdalla.mercator.universe.good.Good;
 import de.bushnaq.abdalla.mercator.universe.path.Waypoint;
 import org.slf4j.Logger;

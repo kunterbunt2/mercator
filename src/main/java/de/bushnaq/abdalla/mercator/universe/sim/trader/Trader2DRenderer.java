@@ -21,7 +21,7 @@ import com.badlogic.gdx.math.Circle;
 import com.badlogic.gdx.math.Vector3;
 import de.bushnaq.abdalla.engine.ObjectRenderer;
 import de.bushnaq.abdalla.engine.RenderEngine2D;
-import de.bushnaq.abdalla.mercator.renderer.GameEngine2D;
+import de.bushnaq.abdalla.mercator.engine.GameEngine2D;
 import de.bushnaq.abdalla.mercator.universe.Universe;
 import de.bushnaq.abdalla.mercator.universe.planet.Planet2DRenderer;
 import de.bushnaq.abdalla.mercator.universe.planet.Planet3DRenderer;

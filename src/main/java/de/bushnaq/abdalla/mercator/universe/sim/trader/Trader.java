@@ -19,7 +19,7 @@ package de.bushnaq.abdalla.mercator.universe.sim.trader;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector3;
 import de.bushnaq.abdalla.engine.audio.OpenAlException;
-import de.bushnaq.abdalla.mercator.renderer.GameEngine;
+import de.bushnaq.abdalla.mercator.engine.GameEngine;
 import de.bushnaq.abdalla.mercator.universe.event.EventLevel;
 import de.bushnaq.abdalla.mercator.universe.event.SimEventType;
 import de.bushnaq.abdalla.mercator.universe.good.Good;

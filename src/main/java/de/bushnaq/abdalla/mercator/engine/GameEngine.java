@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package de.bushnaq.abdalla.mercator.renderer;
+package de.bushnaq.abdalla.mercator.engine;
 
 import de.bushnaq.abdalla.engine.audio.AudioEngine;
 

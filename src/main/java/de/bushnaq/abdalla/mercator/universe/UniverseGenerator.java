@@ -17,7 +17,7 @@
 package de.bushnaq.abdalla.mercator.universe;
 
 import de.bushnaq.abdalla.engine.audio.OpenAlException;
-import de.bushnaq.abdalla.mercator.renderer.GameEngine;
+import de.bushnaq.abdalla.mercator.engine.GameEngine;
 import de.bushnaq.abdalla.mercator.universe.good.GoodList;
 import de.bushnaq.abdalla.mercator.universe.land.Land;
 import de.bushnaq.abdalla.mercator.universe.land.LandList;

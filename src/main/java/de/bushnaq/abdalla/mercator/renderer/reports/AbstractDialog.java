@@ -35,7 +35,7 @@ import com.kotcrab.vis.ui.widget.VisDialog;
 import com.kotcrab.vis.ui.widget.VisTable;
 import com.kotcrab.vis.ui.widget.VisTextButton;
 import de.bushnaq.abdalla.mercator.desktop.Context;
-import de.bushnaq.abdalla.mercator.renderer.GameEngine3D;
+import de.bushnaq.abdalla.mercator.engine.GameEngine3D;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -32,7 +32,7 @@ import de.bushnaq.abdalla.mercator.desktop.DesktopContextFactory;
 import de.bushnaq.abdalla.mercator.desktop.GraphicsDimentions;
 import de.bushnaq.abdalla.mercator.desktop.LaunchMode;
 import de.bushnaq.abdalla.mercator.renderer.AtlasManager;
-import de.bushnaq.abdalla.mercator.renderer.GameEngine3D;
+import de.bushnaq.abdalla.mercator.engine.GameEngine3D;
 import de.bushnaq.abdalla.mercator.universe.event.EventLevel;
 import de.bushnaq.abdalla.mercator.universe.sim.Sim;
 import net.mgsx.gltf.loaders.gltf.GLTFLoader;

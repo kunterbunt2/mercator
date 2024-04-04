@@ -22,7 +22,7 @@ import com.badlogic.gdx.graphics.g3d.utils.CameraInputController;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import de.bushnaq.abdalla.engine.camera.MovingCamera;
-import de.bushnaq.abdalla.mercator.renderer.GameEngine3D;
+import de.bushnaq.abdalla.mercator.engine.GameEngine3D;
 import de.bushnaq.abdalla.mercator.universe.Universe;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,10 +30,10 @@ import org.slf4j.LoggerFactory;
 public class ZoomingCameraInputController extends CameraInputController {
 
     private final GameEngine3D gameEngine;
-    private final Logger       logger = LoggerFactory.getLogger(this.getClass());
-    private final Vector3      tmpV1  = new Vector3();
-    private final Vector3      tmpV2  = new Vector3();
-    public  int   zoomIndex       = 5;
+    private final Logger       logger    = LoggerFactory.getLogger(this.getClass());
+    private final Vector3      tmpV1     = new Vector3();
+    private final Vector3      tmpV2     = new Vector3();
+    public        int          zoomIndex = 5;
     CameraProperties[] zoomFactors = {//
             new CameraProperties(75, 75, 1000f),//
             new CameraProperties(150, 200, 2000f),//

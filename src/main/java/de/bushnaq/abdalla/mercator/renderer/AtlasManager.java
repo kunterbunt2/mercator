@@ -31,21 +31,19 @@ import de.bushnaq.abdalla.engine.util.FontData;
 import de.bushnaq.abdalla.mercator.desktop.Context;
 
 public class AtlasManager {
-    public static final int          SOOMIN_FONT_SIZE = 10;
-    private static      String       assetsFolderName;
-    public              TextureAtlas atlas;
-    public              AtlasRegion  barTextureRegion;
-    public              BitmapFont   bold128Font;
-    public              BitmapFont   bold256Font;
-    public              BitmapFont   chartFont;
-    public              AtlasRegion  dashTextureRegion;
-    public              AtlasRegion  dashTextureRegion16;
-    public              BitmapFont   defaultFont;
-    public              BitmapFont   demoMidFont;
-    public              AtlasRegion  dottedLineTextureRegion;
-    public              AtlasRegion  factoryTextureRegion;
-    public              FontData[]   fontDataList     = {new FontData("default-font", Context.getAppFolderName() + "/assets/fonts/Roboto-Bold.ttf", GameEngine2D.FONT_SIZE),//
-            new FontData("zoomin-default-font", Context.getAppFolderName() + "/assets/fonts/Roboto-Bold.ttf", SOOMIN_FONT_SIZE),//
+    private static String       assetsFolderName;
+    public         TextureAtlas atlas;
+    public         BitmapFont   bold128Font;
+    public         BitmapFont   bold256Font;
+    public         BitmapFont   chartFont;
+    public         AtlasRegion  dashTextureRegion;
+    public         AtlasRegion  dashTextureRegion16;
+    public         BitmapFont   defaultFont;
+    public         BitmapFont   demoMidFont;
+    public         AtlasRegion  dottedLineTextureRegion;
+    public         AtlasRegion  factoryTextureRegion;
+    public         FontData[]   fontDataList = {new FontData("default-font", Context.getAppFolderName() + "/assets/fonts/Roboto-Bold.ttf", GameEngine2D.FONT_SIZE),//
+            new FontData("zoomin-default-font", Context.getAppFolderName() + "/assets/fonts/Roboto-Bold.ttf", 10),//
             new FontData("time-machine-font", Context.getAppFolderName() + "/assets/fonts/Roboto-Bold.ttf", GameEngine2D.TIME_MACHINE_FONT_SIZE),//
             new FontData("chart-font", Context.getAppFolderName() + "/assets/fonts/Roboto-bold.ttf", GameEngine2D.CHART_FONT_SIZE),//
             new FontData("menu-font", Context.getAppFolderName() + "/assets/fonts/Roboto-Regular.ttf", GameEngine2D.MENU_FONT_SIZE),//
@@ -57,26 +55,20 @@ public class AtlasManager {
             new FontData("logo-font", Context.getAppFolderName() + "/assets/fonts/Roboto-Thin.ttf", 128), //
             new FontData("version-font", Context.getAppFolderName() + "/assets/fonts/Roboto-Thin.ttf", 16) //
     };
-    public              AtlasRegion  gaugeTextureRegion;
-    public              BitmapFont   logoFont;
-    public              BitmapFont   menuBoldFont;
-    //	public Texture good_baseColor;
-    //	public AtlasRegion good_baseColorRegion;
-    //	public Texture good_normal;
-    //	public AtlasRegion good_normalRegion;
-    //	public Texture good_occlusionRoughnessMetallic;
-    //	public AtlasRegion good_occlusionRoughnessMetallicRegion;
-    public              BitmapFont   menuFont;
-    public              BitmapFont   modelFont;
-    public              AtlasRegion  patternCircle12;
-    public              AtlasRegion  patternCircle24;
-    public              AtlasRegion  planetTextureRegion;
-    public              AtlasRegion  simTextureRegion;
-    public              AtlasRegion  systemTextureRegion;
-    public              BitmapFont   timeMachineFont;
-    public              AtlasRegion  traderTextureRegion;
-    public              BitmapFont   versionFont;
-    public              BitmapFont   zoominDefaultFont;
+    public         AtlasRegion  gaugeTextureRegion;
+    public         BitmapFont   logoFont;
+    public         BitmapFont   menuBoldFont;
+    public         BitmapFont   menuFont;
+    public         BitmapFont   modelFont;
+    public         AtlasRegion  patternCircle12;
+    public         AtlasRegion  patternCircle24;
+    public         AtlasRegion  planetTextureRegion;
+    public         AtlasRegion  simTextureRegion;
+    public         AtlasRegion  systemTextureRegion;
+    public         BitmapFont   timeMachineFont;
+    public         AtlasRegion  traderTextureRegion;
+    public         BitmapFont   versionFont;
+    public         BitmapFont   zoominDefaultFont;
 
     public AtlasManager() {
     }
@@ -92,7 +84,7 @@ public class AtlasManager {
         atlas.dispose();
     }
 
-    public void init() {
+    public void init() throws Exception {
         assetsFolderName = Context.getAppFolderName() + "/assets";
         initTextures();
         initFonts();
@@ -129,26 +121,21 @@ public class AtlasManager {
         versionFont       = fontDataList[11].font;
     }
 
-    private void initTextures() {
-        atlas                = new TextureAtlas(Gdx.files.internal(Context.getAppFolderName() + "/assets/atlas/atlas.atlas"));
-        systemTextureRegion  = atlas.findRegion("system");
-        planetTextureRegion  = atlas.findRegion("planet");
-        simTextureRegion     = atlas.findRegion("sim");
-        factoryTextureRegion = atlas.findRegion("factory");
-        gaugeTextureRegion   = atlas.findRegion("gauge");
-        traderTextureRegion  = atlas.findRegion("trader");
-        dashTextureRegion    = atlas.findRegion("dash");
-        dashTextureRegion16  = atlas.findRegion("dash16");
-        patternCircle12      = atlas.findRegion("pattern-circle-12");
-        patternCircle24      = atlas.findRegion("pattern-circle-24");
-        //		good_baseColorRegion = atlas.findRegion("good_baseColor");
-        //		good_normalRegion = atlas.findRegion("good_normal");
-        //		good_occlusionRoughnessMetallicRegion = atlas.findRegion("good_occlusionRoughnessMetallic");
-        barTextureRegion        = atlas.findRegion("bar");
+    private void initTextures() throws Exception {
+        AtlasGenerator atlasGenerator = new AtlasGenerator();
+        atlasGenerator.generateIfNeeded(this);
+        atlas                   = new TextureAtlas(Gdx.files.internal(Context.getAppFolderName() + "/assets/atlas/atlas.atlas"));
+        systemTextureRegion     = atlas.findRegion("system");
+        planetTextureRegion     = atlas.findRegion("planet");
+        simTextureRegion        = atlas.findRegion("sim");
+        factoryTextureRegion    = atlas.findRegion("factory");
+        gaugeTextureRegion      = atlas.findRegion("gauge");
+        traderTextureRegion     = atlas.findRegion("trader");
+        dashTextureRegion       = atlas.findRegion("dash");
+        dashTextureRegion16     = atlas.findRegion("dash16");
+        patternCircle12         = atlas.findRegion("pattern-circle-12");
+        patternCircle24         = atlas.findRegion("pattern-circle-24");
         dottedLineTextureRegion = atlas.findRegion("dotted_line");
-        //		good_baseColor = new Texture(Gdx.files.internal("models/glTF/Metal_Floor_01/Metal_Floor_01_basecolor.jpg"));
-        //		good_occlusionRoughnessMetallic = new Texture(Gdx.files.internal("models/glTF/Metal_Floor_01/Metal_Floor_01_metallic-Metal_Floor_01_roughness.png"));
-        //		good_normal = new Texture(Gdx.files.internal("models/glTF/Metal_Floor_01/Metal_Floor_01_normal.jpg"));
         VisUI.load(VisUI.SkinScale.X2);
         VisUI.getSkin().getFont("default-font").getData().markupEnabled = true;
         VisUI.getSkin().getFont("small-font").getData().markupEnabled   = true;

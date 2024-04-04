@@ -20,7 +20,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.VertexAttributes.Usage;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g3d.Attribute;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Model;
@@ -94,10 +93,10 @@ public class AssetManager {
 
     public void create() throws Exception {
 //        cubeGoldLeaves = new GLTFLoader().load(Gdx.files.internal(AtlasManager.getAssetsFolderName() + "/models/glTF/cube-Gold_leafs/cube-Gold_leafs.gltf"));
-        final Texture           texture      = new Texture(Gdx.files.internal(AtlasManager.getAssetsFolderName() + "/tiles.png"));
-        final TextureRegion[][] tiles        = TextureRegion.split(texture, 32, 32);
-        final ModelBuilder      modelBuilder = new ModelBuilder();
-        final ModelCreator      modelCreator = new ModelCreator();
+        final Texture texture = new Texture(Gdx.files.internal(AtlasManager.getAssetsFolderName() + "/tiles.png"));
+//        final TextureRegion[][] tiles        = TextureRegion.split(texture, 32, 32);
+        final ModelBuilder modelBuilder = new ModelBuilder();
+        final ModelCreator modelCreator = new ModelCreator();
 //        cubeAluminiumBrushed = new GLTFLoader().load(Gdx.files.internal(AtlasManager.getAssetsFolderName() + "/models/glTF/cube-Aluminium_brushed/cube-Aluminium_brushed.gltf"));
 //        BoomBox              = new GLTFLoader().load(Gdx.files.internal(AtlasManager.getAssetsFolderName() + "/models/glTF/BoomBox.gltf"));
         {

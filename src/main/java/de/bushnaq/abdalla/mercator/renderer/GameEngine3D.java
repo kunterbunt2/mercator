@@ -56,7 +56,6 @@ import net.mgsx.gltf.scene3d.attributes.PBRFloatAttribute;
 import net.mgsx.gltf.scene3d.attributes.PBRTextureAttribute;
 import net.mgsx.gltf.scene3d.lights.DirectionalLightEx;
 import net.mgsx.gltf.scene3d.model.ModelInstanceHack;
-import net.mgsx.gltf.scene3d.scene.SceneSkybox;
 import net.mgsx.gltf.scene3d.utils.IBLBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -316,15 +315,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
     private void createEnvironment() {
         // setup IBL (image based lighting)
         if (renderEngine.isPbr()) {
-//			setupImageBasedLightingByFaceNames("ruins", "jpg", "png", "jpg", 10);
-            setupImageBasedLightingByFaceNames("clouds", "jpg", "jpg", "jpg", 10);
-//			setupImageBasedLightingByFaceNames("moonless_golf_2k", "jpg", "jpg", "jpg", 10);
-            // setup skybox
-            if (renderEngine.isSkyBox()) {
-                renderEngine.setDaySkyBox(new SceneSkybox(environmentDayCubemap));
-                renderEngine.setNightSkyBox(new SceneSkybox(environmentNightCubemap));
-            }
-
+            setupImageBasedLighting();
             renderEngine.environment.set(PBRCubemapAttribute.createDiffuseEnv(diffuseCubemap));
             renderEngine.environment.set(PBRCubemapAttribute.createSpecularEnv(specularCubemap));
             renderEngine.environment.set(new PBRTextureAttribute(PBRTextureAttribute.BRDFLUTTexture, brdfLUT));
@@ -1188,22 +1179,10 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
     //		this.maxFramesPerSecond = maxFramesPerSecond;
     //	}
 
-    private void setupImageBasedLightingByFaceNames(final String name, final String diffuseExtension, final String environmentExtension, final String specularExtension, final int specularIterations) {
-//        diffuseCubemap          = EnvironmentUtil.createCubemap(new InternalFileHandleResolver(), AtlasManager.getAssetsFolderName() + "/textures/" + name + "/diffuse/diffuse_", "_0." + diffuseExtension, EnvironmentUtil.FACE_NAMES_FULL);
-//        environmentDayCubemap   = EnvironmentUtil.createCubemap(new InternalFileHandleResolver(), AtlasManager.getAssetsFolderName() + "/textures/" + name + "/environmentDay/environment_", "_0." + environmentExtension, EnvironmentUtil.FACE_NAMES_FULL);
-//        environmentNightCubemap = EnvironmentUtil.createCubemap(new InternalFileHandleResolver(), AtlasManager.getAssetsFolderName() + "/textures/" + name + "/environmentNight/environment_", "_0." + environmentExtension, EnvironmentUtil.FACE_NAMES_FULL);
-//        specularCubemap         = EnvironmentUtil.createCubemap(new InternalFileHandleResolver(), AtlasManager.getAssetsFolderName() + "/textures/" + name + "/specular/specular_", "_", "." + specularExtension, specularIterations, EnvironmentUtil.FACE_NAMES_FULL);
+    private void setupImageBasedLighting() {
         brdfLUT = new Texture(Gdx.files.classpath("net/mgsx/gltf/shaders/brdfLUT.png"));
 
         // // setup quick IBL (image based lighting)
-        // DirectionalLightEx light = new DirectionalLightEx();
-        // light.direction.set(1, -3, 1).nor();
-        // light.color.set(Color.WHITE);
-        // IBLBuilder iblBuilder = IBLBuilder.createOutdoor(light);
-        // environmentCubemap = iblBuilder.buildEnvMap(1024);
-        // diffuseCubemap = iblBuilder.buildIrradianceMap(256);
-        // specularCubemap = iblBuilder.buildRadianceMap(10);
-        // iblBuilder.dispose();
         DirectionalLightEx light = new DirectionalLightEx();
         light.direction.set(1, -3, 1).nor();
         light.color.set(Color.WHITE);

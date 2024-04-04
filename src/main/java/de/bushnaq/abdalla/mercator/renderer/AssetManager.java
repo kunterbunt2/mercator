@@ -61,6 +61,7 @@ public class AssetManager {
     public Model                   jumpGateArrow;
     public Model                   land;
     public Model                   mirrorModel;
+    public SceneAsset              planet01;
     public Model                   planetModel;
     public Model                   redEmissiveModel;
     public Model                   sector;
@@ -112,6 +113,7 @@ public class AssetManager {
         }
         createTrader(modelBuilder, modelCreator);
         createStation(modelBuilder, modelCreator);
+        createPlanet01(modelBuilder, modelCreator);
         createFlame(modelBuilder, modelCreator);
         createGoodContainer(modelBuilder);
 
@@ -236,6 +238,24 @@ public class AssetManager {
         planetModel = modelCreator.createBox(material);
     }
 
+    private void createPlanet01(ModelBuilder modelBuilder, ModelCreator modelCreator) {
+        planet01 = new GLBLoader().load(Gdx.files.internal(String.format(AtlasManager.getAssetsFolderName() + "/models/planet-01.glb")));
+
+        final Attribute metallic  = PBRFloatAttribute.createMetallic(0.9f);
+        final Attribute roughness = PBRFloatAttribute.createRoughness(0.1f);
+        final Attribute color     = new PBRColorAttribute(PBRColorAttribute.BaseColorFactor, Color.BLACK);
+        final Attribute blending  = new BlendingAttribute(0.3f); // opacity is set by pbrMetallicRoughness below
+//        final Material  material  = new Material(metallic, roughness, color/* , culling, normal, occlusion, shininess */, blending);
+
+
+        for (Material material : planet01.scene.model.materials) {
+            if (material.id.equals("material.atmosphere")) {
+                material.set(blending);
+            }
+        }
+
+    }
+
     private void createRedEmissiveModel(ModelCreator modelCreator) {
         final Material material = new Material();
         material.set(PBRColorAttribute.createBaseColorFactor(new Color(Color.WHITE).fromHsv(15, .9f, .8f)));
@@ -253,7 +273,6 @@ public class AssetManager {
     private void createStation(ModelBuilder modelBuilder, ModelCreator modelCreator) {
         station = new GLBLoader().load(Gdx.files.internal(String.format(AtlasManager.getAssetsFolderName() + "/models/station.glb")));
     }
-
 
     private void createTrader(ModelBuilder modelBuilder, ModelCreator modelCreator) {
 //        final Attribute color     = new PBRColorAttribute(PBRColorAttribute.BaseColorFactor, Color.BLACK);

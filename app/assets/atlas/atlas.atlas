@@ -55,35 +55,35 @@ bold-256
   index: -1
 chart-font
   rotate: false
-  xy: 578, 358
+  xy: 899, 679
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 time-machine-font
   rotate: false
-  xy: 578, 358
+  xy: 899, 679
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 zoomin-default-font
   rotate: false
-  xy: 578, 358
+  xy: 899, 679
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 check-off
   rotate: false
-  xy: 1028, 793
+  xy: 3332, 3353
   size: 14, 14
   orig: 14, 14
   offset: 0, 0
   index: -1
 textfield
   rotate: false
-  xy: 1028, 793
+  xy: 3332, 3353
   size: 14, 14
   split: 3, 3, 3, 3
   orig: 14, 14
@@ -91,7 +91,7 @@ textfield
   index: -1
 check-on
   rotate: false
-  xy: 194, 87
+  xy: 3396, 3417
   size: 14, 14
   orig: 14, 14
   offset: 0, 0
@@ -106,21 +106,21 @@ cursor
   index: -1
 dash
   rotate: false
-  xy: 3396, 3496
+  xy: 3973, 4009
   size: 64, 64
   orig: 64, 64
   offset: 0, 0
   index: -1
 dash16
   rotate: false
-  xy: 3716, 3880
+  xy: 771, 422
   size: 64, 64
   orig: 64, 64
   offset: 0, 0
   index: -1
 default
   rotate: false
-  xy: 2178, 1946
+  xy: 194, 153
   size: 254, 77
   orig: 254, 77
   offset: 0, 0
@@ -134,7 +134,7 @@ default-font
   index: -1
 default-pane
   rotate: false
-  xy: 3716, 3876
+  xy: 771, 418
   size: 5, 3
   split: 1, 1, 1, 1
   orig: 5, 3
@@ -142,7 +142,7 @@ default-pane
   index: -1
 default-rect-pad
   rotate: false
-  xy: 3716, 3876
+  xy: 771, 418
   size: 5, 3
   split: 1, 1, 1, 1
   orig: 5, 3
@@ -150,7 +150,7 @@ default-rect-pad
   index: -1
 default-pane-noborder
   rotate: false
-  xy: 3973, 4042
+  xy: 578, 262
   size: 1, 1
   split: 0, 0, 0, 0
   orig: 1, 1
@@ -174,7 +174,7 @@ default-rect-down
   index: -1
 default-round
   rotate: false
-  xy: 899, 658
+  xy: 3203, 3218
   size: 12, 20
   split: 5, 5, 5, 4
   pad: 4, 4, 1, 1
@@ -183,7 +183,7 @@ default-round
   index: -1
 default-round-down
   rotate: false
-  xy: 707, 466
+  xy: 1028, 787
   size: 12, 20
   split: 5, 5, 5, 4
   pad: 4, 4, 1, 1
@@ -192,7 +192,7 @@ default-round-down
   index: -1
 default-round-large
   rotate: false
-  xy: 2433, 2003
+  xy: 449, 210
   size: 20, 20
   split: 5, 5, 5, 4
   orig: 20, 20
@@ -200,7 +200,7 @@ default-round-large
   index: -1
 default-scroll
   rotate: false
-  xy: 578, 337
+  xy: 899, 658
   size: 20, 20
   split: 2, 2, 2, 2
   orig: 20, 20
@@ -208,7 +208,7 @@ default-scroll
   index: -1
 default-select
   rotate: false
-  xy: 2178, 1925
+  xy: 194, 132
   size: 27, 20
   split: 4, 14, 4, 4
   orig: 27, 20
@@ -224,7 +224,7 @@ default-select-selection
   index: -1
 default-slider
   rotate: false
-  xy: 3461, 3552
+  xy: 4038, 4065
   size: 8, 8
   split: 2, 2, 2, 2
   orig: 8, 8
@@ -232,7 +232,7 @@ default-slider
   index: -1
 default-slider-knob
   rotate: false
-  xy: 3396, 3477
+  xy: 3973, 3990
   size: 9, 18
   orig: 9, 18
   offset: 0, 0
@@ -247,7 +247,7 @@ default-splitpane
   index: -1
 default-splitpane-vertical
   rotate: false
-  xy: 3781, 3939
+  xy: 836, 481
   size: 3, 5
   split: 0, 0, 0, 5
   orig: 3, 5
@@ -255,7 +255,7 @@ default-splitpane-vertical
   index: -1
 default-window
   rotate: false
-  xy: 3973, 4044
+  xy: 578, 264
   size: 27, 29
   split: 4, 3, 20, 3
   orig: 27, 29
@@ -298,7 +298,7 @@ trader
   index: -1
 gauge
   rotate: false
-  xy: 323, 206
+  xy: 3525, 3536
   size: 4, 24
   orig: 4, 24
   offset: 0, 0
@@ -324,16 +324,23 @@ good_occlusionRoughnessMetallic
   orig: 1024, 1024
   offset: 0, 0
   index: -1
+logo-font
+  rotate: false
+  xy: 2178, 999
+  size: 1024, 1024
+  orig: 1024, 1024
+  offset: 0, 0
+  index: -1
 menu-font
   rotate: false
-  xy: 899, 679
+  xy: 3203, 3239
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 menu-font-bold
   rotate: false
-  xy: 194, 102
+  xy: 3396, 3432
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
@@ -347,7 +354,7 @@ model-font
   index: -1
 pattern-circle-12
   rotate: false
-  xy: 3203, 3239
+  xy: 3716, 3816
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
@@ -361,7 +368,7 @@ pattern-circle-24
   index: -1
 selection
   rotate: false
-  xy: 4001, 4072
+  xy: 606, 292
   size: 1, 1
   orig: 1, 1
   offset: 0, 0
@@ -375,16 +382,23 @@ time-machine
   index: -1
 tree-minus
   rotate: false
-  xy: 3203, 3224
+  xy: 3716, 3801
   size: 14, 14
   orig: 14, 14
   offset: 0, 0
   index: -1
 tree-plus
   rotate: false
-  xy: 3332, 3353
+  xy: 3845, 3930
   size: 14, 14
   orig: 14, 14
+  offset: 0, 0
+  index: -1
+version-font
+  rotate: false
+  xy: 578, 294
+  size: 192, 192
+  orig: 192, 192
   offset: 0, 0
   index: -1
 white

@@ -106,6 +106,7 @@ public class MercatorSynthesizer extends Synthesizer {
         final float highGain = (1 - bassGain);
         //		setFilter(true);
         setFilterGain(lowGain, highGain);
+//        setFilterGain(1f, 0.1f);
         if (lowGain < 0.5f) {
             setFilter(false);
             filters.setBassBoost(false);

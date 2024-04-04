@@ -31,10 +31,7 @@ import com.badlogic.gdx.math.collision.Ray;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.utils.Align;
-import de.bushnaq.abdalla.engine.GameObject;
-import de.bushnaq.abdalla.engine.IContextFactory;
-import de.bushnaq.abdalla.engine.RenderEngine3D;
-import de.bushnaq.abdalla.engine.RenderEngineExtension;
+import de.bushnaq.abdalla.engine.*;
 import de.bushnaq.abdalla.engine.audio.AudioEngine;
 import de.bushnaq.abdalla.engine.audio.OggPlayer;
 import de.bushnaq.abdalla.engine.audio.OpenAlException;
@@ -193,7 +190,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
             renderEngine.getMirror().setPresent(true);
             renderEngine.getMirror().setReflectivity(0.6f);
             renderEngine.setShadowEnabled(true);
-            renderEngine.getFog().setEnabled(true);
+            renderEngine.getFog().setEnabled(false);
             renderEngine.getFog().setColor(Color.BLACK);
             renderEngine.getFog().setBeginDistance(2000f);
             renderEngine.getFog().setFullDistance(3000f);
@@ -203,9 +200,10 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
             renderEngine.setSkyBox(false);
             renderEngine.setSceneBoxMin(new Vector3(-1000, -1000, -1000));
             renderEngine.setSceneBoxMax(new Vector3(1000, 1000, 1000));
-            renderEngine.setDayAmbientLight(1f, 1f, 1f, 1f);
-            renderEngine.setNightAmbientLight(.01f, .01f, .01f, 1f);
+            renderEngine.setDayAmbientLight(.5f, .5f, .5f, 1f);
+            renderEngine.setNightAmbientLight(.04f, .04f, .04f, 1f);
             createInputProcessor(this, this);
+            createLogo();
 
             try {
                 context.setSelected(renderEngine.getProfiler(), false);
@@ -364,6 +362,27 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
         }
     }
 
+    private void createLogo() {
+        String applicationName = "Mercator";
+        int    x               = 100;
+        int    y               = Gdx.graphics.getHeight() - 100;
+        Text2D logo            = new Text2D(applicationName, x, y, new Color(1f, 1f, 1f, .4f), renderEngine.getGameEngine().getAtlasManager().logoFont);
+        renderEngine.add(logo);
+        try {
+            String            v      = renderEngine.getGameEngine().context.getAppVersion();
+            final GlyphLayout layout = new GlyphLayout();
+            layout.setText(renderEngine.getGameEngine().getAtlasManager().logoFont, applicationName);
+            float h1 = layout.height;
+            float w1 = layout.width;
+            layout.setText(renderEngine.getGameEngine().getAtlasManager().versionFont, v);
+            float  h2      = layout.height;
+            Text2D version = new Text2D(v, (int) (x + w1), y - (int) (h1 - h2), Color.WHITE, renderEngine.getGameEngine().getAtlasManager().versionFont);
+            renderEngine.add(version);
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+        }
+    }
+
     private void createPlanets() {
         for (final Planet planet : universe.planetList) {
             planet.get3DRenderer().create(renderEngine);
@@ -478,14 +497,18 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
         return atlasManager;
     }
 
+    @Override
+    public AudioEngine getAudioEngine() {
+        return audioEngine;
+    }
+
 
 //    public int getMaxFramesPerSecond() {
 //        return maxFramesPerSecond;
 //    }
 
-    @Override
-    public AudioEngine getAudioEngine() {
-        return audioEngine;
+    public int getCameraZoomIndex() {
+        return camController.zoomIndex;
     }
 
     private void initColors() {
@@ -812,8 +835,8 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
 
     private void render(final long currentTime) throws Exception {
         final float deltaTime = Gdx.graphics.getDeltaTime();
-        renderEngine.render2D = camera.position.y >= RENDER_2D_UNTIL;
-        renderEngine.render3D = camera.position.y < RENDER_3D_UNTIL;
+        renderEngine.render2D = getCameraZoomIndex() > 5;
+        renderEngine.render3D = getCameraZoomIndex() <= 5;
 
 
         if (followMode && universe.selected instanceof Trader) {

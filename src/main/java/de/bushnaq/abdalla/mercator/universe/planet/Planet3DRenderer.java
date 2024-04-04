@@ -20,6 +20,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.PointLight;
@@ -99,6 +100,7 @@ public class Planet3DRenderer extends ObjectRenderer<GameEngine3D> {
     private boolean                  dayMode       = true;
     //	Scene scene;
     private GameObject<GameEngine3D> gameObject;
+    private GameObject<GameEngine3D> planetGameObject;
     private float                    rotation;
     private float                    rotationSpeed = 1f;
     private GameObject<GameEngine3D> stationGameObject;
@@ -163,6 +165,24 @@ public class Planet3DRenderer extends ObjectRenderer<GameEngine3D> {
             int i = 0;
             for (final Good good : planet.getGoodList()) {
                 good.get3DRenderer().renderText(planet.x, planet.y, planet.z, renderEngine, i++);
+            }
+            if (planet.selected) {
+                {
+                    final Matrix4 m = new Matrix4();
+                    //move center of text to center of trader
+                    m.setToTranslation(translation.x, translation.y, translation.z);
+                    m.rotate(Vector3.Y, rotation);
+                    //move to the top and back on engine
+                    m.translate(0, -1, 0);
+                    //rotate into the xz layer
+                    m.rotate(Vector3.X, -90);
+                    renderEngine.renderEngine25D.setTransformMatrix(m);
+                }
+                TextureAtlas.AtlasRegion systemTextureRegion = renderEngine.getGameEngine().getAtlasManager().systemTextureRegion;
+                renderEngine.renderEngine25D.fillCircle(systemTextureRegion, 0, 0, PLANET_3D_SIZE, 128, new Color(.2f, .2f, .4f, 0.2f));
+                renderEngine.renderEngine25D.circle(renderEngine.getGameEngine().getAtlasManager().patternCircle24, 0, 0, PLANET_3D_SIZE - .5f, 1f, new Color(.9f, .9f, .9f, .5f), 128);
+                if (renderEngine.getGameEngine().getCameraZoomIndex() < 4)
+                    renderEngine.renderEngine25D.renderRose(systemTextureRegion, renderEngine.getGameEngine().getAtlasManager().modelFont, translation, PLANET_3D_SIZE / 2, -1);
             }
         }
     }
@@ -289,6 +309,10 @@ public class Planet3DRenderer extends ObjectRenderer<GameEngine3D> {
             stationGameObject.instance.transform.setToTranslation(x, -32, z);
             stationGameObject.update();
             renderEngine.addStatic(stationGameObject);
+            planetGameObject = new GameObject<GameEngine3D>(new ModelInstanceHack(renderEngine.getGameEngine().assetManager.planet01.scene.model), planet, this);
+            planetGameObject.instance.transform.setToTranslation(x, -500, z);
+            planetGameObject.update();
+            renderEngine.addStatic(planetGameObject);
             //todo decide if city should have light
             final PointLight light = new PointLight().set(Color.WHITE, x, LIGHT_HIGHT, z, LIGHT_DAY_INTENSITY);
             pointLight.add(light);
@@ -516,6 +540,8 @@ public class Planet3DRenderer extends ObjectRenderer<GameEngine3D> {
         rotation += rotationSpeed * realTimeDelta;
         stationGameObject.instance.transform.setToTranslation(planet.x, -16, planet.z);
         stationGameObject.instance.transform.rotate(Vector3.Y, rotation);
+        planetGameObject.instance.transform.setToTranslation(planet.x, -512 - 2024, planet.z - 512);
+        planetGameObject.instance.transform.rotate(Vector3.Y, rotation);
         planet.communicationPartner.ttsPlayer.play();
 //        planet.communicationPartner.ttsPlayer.setPositionAndVelocity(position, velocity);
 

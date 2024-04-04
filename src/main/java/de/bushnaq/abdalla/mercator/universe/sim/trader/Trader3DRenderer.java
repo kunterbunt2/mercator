@@ -19,7 +19,6 @@ package de.bushnaq.abdalla.mercator.universe.sim.trader;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
@@ -317,61 +316,8 @@ public class Trader3DRenderer extends ObjectRenderer<GameEngine3D> {
             TextureAtlas.AtlasRegion systemTextureRegion = renderEngine.getGameEngine().getAtlasManager().systemTextureRegion;
             renderEngine.renderEngine25D.fillCircle(systemTextureRegion, 0, 0, TRADER_SIZE_Z, 128, new Color(.2f, .2f, .4f, 0.2f));
             renderEngine.renderEngine25D.circle(renderEngine.getGameEngine().getAtlasManager().patternCircle24, 0, 0, TRADER_SIZE_Z - .5f, 1f, new Color(.9f, .9f, .9f, .5f), 128);
-            {
-                float         width   = TRADER_SIZE_Z / 2;
-                float         height  = TRADER_SIZE_Z / 2;
-                float         sectors = 36;
-                final Matrix4 m       = new Matrix4();
-                //move to the top and back on engine
-                //rotate into the xz layer
-                float      a     = 360f / sectors;
-                float      r     = (float) Math.sqrt(width * width + height * height);
-                float      scale = .05f;// text
-                BitmapFont font  = renderEngine.getGameEngine().getAtlasManager().modelFont;
-                for (int i = 0; i < sectors; i++) {
-                    float             angle  = i * a;
-                    final GlyphLayout layout = new GlyphLayout();
-                    String            text   = String.format("%.0f", angle);
-                    layout.setText(font, text);
-                    {
-                        float rad = (float) Math.toRadians(angle);
-                        float ry  = -r * (float) Math.cos(rad);
-                        float rx  = r * (float) Math.sin(rad);
-                        m.setToTranslation(translation.x, translation.y, translation.z);
-//                        m.rotate(yVector, rotation);
-                        m.translate(rx, -TRADER_SIZE_Y, ry);
-                        m.rotate(yVector, -angle + 90 + 90);
-                        m.rotate(xVector, -90);
-                        m.scale(scale, scale, scale);
-                        renderEngine.renderEngine25D.setTransformMatrix(m);
-                        Color color = new Color(1f, 1f, 1f, 0.5f);
-                        renderEngine.renderEngine25D.text(-layout.width / 2, 0, font, Color.WHITE, color, text);
-                    }
-                }
-                m.setToTranslation(translation.x, translation.y, translation.z);
-                m.translate(0, -TRADER_SIZE_Y, 0);
-                m.rotate(xVector, -90);
-                renderEngine.renderEngine25D.setTransformMatrix(m);
-                sectors = 360;
-                a       = 360f / sectors;
-                for (int i = 0; i < sectors; i++) {
-                    float startAngle = i * a;
-                    float angle      = startAngle;
-                    {
-                        float rad       = (float) Math.toRadians(angle);
-                        float rx        = r * (float) Math.cos(rad);
-                        float ry        = r * (float) Math.sin(rad);
-                        float thickness = .2f;
-                        Color color     = new Color(1f, 1f, 1f, 0.5f);
-                        if (i / 10 * 10 == i) {
-                            thickness = .4f;
-                            color     = new Color(1, 1, 1, 0.5f);
-                        }
-                        renderEngine.renderEngine25D.line(systemTextureRegion, rx * .95f, 0, ry * .95f, rx * .98f, ry * .98f, color, thickness);
-                    }
-                }
-
-            }
+            if (renderEngine.getGameEngine().getCameraZoomIndex() < 3)
+                renderEngine.renderEngine25D.renderRose(systemTextureRegion, renderEngine.getGameEngine().getAtlasManager().modelFont, translation, TRADER_SIZE_Z / 2, -TRADER_SIZE_Y);
             BitmapFont modelFont = renderEngine.getGameEngine().getAtlasManager().modelFont;
             if (trader.destinationPlanet != null) {
                 String name  = trader.getName();
@@ -414,6 +360,7 @@ public class Trader3DRenderer extends ObjectRenderer<GameEngine3D> {
             }
         }
     }
+
 
     private void renderTextOnTop(final RenderEngine3D<GameEngine3D> renderEngine, final float dx, final float dy, final String text, final float size) {
 //        final float x = translation.x;
@@ -634,6 +581,7 @@ public class Trader3DRenderer extends ObjectRenderer<GameEngine3D> {
         //		pole.update();
         if (selected != lastSelected) {
             if (selected) {
+
 //                instance.instance.materials.get(0).set(new PBRColorAttribute(ColorAttribute.Emissive, Color.YELLOW));
 //                instance.instance.materials.get(0).remove(PBRColorAttribute.BaseColorFactor);
 //                instance.instance.materials.get(0).set(new PBRColorAttribute(PBRColorAttribute.BaseColorFactor, Color.DARK_GRAY));

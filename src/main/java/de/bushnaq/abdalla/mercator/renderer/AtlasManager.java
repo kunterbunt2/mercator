@@ -53,9 +53,12 @@ public class AtlasManager {
             new FontData("model-font", Context.getAppFolderName() + "/assets/fonts/Roboto-Bold.ttf", 64),//
             new FontData("bold-128", Context.getAppFolderName() + "/assets/fonts/Roboto-Bold.ttf", 128),//
             new FontData("bold-256", Context.getAppFolderName() + "/assets/fonts/Roboto-Bold.ttf", 256),//
-            new FontData("demo-mid-font", Context.getAppFolderName() + "/assets/fonts/Roboto-Regular.ttf", 32)//
+            new FontData("demo-mid-font", Context.getAppFolderName() + "/assets/fonts/Roboto-Regular.ttf", 32),//
+            new FontData("logo-font", Context.getAppFolderName() + "/assets/fonts/Roboto-Thin.ttf", 128), //
+            new FontData("version-font", Context.getAppFolderName() + "/assets/fonts/Roboto-Thin.ttf", 16) //
     };
     public              AtlasRegion  gaugeTextureRegion;
+    public              BitmapFont   logoFont;
     public              BitmapFont   menuBoldFont;
     //	public Texture good_baseColor;
     //	public AtlasRegion good_baseColorRegion;
@@ -72,6 +75,7 @@ public class AtlasManager {
     public              AtlasRegion  systemTextureRegion;
     public              BitmapFont   timeMachineFont;
     public              AtlasRegion  traderTextureRegion;
+    public              BitmapFont   versionFont;
     public              BitmapFont   zoominDefaultFont;
 
     public AtlasManager() {
@@ -121,6 +125,8 @@ public class AtlasManager {
         bold128Font       = fontDataList[7].font;
         bold256Font       = fontDataList[8].font;
         demoMidFont       = fontDataList[9].font;
+        logoFont          = fontDataList[10].font;
+        versionFont       = fontDataList[11].font;
     }
 
     private void initTextures() {

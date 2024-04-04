@@ -20,7 +20,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>de.bushnaq.abdalla</groupId>
     <artifactId>mercator</artifactId>
-    <version>0.0.1</version>
+    <version>0.1.0</version>
     <name>mercator</name>
     <description>mercator: a computer game implementation of a closed economical simulation.</description>
 

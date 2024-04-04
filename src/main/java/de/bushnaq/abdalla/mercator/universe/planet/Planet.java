@@ -39,7 +39,7 @@ import de.bushnaq.abdalla.mercator.util.*;
 public class Planet extends Waypoint implements TradingPartner {
     public static final float                      CHANNEL_SIZE           = 64 / Universe.WORLD_SCALE;
     //    public final static float                  MIN_PLANET_DISTANCE    = 30;
-    public static final int                        PLANET_DISTANCE        = 2048;
+    public static final int                        PLANET_DISTANCE        = 2048 * 2;
     public final static int                        PLANET_MAX_SIMS        = 10;
     public final static float                      PLANET_START_CREDITS   = 20000;
     public              PlanetCommunicationPartner communicationPartner;
@@ -58,9 +58,9 @@ public class Planet extends Waypoint implements TradingPartner {
     public              TraderList                 traderList             = new TraderList();
     public              Universe                   universe;
     boolean selected;
-    private             float                      credits                = PLANET_START_CREDITS;
-    private             GoodList                   goodList               = new GoodList();
-    private             HistoryManager             historyManager;
+    private float          credits  = PLANET_START_CREDITS;
+    private GoodList       goodList = new GoodList();
+    private HistoryManager historyManager;
 
     public Planet(final String name, final float x, final float y, final float z, final Universe universe) {
         super(name, x, y, z);

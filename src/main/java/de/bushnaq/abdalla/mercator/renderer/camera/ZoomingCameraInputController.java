@@ -33,6 +33,7 @@ public class ZoomingCameraInputController extends CameraInputController {
     private final Logger       logger = LoggerFactory.getLogger(this.getClass());
     private final Vector3      tmpV1  = new Vector3();
     private final Vector3      tmpV2  = new Vector3();
+    public  int   zoomIndex       = 5;
     CameraProperties[] zoomFactors = {//
             new CameraProperties(75, 75, 1000f),//
             new CameraProperties(150, 200, 2000f),//
@@ -50,7 +51,6 @@ public class ZoomingCameraInputController extends CameraInputController {
             new CameraProperties(6000, 0, 8000f),//
             new CameraProperties(10000, 0, 10000f),//
     };
-    int                zoomIndex   = 5;
     private float progress        = 0;
     private int   targetZoomIndex = 3;
 

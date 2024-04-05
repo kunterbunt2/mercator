@@ -27,9 +27,12 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
 import com.kotcrab.vis.ui.VisUI;
+import de.bushnaq.abdalla.engine.util.AtlasGenerator;
 import de.bushnaq.abdalla.engine.util.FontData;
 import de.bushnaq.abdalla.mercator.desktop.Context;
 import de.bushnaq.abdalla.mercator.engine.GameEngine2D;
+
+import java.io.File;
 
 public class AtlasManager {
     private static String       assetsFolderName;
@@ -43,7 +46,7 @@ public class AtlasManager {
     public         BitmapFont   demoMidFont;
     public         AtlasRegion  dottedLineTextureRegion;
     public         AtlasRegion  factoryTextureRegion;
-    public         FontData[]   fontDataList = {new FontData("default-font", Context.getAppFolderName() + "/assets/fonts/Roboto-Bold.ttf", GameEngine2D.FONT_SIZE),//
+    public         FontData[]   fontData = {new FontData("default-font", Context.getAppFolderName() + "/assets/fonts/Roboto-Bold.ttf", GameEngine2D.FONT_SIZE),//
             new FontData("zoomin-default-font", Context.getAppFolderName() + "/assets/fonts/Roboto-Bold.ttf", 10),//
             new FontData("time-machine-font", Context.getAppFolderName() + "/assets/fonts/Roboto-Bold.ttf", GameEngine2D.TIME_MACHINE_FONT_SIZE),//
             new FontData("chart-font", Context.getAppFolderName() + "/assets/fonts/Roboto-bold.ttf", GameEngine2D.CHART_FONT_SIZE),//
@@ -79,21 +82,21 @@ public class AtlasManager {
     }
 
     public void dispose() {
-        for (final FontData fontData : fontDataList) {
+        for (final FontData fontData : fontData) {
             fontData.font.dispose();
         }
         atlas.dispose();
     }
 
     public void init() throws Exception {
-        assetsFolderName = Context.getAppFolderName() + "/assets";
+        assetsFolderName = Context.getAppFolderName() + "/assets/";
         initTextures();
         initFonts();
     }
 
     private void initFonts() {
-        for (int index = 0; index < fontDataList.length; index++) {
-            final FontData    fontData    = fontDataList[index];
+        for (int index = 0; index < fontData.length; index++) {
+            final FontData    fontData    = this.fontData[index];
             final AtlasRegion atlasRegion = atlas.findRegion(fontData.name);
             atlasRegion.getRegionWidth();
             atlasRegion.getRegionHeight();
@@ -108,24 +111,27 @@ public class AtlasManager {
             packer.dispose();
             fontData.font.setUseIntegerPositions(false);
         }
-        defaultFont       = fontDataList[0].font;
-        zoominDefaultFont = fontDataList[1].font;
-        timeMachineFont   = fontDataList[2].font;
-        chartFont         = fontDataList[3].font;
-        menuFont          = fontDataList[4].font;
-        menuBoldFont      = fontDataList[5].font;
-        modelFont         = fontDataList[6].font;
-        bold128Font       = fontDataList[7].font;
-        bold256Font       = fontDataList[8].font;
-        demoMidFont       = fontDataList[9].font;
-        logoFont          = fontDataList[10].font;
-        versionFont       = fontDataList[11].font;
+        defaultFont       = fontData[0].font;
+        zoominDefaultFont = fontData[1].font;
+        timeMachineFont   = fontData[2].font;
+        chartFont         = fontData[3].font;
+        menuFont          = fontData[4].font;
+        menuBoldFont      = fontData[5].font;
+        modelFont         = fontData[6].font;
+        bold128Font       = fontData[7].font;
+        bold256Font       = fontData[8].font;
+        demoMidFont       = fontData[9].font;
+        logoFont          = fontData[10].font;
+        versionFont       = fontData[11].font;
     }
 
     private void initTextures() throws Exception {
         AtlasGenerator atlasGenerator = new AtlasGenerator();
-        atlasGenerator.generateIfNeeded(this);
-        atlas                   = new TextureAtlas(Gdx.files.internal(Context.getAppFolderName() + "/assets/atlas/atlas.atlas"));
+        atlasGenerator.setOutputFolder(getAssetsFolderName() + "atlas/");
+        atlasGenerator.setInputFolders(new File[]{new File(getAssetsFolderName() + "textures/"), new File(getAssetsFolderName() + "ui/")});
+        atlasGenerator.setFontData(fontData);
+        atlasGenerator.generateIfNeeded();
+        atlas                   = new TextureAtlas(Gdx.files.internal(getAssetsFolderName() + "atlas/atlas.atlas"));
         systemTextureRegion     = atlas.findRegion("system");
         planetTextureRegion     = atlas.findRegion("planet");
         simTextureRegion        = atlas.findRegion("sim");

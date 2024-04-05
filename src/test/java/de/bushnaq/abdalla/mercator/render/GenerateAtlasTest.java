@@ -51,7 +51,7 @@ public class GenerateAtlasTest implements ApplicationListener {
     @Override
     public void create() {
         final AtlasManager atlasManager = new AtlasManager();
-        generateFonts(atlasManager.fontDataList);
+        generateFonts(atlasManager.fontData);
         createAtlas();
 //        System.out.println("End");
         Gdx.app.exit();

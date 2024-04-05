@@ -92,13 +92,9 @@ public class AssetManager {
     }
 
     public void create() throws Exception {
-//        cubeGoldLeaves = new GLTFLoader().load(Gdx.files.internal(AtlasManager.getAssetsFolderName() + "/models/glTF/cube-Gold_leafs/cube-Gold_leafs.gltf"));
-        final Texture texture = new Texture(Gdx.files.internal(AtlasManager.getAssetsFolderName() + "/tiles.png"));
-//        final TextureRegion[][] tiles        = TextureRegion.split(texture, 32, 32);
+        final Texture      texture      = new Texture(Gdx.files.internal(AtlasManager.getAssetsFolderName() + "/tiles.png"));
         final ModelBuilder modelBuilder = new ModelBuilder();
         final ModelCreator modelCreator = new ModelCreator();
-//        cubeAluminiumBrushed = new GLTFLoader().load(Gdx.files.internal(AtlasManager.getAssetsFolderName() + "/models/glTF/cube-Aluminium_brushed/cube-Aluminium_brushed.gltf"));
-//        BoomBox              = new GLTFLoader().load(Gdx.files.internal(AtlasManager.getAssetsFolderName() + "/models/glTF/BoomBox.gltf"));
         {
             final Attribute metallic  = PBRFloatAttribute.createMetallic(0.3f);
             final Attribute roughness = PBRFloatAttribute.createRoughness(0.2f);

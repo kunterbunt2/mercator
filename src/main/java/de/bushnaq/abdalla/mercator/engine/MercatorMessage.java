@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-package de.bushnaq.abdalla.mercator.renderer.reports;
+package de.bushnaq.abdalla.mercator.engine;
 
-public class GraphChartPointData {
-    public int   absolute;
-    public float percentage;
+public enum MercatorMessage {
+    /*MERCATOR_MESSAGE_ENABLE_PROFILING,*//* MERCATOR_MESSAGE_EXIT*//*, MERCATOR_MESSAGE_PAUSE*/;
 }

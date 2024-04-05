@@ -14,19 +14,9 @@
  * limitations under the License.
  */
 
-package de.bushnaq.abdalla.mercator.renderer.reports;
+package de.bushnaq.abdalla.mercator.ui;
 
-import com.badlogic.gdx.scenes.scene2d.ui.Label;
-
-import java.util.ArrayList;
-import java.util.List;
-
-public class LabelData {
-    List<GraphChart> graphCharts = new ArrayList<GraphChart>();
-    Label            nameLabel;
-    List<PieChart>   pieCharts   = new ArrayList<PieChart>();
-    Label            value2Label;
-    Label            value3Label;
-    Label            value4Label;
-    Label            valueLabel;
+public class GraphChartPointData {
+    public int   absolute;
+    public float percentage;
 }

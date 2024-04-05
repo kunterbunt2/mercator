@@ -14,22 +14,20 @@
  * limitations under the License.
  */
 
-package de.bushnaq.abdalla.mercator.gui.frame;
+package de.bushnaq.abdalla.mercator.ui.frame;
 
 import de.bushnaq.abdalla.mercator.universe.Universe;
-import de.bushnaq.abdalla.mercator.universe.factory.Factory;
-import de.bushnaq.abdalla.mercator.universe.factory.ProductionFacility;
-import de.bushnaq.abdalla.mercator.universe.factory.ProductionFacilityList;
+import de.bushnaq.abdalla.mercator.universe.good.GoodList;
 
 import javax.swing.table.AbstractTableModel;
 
-public class SelectedPlanetFactoriesTableModel extends AbstractTableModel {
+public class SelectedTraderGoodsTableModel extends AbstractTableModel {
 
     private static final long     serialVersionUID = 4803847753013026463L;
-    private final        String[] columnNames      = {"Name", "Needs", "Produces", "Status"};
+    private final        String[] columnNames      = {"Name", "Cost", "Average price", "Amount"};
     private final        Universe universe;
 
-    public SelectedPlanetFactoriesTableModel(final Universe universe) {
+    public SelectedTraderGoodsTableModel(final Universe universe) {
         this.universe = universe;
     }
 
@@ -45,8 +43,8 @@ public class SelectedPlanetFactoriesTableModel extends AbstractTableModel {
 
     @Override
     public int getRowCount() {
-        if (universe.selectedPlanet != null) {
-            return universe.selectedPlanet.productionFacilityList.size();
+        if (universe.selectedTrader != null) {
+            return universe.selectedTrader.getGoodList().size();
         }
         return 0;
     }
@@ -58,25 +56,17 @@ public class SelectedPlanetFactoriesTableModel extends AbstractTableModel {
 
     @Override
     public Object getValueAt(final int row, final int col) {
-        if (universe.selectedPlanet != null) {
-            final ProductionFacilityList productionFacilityList = universe.selectedPlanet.productionFacilityList;
-            final ProductionFacility     productionFacility     = productionFacilityList.get(row);
+        if (universe.selectedTrader != null) {
+            final GoodList goodList = universe.selectedTrader.getGoodList();
             switch (col) {
                 case 0:
-                    return productionFacility.getName();
+                    return goodList.get(row).type.getName();
                 case 1:
-                    if (Factory.class.isInstance(productionFacility)) {
-                        final Factory factory = (Factory) productionFacility;
-                        if (factory.inputGood.size() != 0) {
-                            return factory.inputGood.get(0).type.getName();
-                        } else {
-                            return "N/A";
-                        }
-                    }
+                    return goodList.get(row).price;
                 case 2:
-                    return productionFacility.producedGood.type.getName();
+                    return goodList.get(row).getAveragePrice();
                 case 3:
-                    return productionFacility.getStatusName();
+                    return goodList.get(row).getAmount();
             }
         }
         return null;

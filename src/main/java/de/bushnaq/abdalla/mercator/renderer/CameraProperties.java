@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package de.bushnaq.abdalla.mercator.renderer.camera;
+package de.bushnaq.abdalla.mercator.renderer;
 
 class CameraProperties {
     public final float far;//the far clipping plane distance, has to be positive

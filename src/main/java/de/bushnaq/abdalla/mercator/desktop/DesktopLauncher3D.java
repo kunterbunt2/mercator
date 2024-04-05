@@ -39,28 +39,9 @@ import org.slf4j.LoggerFactory;
 public class DesktopLauncher3D implements ApplicationListener {
     private static final int UNIVERSE_GENERATION_RANDOM_SEED = 1;
     private static final int UNIVERSE_SIZE                   = 10;
-    //    private final Universe universe;
     DesktopContextFactory contextFactory = new DesktopContextFactory();
     LaunchMode            launchMode     = LaunchMode.normal;
-    boolean               useOGL3        = true;
     private Logger logger = LoggerFactory.getLogger(this.getClass());
-
-    /**
-     * called by GameEngine to create Lwjgl3Application
-     *
-     * @throws Exception
-     */
-    public DesktopLauncher3D() throws Exception {
-//        this.universe = universe;
-//        if (launchMode != LaunchMode.demo && launchMode != LaunchMode.development) {
-//            final MercatorFrame frame = new MercatorFrame(universe);
-//            frame.setVisible(true);
-//        }
-//		final Lwjgl3ApplicationConfiguration config = createConfig();
-//		new Lwjgl3Application(screen, config);
-//		System.out.println("DesktopLauncher constructed");
-//		System.exit(0);
-    }
 
     public static void main(final String[] args) throws Exception {
         DesktopLauncher3D desktopLauncher3D = new DesktopLauncher3D();
@@ -100,7 +81,6 @@ public class DesktopLauncher3D implements ApplicationListener {
         config.useVsync(context.getVsyncProperty());
         config.setForegroundFPS(foregroundFPS);
         config.setResizable(true);
-//		config.useOpenGL3(true, 3, 2);
         config.setOpenGLEmulation(GLEmulation.GL30, 3, 2);
 
 //		if (Context.getOeratingSystemType() == OperatingSystem.osx)
@@ -129,9 +109,6 @@ public class DesktopLauncher3D implements ApplicationListener {
         boolean           fullScreenMode = context.getFullscreenModeProperty();
         if (fullScreenMode)
             config.setFullscreenMode(primaryMode);
-//		config.setWindowPosition(0, 0);
-//		config.setWindowedMode(primaryMode.width, primaryMode.height);
-//		config.setMaximized(true);
         return config;
     }
 

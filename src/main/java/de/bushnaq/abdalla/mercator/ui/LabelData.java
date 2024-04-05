@@ -14,8 +14,19 @@
  * limitations under the License.
  */
 
-package de.bushnaq.abdalla.mercator.renderer;
+package de.bushnaq.abdalla.mercator.ui;
 
-public enum MercatorMessage {
-    /*MERCATOR_MESSAGE_ENABLE_PROFILING,*//* MERCATOR_MESSAGE_EXIT*//*, MERCATOR_MESSAGE_PAUSE*/;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class LabelData {
+    List<GraphChart> graphCharts = new ArrayList<GraphChart>();
+    Label            nameLabel;
+    List<PieChart>   pieCharts   = new ArrayList<PieChart>();
+    Label            value2Label;
+    Label            value3Label;
+    Label            value4Label;
+    Label            valueLabel;
 }

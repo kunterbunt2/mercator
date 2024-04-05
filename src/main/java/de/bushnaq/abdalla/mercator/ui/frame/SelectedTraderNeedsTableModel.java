@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
-package de.bushnaq.abdalla.mercator.gui.frame;
+package de.bushnaq.abdalla.mercator.ui.frame;
 
 import de.bushnaq.abdalla.mercator.universe.Universe;
 import de.bushnaq.abdalla.mercator.universe.sim.SimNeedList;
 
 import javax.swing.table.AbstractTableModel;
 
-public class SelectedPlanetSimNeedsTableModel extends AbstractTableModel {
+public class SelectedTraderNeedsTableModel extends AbstractTableModel {
 
     private static final long     serialVersionUID = 4803847753013026463L;
     private final        String[] columnNames      = {"Good", "consumeEvery", "lastConsumed", "dieIfNotConsumedWithin", "totalConsumed"};
     private final        Universe universe;
 
-    public SelectedPlanetSimNeedsTableModel(final Universe universe) {
+    public SelectedTraderNeedsTableModel(final Universe universe) {
         this.universe = universe;
     }
 

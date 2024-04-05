@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package de.bushnaq.abdalla.mercator.renderer.reports;
+package de.bushnaq.abdalla.mercator.ui;
 
 import com.badlogic.gdx.graphics.Color;
 

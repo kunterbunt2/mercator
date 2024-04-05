@@ -14,9 +14,13 @@
  * limitations under the License.
  */
 
-package de.bushnaq.abdalla.mercator.gui.frame;
+package de.bushnaq.abdalla.mercator.ui;
 
-public enum DrawMode {
-    SHAPE_RENDERER, SPRITE_BATCH
+import com.badlogic.gdx.graphics.Color;
 
+public class PieChartSectionData {
+    public String absolute;
+    public Color  color;
+    public String name;
+    public float  percentage;
 }

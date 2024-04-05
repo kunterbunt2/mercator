@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package de.bushnaq.abdalla.mercator.renderer;
+package de.bushnaq.abdalla.mercator.engine;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
@@ -30,7 +30,6 @@ import com.kotcrab.vis.ui.VisUI;
 import de.bushnaq.abdalla.engine.util.AtlasGenerator;
 import de.bushnaq.abdalla.engine.util.FontData;
 import de.bushnaq.abdalla.mercator.desktop.Context;
-import de.bushnaq.abdalla.mercator.engine.GameEngine2D;
 
 import java.io.File;
 

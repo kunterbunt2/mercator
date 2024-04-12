@@ -34,18 +34,6 @@
     </properties>
 
     <dependencies>
-        <!--        <dependency>-->
-        <!--            <groupId>com.badlogicgames.gdx</groupId>-->
-        <!--            <artifactId>gdx-freetype-platform</artifactId>-->
-        <!--            <classifier>natives-desktop</classifier>-->
-        <!--            <version>${libgdxVersion}</version>-->
-        <!--        </dependency>-->
-        <!--        <dependency>-->
-        <!--            <groupId>com.badlogicgames.gdx</groupId>-->
-        <!--            <artifactId>gdx-platform</artifactId>-->
-        <!--            <classifier>natives-desktop</classifier>-->
-        <!--            <version>${libgdxVersion}</version>-->
-        <!--        </dependency>-->
         <dependency>
             <groupId>de.bushnaq.abdalla</groupId>
             <artifactId>game-engine</artifactId>
@@ -62,17 +50,6 @@
                 </exclusion>
             </exclusions>
         </dependency>
-        <!--        <dependency>-->
-        <!--            <groupId>com.crashinvaders.vfx</groupId>-->
-        <!--            <artifactId>gdx-vfx-core</artifactId>-->
-        <!--            <version>${gdx.vfx.version}</version>-->
-        <!--        </dependency>-->
-        <!--        <dependency>-->
-        <!--            <groupId>com.crashinvaders.vfx</groupId>-->
-        <!--            <artifactId>gdx-vfx-effects</artifactId>-->
-        <!--            <version>${gdx.vfx.version}</version>-->
-        <!--        </dependency>-->
-
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-math3</artifactId>

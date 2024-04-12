@@ -17,7 +17,6 @@
 package de.bushnaq.abdalla.mercator.engine;
 
 import com.badlogic.gdx.*;
-import com.badlogic.gdx.assets.loaders.resolvers.InternalFileHandleResolver;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Cubemap;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -56,9 +55,6 @@ import net.mgsx.gltf.scene3d.attributes.PBRFloatAttribute;
 import net.mgsx.gltf.scene3d.attributes.PBRTextureAttribute;
 import net.mgsx.gltf.scene3d.lights.DirectionalLightEx;
 import net.mgsx.gltf.scene3d.model.ModelInstanceHack;
-import net.mgsx.gltf.scene3d.scene.SceneSkybox;
-import net.mgsx.gltf.scene3d.utils.EnvironmentUtil;
-import net.mgsx.gltf.scene3d.utils.IBLBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -82,7 +78,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
     public static final  int                          FONT_SIZE                       = 9;
     // private static final float MAX_VOXEL_DIMENSION = 20;
     public static final  Color                        NOT_PRODUCING_FACTORY_COLOR     = Color.RED; // 0xffFF0000;
-    public static final  int                          NUMBER_OF_CELESTIAL_BODIES      = 10000;
+    public static final  int                          NUMBER_OF_CELESTIAL_BODIES      = 10000;//TODO should be 10000
     public static final  int                          RAYS_NUM                        = 128;
     public static final  Color                        SELECTED_PLANET_COLOR           = Color.BLUE;
     public static final  Color                        SELECTED_TRADER_COLOR           = Color.RED; // 0xffff0000;
@@ -119,7 +115,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
     public               LaunchMode                   launchMode;
     public               RenderEngine3D<GameEngine3D> renderEngine;
     public               ShowGood                     showGood                        = ShowGood.Name;
-    List<CelestialBody>               celestialBody          = new ArrayList<>();
+    List<CelestialBody>               celestialBodyList      = new ArrayList<>();
     Map<Integer, EnvironmentSnapshot> environmentSnapshotMap = new HashMap<>();
     Vector3                           sunPosition            = new Vector3();
     private float                        angle                = -1;
@@ -342,7 +338,8 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
 //            renderEngine.environment.set(PBRCubemapAttribute.createSpecularEnv(specularCubemap));
 //            renderEngine.environment.set(new PBRTextureAttribute(PBRTextureAttribute.BRDFLUTTexture, brdfLUT));
 //            renderEngine.environment.set(new PBRFloatAttribute(PBRFloatAttribute.ShadowBias, .001f));
-            setupImageBasedLighting(timeOfDay);
+//            setupImageBasedLighting(timeOfDay);
+            updateEnvironment(timeOfDay);
         } else {
         }
     }
@@ -963,12 +960,12 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
             final Vector3 shadowLightDirection = new Vector3();
             final Matrix4 m                    = new Matrix4();
             if (renderEngine.isFixedShadowDirection()) {
-                angle = 360 * 14f / 24;
+                angle = 360 * 15f / 24;//0=pz,1=-pz,6=px,12=nz,18=nx
             } else {
                 angle = 360 * timeOfDay / 24;
             }
 
-            m.rotate(Vector3.X, 60);
+            m.rotate(Vector3.X, 30);
             m.rotate(Vector3.Y, angle);
             m.translate(0, 0, -1);
             m.getTranslation(shadowLightDirection);
@@ -1243,23 +1240,8 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
     private void setupImageBasedLighting(float timeOfDay) {
         if (brdfLUT == null)
             brdfLUT = new Texture(Gdx.files.classpath("net/mgsx/gltf/shaders/brdfLUT.png"));
-
         // // setup quick IBL (image based lighting)
-        if (false) {
-            DirectionalLightEx light = new DirectionalLightEx();
-            light.direction.set(1, -3, 1).nor();
-//            light.direction.set(renderEngine.getShadowLight().direction.x, renderEngine.getShadowLight().direction.y, renderEngine.getShadowLight().direction.z).nor();
-            light.color.set(Color.WHITE);
-            IBLBuilder iblBuilder         = IBLBuilder.createOutdoor(light);
-            Cubemap    environmentCubemap = iblBuilder.buildEnvMap(1024 * 4);
-            diffuseCubemap  = iblBuilder.buildIrradianceMap(256);
-            specularCubemap = iblBuilder.buildRadianceMap(10);
-            iblBuilder.dispose();
-//            environmentDayCubemap   = environmentCubemap;
-//            environmentNightCubemap = environmentCubemap;
-            renderEngine.setDaySkyBox(new SceneSkybox(environmentCubemap));
-            renderEngine.setNightSkyBox(new SceneSkybox(environmentCubemap));
-        } else {
+        {
             Integer             index               = (int) (angle);
             EnvironmentSnapshot environmentSnapshot = environmentSnapshotMap.get(index);
             if (environmentSnapshot == null) {
@@ -1267,24 +1249,23 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
                 DirectionalLightEx sun = new DirectionalLightEx();
                 sun.direction.set(renderEngine.getShadowLight().direction.x, renderEngine.getShadowLight().direction.y, renderEngine.getShadowLight().direction.z).nor();
                 sun.color.set(Color.WHITE);
-                myIBLBuilder ibl = new myIBLBuilder();
-//                if (celestialBody.isEmpty())
+                myIBLBuilder ibl = new myIBLBuilder("app/assets/textures/space/");
                 {
-                    celestialBody.clear();
+                    celestialBodyList.clear();
                     int numberOfBodies;
                     if (index == -1)
                         numberOfBodies = 10;
                     else
                         numberOfBodies = NUMBER_OF_CELESTIAL_BODIES;
                     logger.info(String.format("numberOfBodies=%d", numberOfBodies));
-                    celestialBody.add(new CelestialBody(sun.direction, sun.color, 10000f));
+                    celestialBodyList.add(new CelestialBody(sun.direction, sun.color, 10000f));
                     for (int i = 0; i < numberOfBodies; i++) {
-                        celestialBody.add(new CelestialBody());
+                        celestialBodyList.add(new CelestialBody());
                     }
                 }
 
-                celestialBody.get(0).getDirection().set(sun.direction);
-                for (CelestialBody cb : celestialBody) {
+                celestialBodyList.get(0).getDirection().set(sun.direction);
+                for (CelestialBody cb : celestialBodyList) {
                     myIBLBuilder.Light light = new myIBLBuilder.Light();
                     light.direction.set(cb.getDirection());
                     light.color.set(cb.getColor());
@@ -1297,9 +1278,9 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
                 ibl.farGroundColor.set(tint, tint, tint, 1.0F);
                 ibl.nearSkyColor.set(tint, tint, tint, 1.0F);
                 ibl.farSkyColor.set(tint, tint, tint, 1.0F);
-                Cubemap environmentCubemap = ibl.buildEnvMap(1024 * 4);
-                Cubemap irradianceMap      = ibl.buildIrradianceMap(256 * 4);
-                Cubemap radianceMap        = ibl.buildRadianceMap(10 + 2);
+                Cubemap environmentCubemap = ibl.buildEnvMap(1024 * 4, renderEngine.batch2D, atlasManager.bold256Font);
+                Cubemap irradianceMap      = ibl.buildIrradianceMap(256 * 4, renderEngine.batch2D, atlasManager.bold256Font);
+                Cubemap radianceMap        = ibl.buildRadianceMap(12, renderEngine.batch2D, atlasManager.bold256Font);
                 environmentSnapshot = new EnvironmentSnapshot(environmentCubemap, irradianceMap, radianceMap);
                 environmentSnapshotMap.put(index, environmentSnapshot);
                 ibl.dispose();
@@ -1313,16 +1294,6 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
         renderEngine.environment.set(PBRCubemapAttribute.createSpecularEnv(specularCubemap));
         renderEngine.environment.set(new PBRTextureAttribute(PBRTextureAttribute.BRDFLUTTexture, brdfLUT));
         renderEngine.environment.set(new PBRFloatAttribute(PBRFloatAttribute.ShadowBias, .004f));
-    }
-
-    private void setupImageBasedLightingByFaceNames(final String name, final String diffuseExtension, final String environmentExtension, final String specularExtension, final int specularIterations) {
-        diffuseCubemap = EnvironmentUtil.createCubemap(new InternalFileHandleResolver(), AtlasManager.getAssetsFolderName() + "/textures/" + name + "/diffuse/diffuse_", "_0." + diffuseExtension, EnvironmentUtil.FACE_NAMES_FULL);
-//        environmentDayCubemap   = EnvironmentUtil.createCubemap(new InternalFileHandleResolver(), AtlasManager.getAssetsFolderName() + "/textures/" + name + "/environmentDay/environment_", "_0." + environmentExtension, EnvironmentUtil.FACE_NAMES_FULL);
-        environmentNightCubemap = EnvironmentUtil.createCubemap(new InternalFileHandleResolver(), AtlasManager.getAssetsFolderName() + "/textures/" + name + "/environmentNight/environment_", "_0." + environmentExtension, EnvironmentUtil.FACE_NAMES_FULL);
-        specularCubemap         = EnvironmentUtil.createCubemap(new InternalFileHandleResolver(), AtlasManager.getAssetsFolderName() + "/textures/" + name + "/specular/specular_", "_", "." + specularExtension, specularIterations, EnvironmentUtil.FACE_NAMES_FULL);
-        brdfLUT                 = new Texture(Gdx.files.classpath("net/mgsx/gltf/shaders/brdfLUT.png"));
-
-
     }
 
     private void startDemoMode() throws OpenAlException {

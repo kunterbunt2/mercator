@@ -33,11 +33,16 @@ import de.bushnaq.abdalla.mercator.universe.sim.trader.Trader;
 import de.bushnaq.abdalla.mercator.universe.sim.trader.Trader3DRenderer;
 import net.mgsx.gltf.scene3d.model.ModelInstanceHack;
 
+import static de.bushnaq.abdalla.mercator.universe.sim.trader.Trader3DRenderer.TRADER_HEIGHT;
+
 public class JumpGate3DRenderer extends ObjectRenderer<GameEngine3D> {
-    public static final  float JUMP_GATE_WIDTH  = 1 / Universe.WORLD_SCALE;
+    public static final  float PATH_WIDTH       = 1 / Universe.WORLD_SCALE;
     static final         Color JUMPGATE_COLOR   = new Color(0.275f, 0.314f, 0.314f, 1.0f);
     private static final float JUMP_GATE_DEPTH  = 0 / Universe.WORLD_SCALE /*+ Planet3DRenderer.WATER_Y*/;
-    private static final float JUMP_GATE_HEIGHT = 1 / Universe.WORLD_SCALE;
+    private static final float JUMP_GATE_SIZE_X = 64;
+    private static final float JUMP_GATE_SIZE_Y = 64;
+    private static final float JUMP_GATE_SIZE_Z = 32;
+    private static final float PATH_HEIGHT      = 1 / Universe.WORLD_SCALE;
     private static final Color PATH_NAME_COLOR  = Color.BLUE;
     private final        Path  jumpGate;
     float   directionLength;
@@ -74,6 +79,7 @@ public class JumpGate3DRenderer extends ObjectRenderer<GameEngine3D> {
     boolean lastSelected           = false;
     float   r                      = 45;
     Vector3 targetVector;
+    private GameObject<GameEngine3D> gateGameObject;
     //	private static final Color SELECTED_JUMPGATE_COLOR = Color.WHITE;
     //	private static final Color JUMPGATE_COLOR = new Color(0.3f, 0.3f, 0.3f, 1.0f); // 0xff5555cc
     //	static final Color JUMPGATE_COLOR = new Color(0.275f, 0.314f, 0.314f, 1.0f);
@@ -114,7 +120,7 @@ public class JumpGate3DRenderer extends ObjectRenderer<GameEngine3D> {
     public void renderText(final RenderEngine3D<GameEngine3D> renderEngine, final int index, final boolean selected) {
         if (renderEngine.isDebugMode()) {
             final String text1 = jumpGate.target.getName();
-            renderTextOnTop(renderEngine, 0f, 0f, text1, JUMP_GATE_WIDTH / 4);
+            renderTextOnTop(renderEngine, 0f, 0f, text1, PATH_WIDTH / 4);
 //		if (jumpGate.source.trader != null) {
 //			final String text2 = jumpGate.source.trader.getName();
 //			renderTextOnTop(sceneManager, 0f, 10f, text2, JUMP_GATE_SIZE/2);
@@ -142,25 +148,34 @@ public class JumpGate3DRenderer extends ObjectRenderer<GameEngine3D> {
         final float scalez = (tz - z);
 
         final Vector3 direction = new Vector3(scalex, scaley, scalez);
-
-        instance        = new GameObject(new ModelInstanceHack(renderEngine.getGameEngine().assetManager.jumpGate), null, this);
         directionLength = direction.len() + GameEngine3D.SPACE_BETWEEN_OBJECTS;
-        targetVector    = new Vector3(tx, ty, tz /*- sign * Planet3DRenderer.PLANET_SIZE / 2*/);
+        targetVector    = new Vector3(tx, ty, tz);
 
+        instance = new GameObject<>(new ModelInstanceHack(renderEngine.getGameEngine().assetManager.jumpGate), null, this);
         instance.instance.transform.setToTranslation(x/* + shift.x*/, y/* + shift.y*/ + JUMP_GATE_DEPTH, z/* + shift.z*//*+sign * Planet3DRenderer.PLANET_SIZE / 2*/);
         instance.instance.transform.rotateTowardTarget(targetVector, Vector3.Y);
-        instance.instance.transform.translate(0, /*-sign **/ -JUMP_GATE_HEIGHT / 2 - 1, -directionLength / 2);
-        instance.instance.transform.scale(JUMP_GATE_WIDTH, JUMP_GATE_HEIGHT - GameEngine3D.SPACE_BETWEEN_OBJECTS, directionLength);
+        instance.instance.transform.translate(0, /*-sign **/ -PATH_HEIGHT / 2 - 1, -directionLength / 2);
+        instance.instance.transform.scale(PATH_WIDTH, PATH_HEIGHT - GameEngine3D.SPACE_BETWEEN_OBJECTS, directionLength);
         instance.update();
-        renderEngine.addStatic(instance);
+//        renderEngine.addStatic(instance);
 
-        instanceOfSelected = new GameObject(new ModelInstanceHack(renderEngine.getGameEngine().assetManager.jumpGateArrow), null, this);
+        instanceOfSelected = new GameObject<>(new ModelInstanceHack(renderEngine.getGameEngine().assetManager.jumpGateArrow), null, this);
         instanceOfSelected.instance.transform.setToTranslation(x/* + shift.x*/, y/* + shift.y*/ + JUMP_GATE_DEPTH, z/* + shift.z*//*+sign * Planet3DRenderer.PLANET_SIZE / 2*/);
         instanceOfSelected.instance.transform.rotateTowardTarget(targetVector, Vector3.Y);
         instanceOfSelected.instance.transform.translate(0, /*-sign **/ Trader3DRenderer.TRADER_SIZE_Y, -directionLength / 2);
-        instanceOfSelected.instance.transform.scale(JUMP_GATE_WIDTH / 8, .2f, directionLength);
+        instanceOfSelected.instance.transform.scale(PATH_WIDTH / 8, .2f, directionLength);
         instanceOfSelected.update();
 //        renderEngine.addStatic(instance2);
+        if (jumpGate.source.city == null) {
+            gateGameObject = new GameObject<>(new ModelInstanceHack(renderEngine.getGameEngine().assetManager.gate.scene.model), this, this);
+            gateGameObject.instance.transform.setToTranslation(x, TRADER_HEIGHT, z);
+            gateGameObject.instance.transform.rotateTowardTarget(targetVector, Vector3.Y);
+//        gateGameObject.instance.transform.translate(0, 0, 0);
+            gateGameObject.instance.transform.scale(JUMP_GATE_SIZE_X, JUMP_GATE_SIZE_Y, JUMP_GATE_SIZE_Z);
+            gateGameObject.update();
+            renderEngine.addStatic(gateGameObject);
+
+        }
     }
 
     private void drawJumpGate(final float x, final float y, final float z, final RenderEngine3D<GameEngine3D> renderEngine, final long currentTime, final boolean selected) {
@@ -221,7 +236,7 @@ public class JumpGate3DRenderer extends ObjectRenderer<GameEngine3D> {
 
     private void renderTextOnTop(final RenderEngine3D<GameEngine3D> renderEngine, final float dx, final float dy, final String text, final float size) {
         final float x = jumpGate.target.x;
-        final float y = jumpGate.target.y + JUMP_GATE_HEIGHT / 2 + 10;
+        final float y = jumpGate.target.y + PATH_HEIGHT / 2 + 10;
         final float z = jumpGate.target.z;
         //draw text
 //        final PolygonSpriteBatch batch = renderEngine.renderEngine2D.batch;

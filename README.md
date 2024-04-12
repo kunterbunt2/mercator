@@ -47,14 +47,11 @@ Then you can start mercator by one of its starting classes
 
 1. Form selecting an item does not show info in the lower pane.
 2. Economy is not stable, all sims eventually die of hunger.
-3. skybox top not oriented correctly (see reflection screenshot)
-4. simulation advanceintime is triggered every frame.
-5. ensure adding/removing lights does not cause any caching to get dirty.
-6. optimize selected path performance
-7. ships will collide while navigating from planet to planet.
-8. Global lighting image generation is not fitting to space theme
-9. tts is not working
-10. zooming does not change center
-11. radio should add distortion effect
+3. simulation advanceintime is triggered every frame.
+4. ensure adding/removing lights does not cause any caching to get dirty.
+5. optimize selected path performance
+6. ships will collide while navigating from planet to planet.
+7. zooming does not change center
+
 
 

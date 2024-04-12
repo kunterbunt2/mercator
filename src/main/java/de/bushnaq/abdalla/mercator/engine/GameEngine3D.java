@@ -17,16 +17,14 @@
 package de.bushnaq.abdalla.mercator.engine;
 
 import com.badlogic.gdx.*;
+import com.badlogic.gdx.assets.loaders.resolvers.InternalFileHandleResolver;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Cubemap;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
-import com.badlogic.gdx.math.Intersector;
-import com.badlogic.gdx.math.Plane;
-import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.math.collision.Ray;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
@@ -58,6 +56,8 @@ import net.mgsx.gltf.scene3d.attributes.PBRFloatAttribute;
 import net.mgsx.gltf.scene3d.attributes.PBRTextureAttribute;
 import net.mgsx.gltf.scene3d.lights.DirectionalLightEx;
 import net.mgsx.gltf.scene3d.model.ModelInstanceHack;
+import net.mgsx.gltf.scene3d.scene.SceneSkybox;
+import net.mgsx.gltf.scene3d.utils.EnvironmentUtil;
 import net.mgsx.gltf.scene3d.utils.IBLBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,7 +66,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class GameEngine3D implements ScreenListener, ApplicationListener, InputProcessor, RenderEngineExtension, GameEngine {
     public static final  float                        CAMERA_OFFSET_X                 = 300f;
@@ -80,6 +82,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
     public static final  int                          FONT_SIZE                       = 9;
     // private static final float MAX_VOXEL_DIMENSION = 20;
     public static final  Color                        NOT_PRODUCING_FACTORY_COLOR     = Color.RED; // 0xffFF0000;
+    public static final  int                          NUMBER_OF_CELESTIAL_BODIES      = 10000;
     public static final  int                          RAYS_NUM                        = 128;
     public static final  Color                        SELECTED_PLANET_COLOR           = Color.BLUE;
     public static final  Color                        SELECTED_TRADER_COLOR           = Color.RED; // 0xffff0000;
@@ -116,37 +119,46 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
     public               LaunchMode                   launchMode;
     public               RenderEngine3D<GameEngine3D> renderEngine;
     public               ShowGood                     showGood                        = ShowGood.Name;
-    private              AtlasManager                 atlasManager;
-    private              Texture                      brdfLUT;
-    private              ZoomingCameraInputController camController;
-    private              MovingCamera                 camera;
-    private              OrthographicCamera           camera2D;
-    private              float                        centerXD;
-    private              float                        centerYD;
-    private              Context                      context;
-    private              float                        demoTextX                       = 100;
-    private              float                        demoTextY                       = 0;
-    private              Cubemap                      diffuseCubemap;
+    List<CelestialBody>               celestialBody          = new ArrayList<>();
+    Map<Integer, EnvironmentSnapshot> environmentSnapshotMap = new HashMap<>();
+    Vector3                           sunPosition            = new Vector3();
+    private float                        angle                = -1;
+    private AtlasManager                 atlasManager;
+    private Texture                      brdfLUT;
+    private ZoomingCameraInputController camController;
+    private MovingCamera                 camera;
+    private OrthographicCamera           camera2D;
+    private float                        centerXD;
+    private float                        centerYD;
+    private Context                      context;
+    private float                        dayAmbientIntensityB = 1f;
+    private float                        dayAmbientIntensityG = 1f;
+    private float                        dayAmbientIntensityR = 1f;
+    private float                        dayShadowIntensity   = 5f;
+    private float                        demoTextX            = 100;
+    private float                        demoTextY            = 0;
+    private Cubemap                      diffuseCubemap;
     //	private boolean end = false;
     //	private MercatorFrame frame;
     //	private LwjglApplicationConfiguration config;
-    private              Cubemap                      environmentDayCubemap;
-    private              Cubemap                      environmentNightCubemap;
-    private              boolean                      followMode;
+    private Cubemap                      environmentDayCubemap;
+    private Cubemap                      environmentNightCubemap;
+    private boolean                      followMode;
     //    private              BitmapFont                   font;
-    private              boolean                      hrtfEnabled                     = true;
-    private              Info                         info;
-    private              boolean                      infoVisible;
-    private              GameObject<GameEngine3D>     instance;//TODO
-    private              long                         lastCameraDirty                 = 0;
-    private              OggPlayer                    oggPlayer;
+    private boolean                      hrtfEnabled          = true;
+    private Info                         info;
+    private boolean                      infoVisible;
+    private GameObject<GameEngine3D>     instance;//TODO
+    private long                         lastCameraDirty      = 0;
+    private OggPlayer                    oggPlayer;
     //    private              Render2DMaster               render2DMaster;
-    private              boolean                      showFps;
-    private              Cubemap                      specularCubemap;
-    private              Stage                        stage;
-    private              StringBuilder                stringBuilder;
-    private              boolean                      takeScreenShot;
-    private              boolean                      vsyncEnabled                    = true;
+    private boolean                      showFps;
+    private Cubemap                      specularCubemap;
+    private Stage                        stage;
+    private StringBuilder                stringBuilder;
+    private boolean                      takeScreenShot;
+    private float                        timeOfDay;
+    private boolean                      vsyncEnabled         = true;
 
     public GameEngine3D(final IContextFactory contextFactory, final Universe universe, final LaunchMode launchMode) throws Exception {
         this.contextFactory = contextFactory;
@@ -188,21 +200,24 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
             renderEngine.getWater().setWaveStrength(0.01f / Universe.WORLD_SCALE);
             renderEngine.getWater().setWaveSpeed(0.01f);
             renderEngine.getWater().setRefractiveMultiplicator(1f);
-            renderEngine.getMirror().setPresent(true);
-            renderEngine.getMirror().setReflectivity(0.6f);
+            renderEngine.getMirror().setPresent(false);
+            renderEngine.getMirror().setReflectivity(0.2f);
             renderEngine.setShadowEnabled(true);
-            renderEngine.getFog().setEnabled(false);
+            renderEngine.getFog().setEnabled(true);
             renderEngine.getFog().setColor(Color.BLACK);
             renderEngine.getFog().setBeginDistance(2000f);
             renderEngine.getFog().setFullDistance(3000f);
             renderEngine.setReflectionClippingPlane(-(context.getWaterLevel() - 2));
             renderEngine.setRefractionClippingPlane((context.getWaterLevel() - 2));
             renderEngine.setDynamicDayTime(true);
-            renderEngine.setSkyBox(false);
-            renderEngine.setSceneBoxMin(new Vector3(-1000, -1000, -1000));
-            renderEngine.setSceneBoxMax(new Vector3(1000, 1000, 1000));
-            renderEngine.setDayAmbientLight(.5f, .5f, .5f, 1f);
-            renderEngine.setNightAmbientLight(.04f, .04f, .04f, 1f);
+            renderEngine.setSkyBox(true);
+            renderEngine.setSceneBoxMin(new Vector3(-500, -500, -500));
+            renderEngine.setSceneBoxMax(new Vector3(500, 0, 500));
+            renderEngine.setDayAmbientLight(.2f, .2f, .2f, 1f);
+            renderEngine.getShadowLight().setColor(Color.WHITE);
+            renderEngine.setFixedShadowDirection(true);
+//            renderEngine.setNightAmbientLight(.04f, .04f, .04f, 10f);
+//            setDayAmbientLight(.9f, .9f, .9f, 1f);
             createInputProcessor(this, this);
             createLogo();
 
@@ -317,11 +332,17 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
     private void createEnvironment() {
         // setup IBL (image based lighting)
         if (renderEngine.isPbr()) {
-            setupImageBasedLighting();
-            renderEngine.environment.set(PBRCubemapAttribute.createDiffuseEnv(diffuseCubemap));
-            renderEngine.environment.set(PBRCubemapAttribute.createSpecularEnv(specularCubemap));
-            renderEngine.environment.set(new PBRTextureAttribute(PBRTextureAttribute.BRDFLUTTexture, brdfLUT));
-            renderEngine.environment.set(new PBRFloatAttribute(PBRFloatAttribute.ShadowBias, .001f));
+//            setupImageBasedLightingByFaceNames("clouds", "jpg", "jpg", "jpg", 10);
+//            if (renderEngine.isSkyBox()) {
+//                renderEngine.setDaySkyBox(new SceneSkybox(environmentNightCubemap));
+//                renderEngine.setNightSkyBox(new SceneSkybox(environmentNightCubemap));
+//            }
+//
+//            renderEngine.environment.set(PBRCubemapAttribute.createDiffuseEnv(diffuseCubemap));
+//            renderEngine.environment.set(PBRCubemapAttribute.createSpecularEnv(specularCubemap));
+//            renderEngine.environment.set(new PBRTextureAttribute(PBRTextureAttribute.BRDFLUTTexture, brdfLUT));
+//            renderEngine.environment.set(new PBRFloatAttribute(PBRFloatAttribute.ShadowBias, .001f));
+            setupImageBasedLighting(timeOfDay);
         } else {
         }
     }
@@ -452,6 +473,11 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
         }
     }
 
+
+//    public int getMaxFramesPerSecond() {
+//        return maxFramesPerSecond;
+//    }
+
     private void drawDebugGrid() {
         for (int y = -universe.size; y < universe.size; y++) {
             for (int x = -universe.size; x < universe.size; x++) {
@@ -475,84 +501,6 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
 
     private void exit() {
         Gdx.app.exit();
-    }
-
-    private void export(final String fileName, final List<DemoString> Strings) throws IOException {
-        final FileWriter  fileWriter  = new FileWriter(fileName);
-        final PrintWriter printWriter = new PrintWriter(fileWriter);
-        for (final DemoString demoString : Strings) {
-            printWriter.println(demoString.text);
-        }
-        printWriter.close();
-    }
-
-    public AtlasManager getAtlasManager() {
-        return atlasManager;
-    }
-
-    @Override
-    public AudioEngine getAudioEngine() {
-        return audioEngine;
-    }
-
-
-//    public int getMaxFramesPerSecond() {
-//        return maxFramesPerSecond;
-//    }
-
-    public int getCameraZoomIndex() {
-        return camController.zoomIndex;
-    }
-
-    private void initColors() {
-        {
-            distinctiveColorlist.add(new Color(0.2f, 0.2f, 0.2f, 0.5f));
-            final float factor = (universe.sectorList.size() / 8) / 2.0f;
-            final int   c      = (int) Math.ceil(universe.sectorList.size() / 6.0);
-            for (float i = 0; i < Math.ceil(universe.sectorList.size() / 6.0); i++) {
-                final float low = 1.0f - (i + 1) * factor;
-                //				System.out.println(low * 255);
-                final float high  = 1.0f - i * factor;
-                final float alpha = 1.f;
-                // distinctiveColorlist.add( new Color( high, high, high, alpha ) );
-                distinctiveColorlist.add(new Color(high, high, low, alpha));
-                distinctiveColorlist.add(new Color(high, low, high, alpha));
-                distinctiveColorlist.add(new Color(low, high, high, alpha));
-                distinctiveColorlist.add(new Color(high, low, low, alpha));
-                distinctiveColorlist.add(new Color(low, low, high, alpha));
-                distinctiveColorlist.add(new Color(low, high, low, alpha));
-                // distinctiveColorlist.add( new Color( low, high, low, alpha ) );
-                // distinctiveColorlist.add( new Color( low, low, high, alpha ) );
-                // distinctiveColorlist.add( new Color( low, 1.0f, 1.0f, alpha ) );
-                // distinctiveColorlist.add( new Color( 1.0f, low, 1.0f, alpha ) );
-                // distinctiveColorlist.add( new Color( 1.0f, 1.0f, low, alpha ) );
-                // distinctiveColorlist.add( new Color( low, low, low, alpha ) );
-            }
-            // distinctiveColorArray = distinctiveColorlist.toArray( new Color[0] );
-        }
-        distinctiveTransparentColorlist.add(new Color(0.2f, 0.2f, 0.2f, 0.5f));
-        final float factor = (universe.sectorList.size() / 8) / 2.0f;
-        final int   c      = (int) Math.ceil(universe.sectorList.size() / 6.0);
-        for (float i = 0; i < Math.ceil(universe.sectorList.size() / 6.0); i++) {
-            final float low = 1.0f - (i + 1) * factor;
-            //			System.out.println(low * 255);
-            final float high  = 1.0f - i * factor;
-            final float alpha = 0.4f;
-            // distinctiveColorlist.add( new Color( high, high, high, alpha ) );
-            distinctiveTransparentColorlist.add(new Color(high, high, low, alpha));
-            distinctiveTransparentColorlist.add(new Color(high, low, high, alpha));
-            distinctiveTransparentColorlist.add(new Color(low, high, high, alpha));
-            distinctiveTransparentColorlist.add(new Color(high, low, low, alpha));
-            distinctiveTransparentColorlist.add(new Color(low, low, high, alpha));
-            distinctiveTransparentColorlist.add(new Color(low, high, low, alpha));
-            // distinctiveColorlist.add( new Color( low, high, low, alpha ) );
-            // distinctiveColorlist.add( new Color( low, low, high, alpha ) );
-            // distinctiveColorlist.add( new Color( low, 1.0f, 1.0f, alpha ) );
-            // distinctiveColorlist.add( new Color( 1.0f, low, 1.0f, alpha ) );
-            // distinctiveColorlist.add( new Color( 1.0f, 1.0f, low, alpha ) );
-            // distinctiveColorlist.add( new Color( low, low, low, alpha ) );
-        }
-        // distinctiveColorArray = distinctiveColorlist.toArray( new Color[0] );
     }
 
     //	Sector3DRenderer sector3DRenderer = new Sector3DRenderer();
@@ -617,6 +565,102 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
     //	  }
     //
     //	  graphics.setStroke( defaultStroke ); }
+
+    private void export(final String fileName, final List<DemoString> Strings) throws IOException {
+        final FileWriter  fileWriter  = new FileWriter(fileName);
+        final PrintWriter printWriter = new PrintWriter(fileWriter);
+        for (final DemoString demoString : Strings) {
+            printWriter.println(demoString.text);
+        }
+        printWriter.close();
+    }
+
+    public AtlasManager getAtlasManager() {
+        return atlasManager;
+    }
+
+    /*
+     * private void drawPlanetGraph( Planet planet ) { int pd = PLANET_DISTANCE - 2;
+     * int hpd = PLANET_DISTANCE / 2; int qpd = PLANET_DISTANCE / 4 - 2; int planetX
+     * = planet.x * PLANET_DISTANCE - hpd; int planetY = planet.y * PLANET_DISTANCE
+     * - hpd; int x[] = new int[planet.creditHistory.size()]; int y[] = new
+     * int[planet.creditHistory.size()]; boolean draw = true; // ---Find max int
+     * maxY = Planet.PLANET_START_CREDITS; for ( int i = 0; i <
+     * planet.creditHistory.size(); i++ ) { int ty = planet.creditHistory.get( i );
+     * if ( ty > maxY ) maxY = ty; } for ( int i = 0; i <
+     * planet.creditHistory.size(); i++ ) { x[i] = transformX( planetX + ( i * pd )
+     * / Planet.CREDIT_HISTORY_SIZE ); y[i] = transformY( planetY + pd - ( (
+     * planet.creditHistory.get( i ) * qpd ) / maxY ) ); } graphics.setColor(
+     * queryCreditColor( planet ) ); if ( draw ) { Stroke defaultStroke =
+     * graphics.getStroke(); float dash[] = { 1.0f }; BasicStroke stroke = new
+     * BasicStroke( 1.7f, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_MITER, 10.0f,
+     * dash, 0.0f ); graphics.setStroke( stroke ); graphics.drawPolyline( x, y,
+     * planet.creditHistory.size() ); graphics.setStroke( defaultStroke ); } }
+     */
+
+    //	public Canvas getCanvas() {
+    //		return myCanvas.getCanvas();
+    //	}
+
+    @Override
+    public AudioEngine getAudioEngine() {
+        return audioEngine;
+    }
+
+    public int getCameraZoomIndex() {
+        return camController.zoomIndex;
+    }
+
+    private void initColors() {
+        {
+            distinctiveColorlist.add(new Color(0.2f, 0.2f, 0.2f, 0.5f));
+            final float factor = (universe.sectorList.size() / 8) / 2.0f;
+            final int   c      = (int) Math.ceil(universe.sectorList.size() / 6.0);
+            for (float i = 0; i < Math.ceil(universe.sectorList.size() / 6.0); i++) {
+                final float low = 1.0f - (i + 1) * factor;
+                //				System.out.println(low * 255);
+                final float high  = 1.0f - i * factor;
+                final float alpha = 1.f;
+                // distinctiveColorlist.add( new Color( high, high, high, alpha ) );
+                distinctiveColorlist.add(new Color(high, high, low, alpha));
+                distinctiveColorlist.add(new Color(high, low, high, alpha));
+                distinctiveColorlist.add(new Color(low, high, high, alpha));
+                distinctiveColorlist.add(new Color(high, low, low, alpha));
+                distinctiveColorlist.add(new Color(low, low, high, alpha));
+                distinctiveColorlist.add(new Color(low, high, low, alpha));
+                // distinctiveColorlist.add( new Color( low, high, low, alpha ) );
+                // distinctiveColorlist.add( new Color( low, low, high, alpha ) );
+                // distinctiveColorlist.add( new Color( low, 1.0f, 1.0f, alpha ) );
+                // distinctiveColorlist.add( new Color( 1.0f, low, 1.0f, alpha ) );
+                // distinctiveColorlist.add( new Color( 1.0f, 1.0f, low, alpha ) );
+                // distinctiveColorlist.add( new Color( low, low, low, alpha ) );
+            }
+            // distinctiveColorArray = distinctiveColorlist.toArray( new Color[0] );
+        }
+        distinctiveTransparentColorlist.add(new Color(0.2f, 0.2f, 0.2f, 0.5f));
+        final float factor = (universe.sectorList.size() / 8) / 2.0f;
+        final int   c      = (int) Math.ceil(universe.sectorList.size() / 6.0);
+        for (float i = 0; i < Math.ceil(universe.sectorList.size() / 6.0); i++) {
+            final float low = 1.0f - (i + 1) * factor;
+            //			System.out.println(low * 255);
+            final float high  = 1.0f - i * factor;
+            final float alpha = 0.4f;
+            // distinctiveColorlist.add( new Color( high, high, high, alpha ) );
+            distinctiveTransparentColorlist.add(new Color(high, high, low, alpha));
+            distinctiveTransparentColorlist.add(new Color(high, low, high, alpha));
+            distinctiveTransparentColorlist.add(new Color(low, high, high, alpha));
+            distinctiveTransparentColorlist.add(new Color(high, low, low, alpha));
+            distinctiveTransparentColorlist.add(new Color(low, low, high, alpha));
+            distinctiveTransparentColorlist.add(new Color(low, high, low, alpha));
+            // distinctiveColorlist.add( new Color( low, high, low, alpha ) );
+            // distinctiveColorlist.add( new Color( low, low, high, alpha ) );
+            // distinctiveColorlist.add( new Color( low, 1.0f, 1.0f, alpha ) );
+            // distinctiveColorlist.add( new Color( 1.0f, low, 1.0f, alpha ) );
+            // distinctiveColorlist.add( new Color( 1.0f, 1.0f, low, alpha ) );
+            // distinctiveColorlist.add( new Color( low, low, low, alpha ) );
+        }
+        // distinctiveColorArray = distinctiveColorlist.toArray( new Color[0] );
+    }
 
     public boolean isInfoVisible() {
         return infoVisible;
@@ -702,29 +746,6 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
         return false;
 
     }
-
-    /*
-     * private void drawPlanetGraph( Planet planet ) { int pd = PLANET_DISTANCE - 2;
-     * int hpd = PLANET_DISTANCE / 2; int qpd = PLANET_DISTANCE / 4 - 2; int planetX
-     * = planet.x * PLANET_DISTANCE - hpd; int planetY = planet.y * PLANET_DISTANCE
-     * - hpd; int x[] = new int[planet.creditHistory.size()]; int y[] = new
-     * int[planet.creditHistory.size()]; boolean draw = true; // ---Find max int
-     * maxY = Planet.PLANET_START_CREDITS; for ( int i = 0; i <
-     * planet.creditHistory.size(); i++ ) { int ty = planet.creditHistory.get( i );
-     * if ( ty > maxY ) maxY = ty; } for ( int i = 0; i <
-     * planet.creditHistory.size(); i++ ) { x[i] = transformX( planetX + ( i * pd )
-     * / Planet.CREDIT_HISTORY_SIZE ); y[i] = transformY( planetY + pd - ( (
-     * planet.creditHistory.get( i ) * qpd ) / maxY ) ); } graphics.setColor(
-     * queryCreditColor( planet ) ); if ( draw ) { Stroke defaultStroke =
-     * graphics.getStroke(); float dash[] = { 1.0f }; BasicStroke stroke = new
-     * BasicStroke( 1.7f, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_MITER, 10.0f,
-     * dash, 0.0f ); graphics.setStroke( stroke ); graphics.drawPolyline( x, y,
-     * planet.creditHistory.size() ); graphics.setStroke( defaultStroke ); } }
-     */
-
-    //	public Canvas getCanvas() {
-    //		return myCanvas.getCanvas();
-    //	}
 
     @Override
     public boolean keyUp(final int keycode) {
@@ -936,6 +957,37 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
         drawDebugGrid();
     }
 
+    @Override
+    public boolean updateEnvironment(float timeOfDay) {
+        if (Math.abs(this.timeOfDay - timeOfDay) > 0.01) {
+            final Vector3 shadowLightDirection = new Vector3();
+            final Matrix4 m                    = new Matrix4();
+            if (renderEngine.isFixedShadowDirection()) {
+                angle = 360 * 14f / 24;
+            } else {
+                angle = 360 * timeOfDay / 24;
+            }
+
+            m.rotate(Vector3.X, 60);
+            m.rotate(Vector3.Y, angle);
+            m.translate(0, 0, -1);
+            m.getTranslation(shadowLightDirection);
+            shadowLightDirection.nor();
+            renderEngine.getShadowLight().setDirection(shadowLightDirection);
+            setupImageBasedLighting(timeOfDay);
+            {
+                final float intensity = 1.0f;
+                final float r         = dayAmbientIntensityR;
+                final float g         = dayAmbientIntensityG;
+                final float b         = dayAmbientIntensityB;
+                renderEngine.setShadowLight(dayShadowIntensity * intensity);
+                renderEngine.setAmbientLight(r, g, b);
+            }
+            this.timeOfDay = timeOfDay;
+        }
+        return true;
+    }
+
     private void renderAllTTSStrings() {
         List<String> names = new ArrayList<>();
         for (Trader trader : universe.traderList) {
@@ -1063,7 +1115,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
             final float time    = renderEngine.getCurrentDayTime();
             final int   hours   = (int) time;
             final int   minutes = (int) (60 * ((time - (int) time) * 100) / 100);
-            stringBuilder.append(" time ").append(hours).append(":").append(minutes);
+            stringBuilder.append(" time ").append(String.format("%2df", hours)).append(":").append(String.format("%2df", minutes)).append(" sun :").append(String.format("%.0f", angle));
             labels.get(labelIndex++).setText(stringBuilder);
         }
         stage.draw();
@@ -1173,28 +1225,103 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
     //		return planet;
     //	}
 
-    public void setInfoVisible(final boolean infoVisible) {
-        this.infoVisible = infoVisible;
+    public void setDayAmbientLight(float r, float g, float b, float shadowIntensity) {
+        dayAmbientIntensityR = r;
+        dayAmbientIntensityG = g;
+        dayAmbientIntensityB = b;
+        dayShadowIntensity   = shadowIntensity;
     }
 
     //	private void setMaxFramesPerSecond(int maxFramesPerSecond) {
     //		this.maxFramesPerSecond = maxFramesPerSecond;
     //	}
 
-    private void setupImageBasedLighting() {
-        brdfLUT = new Texture(Gdx.files.classpath("net/mgsx/gltf/shaders/brdfLUT.png"));
+    public void setInfoVisible(final boolean infoVisible) {
+        this.infoVisible = infoVisible;
+    }
+
+    private void setupImageBasedLighting(float timeOfDay) {
+        if (brdfLUT == null)
+            brdfLUT = new Texture(Gdx.files.classpath("net/mgsx/gltf/shaders/brdfLUT.png"));
 
         // // setup quick IBL (image based lighting)
-        DirectionalLightEx light = new DirectionalLightEx();
-        light.direction.set(1, -3, 1).nor();
-        light.color.set(Color.WHITE);
-        IBLBuilder iblBuilder         = IBLBuilder.createOutdoor(light);
-        Cubemap    environmentCubemap = iblBuilder.buildEnvMap(1024);
-        diffuseCubemap  = iblBuilder.buildIrradianceMap(256);
-        specularCubemap = iblBuilder.buildRadianceMap(10);
-        iblBuilder.dispose();
-        environmentDayCubemap   = environmentCubemap;
-        environmentNightCubemap = environmentCubemap;
+        if (false) {
+            DirectionalLightEx light = new DirectionalLightEx();
+            light.direction.set(1, -3, 1).nor();
+//            light.direction.set(renderEngine.getShadowLight().direction.x, renderEngine.getShadowLight().direction.y, renderEngine.getShadowLight().direction.z).nor();
+            light.color.set(Color.WHITE);
+            IBLBuilder iblBuilder         = IBLBuilder.createOutdoor(light);
+            Cubemap    environmentCubemap = iblBuilder.buildEnvMap(1024 * 4);
+            diffuseCubemap  = iblBuilder.buildIrradianceMap(256);
+            specularCubemap = iblBuilder.buildRadianceMap(10);
+            iblBuilder.dispose();
+//            environmentDayCubemap   = environmentCubemap;
+//            environmentNightCubemap = environmentCubemap;
+            renderEngine.setDaySkyBox(new SceneSkybox(environmentCubemap));
+            renderEngine.setNightSkyBox(new SceneSkybox(environmentCubemap));
+        } else {
+            Integer             index               = (int) (angle);
+            EnvironmentSnapshot environmentSnapshot = environmentSnapshotMap.get(index);
+            if (environmentSnapshot == null) {
+                logger.info(String.format("setupImageBasedLighting = %d", index));
+                DirectionalLightEx sun = new DirectionalLightEx();
+                sun.direction.set(renderEngine.getShadowLight().direction.x, renderEngine.getShadowLight().direction.y, renderEngine.getShadowLight().direction.z).nor();
+                sun.color.set(Color.WHITE);
+                myIBLBuilder ibl = new myIBLBuilder();
+//                if (celestialBody.isEmpty())
+                {
+                    celestialBody.clear();
+                    int numberOfBodies;
+                    if (index == -1)
+                        numberOfBodies = 10;
+                    else
+                        numberOfBodies = NUMBER_OF_CELESTIAL_BODIES;
+                    logger.info(String.format("numberOfBodies=%d", numberOfBodies));
+                    celestialBody.add(new CelestialBody(sun.direction, sun.color, 10000f));
+                    for (int i = 0; i < numberOfBodies; i++) {
+                        celestialBody.add(new CelestialBody());
+                    }
+                }
+
+                celestialBody.get(0).getDirection().set(sun.direction);
+                for (CelestialBody cb : celestialBody) {
+                    myIBLBuilder.Light light = new myIBLBuilder.Light();
+                    light.direction.set(cb.getDirection());
+                    light.color.set(cb.getColor());
+                    light.exponent = cb.getExponent();
+                    ibl.lights.add(light);
+                }
+
+                float tint = 0.0f;
+                ibl.nearGroundColor.set(tint, tint, tint, 1.0F);
+                ibl.farGroundColor.set(tint, tint, tint, 1.0F);
+                ibl.nearSkyColor.set(tint, tint, tint, 1.0F);
+                ibl.farSkyColor.set(tint, tint, tint, 1.0F);
+                Cubemap environmentCubemap = ibl.buildEnvMap(1024 * 4);
+                Cubemap irradianceMap      = ibl.buildIrradianceMap(256 * 4);
+                Cubemap radianceMap        = ibl.buildRadianceMap(10 + 2);
+                environmentSnapshot = new EnvironmentSnapshot(environmentCubemap, irradianceMap, radianceMap);
+                environmentSnapshotMap.put(index, environmentSnapshot);
+                ibl.dispose();
+            }
+            renderEngine.setDaySkyBox(environmentSnapshot.getEnvironmentCubemap());
+            renderEngine.setNightSkyBox(environmentSnapshot.getEnvironmentCubemap());
+            diffuseCubemap  = environmentSnapshot.getIrradianceMap();
+            specularCubemap = environmentSnapshot.getRadianceMap();
+        }
+        renderEngine.environment.set(PBRCubemapAttribute.createDiffuseEnv(diffuseCubemap));
+        renderEngine.environment.set(PBRCubemapAttribute.createSpecularEnv(specularCubemap));
+        renderEngine.environment.set(new PBRTextureAttribute(PBRTextureAttribute.BRDFLUTTexture, brdfLUT));
+        renderEngine.environment.set(new PBRFloatAttribute(PBRFloatAttribute.ShadowBias, .004f));
+    }
+
+    private void setupImageBasedLightingByFaceNames(final String name, final String diffuseExtension, final String environmentExtension, final String specularExtension, final int specularIterations) {
+        diffuseCubemap = EnvironmentUtil.createCubemap(new InternalFileHandleResolver(), AtlasManager.getAssetsFolderName() + "/textures/" + name + "/diffuse/diffuse_", "_0." + diffuseExtension, EnvironmentUtil.FACE_NAMES_FULL);
+//        environmentDayCubemap   = EnvironmentUtil.createCubemap(new InternalFileHandleResolver(), AtlasManager.getAssetsFolderName() + "/textures/" + name + "/environmentDay/environment_", "_0." + environmentExtension, EnvironmentUtil.FACE_NAMES_FULL);
+        environmentNightCubemap = EnvironmentUtil.createCubemap(new InternalFileHandleResolver(), AtlasManager.getAssetsFolderName() + "/textures/" + name + "/environmentNight/environment_", "_0." + environmentExtension, EnvironmentUtil.FACE_NAMES_FULL);
+        specularCubemap         = EnvironmentUtil.createCubemap(new InternalFileHandleResolver(), AtlasManager.getAssetsFolderName() + "/textures/" + name + "/specular/specular_", "_", "." + specularExtension, specularIterations, EnvironmentUtil.FACE_NAMES_FULL);
+        brdfLUT                 = new Texture(Gdx.files.classpath("net/mgsx/gltf/shaders/brdfLUT.png"));
+
 
     }
 

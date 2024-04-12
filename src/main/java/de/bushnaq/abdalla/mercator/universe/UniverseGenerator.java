@@ -129,7 +129,7 @@ public class UniverseGenerator {
     }
 
     private void connectPlanets(final Planet sourcePlanet, final Planet targetPlanet, final float zSign, final float xSign, final String name) {
-        final Waypoint w0 = new Waypoint(sourcePlanet.getName() + "-0" + name, sourcePlanet.x + zSign * Planet.CHANNEL_SIZE / 2 - xSign * (Planet3DRenderer.PLANET_3D_SIZE / 2 + Planet.CHANNEL_SIZE), sourcePlanet.y, sourcePlanet.z - zSign * (Planet3DRenderer.PLANET_3D_SIZE / 2 + Planet.CHANNEL_SIZE) - xSign * Planet.CHANNEL_SIZE / 2);
+        final Waypoint w0 = new Waypoint(sourcePlanet.getName() + "-0" + name, sourcePlanet.x + zSign * Planet.CHANNEL_SIZE / 2 - xSign * (Planet3DRenderer.PLANET_3D_SIZE /*/ 2*/ + Planet.CHANNEL_SIZE), sourcePlanet.y, sourcePlanet.z - zSign * (Planet3DRenderer.PLANET_3D_SIZE /*/ 2*/ + Planet.CHANNEL_SIZE) - xSign * Planet.CHANNEL_SIZE / 2);
         final Path     p0 = new Path(sourcePlanet, w0);
         sourcePlanet.pathList.add(p0);
 
@@ -168,7 +168,7 @@ public class UniverseGenerator {
 //            }
 
 
-            final Waypoint w3 = new Waypoint(sourcePlanet.getName() + "-" + 3 + name, targetPlanet.x + zSign * Planet.CHANNEL_SIZE / 2 + xSign * (Planet3DRenderer.PLANET_3D_SIZE / 2 + Planet.CHANNEL_SIZE), targetPlanet.y, targetPlanet.z + zSign * (Planet3DRenderer.PLANET_3D_SIZE / 2 + Planet.CHANNEL_SIZE) - xSign * Planet.CHANNEL_SIZE / 2);
+            final Waypoint w3 = new Waypoint(sourcePlanet.getName() + "-" + 3 + name, targetPlanet.x + zSign * Planet.CHANNEL_SIZE / 2 + xSign * (Planet3DRenderer.PLANET_3D_SIZE /*/ 2*/ + Planet.CHANNEL_SIZE), targetPlanet.y, targetPlanet.z + zSign * (Planet3DRenderer.PLANET_3D_SIZE /*/ 2*/ + Planet.CHANNEL_SIZE) - xSign * Planet.CHANNEL_SIZE / 2);
             final Path     p3 = new Path(w0, w3);
             w0.pathList.add(p3);
 

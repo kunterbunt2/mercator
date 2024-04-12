@@ -53,8 +53,11 @@ public class AssetManager {
     public Model                   cubeBase1;
     public Model                   cubeModel;//used for debugging
     public Model                   cubeTrans1;
+    public SceneAsset              dockingStation;
+    public SceneAsset              dynamicStation;
     //    public Model                   cubeTrans2;
     public SceneAsset              flame;
+    public SceneAsset              gate;
     //    public SceneAsset              cubeGoldLeaves;
     public SceneAsset              goodContainer;
     public Model                   jumpGate;
@@ -62,11 +65,10 @@ public class AssetManager {
     public Model                   land;
     public Model                   mirrorModel;
     public SceneAsset              planet01;
-    public Model                   planetModel;
+    //    public  Model                   planetModel;
     public Model                   redEmissiveModel;
     public Model                   sector;
     public ShowGood                showGood = ShowGood.Name;
-    public SceneAsset              station;
     public SceneAsset              trader;
     //    public SceneAsset              traderAsset;
     public SceneAsset              turbine;
@@ -108,13 +110,13 @@ public class AssetManager {
             cubeBase1 = modelCreator.createBox(material);
         }
         createTrader(modelBuilder, modelCreator);
-        createStation(modelBuilder, modelCreator);
+        createDynamicStation(modelBuilder, modelCreator);
         createPlanet01(modelBuilder, modelCreator);
         createFlame(modelBuilder, modelCreator);
         createGoodContainer(modelBuilder);
 
         createRedEmissiveModel(modelCreator);
-        createPlanet(modelCreator);
+        createDockingStation(texture, modelCreator, modelBuilder);
         {
             final Attribute color     = new PBRColorAttribute(PBRColorAttribute.BaseColorFactor, Color.DARK_GRAY);
             final Attribute metallic  = PBRFloatAttribute.createMetallic(0.0f);
@@ -124,7 +126,8 @@ public class AssetManager {
         }
         createBuilding(modelBuilder);
         createJumpgate(modelBuilder);
-        createJumpgateArraw(modelBuilder, modelCreator);
+        createGate();
+        createJumpGateArrow(modelBuilder, modelCreator);
 //        {
 //            wheel = new GLTFLoader().load(Gdx.files.internal(AtlasManager.getAssetsFolderName() + "/models/glTF/wheel/wheel.gltf"));
 //            final Material material = wheel.scene.model.materials.get(0);
@@ -174,6 +177,19 @@ public class AssetManager {
         cubeModel = modelBuilder.createBox(1.0f, 1.0f, 1.0f, material, Usage.Position | Usage.Normal);
     }
 
+    private void createDockingStation(Texture texture, ModelCreator modelCreator, ModelBuilder modelBuilder) {
+//        final Attribute color     = new PBRColorAttribute(PBRColorAttribute.BaseColorFactor, Color.BLACK);
+//        final Attribute metallic  = PBRFloatAttribute.createMetallic(0.5f);
+//        final Attribute roughness = PBRFloatAttribute.createRoughness(0.5f);
+//        final Material  material  = new Material(metallic, roughness, color);
+//        planetModel = modelCreator.createBox(material);
+        dockingStation = new GLBLoader().load(Gdx.files.internal(String.format(AtlasManager.getAssetsFolderName() + "/models/docking-station.glb")));
+    }
+
+    private void createDynamicStation(ModelBuilder modelBuilder, ModelCreator modelCreator) {
+        dynamicStation = new GLBLoader().load(Gdx.files.internal(String.format(AtlasManager.getAssetsFolderName() + "/models/dynamic-station.glb")));
+    }
+
     private void createFlame(ModelBuilder modelBuilder, ModelCreator modelCreator) {
         flame = new GLBLoader().load(Gdx.files.internal(String.format(AtlasManager.getAssetsFolderName() + "/models/flame.glb")));
         PBRColorAttribute baseColorFactor = PBRColorAttribute.createBaseColorFactor(new Color(Color.WHITE));
@@ -185,6 +201,24 @@ public class AssetManager {
         }
     }
 
+    private void createGate() {
+        gate = new GLBLoader().load(Gdx.files.internal(String.format(AtlasManager.getAssetsFolderName() + "/models/gate.glb")));
+
+        final Attribute metallic  = PBRFloatAttribute.createMetallic(0.9f);
+        final Attribute roughness = PBRFloatAttribute.createRoughness(0.1f);
+        final Attribute color     = new PBRColorAttribute(PBRColorAttribute.BaseColorFactor, Color.BLACK);
+        final Attribute blending  = new BlendingAttribute(0.1f); // opacity is set by pbrMetallicRoughness below
+//        final Material  material  = new Material(metallic, roughness, color/* , culling, normal, occlusion, shininess */, blending);
+
+
+        for (Material material : gate.scene.model.materials) {
+            if (material.id.equals("transparent.material")) {
+                material.set(blending);
+            }
+        }
+
+    }
+
     private void createGoodContainer(ModelBuilder modelBuilder) {
 //        final Attribute color     = new PBRColorAttribute(PBRColorAttribute.BaseColorFactor, Color.WHITE);
 //        final Attribute metallic  = PBRFloatAttribute.createMetallic(0.5f);
@@ -192,6 +226,18 @@ public class AssetManager {
 //        final Material  material  = new Material(metallic, roughness, color/*, culface, normal, occlusion*/);
 //        goodContainer = modelBuilder.createBox(1.0f, 1.0f, 1.0f, material, Usage.Position | Usage.Normal);
         goodContainer = new GLBLoader().load(Gdx.files.internal(String.format(AtlasManager.getAssetsFolderName() + "/models/container.glb")));
+    }
+
+    private void createJumpGateArrow(ModelBuilder modelBuilder, ModelCreator modelCreator) {
+        final Attribute color     = new PBRColorAttribute(PBRColorAttribute.BaseColorFactor, new Color(1, 1, 1, 0.5f));
+        final Attribute metallic  = PBRFloatAttribute.createMetallic(.8f);
+        final Attribute roughness = PBRFloatAttribute.createRoughness(0.2f);
+//        final Attribute occlusion = PBRFloatAttribute.createOcclusionStrength(1.0f);
+        //			final Attribute culling = IntAttribute.createCullFace(1);
+        //			final Material material = new Material(metallic, roughness, color);
+        //			final Material material = new Material(metallic, roughness, color, culling/*, normal*/, occlusion/*, shininess */);
+        final Material material = new Material(metallic, roughness, color);
+        jumpGateArrow = modelBuilder.createBox(1.0f, 1.0f, 1.0f, material, Usage.Position | Usage.Normal);
     }
 
     private void createJumpgate(ModelBuilder modelBuilder) {
@@ -206,32 +252,12 @@ public class AssetManager {
         jumpGate = modelBuilder.createBox(1.0f, 1.0f, 1.0f, material, Usage.Position | Usage.Normal);
     }
 
-    private void createJumpgateArraw(ModelBuilder modelBuilder, ModelCreator modelCreator) {
-        final Attribute color     = new PBRColorAttribute(PBRColorAttribute.BaseColorFactor, new Color(1, 1, 1, 0.5f));
-        final Attribute metallic  = PBRFloatAttribute.createMetallic(.8f);
-        final Attribute roughness = PBRFloatAttribute.createRoughness(0.2f);
-//        final Attribute occlusion = PBRFloatAttribute.createOcclusionStrength(1.0f);
-        //			final Attribute culling = IntAttribute.createCullFace(1);
-        //			final Material material = new Material(metallic, roughness, color);
-        //			final Material material = new Material(metallic, roughness, color, culling/*, normal*/, occlusion/*, shininess */);
-        final Material material = new Material(metallic, roughness, color);
-        jumpGateArrow = modelBuilder.createBox(1.0f, 1.0f, 1.0f, material, Usage.Position | Usage.Normal);
-    }
-
     private void createMirror(Texture texture, ModelBuilder modelBuilder) {
-        final ColorAttribute   diffuseColor   = ColorAttribute.createDiffuse(Color.BLACK);
+        final ColorAttribute   diffuseColor   = ColorAttribute.createDiffuse(Color.WHITE);
         final TextureAttribute diffuseTexture = TextureAttribute.createDiffuse(texture);
         final Material         material       = new Material(diffuseColor, diffuseTexture);
         material.id = "mirror";
         mirrorModel = createSquare(modelBuilder, 0.5f, 0.5f, material);
-    }
-
-    private void createPlanet(ModelCreator modelCreator) {
-        final Attribute color     = new PBRColorAttribute(PBRColorAttribute.BaseColorFactor, Color.BLACK);
-        final Attribute metallic  = PBRFloatAttribute.createMetallic(0.2f);
-        final Attribute roughness = PBRFloatAttribute.createRoughness(0.5f);
-        final Material  material  = new Material(metallic, roughness, color);
-        planetModel = modelCreator.createBox(material);
     }
 
     private void createPlanet01(ModelBuilder modelBuilder, ModelCreator modelCreator) {
@@ -264,10 +290,6 @@ public class AssetManager {
 
     private Model createSquare(final ModelBuilder modelBuilder, final float sx, final float sz, final Material material) {
         return modelBuilder.createRect(-sx, 0f, sz, sx, 0f, sz, sx, 0f, -sz, -sx, 0f, -sz, 0f, 1f, 0f, material, Usage.Position | Usage.Normal | Usage.TextureCoordinates);
-    }
-
-    private void createStation(ModelBuilder modelBuilder, ModelCreator modelCreator) {
-        station = new GLBLoader().load(Gdx.files.internal(String.format(AtlasManager.getAssetsFolderName() + "/models/station.glb")));
     }
 
     private void createTrader(ModelBuilder modelBuilder, ModelCreator modelCreator) {

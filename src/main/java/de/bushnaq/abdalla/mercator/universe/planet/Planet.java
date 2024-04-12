@@ -37,7 +37,7 @@ import de.bushnaq.abdalla.mercator.util.*;
  * @author bushnaq Created 13.02.2005
  */
 public class Planet extends Waypoint implements TradingPartner {
-    public static final float                      CHANNEL_SIZE           = 64 / Universe.WORLD_SCALE;
+    public static final float                      CHANNEL_SIZE           = 196 / Universe.WORLD_SCALE;
     //    public final static float                  MIN_PLANET_DISTANCE    = 30;
     public static final int                        PLANET_DISTANCE        = 2048 * 2;
     public final static int                        PLANET_MAX_SIMS        = 10;

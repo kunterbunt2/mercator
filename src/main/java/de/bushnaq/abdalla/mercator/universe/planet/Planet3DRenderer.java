@@ -99,11 +99,12 @@ public class Planet3DRenderer extends ObjectRenderer<GameEngine3D> {
     Vector3 translation = new Vector3();
     private boolean                  dayMode       = true;
     //	Scene scene;
-    private GameObject<GameEngine3D> gameObject;
+    private GameObject<GameEngine3D> dockingStationGameObject;
+    private GameObject<GameEngine3D> dynamicStationGameObject;
+    private GameObject<GameEngine3D> mirrorObject;
     private GameObject<GameEngine3D> planetGameObject;
     private float                    rotation;
     private float                    rotationSpeed = 1f;
-    private GameObject<GameEngine3D> stationGameObject;
 
     public Planet3DRenderer(final Planet planet) {
         this.planet = planet;
@@ -139,7 +140,7 @@ public class Planet3DRenderer extends ObjectRenderer<GameEngine3D> {
 
     @Override
     public void renderText(final RenderEngine3D<GameEngine3D> renderEngine, final int index, final boolean selected) {
-        if (renderEngine.getCamera().frustum.boundsInFrustum(gameObject.transformedBoundingBox)) {
+        if (renderEngine.getCamera().frustum.boundsInFrustum(dockingStationGameObject.transformedBoundingBox)) {
             final float size = 64;
             final float x    = planet.x;
             final float z    = planet.z;
@@ -301,18 +302,25 @@ public class Planet3DRenderer extends ObjectRenderer<GameEngine3D> {
         final float z = planet.z;
         //planet
         {
-            gameObject = new GameObject<GameEngine3D>(new ModelInstanceHack(renderEngine.getGameEngine().assetManager.planetModel), planet, this);
-            gameObject.instance.transform.setToTranslationAndScaling(x, -PLANET_HIGHT / 2, z, PLANET_3D_SIZE, PLANET_HIGHT, PLANET_3D_SIZE);
-            gameObject.update();
-            renderEngine.addStatic(gameObject);
-            stationGameObject = new GameObject<GameEngine3D>(new ModelInstanceHack(renderEngine.getGameEngine().assetManager.station.scene.model), planet, this);
-            stationGameObject.instance.transform.setToTranslation(x, -32, z);
-            stationGameObject.update();
-            renderEngine.addStatic(stationGameObject);
+            dockingStationGameObject = new GameObject<GameEngine3D>(new ModelInstanceHack(renderEngine.getGameEngine().assetManager.dockingStation.scene.model), planet, this);
+            dockingStationGameObject.instance.transform.setToTranslation(x, -PLANET_HIGHT / 2, z);
+            dockingStationGameObject.update();
+            renderEngine.addStatic(dockingStationGameObject);
+
+            mirrorObject = new GameObject<GameEngine3D>(new ModelInstanceHack(renderEngine.getGameEngine().assetManager.mirrorModel), planet, this);
+            mirrorObject.instance.transform.setToTranslationAndScaling(x, 1, z, PLANET_3D_SIZE, PLANET_HIGHT, PLANET_3D_SIZE);
+            mirrorObject.update();
+//            renderEngine.addStatic(mirrorObject);
+
+            dynamicStationGameObject = new GameObject<GameEngine3D>(new ModelInstanceHack(renderEngine.getGameEngine().assetManager.dynamicStation.scene.model), planet, this);
+//            dynamicStationGameObject.instance.transform.setToTranslation(x, -128, z);
+//            dynamicStationGameObject.update();
+            renderEngine.addStatic(dynamicStationGameObject);
+
             planetGameObject = new GameObject<GameEngine3D>(new ModelInstanceHack(renderEngine.getGameEngine().assetManager.planet01.scene.model), planet, this);
             planetGameObject.instance.transform.setToTranslation(x, -500, z);
             planetGameObject.update();
-            renderEngine.addStatic(planetGameObject);
+//            renderEngine.addStatic(planetGameObject);
             //todo decide if city should have light
             final PointLight light = new PointLight().set(Color.WHITE, x, LIGHT_HIGHT, z, LIGHT_DAY_INTENSITY);
             pointLight.add(light);
@@ -538,8 +546,8 @@ public class Planet3DRenderer extends ObjectRenderer<GameEngine3D> {
             dayMode = true;
         }
         rotation += rotationSpeed * realTimeDelta;
-        stationGameObject.instance.transform.setToTranslation(planet.x, -16, planet.z);
-        stationGameObject.instance.transform.rotate(Vector3.Y, rotation);
+        dynamicStationGameObject.instance.transform.setToTranslation(planet.x, -128, planet.z);
+        dynamicStationGameObject.instance.transform.rotate(Vector3.Y, rotation);
         planetGameObject.instance.transform.setToTranslation(planet.x, -512 - 2024, planet.z - 512);
         planetGameObject.instance.transform.rotate(Vector3.Y, rotation);
         planet.communicationPartner.ttsPlayer.play();

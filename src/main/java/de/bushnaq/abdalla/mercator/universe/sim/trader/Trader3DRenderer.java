@@ -438,13 +438,13 @@ public class Trader3DRenderer extends ObjectRenderer<GameEngine3D> {
             final int   xContainer = i % xEdgeSize;
             final int   yContainer = (int) Math.floor(i / xEdgeSize) % yEdgeSize;
             final int   zContainer = (int) Math.floor(i / (xEdgeSize * yEdgeSize));
-            final float x          = -TRADER_SIZE_X / 2 + Good3DRenderer.GOOD_X / 2 + xContainer * (Good3DRenderer.GOOD_X + 2);
-            final float z          = /*-40*/ +16 - TRADER_SIZE_Z / 2 + Good3DRenderer.GOOD_Y / 2 + zContainer * (Good3DRenderer.GOOD_Z + 2);
-            final float y          = +TRADER_SIZE_Y / 2 - Good3DRenderer.GOOD_Z / 2 - yContainer * (Good3DRenderer.GOOD_Y + 2);
+            final float x          = -TRADER_SIZE_X / 2 + Good3DRenderer.GOOD_X / 2 - .5f + xContainer * (Good3DRenderer.GOOD_X + 1);
+            final float z          = /*-40*/ +16 - TRADER_SIZE_Z / 2 + Good3DRenderer.GOOD_Y / 2 + zContainer * (Good3DRenderer.GOOD_Z + 1);
+            final float y          = +0.5f + TRADER_SIZE_Y / 2 - Good3DRenderer.GOOD_Z / 2 - yContainer * (Good3DRenderer.GOOD_Y + 1);
 
 
             go.instance.transform.translate(x, y, z);
-            go.instance.transform.scale(Good3DRenderer.GOOD_X - Good3DRenderer.SPACE_BETWEEN_GOOD, Good3DRenderer.GOOD_Y - Good3DRenderer.SPACE_BETWEEN_GOOD, Good3DRenderer.GOOD_Z - Good3DRenderer.SPACE_BETWEEN_GOOD);
+            go.instance.transform.scale(Good3DRenderer.GOOD_X, Good3DRenderer.GOOD_Y, Good3DRenderer.GOOD_Z);
             go.update();
         }
     }

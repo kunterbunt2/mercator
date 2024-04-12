@@ -723,6 +723,11 @@ public class GameEngine2D implements ScreenListener, ApplicationListener, InputP
 
     }
 
+    @Override
+    public boolean updateEnvironment(float timeOfDay) {
+        return false;
+    }
+
     private void renderGoods() {
         for (final Planet planet : universe.planetList) {
             int index = 0;

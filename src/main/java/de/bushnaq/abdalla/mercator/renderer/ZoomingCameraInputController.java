@@ -143,7 +143,9 @@ public class ZoomingCameraInputController extends CameraInputController {
             final MovingCamera movingCamera = (MovingCamera) camera;
             if (button == rotateButton) {
                 tmpV1.set(movingCamera.direction).crs(movingCamera.up)/*.y = 0f*/;
-//                movingCamera.rotateAround(movingCamera.lookat, tmpV1.nor(), deltaY * rotateAngle);
+                if (gameEngine.renderEngine.isDebugMode()) {
+                    movingCamera.rotateAround(movingCamera.lookat, tmpV1.nor(), deltaY * rotateAngle);
+                }
                 movingCamera.rotateAround(movingCamera.lookat, Vector3.Y, deltaX * -rotateAngle);
                 movingCamera.setDirty(true);
                 //				notifyListener(movingCamera);

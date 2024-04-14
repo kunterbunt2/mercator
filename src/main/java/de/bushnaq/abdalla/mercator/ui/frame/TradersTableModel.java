@@ -63,7 +63,7 @@ public class TradersTableModel extends AbstractTableModel {
                 case 2:
                     return traderList.get(row).getCredits();
                 case 3:
-                    return traderList.get(row).traderStatus.getName();
+                    return traderList.get(row).getTraderStatus().getName();
                 case 4:
                     return traderList.get(row).status.getName();
                 case 5:

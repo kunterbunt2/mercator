@@ -34,7 +34,7 @@ public class VelocityVector extends ObjectRenderer<GameEngine3D> {
     }
 
     public void update(final RenderEngine3D<GameEngine3D> renderEngine, Trader trader) throws Exception {
-        gameObject.instance.transform.setToTranslation(trader.sourceWaypoint.x, trader.sourceWaypoint.y + Trader3DRenderer.TRADER_HEIGHT, trader.sourceWaypoint.z);
+        gameObject.instance.transform.setToTranslation(trader.sourceWaypoint.x, trader.sourceWaypoint.y + Trader3DRenderer.TRADER_FLIGHT_HEIGHT, trader.sourceWaypoint.z);
         gameObject.instance.transform.rotate(Vector3.Y, trader.getManeuveringSystem().rotation);
         gameObject.instance.transform.translate(0, 0, -VECTOR_LENGTH / 2);
         gameObject.instance.transform.scale(VECTOR_WIDTH, VECTOR_WIDTH, VECTOR_LENGTH);

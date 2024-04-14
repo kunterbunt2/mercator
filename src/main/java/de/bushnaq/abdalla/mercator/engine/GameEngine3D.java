@@ -48,6 +48,7 @@ import de.bushnaq.abdalla.mercator.universe.planet.Planet;
 import de.bushnaq.abdalla.mercator.universe.planet.Planet3DRenderer;
 import de.bushnaq.abdalla.mercator.universe.sim.Sim;
 import de.bushnaq.abdalla.mercator.universe.sim.trader.Trader;
+import de.bushnaq.abdalla.mercator.util.Debug;
 import de.bushnaq.abdalla.mercator.util.TimeAccuracy;
 import de.bushnaq.abdalla.mercator.util.TimeUnit;
 import net.mgsx.gltf.scene3d.attributes.PBRCubemapAttribute;
@@ -308,8 +309,9 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
 
     private void createCamera() throws Exception {
         camera = new MovingCamera(46f, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-        Planet planet = universe.planetList.findBusyCenterPlanet();
+//        Planet planet = universe.planetList.findBusyCenterPlanet();
 //        Planet planet = universe.traderList.findByName(Debug.getFilterTrader()).planet;
+        Planet planet = universe.planetList.findByName(Debug.getFilterPlanet());
         if (planet == null && !universe.planetList.isEmpty()) planet = universe.planetList.get(0);
         Vector3 lookat;
         if (planet != null) lookat = new Vector3(planet.x, 0, planet.z);

@@ -33,7 +33,7 @@ import de.bushnaq.abdalla.mercator.universe.sim.trader.Trader;
 import de.bushnaq.abdalla.mercator.universe.sim.trader.Trader3DRenderer;
 import net.mgsx.gltf.scene3d.model.ModelInstanceHack;
 
-import static de.bushnaq.abdalla.mercator.universe.sim.trader.Trader3DRenderer.TRADER_HEIGHT;
+import static de.bushnaq.abdalla.mercator.universe.sim.trader.Trader3DRenderer.TRADER_FLIGHT_HEIGHT;
 
 public class JumpGate3DRenderer extends ObjectRenderer<GameEngine3D> {
     public static final  float PATH_WIDTH       = 1 / Universe.WORLD_SCALE;
@@ -168,7 +168,7 @@ public class JumpGate3DRenderer extends ObjectRenderer<GameEngine3D> {
 //        renderEngine.addStatic(instance2);
         if (jumpGate.source.city == null) {
             gateGameObject = new GameObject<>(new ModelInstanceHack(renderEngine.getGameEngine().assetManager.gate.scene.model), this, this);
-            gateGameObject.instance.transform.setToTranslation(x, TRADER_HEIGHT, z);
+            gateGameObject.instance.transform.setToTranslation(x, TRADER_FLIGHT_HEIGHT, z);
             gateGameObject.instance.transform.rotateTowardTarget(targetVector, Vector3.Y);
 //        gateGameObject.instance.transform.translate(0, 0, 0);
             gateGameObject.instance.transform.scale(JUMP_GATE_SIZE_X, JUMP_GATE_SIZE_Y, JUMP_GATE_SIZE_Z);

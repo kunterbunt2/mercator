@@ -360,8 +360,8 @@ public class Info {
             clearUnmatchedSizeAndType(size, Trader.class);
             updateNameAndValue("name", trader.getName(), NAME_LABEL);
             updateNameAndValue("status", trader.status.getName(), VARIABLE_LABEL);
-            updateNameAndValue("traderStatus", trader.traderStatus.getName(), VARIABLE_LABEL);
-            updateNameAndValue("traderSubStatus", trader.getSubStatus().getName(), VARIABLE_LABEL);
+            updateNameAndValue("traderStatus", trader.getTraderStatus().getName(), VARIABLE_LABEL);
+            updateNameAndValue("traderSubStatus", trader.getTraderSubStatus().getName(), VARIABLE_LABEL);
             updateNameAndValue("start credits", Sim.SIM_START_CREDITS, STATIC_LABEL);
             updateNameAndValue("cargo size", trader.goodSpace, STATIC_LABEL);
             updateNameAndValue("engine speed", trader.getEngine().getEngineSpeed() * Engine.ENGINE_TO_REALITY_FACTOR, STATIC_LABEL);

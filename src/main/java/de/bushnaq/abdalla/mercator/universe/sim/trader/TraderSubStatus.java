@@ -24,19 +24,30 @@ package de.bushnaq.abdalla.mercator.universe.sim.trader;
  * TRADER_STATUS_DECELERATING
  */
 public enum TraderSubStatus {
-    TRADER_STATUS_NA("N/A"),//
-    TRADER_STATUS_ALIGNING("Maneuvering"),//
-    TRADER_STATUS_WAITING_FOR_WAYPOINT("In-Queue"),//
-    TRADER_STATUS_ACCELERATING("Accelerating"),//
-    TRADER_STATUS_DECELERATING("Decelerating");//
-    private String name;
+    TRADER_STATUS_NA("N/A", false),//
+    TRADER_STATUS_ALIGNING("Maneuvering", true),//
+    TRADER_STATUS_WAITING_FOR_WAYPOINT("In-Queue", false),//
+    TRADER_STATUS_ACCELERATING("Accelerating", true),//
+    TRADER_STATUS_DECELERATING("Decelerating", true),//
+    TRADER_STATUS_DOCKING_ACC("Docking Acc.", false),//
+    TRADER_STATUS_DOCKING_DEC("Docking Dec.", false),//
+    TRADER_STATUS_DOCKED("Docked", false),//
+    TRADER_STATUS_UNDOCKING_ACC("Undocking Acc.", false),//
+    TRADER_STATUS_UNDOCKING_DEC("undocking Dec.", false);
+    private String  name;
+    private boolean traveling;
 
-    TraderSubStatus(final String name) {
+    TraderSubStatus(final String name, boolean traveling) {
         this.setName(name);
+        this.traveling = traveling;
     }
 
     public String getName() {
         return name;
+    }
+
+    public boolean isTraveling() {
+        return traveling;
     }
 
     public void setName(final String name) {

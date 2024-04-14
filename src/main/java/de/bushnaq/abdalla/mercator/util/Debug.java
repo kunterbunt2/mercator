@@ -17,10 +17,10 @@
 package de.bushnaq.abdalla.mercator.util;
 
 public class Debug {
-    private static boolean enablePlanetFilter = true;
-    private static boolean enableTraderFilter = false;
-    private static String  filterPlanet       = "P-81";
-    private static String  filterTrader       = "T-37";
+    private static boolean enablePlanetFilter = false;
+    private static boolean enableTraderFilter = true;
+    private static String  filterPlanet       = "P-95";
+    private static String  filterTrader       = "T-31";
 
 //    public static String getCallerMethodName() {
 //        return StackWalker.getInstance()

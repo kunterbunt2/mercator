@@ -61,7 +61,7 @@ public class ManeuveringSystem {
     }
 
     public void advanceInTime(float timeDelta) {
-        if (trader.subStatus == TraderSubStatus.TRADER_STATUS_ALIGNING) {
+        if (trader.getTraderSubStatus() == TraderSubStatus.TRADER_STATUS_ALIGNING) {
             progress      = calculateRotationProgress();
             rotationSpeed = calculateRotationSpeed(timeDelta);
             if (endRotation - rotation > 180) {
@@ -177,7 +177,7 @@ public class ManeuveringSystem {
             rotation = endRotation;
 //            if (Debug.isFilter(trader.getName()))
 //                logger.info("end");
-            trader.setSubStatus(TraderSubStatus.TRADER_STATUS_WAITING_FOR_WAYPOINT);
+            trader.setTraderSubStatus(TraderSubStatus.TRADER_STATUS_WAITING_FOR_WAYPOINT);
             if (trader.targetWaypoint.city != null)
                 trader.communicationPartner.informControlTower();
         } else {
@@ -200,7 +200,7 @@ public class ManeuveringSystem {
      * Should only be called after setting Trader.subStatus to TRADER_STATUS_ALIGNING
      */
     public void startRotation() {
-        if (trader.subStatus == TraderSubStatus.TRADER_STATUS_ALIGNING) {
+        if (trader.getTraderSubStatus() == TraderSubStatus.TRADER_STATUS_ALIGNING) {
             Waypoint    targetWaypoint = trader.waypointList.get(trader.destinationWaypointIndex).waypoint;
             final float scalex         = (targetWaypoint.x - trader.sourceWaypoint.x);
             final float scaley         = (targetWaypoint.y - trader.sourceWaypoint.y);

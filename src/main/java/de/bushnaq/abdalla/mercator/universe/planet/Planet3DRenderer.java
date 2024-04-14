@@ -303,7 +303,7 @@ public class Planet3DRenderer extends ObjectRenderer<GameEngine3D> {
         //planet
         {
             dockingStationGameObject = new GameObject<GameEngine3D>(new ModelInstanceHack(renderEngine.getGameEngine().assetManager.dockingStation.scene.model), planet, this);
-            dockingStationGameObject.instance.transform.setToTranslation(x, -PLANET_HIGHT / 2, z);
+            dockingStationGameObject.instance.transform.setToTranslation(x, 0, z);
             dockingStationGameObject.update();
             renderEngine.addStatic(dockingStationGameObject);
 

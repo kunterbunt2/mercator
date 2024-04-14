@@ -169,9 +169,9 @@ public class Trader2DRenderer extends ObjectRenderer<GameEngine2D> {
         //						System.out.println("x=" + position[0] + " y=" + position[1] + " z=" + position[2]);
         //		}
 
-        trader.x = translation.x;
-        trader.y = translation.y;
-        trader.z = translation.z;
+//        trader.x = translation.x;
+//        trader.y = translation.y;
+//        trader.z = translation.z;
 //		instance.update();
         //		pole.update();
         if (selected != lastSelected) {
@@ -191,17 +191,17 @@ public class Trader2DRenderer extends ObjectRenderer<GameEngine2D> {
         } else {
             color = TRADER_COLOR;
         }
-        if (!trader.traderStatus.isGood()) {
+        if (!trader.getTraderStatus().isGood()) {
             color = TADER_COLOR_IS_GOOD;
         }
         final float hps = TRADER_WIDTH / 2;
-        renderEngine.getGameEngine().renderEngine.fillCircle(renderEngine.getGameEngine().atlasManager.planetTextureRegion, trader.x, trader.z, hps + 1, 32, color);
+        renderEngine.getGameEngine().renderEngine.fillCircle(renderEngine.getGameEngine().atlasManager.planetTextureRegion, translation.x, translation.z, hps + 1, 32, color);
         // renderMaster.bar( renderMaster.fillCircle.get( TRADER_WIDTH, TRADER_HEIGHT ),
         // x - hps, y - hps, x + hps, y + hps, color );
         if (renderEngine.getGameEngine().renderEngine.camera.zoom < 3.0f) {
-            renderEngine.getGameEngine().renderEngine.lable(renderEngine.getGameEngine().atlasManager.dottedLineTextureRegion, trader.x - hps, trader.z - hps, Trader2DRenderer.TRADER_WIDTH, Trader2DRenderer.TRADER_HEIGHT, TRADER_WIDTH * 1, TRADER_WIDTH * 3, renderEngine.getGameEngine().atlasManager.defaultFont, color, trader.getName(), color, String.format("%.0f", trader.getCredits()), renderEngine.getGameEngine().queryCreditColor(trader.getCredits(), Trader.TRADER_START_CREDITS));
+            renderEngine.getGameEngine().renderEngine.lable(renderEngine.getGameEngine().atlasManager.dottedLineTextureRegion, translation.x - hps, translation.z - hps, Trader2DRenderer.TRADER_WIDTH, Trader2DRenderer.TRADER_HEIGHT, TRADER_WIDTH * 1, TRADER_WIDTH * 3, renderEngine.getGameEngine().atlasManager.defaultFont, color, trader.getName(), color, String.format("%.0f", trader.getCredits()), renderEngine.getGameEngine().queryCreditColor(trader.getCredits(), Trader.TRADER_START_CREDITS));
         }
-        circle.setPosition(trader.x, trader.z);
+        circle.setPosition(translation.x, translation.z);
 //        if (Debug.isFilter(trader.getName())) {
 //            System.out.println(String.format("%f %f", trader.x, trader.z));
 //        }

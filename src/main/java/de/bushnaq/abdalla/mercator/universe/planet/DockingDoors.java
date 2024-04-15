@@ -30,8 +30,8 @@ public class DockingDoors extends ArrayList<DockingDoor> {
     private       OggPlayer oggPlayer;
 
     public DockingDoors(Planet planet) {
-        add(new DockingDoor(planet, planet.getName().substring(0, 2), -32f, 0));
-        add(new DockingDoor(planet, planet.getName().substring(2, planet.getName().length()), 32f, 0));
+        add(new DockingDoor(planet, planet.getName().substring(2, 3), -32f, 0));
+        add(new DockingDoor(planet, planet.getName().substring(3, planet.getName().length()), 32f, 0));
         position[0] = planet.x;
         position[1] = planet.y;
         position[2] = planet.z;

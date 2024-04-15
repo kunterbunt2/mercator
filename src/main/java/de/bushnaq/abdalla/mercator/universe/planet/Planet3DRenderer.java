@@ -142,6 +142,7 @@ public class Planet3DRenderer extends ObjectRenderer<GameEngine3D> {
     @Override
     public void renderText(final RenderEngine3D<GameEngine3D> renderEngine, final int index, final boolean selected) {
         if (renderEngine.getCamera().frustum.boundsInFrustum(dockingStationGameObject.transformedBoundingBox)) {
+            planet.dockingDoors.renderText(renderEngine);
             final float size = 64;
             final float x    = planet.x;
             final float z    = planet.z;

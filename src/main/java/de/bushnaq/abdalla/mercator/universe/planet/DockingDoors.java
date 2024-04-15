@@ -23,8 +23,8 @@ import java.util.ArrayList;
 
 public class DockingDoors extends ArrayList<DockingDoor> {
     public DockingDoors(Planet planet) {
-        add(new DockingDoor(planet, -32f, 0));
-        add(new DockingDoor(planet, 32f, 0));
+        add(new DockingDoor(planet, planet.getName().substring(0, 2), -32f, 0));
+        add(new DockingDoor(planet, planet.getName().substring(2, planet.getName().length()), 32f, 0));
     }
 
     public void advanceInTime(float realTimeDelta) {
@@ -42,6 +42,12 @@ public class DockingDoors extends ArrayList<DockingDoor> {
     public void render(RenderEngine3D<GameEngine3D> renderEngine) {
         for (DockingDoor dockingDoor : this) {
             dockingDoor.render(renderEngine);
+        }
+    }
+
+    public void renderText(final RenderEngine3D<GameEngine3D> renderEngine) {
+        for (DockingDoor dockingDoor : this) {
+            dockingDoor.renderText(renderEngine);
         }
     }
 

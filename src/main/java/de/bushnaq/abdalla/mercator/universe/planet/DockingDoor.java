@@ -16,6 +16,9 @@
 
 package de.bushnaq.abdalla.mercator.universe.planet;
 
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.math.Vector3;
 import de.bushnaq.abdalla.engine.GameObject;
 import de.bushnaq.abdalla.engine.RenderEngine3D;
 import de.bushnaq.abdalla.mercator.engine.GameEngine3D;
@@ -28,6 +31,7 @@ import static de.bushnaq.abdalla.mercator.universe.planet.DockingDoor.DockingDoo
 public class DockingDoor {
     private static final float                    DOCKING_DOOR_HEIGHT = 8;
     private static final float                    HORIZONTAL_SPEED    = 15f;
+    private static final Color                    PLANET_NAME_COLOR   = new Color(0xffa500ff);
     private static final float                    VERTICAL_SPEED      = 2f;
     private static final float                    XZ_MOVEMENT_LEEWAY  = 58f;
     private final        float                    dx;
@@ -38,14 +42,16 @@ public class DockingDoor {
     private final        float                    scalingZ;
     private final        float                    singDx;
     private final        float                    singDz;
+    private final        String                   title;
     private              GameObject<GameEngine3D> dockingDoorGameObject;
     private              DockingDoorState         dockingDoorState    = CLOSED;
     private              float                    x                   = 0;
     private              float                    y                   = 0;
     private              float                    z                   = 0;
 
-    public DockingDoor(Planet planet, float dx, float dz) {
+    public DockingDoor(Planet planet, String title, float dx, float dz) {
         this.planet = planet;
+        this.title  = title;
         this.dx     = dx;
         this.dz     = dz;
         singDz      = -Math.signum(dz);
@@ -121,6 +127,13 @@ public class DockingDoor {
     public void render(RenderEngine3D<GameEngine3D> renderEngine) {
         dockingDoorGameObject.instance.transform.setToTranslationAndScaling(x, y, z, scalingX, DOCKING_DOOR_HEIGHT, scalingZ);
         dockingDoorGameObject.update();
+    }
+
+    public void renderText(final RenderEngine3D<GameEngine3D> renderEngine) {
+        Vector3          translation = new Vector3(x, y, z);
+        final BitmapFont font        = renderEngine.getGameEngine().getAtlasManager().bold256Font;
+        renderEngine.renderEngine25D.renderTextCenterOnTop(translation, 0, 0, 4 + .1f, 0, font, Color.BLACK, PLANET_NAME_COLOR, title, 64);
+
     }
 
     public void setDockingDoorState(DockingDoorState dockingDoorState) {

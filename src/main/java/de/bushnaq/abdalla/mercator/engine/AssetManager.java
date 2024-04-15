@@ -53,6 +53,7 @@ public class AssetManager {
     public Model                   cubeBase1;
     public Model                   cubeModel;//used for debugging
     public Model                   cubeTrans1;
+    public Model                   dockingDoorModel;
     public SceneAsset              dockingStation;
     public SceneAsset              dynamicStation;
     //    public Model                   cubeTrans2;
@@ -153,6 +154,7 @@ public class AssetManager {
         createWater(texture, modelBuilder);
         createMirror(texture, modelBuilder);
         createCube(modelBuilder);
+        createDockingDoor(modelBuilder);
         createTransparentCube(modelBuilder);
     }
 
@@ -175,6 +177,15 @@ public class AssetManager {
         final Attribute occlusion = PBRFloatAttribute.createOcclusionStrength(1.0f);
         final Material  material  = new Material(metallic, roughness, color, occlusion);
         cubeModel = modelBuilder.createBox(1.0f, 1.0f, 1.0f, material, Usage.Position | Usage.Normal);
+    }
+
+    private void createDockingDoor(ModelBuilder modelBuilder) {
+        final Attribute color     = new PBRColorAttribute(PBRColorAttribute.BaseColorFactor, Color.WHITE);
+        final Attribute metallic  = PBRFloatAttribute.createMetallic(0.2f);
+        final Attribute roughness = PBRFloatAttribute.createRoughness(0.2f);
+        final Attribute occlusion = PBRFloatAttribute.createOcclusionStrength(1.0f);
+        final Material  material  = new Material(metallic, roughness, color, occlusion);
+        dockingDoorModel = modelBuilder.createBox(1.0f, 1.0f, 1.0f, material, Usage.Position | Usage.Normal);
     }
 
     private void createDockingStation(Texture texture, ModelCreator modelCreator, ModelBuilder modelBuilder) {

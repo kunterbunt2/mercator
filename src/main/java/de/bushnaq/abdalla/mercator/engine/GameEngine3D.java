@@ -48,7 +48,6 @@ import de.bushnaq.abdalla.mercator.universe.planet.Planet;
 import de.bushnaq.abdalla.mercator.universe.planet.Planet3DRenderer;
 import de.bushnaq.abdalla.mercator.universe.sim.Sim;
 import de.bushnaq.abdalla.mercator.universe.sim.trader.Trader;
-import de.bushnaq.abdalla.mercator.util.Debug;
 import de.bushnaq.abdalla.mercator.util.TimeAccuracy;
 import de.bushnaq.abdalla.mercator.util.TimeUnit;
 import net.mgsx.gltf.scene3d.attributes.PBRCubemapAttribute;
@@ -91,6 +90,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
     public static final  int                          TIME_MACHINE_FONT_SIZE          = 10;
     static final         Color                        DEBUG_GRID_BORDER_COLOR         = new Color(1f, 1f, 1f, 0.1f);
     static final         Color                        DEBUG_GRID_COLOR                = new Color(.0f, .0f, .0f, 0.2f);
+    private static final float                        MAX_TIME_DELTA                  = 0.1f;//everything above will be ignored as a glitch
     private static final float                        RENDER_2D_UNTIL                 = 1500;
     private static final float                        RENDER_3D_UNTIL                 = 2000;
     //	private static final String RENDER_DURATION = "render()";
@@ -309,9 +309,9 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
 
     private void createCamera() throws Exception {
         camera = new MovingCamera(46f, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-//        Planet planet = universe.planetList.findBusyCenterPlanet();
+        Planet planet = universe.planetList.findBusyCenterPlanet();
 //        Planet planet = universe.traderList.findByName(Debug.getFilterTrader()).planet;
-        Planet planet = universe.planetList.findByName(Debug.getFilterPlanet());
+//        Planet planet = universe.planetList.findByName(Debug.getFilterPlanet());
         if (planet == null && !universe.planetList.isEmpty()) planet = universe.planetList.get(0);
         Vector3 lookat;
         if (planet != null) lookat = new Vector3(planet.x, 0, planet.z);
@@ -879,12 +879,14 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
 //            if ((currentTime / 1000) * 1000 == currentTime)
 //                logger.info(String.format("%f %f %f", oggPlayer.getPosition().x, oggPlayer.getPosition().y, oggPlayer.getPosition().z));
 //        }
-        updateJumpGates(currentTime);
-        updatePlanets(currentTime);
-        updateGoods(currentTime);
-        updateTraders(currentTime);
-        audioEngine.begin(camera, universe.isEnableTime());
-        audioEngine.end();
+        if (deltaTime < MAX_TIME_DELTA) {
+            updateJumpGates(currentTime);
+            updatePlanets(currentTime);
+            updateGoods(currentTime);
+            updateTraders(currentTime);
+            audioEngine.begin(camera, universe.isEnableTime());
+            audioEngine.end();
+        }
         renderEngine.cpuGraph.end();
 
         renderEngine.gpuGraph.begin();

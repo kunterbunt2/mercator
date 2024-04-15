@@ -45,6 +45,7 @@ public class Planet extends Waypoint implements TradingPartner {
     public              PlanetCommunicationPartner communicationPartner;
     public              long                       currentTime            = 0;
     public              SimList                    deadSimList            = new SimList(this);
+    public              DockingDoors               dockingDoors           = new DockingDoors(this);
     public              PlanetEventManager         eventManager;
     public              long                       lastTransaction        = 0;
     //	private String name = null;

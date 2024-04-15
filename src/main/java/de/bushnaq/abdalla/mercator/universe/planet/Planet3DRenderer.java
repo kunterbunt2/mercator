@@ -132,6 +132,7 @@ public class Planet3DRenderer extends ObjectRenderer<GameEngine3D> {
     @Override
     public void create(final RenderEngine3D<GameEngine3D> renderEngine) {
         createPlanet3D(renderEngine);
+        planet.dockingDoors.create(renderEngine);
     }
 
     public void render2D(final RenderEngine3D<GameEngine3D> renderEngine, final int index, final boolean selected) {
@@ -190,6 +191,8 @@ public class Planet3DRenderer extends ObjectRenderer<GameEngine3D> {
 
     @Override
     public void update(final RenderEngine3D<GameEngine3D> renderEngine, final long currentTime, final float timeOfDay, final int index, final boolean selected) throws OpenAlException {
+        float realTimeDelta = Gdx.graphics.getDeltaTime();
+        planet.dockingDoors.advanceInTime(realTimeDelta);
         renderPlanet(renderEngine, currentTime, timeOfDay, planet == renderEngine.getGameEngine().universe.selectedPlanet);
     }
 
@@ -552,6 +555,8 @@ public class Planet3DRenderer extends ObjectRenderer<GameEngine3D> {
         planetGameObject.instance.transform.rotate(Vector3.Y, rotation);
         planet.communicationPartner.ttsPlayer.play();
 //        planet.communicationPartner.ttsPlayer.setPositionAndVelocity(position, velocity);
+
+        planet.dockingDoors.render(renderEngine);
 
     }
 

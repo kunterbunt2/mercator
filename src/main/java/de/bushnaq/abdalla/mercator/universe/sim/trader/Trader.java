@@ -37,6 +37,7 @@ import de.bushnaq.abdalla.mercator.util.Transaction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static de.bushnaq.abdalla.mercator.universe.planet.DockingDoor.DockingDoorState.LOWERING;
 import static de.bushnaq.abdalla.mercator.universe.sim.trader.Trader3DRenderer.TRADER_DOCKING_HEIGHT;
 
 /**
@@ -47,7 +48,6 @@ public class Trader extends Sim {
     public static final  int                        MIN_GOOD_SPACE                      = 30;
     public final static  int                        TRADER_MAX_PORT_REST_TIME           = 3;
     public static final  float                      TRADER_START_CREDITS                = 1000.0f;
-    //    public final static  int             TRADER_STATUS_FILTER_BAD            = 0xF0;
     private static final float                      JUMP_UNIT_COST                      = 1f / (1000f);
     public final         Vector3                    speed                               = new Vector3(0, 0, 0);
     private final        Engine                     engine                              = new Engine(this);
@@ -541,6 +541,7 @@ public class Trader extends Sim {
                     destinationPlanetDistance = planet.queryDistance(waypointList);
                     destinationWaypointIndex  = 1;
                     setTraderSubStatus(TraderSubStatus.TRADER_STATUS_UNDOCKING_ACC);
+                    sourcePlanet.dockingDoors.setDockingDoorStatus(LOWERING);
                     planet.universe.eventManager.add(EventLevel.trace, currentTime, this, String.format("departing %s to reach %s", planet.getName(), destinationPlanet.city.getName()));
                     //						if (pathIsClear()) {
                     //							sourceWaypoint.trader = this;

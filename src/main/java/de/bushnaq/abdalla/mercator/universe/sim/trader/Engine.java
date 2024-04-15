@@ -34,6 +34,8 @@ import net.mgsx.gltf.scene3d.model.ModelInstanceHack;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static de.bushnaq.abdalla.mercator.universe.planet.DockingDoor.DockingDoorState.CLOSING;
+import static de.bushnaq.abdalla.mercator.universe.planet.DockingDoor.DockingDoorState.LOWERING;
 import static de.bushnaq.abdalla.mercator.universe.sim.trader.Trader3DRenderer.TRADER_DOCKING_HEIGHT;
 import static de.bushnaq.abdalla.mercator.universe.sim.trader.Trader3DRenderer.TRADER_FLIGHT_HEIGHT;
 
@@ -50,7 +52,7 @@ public class Engine {
     public static final  float                    MIN_ENGINE_SPEED             = .1f;
     final static         Vector3                  yVector                      = new Vector3(0, 1, 0);
     private static final float                    ENGINE_FORCE                 = 3f;//newton
-    private static final float                    MAX_TIME_DELTA               = 0.1f;//everything above will be ignored as a glitch
+    //    private static final float                    MAX_TIME_DELTA               = 0.1f;//everything above will be ignored as a glitch
     private static final float                    PY2                          = 3.14159f / 2;
     public final         PointLight               pointLight;
     private final        Logger                   logger                       = LoggerFactory.getLogger(this.getClass());
@@ -73,23 +75,23 @@ public class Engine {
     }
 
     public void advanceInTime(float realTimeDelta) {
-        if (realTimeDelta < MAX_TIME_DELTA)
-            if ((trader.getTraderSubStatus() == TraderSubStatus.TRADER_STATUS_ACCELERATING || trader.getTraderSubStatus() == TraderSubStatus.TRADER_STATUS_DECELERATING) && realTimeDelta != 0) {
-                calculateEngineSpeed(realTimeDelta);
-                float delta = getEngineSpeed() * realTimeDelta * 10;
-                trader.destinationWaypointDistanceProgress += delta;
-                trader.destinationPlanetDistanceProgress += delta;
-            } else if ((trader.getTraderSubStatus() == TraderSubStatus.TRADER_STATUS_DOCKING_ACC || trader.getTraderSubStatus() == TraderSubStatus.TRADER_STATUS_DOCKING_DEC) && realTimeDelta != 0) {
-                //docking
-                calculateEngineSpeed(realTimeDelta);
-                float delta = getEngineSpeed() * realTimeDelta * 10;
-                trader.y -= delta;
-            } else if ((trader.getTraderSubStatus() == TraderSubStatus.TRADER_STATUS_UNDOCKING_ACC || trader.getTraderSubStatus() == TraderSubStatus.TRADER_STATUS_UNDOCKING_DEC) && realTimeDelta != 0) {
-                //undocking
-                calculateEngineSpeed(realTimeDelta);
-                float delta = getEngineSpeed() * realTimeDelta * 10;
-                trader.y += delta;
-            }
+//        if (realTimeDelta < MAX_TIME_DELTA)
+        if ((trader.getTraderSubStatus() == TraderSubStatus.TRADER_STATUS_ACCELERATING || trader.getTraderSubStatus() == TraderSubStatus.TRADER_STATUS_DECELERATING) && realTimeDelta != 0) {
+            calculateEngineSpeed(realTimeDelta);
+            float delta = getEngineSpeed() * realTimeDelta * 10;
+            trader.destinationWaypointDistanceProgress += delta;
+            trader.destinationPlanetDistanceProgress += delta;
+        } else if ((trader.getTraderSubStatus() == TraderSubStatus.TRADER_STATUS_DOCKING_ACC || trader.getTraderSubStatus() == TraderSubStatus.TRADER_STATUS_DOCKING_DEC) && realTimeDelta != 0) {
+            //docking
+            calculateEngineSpeed(realTimeDelta);
+            float delta = getEngineSpeed() * realTimeDelta * 10;
+            trader.y -= delta;
+        } else if ((trader.getTraderSubStatus() == TraderSubStatus.TRADER_STATUS_UNDOCKING_ACC || trader.getTraderSubStatus() == TraderSubStatus.TRADER_STATUS_UNDOCKING_DEC) && realTimeDelta != 0) {
+            //undocking
+            calculateEngineSpeed(realTimeDelta);
+            float delta = getEngineSpeed() * realTimeDelta * 10;
+            trader.y += delta;
+        }
     }
 
     private void animate(RenderEngine3D<GameEngine3D> renderEngine) {
@@ -160,8 +162,11 @@ public class Engine {
 //                    if (Debug.isFilterTrader(trader.getName())) logger.info("engine acceleration currentMaxEngineSpeed=" + engineSpeed);
                 } else if (progress < 1.0f) {
                     //deceleration
-                    if (trader.getTraderSubStatus() == TraderSubStatus.TRADER_STATUS_ACCELERATING)
+                    if (trader.getTraderSubStatus() == TraderSubStatus.TRADER_STATUS_ACCELERATING) {
                         trader.setTraderSubStatus(TraderSubStatus.TRADER_STATUS_DECELERATING);
+                        if (trader.targetWaypoint == trader.destinationPlanet)
+                            trader.destinationPlanet.dockingDoors.setDockingDoorStatus(LOWERING);
+                    }
                     engineSpeed = Math.max(engineSpeed - acceleration * timeDelta * 10, MIN_ENGINE_SPEED);
 //                    if (Debug.isFilterTrader(trader.getName())) logger.info("engine deceleration currentMaxEngineSpeed=" + engineSpeed);
                 } else {
@@ -174,7 +179,7 @@ public class Engine {
                 }
             }
         } else if (trader.getTraderSubStatus() == TraderSubStatus.TRADER_STATUS_DOCKING_ACC || trader.getTraderSubStatus() == TraderSubStatus.TRADER_STATUS_DOCKING_DEC) {
-            // lower to dock
+            // descend to dock
             float acceleration = calculateAcceleration();
             float progress     = (TRADER_FLIGHT_HEIGHT - trader.y) / (TRADER_FLIGHT_HEIGHT - TRADER_DOCKING_HEIGHT);
             if (progress < 0.5) {
@@ -186,8 +191,10 @@ public class Engine {
 //                if (Debug.isFilterTrader(trader.getName())) logger.info(String.format("engine acceleration engineSpeed=%f height=%f", engineSpeed, trader.y));
             } else if (progress < 1.0f) {
                 //deceleration
-                if (trader.getTraderSubStatus() == TraderSubStatus.TRADER_STATUS_DOCKING_ACC)
+                if (trader.getTraderSubStatus() == TraderSubStatus.TRADER_STATUS_DOCKING_ACC) {
+                    trader.destinationPlanet.dockingDoors.setDockingDoorStatus(CLOSING);
                     trader.setTraderSubStatus(TraderSubStatus.TRADER_STATUS_DOCKING_DEC);
+                }
                 engineSpeed = Math.max(engineSpeed - acceleration * timeDelta * 10, MIN_ENGINE_SPEED);
 //                if (Debug.isFilterTrader(trader.getName())) logger.info(String.format("engine deceleration engineSpeed=%f height=%f", engineSpeed, trader.y));
             } else {
@@ -207,12 +214,14 @@ public class Engine {
 //                if (Debug.isFilterTrader(trader.getName())) logger.info(String.format("undocking engine acceleration=%f timeDelta0%f engineSpeed=%f progress=%f height=%f", acceleration, timeDelta, engineSpeed, progress, trader.y));
             } else if (progress < 1.0f) {
                 //deceleration
-                if (trader.getTraderSubStatus() == TraderSubStatus.TRADER_STATUS_UNDOCKING_ACC)
+                if (trader.getTraderSubStatus() == TraderSubStatus.TRADER_STATUS_UNDOCKING_ACC) {
                     trader.setTraderSubStatus(TraderSubStatus.TRADER_STATUS_UNDOCKING_DEC);
+                }
                 engineSpeed = Math.max(engineSpeed - acceleration * timeDelta * 10, MIN_ENGINE_SPEED);
 //                if (Debug.isFilterTrader(trader.getName())) logger.info(String.format("undocking engine deceleration=%f timeDelta0%f engineSpeed=%f progress=%f height=%f", acceleration, timeDelta, engineSpeed, progress, trader.y));
             } else {
                 //after undocking
+                trader.destinationPlanet.dockingDoors.setDockingDoorStatus(CLOSING);
                 trader.setTraderSubStatus(TraderSubStatus.TRADER_STATUS_ALIGNING);
                 trader.getThrusters().startRotation();
             }

@@ -75,6 +75,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
     public static final  Color                        FACTORY_COLOR                   = Color.DARK_GRAY; // 0xff000000;
     public static final  float                        FACTORY_HEIGHT                  = 1.2f;
     public static final  float                        FACTORY_WIDTH                   = 2.4f;
+    public static final  float                        FIELD_OF_VIEW_Y                 = 46f;
     public static final  int                          FONT_SIZE                       = 9;
     // private static final float MAX_VOXEL_DIMENSION = 20;
     public static final  Color                        NOT_PRODUCING_FACTORY_COLOR     = Color.RED; // 0xffFF0000;
@@ -209,7 +210,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
             renderEngine.setDynamicDayTime(true);
             renderEngine.setSkyBox(true);
             renderEngine.setSceneBoxMin(new Vector3(-500, -500, -500));
-            renderEngine.setSceneBoxMax(new Vector3(500, 0, 500));
+            renderEngine.setSceneBoxMax(new Vector3(1000, 0, 1000));
             renderEngine.setDayAmbientLight(.2f, .2f, .2f, 1f);
             renderEngine.getShadowLight().setColor(Color.WHITE);
             renderEngine.setFixedShadowDirection(true);
@@ -308,7 +309,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
     }
 
     private void createCamera() throws Exception {
-        camera = new MovingCamera(46f, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        camera = new MovingCamera(FIELD_OF_VIEW_Y, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         Planet planet = universe.planetList.findBusyCenterPlanet();
 //        Planet planet = universe.traderList.findByName(Debug.getFilterTrader()).planet;
 //        Planet planet = universe.planetList.findByName(Debug.getFilterPlanet());
@@ -1100,7 +1101,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
         //camera properties
         {
             stringBuilder.setLength(0);
-            stringBuilder.append(" camera: ").append(camera.position.x).append(" ").append(camera.position.y).append(" ").append(camera.position.z);
+            stringBuilder.append(String.format(" camera: [%d] [%+.0f %+.0f %+.0f] [%+.0f %+.0f %+.0f]", camController.zoomIndex, camera.position.x, camera.position.y, camera.position.z, camera.lookat.x, camera.lookat.y, camera.lookat.z));
             labels.get(labelIndex++).setText(stringBuilder);
         }
         //audio sources

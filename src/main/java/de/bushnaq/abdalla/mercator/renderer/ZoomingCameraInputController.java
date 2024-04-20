@@ -38,17 +38,14 @@ public class ZoomingCameraInputController extends CameraInputController {
             new CameraProperties(75, 75, 1000f),//
             new CameraProperties(150, 200, 2000f),//
             new CameraProperties(150, 300, 8000f),//
-//            new CameraProperties(300, 400),//
             new CameraProperties(400, 500, 8000f),//
-//            new CameraProperties(500, 400),//
-//            new CameraProperties(600, 300),//
             new CameraProperties(1000, 200, 8000f),//
-            new CameraProperties(1500, 100, 8000f),//
+//            new CameraProperties(1500, 100, 8000f),//
             new CameraProperties(2000, 50, 8000f),//
-            new CameraProperties(2500, 10, 8000f),//
-            new CameraProperties(3000, 0, 8000f),//
+//            new CameraProperties(2500, 10, 8000f),//
+//            new CameraProperties(3000, 0, 8000f),//
             new CameraProperties(4000, 0, 8000f),//
-            new CameraProperties(6000, 0, 8000f),//
+//            new CameraProperties(6000, 0, 8000f),//
             new CameraProperties(10000, 0, 10000f),//
     };
     private float progress        = 0;
@@ -57,12 +54,11 @@ public class ZoomingCameraInputController extends CameraInputController {
     public ZoomingCameraInputController(final Camera camera, GameEngine3D gameEngine) throws Exception {
         super(camera);
         this.gameEngine = gameEngine;
-        //		this.cameraInputControllerListener = cameraInputControllerListener;
-        rotateButton = Buttons.MIDDLE;
-        //		notifyListener(camera);
+        rotateButton    = Buttons.MIDDLE;
         pinchZoomFactor = 1f / Universe.WORLD_SCALE;
     }
 
+    @Override
     public void update() {
         if (targetZoomIndex != zoomIndex) {
             if (camera instanceof MovingCamera movingCamera) {
@@ -95,6 +91,7 @@ public class ZoomingCameraInputController extends CameraInputController {
 //                logger.info(String.format("camera update zoomIndex=%d targetZoomIndex=%d x=%f y=%f z=%f", zoomIndex, targetZoomIndex, x, y, z));
                 camera.translate(x, y, z);
                 camera.far = farY;
+                movingCamera.lookAt(movingCamera.lookat);
                 camera.update();
                 movingCamera.setDirty(true);
 //                logger.info(String.format("%f %f %f  %f %f %f", movingCamera.position.x, movingCamera.position.y, movingCamera.position.z, movingCamera.lookat.x, movingCamera.lookat.y, movingCamera.lookat.z));
@@ -190,17 +187,10 @@ public class ZoomingCameraInputController extends CameraInputController {
             if (!alwaysScroll && activateKey != 0 && !activatePressed)
                 return false;
             if (amount < 0 && zoomIndex < zoomFactors.length - 1 && progress == 0f) {
-//                zoomIndex++;
                 targetZoomIndex = zoomIndex + 1;
-//                logger.info(String.format("targetZoomIndex=%d", targetZoomIndex));
-//                zoomCamera();
             } else if (amount > 0 && zoomIndex > 0 && progress == 0f) {
-//                zoomIndex--;
                 targetZoomIndex = zoomIndex - 1;
-//                logger.info(String.format("targetZoomIndex=%d", targetZoomIndex));
-//                zoomCamera();
             }
-//            myCamera.translate(0, -amount * pinchZoomFactor, 0);
             //todo need to find a fix for this otherwise camera rotation will lead to strange effects
 //            camera.up.set(0, 1, 0);//careful, this will go wrong if camera is pointing directly at 0, 0, 0 from above.
             if (camera instanceof MovingCamera) {
@@ -217,32 +207,28 @@ public class ZoomingCameraInputController extends CameraInputController {
         return true;
     }
 
-    private void zoomCamera() {
-        if (camera instanceof MovingCamera movingCamera) {
-            //create a vector from lookat to current camera position
-            Vector3 distanceXZ = new Vector3(movingCamera.lookat);
-            distanceXZ.sub(camera.position);
-            float factor = zoomFactors[zoomIndex].distanceXZ / distanceXZ.len();
-            distanceXZ.scl(factor);
-
-//            float cameraX = zoomFactors[zoomIndex].x + (zoomFactors[targetZoomIndex].x - zoomFactors[zoomIndex].x) * progress;
-//            float cameraY = zoomFactors[zoomIndex].y + (zoomFactors[targetZoomIndex].y - zoomFactors[zoomIndex].y) * progress;
-//            float cameraZ = zoomFactors[zoomIndex].z + (zoomFactors[targetZoomIndex].z - zoomFactors[zoomIndex].z) * progress;
-            float cameraY = zoomFactors[targetZoomIndex].y;
-            float cameraX = distanceXZ.x;
-            float cameraZ = distanceXZ.z;
-
-            float x = cameraX - (camera.position.x - movingCamera.lookat.x);
-            float y = cameraY - camera.position.y;
-            float z = cameraZ - (camera.position.z - movingCamera.lookat.z);
-            camera.translate(x, y, z);
-            progress += 0.1f;
-            if (progress >= 1.0f) {
-                progress  = 0;
-                zoomIndex = targetZoomIndex;
-            }
-//            camera.translate(0, zoomFactors[zoomIndex].y - camera.position.y, 0);
-        }
-    }
+//    private void zoomCamera() {
+//        if (camera instanceof MovingCamera movingCamera) {
+//            //create a vector from lookat to current camera position
+//            Vector3 distanceXZ = new Vector3(movingCamera.lookat);
+//            distanceXZ.sub(camera.position);
+//            float factor = zoomFactors[zoomIndex].distanceXZ / distanceXZ.len();
+//            distanceXZ.scl(factor);
+//
+//            float cameraY = zoomFactors[targetZoomIndex].y;
+//            float cameraX = distanceXZ.x;
+//            float cameraZ = distanceXZ.z;
+//
+//            float x = cameraX - (camera.position.x - movingCamera.lookat.x);
+//            float y = cameraY - camera.position.y;
+//            float z = cameraZ - (camera.position.z - movingCamera.lookat.z);
+//            camera.translate(x, y, z);
+//            progress += 0.1f;
+//            if (progress >= 1.0f) {
+//                progress  = 0;
+//                zoomIndex = targetZoomIndex;
+//            }
+//        }
+//    }
 
 }

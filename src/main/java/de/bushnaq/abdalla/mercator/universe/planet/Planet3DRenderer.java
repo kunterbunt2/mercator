@@ -318,7 +318,6 @@ public class Planet3DRenderer extends ObjectRenderer<GameEngine3D> {
 
             dynamicStationGameObject = new GameObject<GameEngine3D>(new ModelInstanceHack(renderEngine.getGameEngine().assetManager.dynamicStation.scene.model), planet, this);
 //            dynamicStationGameObject.instance.transform.setToTranslation(x, -128, z);
-//            dynamicStationGameObject.update();
             renderEngine.addStatic(dynamicStationGameObject);
 
             planetGameObject = new GameObject<GameEngine3D>(new ModelInstanceHack(renderEngine.getGameEngine().assetManager.planet01.scene.model), planet, this);
@@ -552,8 +551,10 @@ public class Planet3DRenderer extends ObjectRenderer<GameEngine3D> {
         rotation += rotationSpeed * realTimeDelta;
         dynamicStationGameObject.instance.transform.setToTranslation(planet.x, -128, planet.z);
         dynamicStationGameObject.instance.transform.rotate(Vector3.Y, rotation);
+        dynamicStationGameObject.update();
         planetGameObject.instance.transform.setToTranslation(planet.x, -512 - 2024, planet.z - 512);
         planetGameObject.instance.transform.rotate(Vector3.Y, rotation);
+        planetGameObject.update();
         planet.communicationPartner.ttsPlayer.play();
 //        planet.communicationPartner.ttsPlayer.setPositionAndVelocity(position, velocity);
 

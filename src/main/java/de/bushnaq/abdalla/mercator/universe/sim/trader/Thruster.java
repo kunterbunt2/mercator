@@ -109,11 +109,11 @@ public class Thruster {
         lightTimer = LIGHT_ON_DURATION;
     }
 
-    public boolean update(RenderEngine3D<GameEngine3D> renderEngine, Trader trader, Vector3 translation, float rotation, RotationDirection rotationDirection, RotationAcelleration rotationAcelleration) throws Exception {
+    public boolean update(RenderEngine3D<GameEngine3D> renderEngine, Trader trader, Vector3 translation, float rotation, RotationDirection rotationDirection, RotationAcceleration rotationAcceleration) throws Exception {
         boolean on = false;
 //        if (direction.x != 0f || direction.y != 0f || direction.z != 0f)
 //        mp3Player.setPositionAndVelocity(position, velocity);
-        if (rotationDirection != RotationDirection.NON && (this.rotationDirection == rotationDirection && rotationAcelleration == RotationAcelleration.ACCELERATING || this.rotationDirection != rotationDirection && rotationAcelleration == RotationAcelleration.DECELLERATING)) {
+        if (rotationDirection != RotationDirection.NON && (this.rotationDirection == rotationDirection && rotationAcceleration == RotationAcceleration.ACCELERATING || this.rotationDirection != rotationDirection && rotationAcceleration == RotationAcceleration.DECELLERATING)) {
             on = true;
             if (!gameObjectAdded) {
                 renderEngine.addDynamic(gameObject);

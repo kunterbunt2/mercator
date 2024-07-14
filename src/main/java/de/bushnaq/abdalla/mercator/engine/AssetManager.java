@@ -66,6 +66,7 @@ public class AssetManager {
     public Model                   land;
     public Model                   mirrorModel;
     public SceneAsset              planet01;
+    public Model                   redEmissiveBohkeyModel;
     //    public  Model                   planetModel;
     public Model                   redEmissiveModel;
     public Model                   sector;
@@ -117,6 +118,7 @@ public class AssetManager {
         createGoodContainer(modelBuilder);
 
         createRedEmissiveModel(modelCreator);
+        createRedEmissiveBohkeyModel(modelBuilder, modelCreator);
         createDockingStation(texture, modelCreator, modelBuilder);
         {
             final Attribute color     = new PBRColorAttribute(PBRColorAttribute.BaseColorFactor, Color.DARK_GRAY);
@@ -207,8 +209,7 @@ public class AssetManager {
 //        final Attribute   blending        = new BlendingAttribute(0.5f); // opacity is set by pbrMetallicRoughness below
         ColorAttribute emissive = PBRColorAttribute.createEmissive(new Color(Color.WHITE));
         for (Material m : flame.scene.model.materials) {
-            if (m.id.equals("flame.material"))
-                m.set(baseColorFactor/*, blending*/, emissive);
+            if (m.id.equals("flame.material")) m.set(baseColorFactor/*, blending*/, emissive);
         }
     }
 
@@ -287,6 +288,22 @@ public class AssetManager {
             }
         }
 
+    }
+
+    private void createRedEmissiveBohkeyModel(final ModelBuilder modelBuilder, final ModelCreator modelCreator) {
+//        final Material material = new Material();
+//        material.set(PBRColorAttribute.createBaseColorFactor(new Color(Color.WHITE).fromHsv(15, .9f, .8f)));
+//        material.set(PBRColorAttribute.createEmissive(new Color(Color.RED)));
+//        material.set(new BlendingAttribute(0.15f));
+//        redEmissiveBohkeyModel = modelBuilder.createSphere(1f, 1f, 1f, 8, 8, material, Usage.Position | Usage.Normal);
+
+//        final Attribute metallic  = PBRFloatAttribute.createMetallic(0.9f);
+//        final Attribute roughness = PBRFloatAttribute.createRoughness(0.1f);
+        final Attribute color    = new PBRColorAttribute(PBRColorAttribute.BaseColorFactor, Color.RED);
+        final Attribute blending = new BlendingAttribute(0.5f); // opacity is set by pbrMetallicRoughness below
+        final Material  material = new Material(color/* , culling, normal, occlusion, shininess */, blending);
+//        cubeTrans1 = modelBuilder.createBox(1.0f, 1.0f, 1.0f, material, Usage.Position | Usage.Normal);
+        redEmissiveBohkeyModel = modelBuilder.createSphere(1f, 1f, 1f, 16, 16, material, Usage.Position | Usage.Normal);
     }
 
     private void createRedEmissiveModel(ModelCreator modelCreator) {

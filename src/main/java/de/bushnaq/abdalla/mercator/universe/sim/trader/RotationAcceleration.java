@@ -16,6 +16,6 @@
 
 package de.bushnaq.abdalla.mercator.universe.sim.trader;
 
-public enum RotationAcelleration {
+public enum RotationAcceleration {
     ACCELERATING, DECELLERATING
 }

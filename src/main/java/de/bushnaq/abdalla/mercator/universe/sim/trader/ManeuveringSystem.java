@@ -51,7 +51,7 @@ public class ManeuveringSystem {
     private              float                endRotation          = 90;
     private              OggPlayer            oggPlayer;
     private              float                progress             = 0;
-    private              RotationAcelleration rotationAcelleration = RotationAcelleration.ACCELERATING;
+    private              RotationAcceleration rotationAcceleration = RotationAcceleration.ACCELERATING;
     private              RotationDirection    rotationDirection;
     private              float                startRotation        = 1000;
 
@@ -142,12 +142,12 @@ public class ManeuveringSystem {
         float acceleration = calculateRotationAcceleration();
         if (progress < 0.5) {
             //accelerating
-            rotationAcelleration = RotationAcelleration.ACCELERATING;
+            rotationAcceleration = RotationAcceleration.ACCELERATING;
 //            if (Debug.isFilter(trader.getName())) logger.info("rotation acceleration");
             return Math.min(rotationSpeed + acceleration * timeDelta * 10, MAX_ROTATION_SPEED);
         } else {
             //deceleration
-            rotationAcelleration = RotationAcelleration.DECELLERATING;
+            rotationAcceleration = RotationAcceleration.DECELLERATING;
 //            if (Debug.isFilter(trader.getName())) logger.info("rotation deceleration");
             return Math.max(rotationSpeed - acceleration * timeDelta * 10, MIN_ROTATION_SPEED);
         }
@@ -218,7 +218,7 @@ public class ManeuveringSystem {
         if (renderEngine.getCamera().frustum.pointInFrustum(translation.x, translation.y, translation.z)) {
             boolean on = false;
             for (Thruster thruster : thrusters) {
-                if (thruster.update(renderEngine, trader, translation, rotation, rotationDirection, rotationAcelleration))
+                if (thruster.update(renderEngine, trader, translation, rotation, rotationDirection, rotationAcceleration))
                     on = true;
             }
             if (on) {

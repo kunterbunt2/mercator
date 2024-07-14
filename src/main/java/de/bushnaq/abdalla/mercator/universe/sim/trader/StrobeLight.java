@@ -24,20 +24,26 @@ import de.bushnaq.abdalla.engine.GameObject;
 import de.bushnaq.abdalla.engine.RenderEngine3D;
 import de.bushnaq.abdalla.mercator.engine.GameEngine3D;
 
+enum LightMode {
+    ON, OFF
+}
+
 public class StrobeLight {
     public static final  float                    LIGHT_MAX_INTENSITY          = 10000f;
     public static final  float                    LIGHT_OFF_DURATION_AVERAGE   = 3f;
     public static final  float                    LIGHT_OFF_DURATION_DEVIATION = 0.1f;
-    public static final  float                    LIGHT_ON_DURATION            = 0.1f;
+    public static final  float                    LIGHT_ON_DURATION            = 1.1f;
     public static final  float                    LIGHT_SIZE                   = .2f;
-    final static         Vector3                  yVector                      = new Vector3(0, 1, 0);
+    //    final static         Vector3                  yVector                      = new Vector3(0, 1, 0);
     private static final float                    PY2                          = 3.14159f / 2;
-    public final         GameObject<GameEngine3D> gameObject;
-    public final         PointLight               pointLight;
-    private final        Vector3                  lightScaling                 = new Vector3(LIGHT_SIZE, LIGHT_SIZE, LIGHT_SIZE);
+    private final        GameObject<GameEngine3D> bokehGameObject;
+    private final        Vector3                  bokehScaling                 = new Vector3(LIGHT_SIZE * 5, LIGHT_SIZE * 5, LIGHT_SIZE * 5);
     public               Vector3                  delta                        = new Vector3();
-    public               int                      lightMode                    = 0;
+    public final         GameObject<GameEngine3D> lightGameObject;
+    private              LightMode                lightMode                    = LightMode.OFF;
+    private final        Vector3                  lightScaling                 = new Vector3(LIGHT_SIZE, LIGHT_SIZE, LIGHT_SIZE);
     public               float                    lightTimer                   = 0;
+    public final         PointLight               pointLight;
 
     //    public StrobeLight(RenderEngine3D<GameEngine3D> renderEngine, float deltaX, float deltaY, float deltaZ, GameObject<GameEngine3D> gameObject) {
 //        delta.set(deltaX, deltaY, deltaZ);
@@ -45,11 +51,13 @@ public class StrobeLight {
 //        this.pointLight = new PointLight();
 //        renderEngine.addDynamic(gameObject);
 //    }
-    public StrobeLight(RenderEngine3D<GameEngine3D> renderEngine, Vector3 delta, GameObject<GameEngine3D> gameObject) {
+    public StrobeLight(RenderEngine3D<GameEngine3D> renderEngine, Vector3 delta, GameObject<GameEngine3D> lightGameObject, GameObject<GameEngine3D> bokehGameObject) {
         this.delta.set(delta);
-        this.gameObject = gameObject;
-        this.pointLight = new PointLight();
-        renderEngine.addDynamic(gameObject);
+        this.lightGameObject = lightGameObject;
+        this.bokehGameObject = bokehGameObject;
+        this.pointLight      = new PointLight();
+        renderEngine.addDynamic(lightGameObject);
+//        renderEngine.addDynamic(bokehGameObject);
     }
 
     private void animate(RenderEngine3D<GameEngine3D> renderEngine) {
@@ -58,18 +66,18 @@ public class StrobeLight {
             //lightMode
             // 0, wait
             switch (lightMode) {
-                case 0: {
+                case ON: {
                     resetLightOffTimer();
-                    lightMode = 1;//wait for light to go on
+                    lightMode = LightMode.OFF;//wait for light to go on
                     renderEngine.remove(pointLight, true);
 //                    if (Debug.isFilter(trader.getName())) {
 //                        logger.info("lights off");
 //                    }
                 }
                 break;
-                case 1: {
+                case OFF: {
                     resetLightOnTimer();
-                    lightMode = 0;//wait for light to go off
+                    lightMode = LightMode.ON;//wait for light to go off
                     final float intensity = (float) Math.abs(Math.sin(PY2 * (lightTimer / LIGHT_ON_DURATION)) * LIGHT_MAX_INTENSITY);
                     pointLight.setIntensity(intensity);
                     renderEngine.add(pointLight, true);
@@ -100,14 +108,23 @@ public class StrobeLight {
 //        if (direction.x != 0f || direction.y != 0f || direction.z != 0f)
         {
             final float intensity = calculateIntensity();
-            gameObject.instance.transform.setToTranslation(translation.x, translation.y, translation.z);
-//            gameObject.instance.transform.rotateTowardDirection(direction, Vector3.Y);
-            gameObject.instance.transform.rotate(yVector, rotation);
-            gameObject.instance.transform.translate(delta);
-            gameObject.instance.transform.scale(lightScaling.x, lightScaling.y, lightScaling.z);
-            gameObject.update();
+            lightGameObject.instance.transform.setToTranslation(translation.x, translation.y, translation.z);
+            lightGameObject.instance.transform.rotate(Vector3.Y, rotation);
+            lightGameObject.instance.transform.translate(delta);
+            lightGameObject.instance.transform.scale(lightScaling.x, lightScaling.y, lightScaling.z);
+            lightGameObject.update();
             Vector3 lightTranslation = new Vector3();
-            gameObject.instance.transform.getTranslation(lightTranslation);
+            lightGameObject.instance.transform.getTranslation(lightTranslation);
+
+            bokehGameObject.instance.transform.setToTranslation(translation.x, translation.y, translation.z);
+            bokehGameObject.instance.transform.rotate(Vector3.Y, rotation);
+            bokehGameObject.instance.transform.translate(delta);
+            if (lightMode == LightMode.OFF)
+                bokehGameObject.instance.transform.scale(.1f, .1f, .1f);
+            else
+                bokehGameObject.instance.transform.scale(bokehScaling.x, bokehScaling.y, bokehScaling.z);
+            bokehGameObject.update();
+
             pointLight.set(Color.RED, lightTranslation.x + 0.2f, lightTranslation.y, lightTranslation.z, intensity);
             animate(renderEngine);
         }

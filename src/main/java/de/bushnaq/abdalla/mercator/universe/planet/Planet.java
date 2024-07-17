@@ -39,29 +39,30 @@ import de.bushnaq.abdalla.mercator.util.*;
 public class Planet extends Waypoint implements TradingPartner {
     public static final float                      CHANNEL_SIZE           = 196 / Universe.WORLD_SCALE;
     //    public final static float                  MIN_PLANET_DISTANCE    = 30;
-    public static final int                        PLANET_DISTANCE        = 2048 * 2;
+    public static final int                        PLANET_DISTANCE        = 2048 /** 2*/
+            ;
     public final static int                        PLANET_MAX_SIMS        = 10;
     public final static float                      PLANET_START_CREDITS   = 20000;
     public              PlanetCommunicationPartner communicationPartner;
+    private float          credits  = PLANET_START_CREDITS;
     public              long                       currentTime            = 0;
     public              SimList                    deadSimList            = new SimList(this);
     public              DockingDoors               dockingDoors           = new DockingDoors(this);
     public              PlanetEventManager         eventManager;
+    private GoodList       goodList = new GoodList();
+    private HistoryManager historyManager;
     public              long                       lastTransaction        = 0;
     //	private String name = null;
     public              float                      orbitAngle             = 0.0f;
     public              PathSeeker                 pathSeeker             = new PathSeeker();
     public              ProductionFacilityList     productionFacilityList = new ProductionFacilityList();
+    boolean selected;
     public              SimList                    simList                = new SimList(this);
     public              PlanetStatisticManager     statisticManager       = new PlanetStatisticManager();
     public              PlanetStatus               status                 = PlanetStatus.LIVING;
     public              long                       timeDelta              = 0;
     public              TraderList                 traderList             = new TraderList();
     public              Universe                   universe;
-    boolean selected;
-    private float          credits  = PLANET_START_CREDITS;
-    private GoodList       goodList = new GoodList();
-    private HistoryManager historyManager;
 
     public Planet(final String name, final float x, final float y, final float z, final Universe universe) {
         super(name, x, y, z);
@@ -245,27 +246,6 @@ public class Planet extends Waypoint implements TradingPartner {
         return this;
     }
 
-    @Override
-    public void setCredits(final float credits) {
-        this.credits = credits;
-    }
-
-    @Override
-    public void setLastTransaction(final long currentTime) {
-        lastTransaction = currentTime;
-    }
-
-    // @Override
-    // public void pay( long currentTime, float price, float transactionAmount,
-    // TradingPartner transaction )
-    // {
-    // setCredits( getCredits() - price * transactionAmount );
-    // transaction.setCredits( transaction.getCredits() + price * transactionAmount
-    // );
-    // getHistoryManager().get( currentTime ).buy( null, price * transactionAmount,
-    // transactionAmount, transaction.getPlanet() );
-    // }
-
     // @Override
     // public void sell( long currentTime, GoodType goodType, float price, float
     // transactionAmount, Transaction to )
@@ -292,6 +272,17 @@ public class Planet extends Waypoint implements TradingPartner {
         return goodList.getByType(GoodType.FOOD).getAveragePrice();
     }
 
+    // @Override
+    // public void pay( long currentTime, float price, float transactionAmount,
+    // TradingPartner transaction )
+    // {
+    // setCredits( getCredits() - price * transactionAmount );
+    // transaction.setCredits( transaction.getCredits() + price * transactionAmount
+    // );
+    // getHistoryManager().get( currentTime ).buy( null, price * transactionAmount,
+    // transactionAmount, transaction.getPlanet() );
+    // }
+
     public float queryDistance(final WaypointList waypointList) {
         //ignore first and last waypoint, as they only mark a city, but not an actual waypoint
         float    distance = 0.0f;
@@ -317,16 +308,26 @@ public class Planet extends Waypoint implements TradingPartner {
         communicationPartner.select();
     }
 
-    //	public void setName(final String name) {
-    //		this.name = name;
-    //	}
+    @Override
+    public void setCredits(final float credits) {
+        this.credits = credits;
+    }
 
     public void setGoodList(final GoodList goodList) {
         this.goodList = goodList;
     }
 
+    //	public void setName(final String name) {
+    //		this.name = name;
+    //	}
+
     public void setHistoryManager(final HistoryManager historyManager) {
         this.historyManager = historyManager;
+    }
+
+    @Override
+    public void setLastTransaction(final long currentTime) {
+        lastTransaction = currentTime;
     }
 
     public void transported(final Planet from, final int amount) {

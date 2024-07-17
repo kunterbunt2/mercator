@@ -1018,6 +1018,12 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
             stringBuilder.append(String.format(" camera: [%d] [%+.0f %+.0f %+.0f] [%+.0f %+.0f %+.0f]", camController.zoomIndex, camera.position.x, camera.position.y, camera.position.z, camera.lookat.x, camera.lookat.y, camera.lookat.z));
             labels.get(labelIndex++).setText(stringBuilder);
         }
+        //depth of field
+        {
+            stringBuilder.setLength(0);
+            stringBuilder.append(String.format(" focal depth: [%f]", renderEngine.getDepthOfFieldEffect2().getFocalDepth()));
+            labels.get(labelIndex++).setText(stringBuilder);
+        }
         //audio sources
         {
             stringBuilder.setLength(0);
@@ -1302,6 +1308,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
                 float min   = focus / 2;
                 renderEngine.getDepthOfFieldEffect1().setFocusDistance(new Vector2(min, max));
                 renderEngine.getDepthOfFieldEffect2().setFocusDistance(new Vector2(min, max));
+                renderEngine.getDepthOfFieldEffect2().setFocalDepth(focus);
 //                System.out.printf("depth of field min=%f max=%f%n", min, max);
             } else {
                 // Not hit

@@ -4,3 +4,5 @@ ctrl+A		select scale to bevel scane independent
 ctrl+B		bevel mode
 precise 	edit->Adjust last operation
 alt+D		clone object
+icon		inset
+ctrl+E		extrude

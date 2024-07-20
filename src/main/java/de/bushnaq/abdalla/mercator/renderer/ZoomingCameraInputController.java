@@ -29,15 +29,16 @@ import org.slf4j.LoggerFactory;
 
 public class ZoomingCameraInputController extends CameraInputController {
 
-    private final GameEngine3D gameEngine;
-    private final Logger       logger    = LoggerFactory.getLogger(this.getClass());
-    private final Vector3      tmpV1     = new Vector3();
-    private final Vector3      tmpV2     = new Vector3();
-    public        int          zoomIndex = 5;
-    CameraProperties[] zoomFactors = {//
+    private final GameEngine3D       gameEngine;
+    private final Logger             logger          = LoggerFactory.getLogger(this.getClass());
+    private       float              progress        = 0;
+    private       int                targetZoomIndex = 3;
+    private final Vector3            tmpV1           = new Vector3();
+    private final Vector3            tmpV2           = new Vector3();
+    public        CameraProperties[] zoomFactors     = {//
             new CameraProperties(75, 75, 1000f),//
             new CameraProperties(150, 200, 2000f),//
-            new CameraProperties(150, 300, 8000f),//
+            new CameraProperties(150, 1300, 8000f, 600f),//
             new CameraProperties(400, 500, 8000f),//
             new CameraProperties(1000, 200, 8000f),//
 //            new CameraProperties(1500, 100, 8000f),//
@@ -48,8 +49,7 @@ public class ZoomingCameraInputController extends CameraInputController {
 //            new CameraProperties(6000, 0, 8000f),//
             new CameraProperties(10000, 0, 10000f),//
     };
-    private float progress        = 0;
-    private int   targetZoomIndex = 3;
+    public        int                zoomIndex       = 5;
 
     public ZoomingCameraInputController(final Camera camera, GameEngine3D gameEngine) throws Exception {
         super(camera);
@@ -57,82 +57,6 @@ public class ZoomingCameraInputController extends CameraInputController {
         rotateButton    = Buttons.MIDDLE;
         pinchZoomFactor = 1f / Universe.WORLD_SCALE;
     }
-
-    @Override
-    public void update() {
-        if (targetZoomIndex != zoomIndex) {
-            if (camera instanceof MovingCamera movingCamera) {
-                Vector2 distanceXZ = new Vector2(camera.position.x, camera.position.z);
-                {
-                    distanceXZ.sub(movingCamera.lookat.x, movingCamera.lookat.z);
-                    if (zoomFactors[zoomIndex].distanceXZ != 0f) {
-                        float factor = zoomFactors[zoomIndex].distanceXZ / distanceXZ.len();
-                        distanceXZ.scl(factor);
-                    }
-                }
-                Vector2 targetDistanceXZ = new Vector2(camera.position.x, camera.position.z);
-                {
-                    targetDistanceXZ.sub(movingCamera.lookat.x, movingCamera.lookat.z);
-                    if (zoomFactors[targetZoomIndex].distanceXZ != 0f) {
-                        float factor = zoomFactors[targetZoomIndex].distanceXZ / targetDistanceXZ.len();
-                        targetDistanceXZ.scl(factor);
-                    }
-                }
-//                logger.info(String.format("%f %f ", distanceXZ.x, distanceXZ.y));
-//                logger.info(String.format("%f %f ", movingCamera.lookat.x + distanceXZ.x, movingCamera.lookat.z + distanceXZ.y));
-                float cameraY = zoomFactors[zoomIndex].y + (zoomFactors[targetZoomIndex].y - zoomFactors[zoomIndex].y) * progress;
-                float cameraX = distanceXZ.x + (targetDistanceXZ.x - distanceXZ.x) * progress;
-                float cameraZ = distanceXZ.y + (targetDistanceXZ.y - distanceXZ.y) * progress;
-                float farY    = zoomFactors[zoomIndex].far + (zoomFactors[targetZoomIndex].far - zoomFactors[zoomIndex].far) * progress;
-
-                float x = cameraX - (camera.position.x - movingCamera.lookat.x);
-                float y = cameraY - camera.position.y;
-                float z = cameraZ - (camera.position.z - movingCamera.lookat.z);
-//                logger.info(String.format("camera update zoomIndex=%d targetZoomIndex=%d x=%f y=%f z=%f", zoomIndex, targetZoomIndex, x, y, z));
-                camera.translate(x, y, z);
-                camera.far = farY;
-                movingCamera.lookAt(movingCamera.lookat);
-                camera.update();
-                movingCamera.setDirty(true);
-//                logger.info(String.format("%f %f %f  %f %f %f", movingCamera.position.x, movingCamera.position.y, movingCamera.position.z, movingCamera.lookat.x, movingCamera.lookat.y, movingCamera.lookat.z));
-//                logger.info("");
-                progress += 0.03f;
-                if (progress >= 1.0f) {
-                    progress  = 0;
-                    zoomIndex = targetZoomIndex;
-                }
-            }
-        }
-    }
-
-//    @Override
-//    public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-//        if (button == Buttons.RIGHT) {
-//            Ray     pickRay      = camera.getPickRay(screenX, screenY);
-//            Plane   plane        = new Plane(new Vector3(0, 1, 0), Vector3.Zero);
-//            Vector3 intersection = new Vector3();
-//            if (Intersector.intersectRayPlane(pickRay, plane, intersection)) {
-//                logger.info(String.format("intersection=%f %f %f", intersection.x, intersection.y, intersection.z));
-//                final MovingCamera movingCamera = (MovingCamera) camera;
-//                // The ray has hit the plane, intersection is the point it hit
-//                Vector2 moveXZ = new Vector2(intersection.x, intersection.z);
-//                moveXZ.sub(camera.position.x, camera.position.z);
-//
-//                logger.info(String.format("moveXZ=%f %f", moveXZ.x, moveXZ.y));
-//                movingCamera.translate(moveXZ.x, 0, moveXZ.y);
-//                movingCamera.lookat.x += moveXZ.x;
-//                movingCamera.lookat.z += moveXZ.y;
-//                if (translateTarget)
-//                    target.add(tmpV1).add(tmpV2);
-//                movingCamera.setDirty(true);
-//                movingCamera.update();
-//                return true;
-//            } else {
-//                // Not hit
-//            }
-//        }
-//        return false;
-//    }
 
     @Override
     protected boolean process(final float deltaX, final float deltaY, final int button) {
@@ -181,6 +105,82 @@ public class ZoomingCameraInputController extends CameraInputController {
         return true;
     }
 
+//    @Override
+//    public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+//        if (button == Buttons.RIGHT) {
+//            Ray     pickRay      = camera.getPickRay(screenX, screenY);
+//            Plane   plane        = new Plane(new Vector3(0, 1, 0), Vector3.Zero);
+//            Vector3 intersection = new Vector3();
+//            if (Intersector.intersectRayPlane(pickRay, plane, intersection)) {
+//                logger.info(String.format("intersection=%f %f %f", intersection.x, intersection.y, intersection.z));
+//                final MovingCamera movingCamera = (MovingCamera) camera;
+//                // The ray has hit the plane, intersection is the point it hit
+//                Vector2 moveXZ = new Vector2(intersection.x, intersection.z);
+//                moveXZ.sub(camera.position.x, camera.position.z);
+//
+//                logger.info(String.format("moveXZ=%f %f", moveXZ.x, moveXZ.y));
+//                movingCamera.translate(moveXZ.x, 0, moveXZ.y);
+//                movingCamera.lookat.x += moveXZ.x;
+//                movingCamera.lookat.z += moveXZ.y;
+//                if (translateTarget)
+//                    target.add(tmpV1).add(tmpV2);
+//                movingCamera.setDirty(true);
+//                movingCamera.update();
+//                return true;
+//            } else {
+//                // Not hit
+//            }
+//        }
+//        return false;
+//    }
+
+    @Override
+    public void update() {
+        if (targetZoomIndex != zoomIndex) {
+            if (camera instanceof MovingCamera movingCamera) {
+                Vector2 distanceXZ = new Vector2(camera.position.x, camera.position.z);
+                {
+                    distanceXZ.sub(movingCamera.lookat.x, movingCamera.lookat.z);
+                    if (zoomFactors[zoomIndex].distanceXZ != 0f) {
+                        float factor = zoomFactors[zoomIndex].distanceXZ / distanceXZ.len();
+                        distanceXZ.scl(factor);
+                    }
+                }
+                Vector2 targetDistanceXZ = new Vector2(camera.position.x, camera.position.z);
+                {
+                    targetDistanceXZ.sub(movingCamera.lookat.x, movingCamera.lookat.z);
+                    if (zoomFactors[targetZoomIndex].distanceXZ != 0f) {
+                        float factor = zoomFactors[targetZoomIndex].distanceXZ / targetDistanceXZ.len();
+                        targetDistanceXZ.scl(factor);
+                    }
+                }
+//                logger.info(String.format("%f %f ", distanceXZ.x, distanceXZ.y));
+//                logger.info(String.format("%f %f ", movingCamera.lookat.x + distanceXZ.x, movingCamera.lookat.z + distanceXZ.y));
+                float cameraY = zoomFactors[zoomIndex].y + (zoomFactors[targetZoomIndex].y - zoomFactors[zoomIndex].y) * progress;
+                float cameraX = distanceXZ.x + (targetDistanceXZ.x - distanceXZ.x) * progress;
+                float cameraZ = distanceXZ.y + (targetDistanceXZ.y - distanceXZ.y) * progress;
+                float farY    = zoomFactors[zoomIndex].far + (zoomFactors[targetZoomIndex].far - zoomFactors[zoomIndex].far) * progress;
+
+                float x = cameraX - (camera.position.x - movingCamera.lookat.x);
+                float y = cameraY - camera.position.y;
+                float z = cameraZ - (camera.position.z - movingCamera.lookat.z);
+//                logger.info(String.format("camera update zoomIndex=%d targetZoomIndex=%d x=%f y=%f z=%f", zoomIndex, targetZoomIndex, x, y, z));
+                camera.translate(x, y, z);
+                camera.far = farY;
+                movingCamera.lookAt(movingCamera.lookat);
+                camera.update();
+                movingCamera.setDirty(true);
+//                logger.info(String.format("%f %f %f  %f %f %f", movingCamera.position.x, movingCamera.position.y, movingCamera.position.z, movingCamera.lookat.x, movingCamera.lookat.y, movingCamera.lookat.z));
+//                logger.info("");
+                progress += 0.03f;
+                if (progress >= 1.0f) {
+                    progress  = 0;
+                    zoomIndex = targetZoomIndex;
+                }
+            }
+        }
+    }
+
     @Override
     public boolean zoom(final float amount) {
         try {
@@ -193,8 +193,7 @@ public class ZoomingCameraInputController extends CameraInputController {
             }
             //todo need to find a fix for this otherwise camera rotation will lead to strange effects
 //            camera.up.set(0, 1, 0);//careful, this will go wrong if camera is pointing directly at 0, 0, 0 from above.
-            if (camera instanceof MovingCamera) {
-                final MovingCamera myCamera = (MovingCamera) camera;
+            if (camera instanceof MovingCamera myCamera) {
                 myCamera.lookAt(myCamera.lookat);
                 myCamera.setDirty(true);
             }

@@ -23,7 +23,10 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
-import com.badlogic.gdx.math.*;
+import com.badlogic.gdx.math.Intersector;
+import com.badlogic.gdx.math.Matrix4;
+import com.badlogic.gdx.math.Plane;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.Ray;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
@@ -36,6 +39,7 @@ import de.bushnaq.abdalla.engine.camera.MovingCamera;
 import de.bushnaq.abdalla.mercator.audio.synthesis.MercatorAudioEngine;
 import de.bushnaq.abdalla.mercator.desktop.Context;
 import de.bushnaq.abdalla.mercator.desktop.LaunchMode;
+import de.bushnaq.abdalla.mercator.renderer.CameraProperties;
 import de.bushnaq.abdalla.mercator.renderer.ScreenListener;
 import de.bushnaq.abdalla.mercator.renderer.ShowGood;
 import de.bushnaq.abdalla.mercator.renderer.ZoomingCameraInputController;
@@ -214,6 +218,11 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
             renderEngine.setDayAmbientLight(.0f, .0f, .0f, 1f);
             renderEngine.getShadowLight().setColor(Color.WHITE);
             renderEngine.setFixedShadowDirection(true);
+            renderEngine.setAmbientLight(.5f, .5f, .5f);
+            dayAmbientIntensityR = .0f;
+            dayAmbientIntensityG = .0f;
+            dayAmbientIntensityB = .0f;
+            dayShadowIntensity   = .2f;
 //            renderEngine.setNightAmbientLight(.04f, .04f, .04f, 10f);
 //            setDayAmbientLight(.9f, .9f, .9f, 1f);
             createInputProcessor(this, this);
@@ -652,7 +661,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
             case Input.Keys.DOWN:
                 centerYD = SCROLL_SPEED;
                 return true;
-            case Input.Keys.Q:
+            case Input.Keys.ESCAPE:
                 exit();
                 return true;
             case Input.Keys.PAUSE:
@@ -665,15 +674,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
                 renderEngine.setAlwaysDay(!renderEngine.isAlwaysDay());
                 return true;
             case Input.Keys.NUM_3:
-                if (!renderEngine.getDepthOfFieldEffect1().isEnabled() && !renderEngine.getDepthOfFieldEffect2().isEnabled()) {
-                    renderEngine.getDepthOfFieldEffect1().setEnabled(true);
-                } else if (renderEngine.getDepthOfFieldEffect1().isEnabled()) {
-                    renderEngine.getDepthOfFieldEffect1().setEnabled(false);
-                    renderEngine.getDepthOfFieldEffect2().setEnabled(true);
-                } else if (renderEngine.getDepthOfFieldEffect2().isEnabled()) {
-                    renderEngine.getDepthOfFieldEffect1().setEnabled(false);
-                    renderEngine.getDepthOfFieldEffect2().setEnabled(false);
-                }
+                renderEngine.getDepthOfFieldEffect().setEnabled(!renderEngine.getDepthOfFieldEffect().isEnabled());
                 return true;
             case Input.Keys.NUM_4:
                 renderEngine.setShowGraphs(!renderEngine.isShowGraphs());
@@ -1021,7 +1022,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
         //depth of field
         {
             stringBuilder.setLength(0);
-            stringBuilder.append(String.format(" focal depth: [%f]", renderEngine.getDepthOfFieldEffect2().getFocalDepth()));
+            stringBuilder.append(String.format(" focal depth: [%f]", renderEngine.getDepthOfFieldEffect().getFocalDepth()));
             labels.get(labelIndex++).setText(stringBuilder);
         }
         //audio sources
@@ -1297,21 +1298,24 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
 
     private void updateDepthOfFieldFocusDistance() {
         if (camera.isDirty()) {
-            Ray     pickRay      = camera.getPickRay(Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2);
-            Plane   plane        = new Plane(new Vector3(0, 1, 0), Vector3.Zero);
-            Vector3 intersection = new Vector3();
-            if (Intersector.intersectRayPlane(pickRay, plane, intersection)) {
-                //calculate distance to camera
-                intersection.sub(camera.position);
-                float focus = intersection.len();
-                float max   = focus * 2;
-                float min   = focus / 2;
-                renderEngine.getDepthOfFieldEffect1().setFocusDistance(new Vector2(min, max));
-                renderEngine.getDepthOfFieldEffect2().setFocusDistance(new Vector2(min, max));
-                renderEngine.getDepthOfFieldEffect2().setFocalDepth(focus);
-//                System.out.printf("depth of field min=%f max=%f%n", min, max);
+            CameraProperties zoomFactor = camController.zoomFactors[camController.zoomIndex];
+            if (zoomFactor.focalDistance != 0) {
+                renderEngine.getDepthOfFieldEffect().setFocalDepth(zoomFactor.focalDistance);
             } else {
-                // Not hit
+                Ray     pickRay      = camera.getPickRay(Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2);
+                Plane   plane        = new Plane(new Vector3(0, 1, 0), Vector3.Zero);
+                Vector3 intersection = new Vector3();
+                if (Intersector.intersectRayPlane(pickRay, plane, intersection)) {
+                    //calculate distance to camera
+                    intersection.sub(camera.position);
+                    float focus = intersection.len();
+                    float max   = focus * 2;
+                    float min   = focus / 2;
+                    renderEngine.getDepthOfFieldEffect().setFocalDepth(focus);
+//                System.out.printf("depth of field min=%f max=%f%n", min, max);
+                } else {
+                    // Not hit
+                }
             }
         }
     }

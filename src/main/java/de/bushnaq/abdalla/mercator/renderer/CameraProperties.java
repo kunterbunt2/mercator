@@ -16,14 +16,23 @@
 
 package de.bushnaq.abdalla.mercator.renderer;
 
-class CameraProperties {
+public class CameraProperties {
+    public final float distanceXZ;//distance to lookat point
     public final float far;//the far clipping plane distance, has to be positive
-    public       float distanceXZ;//distance to lookat point
-    public       float y;//height of camera
+    public final float focalDistance;
+    public final float y;//height of camera
+
+    public CameraProperties(float y, float distanceXZ, float far, float focalDistance) {
+        this.y             = y;
+        this.distanceXZ    = distanceXZ;
+        this.far           = far;
+        this.focalDistance = focalDistance;
+    }
 
     public CameraProperties(float y, float distanceXZ, float far) {
-        this.y          = y;
-        this.distanceXZ = distanceXZ;
-        this.far        = far;
+        this.y             = y;
+        this.distanceXZ    = distanceXZ;
+        this.far           = far;
+        this.focalDistance = 0;
     }
 }

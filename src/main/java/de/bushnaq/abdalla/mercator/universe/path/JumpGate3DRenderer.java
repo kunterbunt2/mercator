@@ -36,7 +36,6 @@ import net.mgsx.gltf.scene3d.model.ModelInstanceHack;
 import static de.bushnaq.abdalla.mercator.universe.sim.trader.Trader3DRenderer.TRADER_FLIGHT_HEIGHT;
 
 public class JumpGate3DRenderer extends ObjectRenderer<GameEngine3D> {
-    public static final  float PATH_WIDTH       = 1 / Universe.WORLD_SCALE;
     static final         Color JUMPGATE_COLOR   = new Color(0.275f, 0.314f, 0.314f, 1.0f);
     private static final float JUMP_GATE_DEPTH  = 0 / Universe.WORLD_SCALE /*+ Planet3DRenderer.WATER_Y*/;
     private static final float JUMP_GATE_SIZE_X = 64;
@@ -44,8 +43,15 @@ public class JumpGate3DRenderer extends ObjectRenderer<GameEngine3D> {
     private static final float JUMP_GATE_SIZE_Z = 32;
     private static final float PATH_HEIGHT      = 1 / Universe.WORLD_SCALE;
     private static final Color PATH_NAME_COLOR  = Color.BLUE;
-    private final        Path  jumpGate;
+    public static final  float PATH_WIDTH       = 1 / Universe.WORLD_SCALE;
     float   directionLength;
+    private GameObject<GameEngine3D> gateGameObject;
+    //	private static final Color SELECTED_JUMPGATE_COLOR = Color.WHITE;
+    //	private static final Color JUMPGATE_COLOR = new Color(0.3f, 0.3f, 0.3f, 1.0f); // 0xff5555cc
+    //	static final Color JUMPGATE_COLOR = new Color(0.275f, 0.314f, 0.314f, 1.0f);
+    //	private static final float JUMP_GATE_MIN_RADIUS = Planet3DRenderer.PLANET_SIZE * 4.0f + 3;
+    // static final Color SELECTED_JUMPGATE_COLOR = Color.ORANGE;
+    private GameObject<GameEngine3D> instance;
     //	private void renderTextOnTop(final SceneManager sceneManager, final String text1) {
     //		final float x = jumpGate.target.x;
     //		final float y = jumpGate.target.y - 10 / Universe.WORLD_SCALE;
@@ -74,20 +80,14 @@ public class JumpGate3DRenderer extends ObjectRenderer<GameEngine3D> {
     //		}
     //	}
     boolean instance2AddedToEngine = false;
+    private GameObject<GameEngine3D> instanceOfSelected;//visible if path is selected
+    private final        Path  jumpGate;
     //	Matrix4 rotationMatrix = new Matrix4();
     //	protected Quaternion rotation = new Quaternion();
     boolean lastSelected           = false;
+    private Trader                   lastTrader;
     float   r                      = 45;
     Vector3 targetVector;
-    private GameObject<GameEngine3D> gateGameObject;
-    //	private static final Color SELECTED_JUMPGATE_COLOR = Color.WHITE;
-    //	private static final Color JUMPGATE_COLOR = new Color(0.3f, 0.3f, 0.3f, 1.0f); // 0xff5555cc
-    //	static final Color JUMPGATE_COLOR = new Color(0.275f, 0.314f, 0.314f, 1.0f);
-    //	private static final float JUMP_GATE_MIN_RADIUS = Planet3DRenderer.PLANET_SIZE * 4.0f + 3;
-    // static final Color SELECTED_JUMPGATE_COLOR = Color.ORANGE;
-    private GameObject<GameEngine3D> instance;
-    private GameObject<GameEngine3D> instanceOfSelected;//visible if path is selected
-    private Trader                   lastTrader;
 
     public JumpGate3DRenderer(final Path jumpGate) {
         this.jumpGate = jumpGate;
@@ -96,46 +96,6 @@ public class JumpGate3DRenderer extends ObjectRenderer<GameEngine3D> {
     @Override
     public void create(final float x, final float y, final float z, final RenderEngine3D<GameEngine3D> renderEngine) {
         createJumpGate(x, y, z, renderEngine);
-    }
-
-    public void render2D(final RenderEngine3D<GameEngine3D> renderEngine, final int index, final boolean selected) {
-        final Vector2 target    = new Vector2(jumpGate.target.x, jumpGate.target.z);
-        final Vector2 start     = new Vector2(jumpGate.source.x, jumpGate.source.z);
-        Color         color;
-        float         thickness = 1.3f /* renderEngine.getGameEngine().renderEngine.camera.zoom*/;
-        if (jumpGate.closed) {
-            color = Color.RED;
-        } else if (jumpGate.selected) {
-            color     = GameEngine2D.SELECTED_COLOR;
-            thickness = 3.3f /* renderEngine.getGameEngine().renderEngine.camera.zoom*/;
-        } else {
-            color = JUMPGATE_COLOR;
-        }
-        final Color c = new Color(color);
-        c.a = 0.45f;
-        renderEngine.renderutils2Dxz.line(renderEngine.getGameEngine().getAtlasManager().dottedLineTextureRegion, start.x, 0, start.y, target.x, 0, target.y, c, thickness);
-    }
-
-    @Override
-    public void renderText(final RenderEngine3D<GameEngine3D> renderEngine, final int index, final boolean selected) {
-        if (renderEngine.isDebugMode()) {
-            final String text1 = jumpGate.target.getName();
-            renderTextOnTop(renderEngine, 0f, 0f, text1, PATH_WIDTH / 4);
-//		if (jumpGate.source.trader != null) {
-//			final String text2 = jumpGate.source.trader.getName();
-//			renderTextOnTop(sceneManager, 0f, 10f, text2, JUMP_GATE_SIZE/2);
-//		}
-        }
-    }
-
-    @Override
-    public void update(final float x, final float y, final float z, final RenderEngine3D<GameEngine3D> renderEngine, final long currentTime, final float timeOfDay, final int index, final boolean selected) {
-        drawJumpGate(x, y, z, renderEngine, currentTime, selected);
-    }
-
-    @Override
-    public boolean withinBounds(final float x, final float y) {
-        return false;
     }
 
     private void createJumpGate(final float x, final float y, final float z, final RenderEngine3D<GameEngine3D> renderEngine) {
@@ -173,7 +133,7 @@ public class JumpGate3DRenderer extends ObjectRenderer<GameEngine3D> {
 //        gateGameObject.instance.transform.translate(0, 0, 0);
             gateGameObject.instance.transform.scale(JUMP_GATE_SIZE_X, JUMP_GATE_SIZE_Y, JUMP_GATE_SIZE_Z);
             gateGameObject.update();
-            renderEngine.addStatic(gateGameObject);
+//            renderEngine.addStatic(gateGameObject);
 
         }
     }
@@ -216,6 +176,24 @@ public class JumpGate3DRenderer extends ObjectRenderer<GameEngine3D> {
 //        }
     }
 
+    public void render2D(final RenderEngine3D<GameEngine3D> renderEngine, final int index, final boolean selected) {
+        final Vector2 target    = new Vector2(jumpGate.target.x, jumpGate.target.z);
+        final Vector2 start     = new Vector2(jumpGate.source.x, jumpGate.source.z);
+        Color         color;
+        float         thickness = 1.3f /* renderEngine.getGameEngine().renderEngine.camera.zoom*/;
+        if (jumpGate.closed) {
+            color = Color.RED;
+        } else if (jumpGate.selected) {
+            color     = GameEngine2D.SELECTED_COLOR;
+            thickness = 3.3f /* renderEngine.getGameEngine().renderEngine.camera.zoom*/;
+        } else {
+            color = JUMPGATE_COLOR;
+        }
+        final Color c = new Color(color);
+        c.a = 0.45f;
+        renderEngine.renderutils2Dxz.line(renderEngine.getGameEngine().getAtlasManager().dottedLineTextureRegion, start.x, 0, start.y, target.x, 0, target.y, c, thickness);
+    }
+
     public void render2Da(final RenderEngine2D<GameEngine3D> renderEngine, final int index, final boolean selected) {
         final Vector2 target    = new Vector2(jumpGate.target.x, jumpGate.target.z);
         final Vector2 start     = new Vector2(jumpGate.source.x, jumpGate.source.z);
@@ -232,6 +210,18 @@ public class JumpGate3DRenderer extends ObjectRenderer<GameEngine3D> {
         final Color c = new Color(color);
         c.a = 0.45f;
         renderEngine.batch.line(renderEngine.getGameEngine().getAtlasManager().dottedLineTextureRegion, start.x, 0, start.y, target.x, 0, target.y, c, thickness);
+    }
+
+    @Override
+    public void renderText(final RenderEngine3D<GameEngine3D> renderEngine, final int index, final boolean selected) {
+        if (renderEngine.isDebugMode()) {
+            final String text1 = jumpGate.target.getName();
+            renderTextOnTop(renderEngine, 0f, 0f, text1, PATH_WIDTH / 4);
+//		if (jumpGate.source.trader != null) {
+//			final String text2 = jumpGate.source.trader.getName();
+//			renderTextOnTop(sceneManager, 0f, 10f, text2, JUMP_GATE_SIZE/2);
+//		}
+        }
     }
 
     private void renderTextOnTop(final RenderEngine3D<GameEngine3D> renderEngine, final float dx, final float dy, final String text, final float size) {
@@ -261,5 +251,15 @@ public class JumpGate3DRenderer extends ObjectRenderer<GameEngine3D> {
 //            font.setColor(PATH_NAME_COLOR);
             renderEngine.renderEngine25D.text(0, 0, font, Color.BLACK, PATH_NAME_COLOR, text);
         }
+    }
+
+    @Override
+    public void update(final float x, final float y, final float z, final RenderEngine3D<GameEngine3D> renderEngine, final long currentTime, final float timeOfDay, final int index, final boolean selected) {
+        drawJumpGate(x, y, z, renderEngine, currentTime, selected);
+    }
+
+    @Override
+    public boolean withinBounds(final float x, final float y) {
+        return false;
     }
 }

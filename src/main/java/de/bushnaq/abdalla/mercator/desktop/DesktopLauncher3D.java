@@ -41,7 +41,7 @@ public class DesktopLauncher3D implements ApplicationListener {
     private static final int UNIVERSE_SIZE                   = 10;
     DesktopContextFactory contextFactory = new DesktopContextFactory();
     LaunchMode            launchMode     = LaunchMode.normal;
-    private Logger logger = LoggerFactory.getLogger(this.getClass());
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     public static void main(final String[] args) throws Exception {
         DesktopLauncher3D desktopLauncher3D = new DesktopLauncher3D();
@@ -54,26 +54,6 @@ public class DesktopLauncher3D implements ApplicationListener {
         Gdx.app.exit();// exit the gdx environment that we created just to read the options
     }
 
-    @Override
-    public void resize(int width, int height) {
-    }
-
-    @Override
-    public void render() {
-    }
-
-    @Override
-    public void pause() {
-    }
-
-    @Override
-    public void resume() {
-    }
-
-    @Override
-    public void dispose() {
-    }
-
     private Lwjgl3ApplicationConfiguration createConfig(Context context) {
         int                            foregroundFPS = context.getForegroundFPSProperty();
         Lwjgl3ApplicationConfiguration config;
@@ -81,7 +61,7 @@ public class DesktopLauncher3D implements ApplicationListener {
         config.useVsync(context.getVsyncProperty());
         config.setForegroundFPS(foregroundFPS);
         config.setResizable(true);
-        config.setOpenGLEmulation(GLEmulation.GL30, 3, 2);
+        config.setOpenGLEmulation(GLEmulation.GL32, 3, 2);
 
 //		if (Context.getOeratingSystemType() == OperatingSystem.osx)
         {
@@ -112,7 +92,11 @@ public class DesktopLauncher3D implements ApplicationListener {
         return config;
     }
 
-    private void loop() throws Exception, InterruptedException {
+    @Override
+    public void dispose() {
+    }
+
+    private void loop() throws Exception {
         boolean restart = false;
         do {
             if (restart)
@@ -141,7 +125,23 @@ public class DesktopLauncher3D implements ApplicationListener {
         } while (restart);
     }
 
-    private void start() throws InterruptedException, Exception {
+    @Override
+    public void pause() {
+    }
+
+    @Override
+    public void render() {
+    }
+
+    @Override
+    public void resize(int width, int height) {
+    }
+
+    @Override
+    public void resume() {
+    }
+
+    private void start() throws Exception {
         logger.info("------------------------------------------------------------------------------");
         logger.info(String.format("Starting mercator v%s.", MavenPropertiesProvider.getProperty("project.version")));
         logger.info("------------------------------------------------------------------------------");

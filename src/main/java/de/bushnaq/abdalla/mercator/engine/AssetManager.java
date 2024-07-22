@@ -308,7 +308,7 @@ public class AssetManager {
 
     private void createRedEmissiveModel(ModelCreator modelCreator) {
         final Material material = new Material();
-        material.set(PBRColorAttribute.createBaseColorFactor(new Color(Color.WHITE).fromHsv(15, .9f, .8f)));
+//        material.set(PBRColorAttribute.createBaseColorFactor(new Color(Color.WHITE).fromHsv(15, .9f, .8f)));
         material.set(PBRColorAttribute.createEmissive(new Color(Color.RED)));
 
 //        final Attribute emissive = ColorAttribute.createEmissive(Color.RED);

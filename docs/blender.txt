@@ -2,7 +2,11 @@ tab			switch to edit mode
 select edge	use select edge mode icon in modeling view
 ctrl+A		select scale to bevel scane independent
 ctrl+B		bevel mode
-precise 	edit->Adjust last operation
+F9		 	edit->Adjust last operation
 alt+D		clone object
 icon		inset
 ctrl+E		extrude
+
+station
+discombobulator
+.002 - .004

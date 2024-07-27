@@ -21,7 +21,6 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.PointLight;
 import com.badlogic.gdx.math.Matrix4;
@@ -47,10 +46,20 @@ import java.util.List;
 
 public class Planet3DRenderer extends ObjectRenderer<GameEngine3D> {
 
+    private static final Color                          BRIGHT_WHITE           = new Color(0xfefefeff);
+    private static final int                            BUILDING_BLOCK_SIZE    = 13;
+    private static final int                            BUILDING_BLOCK_SIZE_2  = BUILDING_BLOCK_SIZE / 2;
     public static final  float                          CIRCLE_SIZE            = 512;
     public static final  float                          CITY_SIZE              = 360;
+    private static final Color                          DEEP_YELLOW            = new Color(0xf29917ff);
+    private static final Color                          FOUNDRY_RED            = new Color(0xf71212ff);
+    private static final Color                          HAWAIIAN_BLUE          = new Color(0x7892cdff);
+    private static final float                          LIGHT_DAY_INTENSITY    = 10000f;
     public static final  float                          LIGHT_HIGHT            = 128;
+    private static final float                          LIGHT_NIGHT_INTENSITY  = 10000f;
     public static final  float                          MIRROR_Y               = -16;//TODO should use context.getWaterLevel()
+    private static final Color                          ORANGE_YELLOW          = new Color(0xf07e02ff);
+    private static final Color                          PEACOCK_BLUE           = new Color(0x092f5cff);
     public static final  float                          PLANET_2D_SIZE         = 64;
     public static final  float                          PLANET_3D_SIZE         = 512;
     public static final  float                          PLANET_ATMOSPHARE_SIZE = 9.6f;
@@ -60,32 +69,30 @@ public class Planet3DRenderer extends ObjectRenderer<GameEngine3D> {
     //	public static final float PLANET_DISTANCE = 512/* PLANET_SIZE * 2 */;
     public static final  float                          PLANET_HIGHT           = 16;
     public static final  int                            PLANET_MAX_SHIFT       = Planet.PLANET_DISTANCE / 4;
+    private static final Color                          PLANET_NAME_COLOR      = new Color(0xffa500ff);
     public static final  int                            PLANET_SPAN_SPACE      = Planet.PLANET_DISTANCE + PLANET_BORDER;
     public static final  float                          SECTOR_HIGHT           = 8;
     public static final  float                          SECTOR_SIZE            = Planet.PLANET_DISTANCE - GameEngine3D.SPACE_BETWEEN_OBJECTS;
     public static final  float                          SECTOR_Y               = -500;
+    private static final Color                          SKY_BLUE               = new Color(0x3980c2ff);
+    private static final float                          TURBINE_SIZE           = 4;
     public static final  float                          WATER_HIGHT            = 1;
     public static final  float                          WATER_SIZE             = SECTOR_SIZE;
     public static final  float                          WATER_Y                = -10;//TODO should use context.getWaterLevel()
-    private static final Color                          BRIGHT_WHITE           = new Color(0xfefefeff);
-    private static final int                            BUILDING_BLOCK_SIZE    = 13;
-    private static final int                            BUILDING_BLOCK_SIZE_2  = BUILDING_BLOCK_SIZE / 2;
-    private static final Color                          DEEP_YELLOW            = new Color(0xf29917ff);
-    private static final Color                          FOUNDRY_RED            = new Color(0xf71212ff);
-    private static final Color                          HAWAIIAN_BLUE          = new Color(0x7892cdff);
-    private static final float                          LIGHT_DAY_INTENSITY    = 10000f;
-    private static final float                          LIGHT_NIGHT_INTENSITY  = 10000f;
-    private static final Color                          ORANGE_YELLOW          = new Color(0xf07e02ff);
-    private static final Color                          PEACOCK_BLUE           = new Color(0x092f5cff);
-    private static final Color                          PLANET_NAME_COLOR      = new Color(0xffa500ff);
-    private static final Color                          SKY_BLUE               = new Color(0x3980c2ff);
-    private static final float                          TURBINE_SIZE           = 4;
     private final        List<GameObject<GameEngine3D>> animatedObjects        = new ArrayList<>();
+    private              boolean                        dayMode                = true;
+    //	Scene scene;
+    private              GameObject<GameEngine3D>       dockingStationGameObject;
+    private              GameObject<GameEngine3D>       dynamicStationGameObject;
+    int index = 0;
+    private       GameObject<GameEngine3D>       mirrorObject;
     //	private GameObject ganeObject;
-    private final        Planet                         planet;
-    private final        List<PointLight>               pointLight             = new ArrayList<>();
-    private final        List<GameObject<GameEngine3D>> pointLightObjects      = new ArrayList<>();
-    int     index       = 0;
+    private final Planet                         planet;
+    private       GameObject<GameEngine3D>       planetGameObject;
+    private final List<PointLight>               pointLight        = new ArrayList<>();
+    private final List<GameObject<GameEngine3D>> pointLightObjects = new ArrayList<>();
+    private       float                          rotation;
+    private final float                          rotationSpeed     = 1f;
     //	private void renderFactory(Planet planet, Render3DMaster renderMaster) {
     //		{
     //			int index = 0;
@@ -97,14 +104,6 @@ public class Planet3DRenderer extends ObjectRenderer<GameEngine3D> {
     //		}
     //	}
     Vector3 translation = new Vector3();
-    private boolean                  dayMode       = true;
-    //	Scene scene;
-    private GameObject<GameEngine3D> dockingStationGameObject;
-    private GameObject<GameEngine3D> dynamicStationGameObject;
-    private GameObject<GameEngine3D> mirrorObject;
-    private GameObject<GameEngine3D> planetGameObject;
-    private float                    rotation;
-    private float                    rotationSpeed = 1f;
 
     public Planet3DRenderer(final Planet planet) {
         this.planet = planet;
@@ -135,68 +134,6 @@ public class Planet3DRenderer extends ObjectRenderer<GameEngine3D> {
         planet.dockingDoors.create(renderEngine);
     }
 
-    public void render2D(final RenderEngine3D<GameEngine3D> renderEngine, final int index, final boolean selected) {
-        renderPlanet2D(planet, renderEngine, selected);
-    }
-
-    @Override
-    public void renderText(final RenderEngine3D<GameEngine3D> renderEngine, final int index, final boolean selected) {
-        if (renderEngine.getCamera().frustum.boundsInFrustum(dockingStationGameObject.transformedBoundingBox)) {
-            planet.dockingDoors.renderText(renderEngine);
-            final float size = 64;
-            final float x    = planet.x;
-            final float z    = planet.z;
-            translation.set(planet.x, 0, planet.z);
-            //draw text
-            final BitmapFont font = renderEngine.getGameEngine().getAtlasManager().bold256Font;
-            String           text = planet.getName();
-//            renderEngine.renderEngine25D.renderTextOnTop(translation, 0, -PLANET_3D_SIZE / 2, 10, -PLANET_3D_SIZE / 2, font, Color.BLACK, PLANET_NAME_COLOR, text, size);
-            {
-                final Matrix4     m        = new Matrix4();
-                final float       fontSize = font.getLineHeight();
-                final float       scaling  = size / fontSize;
-                final GlyphLayout layout   = new GlyphLayout();
-                layout.setText(font, text);
-                final float   width   = layout.width;// contains the width of the current set text
-                final Vector3 xVector = new Vector3(1, 0, 0);
-                m.setToTranslation(x + PLANET_3D_SIZE / 2 - width * scaling, 1, z + PLANET_3D_SIZE / 2);
-                m.rotate(xVector, -90);
-                m.scale(scaling, scaling, 1f);
-                renderEngine.renderEngine25D.setTransformMatrix(m);
-                renderEngine.renderEngine25D.text(0, 0, font, Color.BLACK, PLANET_NAME_COLOR, text);
-            }
-            int i = 0;
-            for (final Good good : planet.getGoodList()) {
-                good.get3DRenderer().renderText(planet.x, planet.y, planet.z, renderEngine, i++);
-            }
-            if (planet.selected) {
-                {
-                    final Matrix4 m = new Matrix4();
-                    //move center of text to center of trader
-                    m.setToTranslation(translation.x, translation.y, translation.z);
-                    m.rotate(Vector3.Y, rotation);
-                    //move to the top and back on engine
-                    m.translate(0, -1, 0);
-                    //rotate into the xz layer
-                    m.rotate(Vector3.X, -90);
-                    renderEngine.renderEngine25D.setTransformMatrix(m);
-                }
-                TextureAtlas.AtlasRegion systemTextureRegion = renderEngine.getGameEngine().getAtlasManager().systemTextureRegion;
-                renderEngine.renderEngine25D.fillCircle(systemTextureRegion, 0, 0, PLANET_3D_SIZE, 128, new Color(.2f, .2f, .4f, 0.2f));
-                renderEngine.renderEngine25D.circle(renderEngine.getGameEngine().getAtlasManager().patternCircle24, 0, 0, PLANET_3D_SIZE - .5f, 1f, new Color(.9f, .9f, .9f, .5f), 128);
-                if (renderEngine.getGameEngine().getCameraZoomIndex() < 4)
-                    renderEngine.renderEngine25D.renderRose(systemTextureRegion, renderEngine.getGameEngine().getAtlasManager().modelFont, translation, PLANET_3D_SIZE / 2, -1);
-            }
-        }
-    }
-
-    @Override
-    public void update(final RenderEngine3D<GameEngine3D> renderEngine, final long currentTime, final float timeOfDay, final int index, final boolean selected) throws OpenAlException {
-        float realTimeDelta = Gdx.graphics.getDeltaTime();
-        planet.dockingDoors.advanceInTime(realTimeDelta);
-        renderPlanet(renderEngine, currentTime, timeOfDay, planet == renderEngine.getGameEngine().universe.selectedPlanet);
-    }
-
     private void createCity(final RenderEngine3D<GameEngine3D> renderEngine, final float x, final float z) {
         final int iteration = 20;
 //        final float scale               = (CITY_SIZE / 2) / (iteration - 1);
@@ -216,7 +153,7 @@ public class Planet3DRenderer extends ObjectRenderer<GameEngine3D> {
         //		System.out.println(String.format("iteration=%d scale=%f x=%f z=%f", iteration, scale, x, z));
         //		int i = 0;
         averrageBuildingHight = averrageBuildingHight + averrageBuildingHight * (0.5f - renderEngine.getGameEngine().assetManager.createRG.nextFloat());
-        final TwinBuilding twinChances[][] = {{new TwinBuilding(0.3f, 0.0f, 1, 1)/*0,0*/, new TwinBuilding(0.0f, 0.3f, 1, -1)}/*0,1*/, {new TwinBuilding(0.0f, 0.3f, -1, 1)/*1,0*/, new TwinBuilding(0.3f, 0.0f, -1, -1)}/*1,1*/};
+        final TwinBuilding[][] twinChances = {{new TwinBuilding(0.3f, 0.0f, 1, 1)/*0,0*/, new TwinBuilding(0.0f, 0.3f, 1, -1)}/*0,1*/, {new TwinBuilding(0.0f, 0.3f, -1, 1)/*1,0*/, new TwinBuilding(0.3f, 0.0f, -1, -1)}/*1,1*/};
         //		z=1, x=1, x=0
         //		0,0
         //		0,1
@@ -318,7 +255,7 @@ public class Planet3DRenderer extends ObjectRenderer<GameEngine3D> {
 
             dynamicStationGameObject = new GameObject<GameEngine3D>(new ModelInstanceHack(renderEngine.getGameEngine().assetManager.dynamicStation.scene.model), planet, this);
 //            dynamicStationGameObject.instance.transform.setToTranslation(x, -128, z);
-            renderEngine.addStatic(dynamicStationGameObject);
+//            renderEngine.addStatic(dynamicStationGameObject);
 
             planetGameObject = new GameObject<GameEngine3D>(new ModelInstanceHack(renderEngine.getGameEngine().assetManager.planet01.scene.model), planet, this);
             planetGameObject.instance.transform.setToTranslation(x, -500, z);
@@ -384,6 +321,10 @@ public class Planet3DRenderer extends ObjectRenderer<GameEngine3D> {
         //		final Material material = go.instance.materials.get(0);
         //		material.set(new PBRColorAttribute(PBRColorAttribute.BaseColorFactor, getBuildingColor(index)));
         return go;
+    }
+
+    public void render2D(final RenderEngine3D<GameEngine3D> renderEngine, final int index, final boolean selected) {
+        renderPlanet2D(planet, renderEngine, selected);
     }
 
     public void render2Da(final RenderEngine2D<GameEngine3D> renderEngine, final int index, final boolean selected) {
@@ -477,7 +418,7 @@ public class Planet3DRenderer extends ObjectRenderer<GameEngine3D> {
                     final float z1    = z;
                     renderEngine.renderutils2Dxz.circle(renderEngine.getGameEngine().getAtlasManager().planetTextureRegion, x1, 0, z1, PLANET_2D_SIZE * index, 8f, renderEngine.getGameEngine().distinctiveTransparentColorlist.get(planet.sector.type), 32);
                 }
-                renderEngine.renderutils2Dxz.label((TextureRegion) renderEngine.getGameEngine().getAtlasManager().systemTextureRegion, x, 0f, z, Trader2DRenderer.TRADER_WIDTH, Trader2DRenderer.TRADER_HEIGHT, PLANET_2D_SIZE * 4, PLANET_2D_SIZE * 5, renderEngine.getGameEngine().getAtlasManager().demoMidFont, color, planet.getName(), color, String.format("%.0f", planet.getCredits()), renderEngine.getGameEngine().queryCreditColor(planet.getCredits(), Planet.PLANET_START_CREDITS));
+                renderEngine.renderutils2Dxz.label(renderEngine.getGameEngine().getAtlasManager().systemTextureRegion, x, 0f, z, Trader2DRenderer.TRADER_WIDTH, Trader2DRenderer.TRADER_HEIGHT, PLANET_2D_SIZE * 4, PLANET_2D_SIZE * 5, renderEngine.getGameEngine().getAtlasManager().demoMidFont, color, planet.getName(), color, String.format("%.0f", planet.getCredits()), renderEngine.getGameEngine().queryCreditColor(planet.getCredits(), Planet.PLANET_START_CREDITS));
             } else {
                 renderEngine.renderutils2Dxz.label(renderEngine.getGameEngine().getAtlasManager().systemTextureRegion, x, 0, z, Trader2DRenderer.TRADER_WIDTH, Trader2DRenderer.TRADER_HEIGHT, PLANET_2D_SIZE * 1, PLANET_2D_SIZE * 2, renderEngine.getGameEngine().getAtlasManager().demoMidFont, color, planet.getName(), color, String.format("%.0f", planet.getCredits()), renderEngine.getGameEngine().queryCreditColor(planet.getCredits(), Planet.PLANET_START_CREDITS));
             }
@@ -510,7 +451,7 @@ public class Planet3DRenderer extends ObjectRenderer<GameEngine3D> {
                     final float z1    = z;
                     renderEngine.circle(renderEngine.getGameEngine().getAtlasManager().planetTextureRegion, x1, z1, PLANET_2D_SIZE * index, 8f, renderEngine.getGameEngine().distinctiveTransparentColorlist.get(planet.sector.type), 32);
                 }
-                renderEngine.lable((TextureRegion) renderEngine.getGameEngine().getAtlasManager().systemTextureRegion, x, z, Trader2DRenderer.TRADER_WIDTH, Trader2DRenderer.TRADER_HEIGHT, PLANET_2D_SIZE * 4, PLANET_2D_SIZE * 5, renderEngine.getGameEngine().getAtlasManager().demoMidFont, color, planet.getName(), color, String.format("%.0f", planet.getCredits()), renderEngine.getGameEngine().queryCreditColor(planet.getCredits(), Planet.PLANET_START_CREDITS));
+                renderEngine.lable(renderEngine.getGameEngine().getAtlasManager().systemTextureRegion, x, z, Trader2DRenderer.TRADER_WIDTH, Trader2DRenderer.TRADER_HEIGHT, PLANET_2D_SIZE * 4, PLANET_2D_SIZE * 5, renderEngine.getGameEngine().getAtlasManager().demoMidFont, color, planet.getName(), color, String.format("%.0f", planet.getCredits()), renderEngine.getGameEngine().queryCreditColor(planet.getCredits(), Planet.PLANET_START_CREDITS));
             } else {
                 renderEngine.lable(renderEngine.getGameEngine().getAtlasManager().systemTextureRegion, x, z, Trader2DRenderer.TRADER_WIDTH, Trader2DRenderer.TRADER_HEIGHT, PLANET_2D_SIZE * 1, PLANET_2D_SIZE * 2, renderEngine.getGameEngine().getAtlasManager().demoMidFont, color, planet.getName(), color, String.format("%.0f", planet.getCredits()), renderEngine.getGameEngine().queryCreditColor(planet.getCredits(), Planet.PLANET_START_CREDITS));
             }
@@ -527,12 +468,69 @@ public class Planet3DRenderer extends ObjectRenderer<GameEngine3D> {
         }
     }
 
+    @Override
+    public void renderText(final RenderEngine3D<GameEngine3D> renderEngine, final int index, final boolean selected) {
+        if (renderEngine.getCamera().frustum.boundsInFrustum(dockingStationGameObject.transformedBoundingBox)) {
+            planet.dockingDoors.renderText(renderEngine);
+            final float size = 64;
+            final float x    = planet.x;
+            final float z    = planet.z;
+            translation.set(planet.x, 0, planet.z);
+            //draw text
+            final BitmapFont font = renderEngine.getGameEngine().getAtlasManager().bold256Font;
+            String           text = planet.getName();
+//            renderEngine.renderEngine25D.renderTextOnTop(translation, 0, -PLANET_3D_SIZE / 2, 10, -PLANET_3D_SIZE / 2, font, Color.BLACK, PLANET_NAME_COLOR, text, size);
+            {
+                final Matrix4     m        = new Matrix4();
+                final float       fontSize = font.getLineHeight();
+                final float       scaling  = size / fontSize;
+                final GlyphLayout layout   = new GlyphLayout();
+                layout.setText(font, text);
+                final float   width   = layout.width;// contains the width of the current set text
+                final Vector3 xVector = new Vector3(1, 0, 0);
+                m.setToTranslation(x + PLANET_3D_SIZE / 2 - width * scaling, 1, z + PLANET_3D_SIZE / 2);
+                m.rotate(xVector, -90);
+                m.scale(scaling, scaling, 1f);
+                renderEngine.renderEngine25D.setTransformMatrix(m);
+                renderEngine.renderEngine25D.text(0, 0, font, Color.BLACK, PLANET_NAME_COLOR, text);
+            }
+            int i = 0;
+            for (final Good good : planet.getGoodList()) {
+                good.get3DRenderer().renderText(planet.x, planet.y, planet.z, renderEngine, i++);
+            }
+            if (planet.selected) {
+                {
+                    final Matrix4 m = new Matrix4();
+                    //move center of text to center of trader
+                    m.setToTranslation(translation.x, translation.y, translation.z);
+                    m.rotate(Vector3.Y, rotation);
+                    //move to the top and back on engine
+                    m.translate(0, -1, 0);
+                    //rotate into the xz layer
+                    m.rotate(Vector3.X, -90);
+                    renderEngine.renderEngine25D.setTransformMatrix(m);
+                }
+                TextureAtlas.AtlasRegion systemTextureRegion = renderEngine.getGameEngine().getAtlasManager().systemTextureRegion;
+                renderEngine.renderEngine25D.fillCircle(systemTextureRegion, 0, 0, PLANET_3D_SIZE, 128, new Color(.2f, .2f, .4f, 0.2f));
+                renderEngine.renderEngine25D.circle(renderEngine.getGameEngine().getAtlasManager().patternCircle24, 0, 0, PLANET_3D_SIZE - .5f, 1f, new Color(.9f, .9f, .9f, .5f), 128);
+                if (renderEngine.getGameEngine().getCameraZoomIndex() < 4)
+                    renderEngine.renderEngine25D.renderRose(systemTextureRegion, renderEngine.getGameEngine().getAtlasManager().modelFont, translation, PLANET_3D_SIZE / 2, -1);
+            }
+        }
+    }
+
+    @Override
+    public void update(final RenderEngine3D<GameEngine3D> renderEngine, final long currentTime, final float timeOfDay, final int index, final boolean selected) throws OpenAlException {
+        float realTimeDelta = Gdx.graphics.getDeltaTime();
+        planet.dockingDoors.advanceInTime(realTimeDelta);
+        renderPlanet(renderEngine, currentTime, timeOfDay, planet == renderEngine.getGameEngine().universe.selectedPlanet);
+    }
+
     private void updatePlanet(final RenderEngine3D<GameEngine3D> renderEngine) throws OpenAlException {
         float realTimeDelta = Gdx.graphics.getDeltaTime();
         // animate factories
         for (final GameObject<GameEngine3D> go : animatedObjects) {
-            if (ProductionFacility.class.isInstance(go.interactive)) {
-                final ProductionFacility pf = (ProductionFacility) go.interactive;
+            if (go.interactive instanceof ProductionFacility pf) {
                 if (pf.status == ProductionFacilityStatus.PRODUCING) go.controller.update(Gdx.graphics.getDeltaTime());
             }
         }

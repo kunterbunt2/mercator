@@ -59,6 +59,8 @@ import net.mgsx.gltf.scene3d.attributes.PBRFloatAttribute;
 import net.mgsx.gltf.scene3d.attributes.PBRTextureAttribute;
 import net.mgsx.gltf.scene3d.lights.DirectionalLightEx;
 import net.mgsx.gltf.scene3d.model.ModelInstanceHack;
+import net.mgsx.gltf.scene3d.scene.SceneSkybox;
+import net.mgsx.gltf.scene3d.utils.IBLBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -120,10 +122,10 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
     private       float            centerYD;
     private       Context          context;
     private final IContextFactory  contextFactory;
-    private       float            dayAmbientIntensityB            = 1f;
-    private       float            dayAmbientIntensityG            = 1f;
-    private       float            dayAmbientIntensityR            = 1f;
-    private       float            dayShadowIntensity              = 5f;
+    //    private       float            dayAmbientIntensityB            = 1f;
+//    private       float            dayAmbientIntensityG            = 1f;
+//    private       float            dayAmbientIntensityR            = 1f;
+//    private       float            dayShadowIntensity              = 5f;
     private final List<DemoString> demoText                        = new ArrayList<>();
     private final float            demoTextX                       = 100;
     private       float            demoTextY                       = 0;
@@ -136,25 +138,26 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
     private       Cubemap          environmentDayCubemap;
     private       Cubemap          environmentNightCubemap;
     Map<Integer, EnvironmentSnapshot> environmentSnapshotMap = new HashMap<>();
-    private       boolean                      followMode;
+    private       boolean                  followMode;
     //    private              BitmapFont                   font;
-    private       boolean                      hrtfEnabled      = true;
-    private       Info                         info;
-    private       boolean                      infoVisible;
-    private final InputMultiplexer             inputMultiplexer = new InputMultiplexer();
-    private       GameObject<GameEngine3D>     instance;//TODO
-    private final List<Label>                  labels           = new ArrayList<>();
-    private       long                         lastCameraDirty  = 0;
-    public        LaunchMode                   launchMode;
-    private final Logger                       logger           = LoggerFactory.getLogger(this.getClass());
-    private       OggPlayer                    oggPlayer;
-    public        RenderEngine3D<GameEngine3D> renderEngine;
+    private       boolean                  hrtfEnabled      = true;
+    private       Info                     info;
+    private       boolean                  infoVisible;
+    private final InputMultiplexer         inputMultiplexer = new InputMultiplexer();
+    private       GameObject<GameEngine3D> instance;//TODO
+    private final List<Label>              labels           = new ArrayList<>();
+    private       long                     lastCameraDirty  = 0;
+    public        LaunchMode               launchMode;
+    private final Logger                   logger           = LoggerFactory.getLogger(this.getClass());
+    private       OggPlayer                oggPlayer;
+    boolean old = true;
+    public  RenderEngine3D<GameEngine3D> renderEngine;
     //    private              Render2DMaster               render2DMaster;
-    private       boolean                      showFps;
-    public        ShowGood                     showGood         = ShowGood.Name;
-    private       Cubemap                      specularCubemap;
-    private       Stage                        stage;
-    private       StringBuilder                stringBuilder;
+    private boolean                      showFps;
+    public  ShowGood                     showGood = ShowGood.Name;
+    private Cubemap                      specularCubemap;
+    private Stage                        stage;
+    private StringBuilder                stringBuilder;
     Vector3 sunPosition = new Vector3();
     private      boolean  takeScreenShot;
     private      float    timeOfDay;
@@ -197,32 +200,54 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
             atlasManager.init();
             initColors();
             renderEngine = new RenderEngine3D<GameEngine3D>(context, this, camera, camera2D, getAtlasManager().menuFont, getAtlasManager().menuBoldFont, getAtlasManager().systemTextureRegion);
+            renderEngine.setSceneBoxMin(new Vector3(-500, -500, -500));
+            renderEngine.setSceneBoxMax(new Vector3(1000, 0, 1000));
             renderEngine.getWater().setPresent(false);
-            renderEngine.getWater().setTiling(universe.size * 2 * 4 * 2 * 4 / Universe.WORLD_SCALE);
-            renderEngine.getWater().setWaveStrength(0.01f / Universe.WORLD_SCALE);
-            renderEngine.getWater().setWaveSpeed(0.01f);
-            renderEngine.getWater().setRefractiveMultiplicator(1f);
+//            renderEngine.getWater().setTiling(universe.size * 2 * 4 * 2 * 4 / Universe.WORLD_SCALE);
+//            renderEngine.getWater().setWaveStrength(0.01f / Universe.WORLD_SCALE);
+//            renderEngine.getWater().setWaveSpeed(0.01f);
+//            renderEngine.getWater().setRefractiveMultiplicator(1f);
             renderEngine.getMirror().setPresent(false);
-            renderEngine.getMirror().setReflectivity(0.2f);
-            renderEngine.setShadowEnabled(true);
+//            renderEngine.getMirror().setReflectivity(0.2f);
+//            renderEngine.setReflectionClippingPlane(-(context.getWaterLevel() - 2));
+//            renderEngine.setRefractionClippingPlane((context.getWaterLevel() - 2));
             renderEngine.getFog().setEnabled(true);
             renderEngine.getFog().setColor(Color.BLACK);
             renderEngine.getFog().setBeginDistance(2000f);
             renderEngine.getFog().setFullDistance(3000f);
-            renderEngine.setReflectionClippingPlane(-(context.getWaterLevel() - 2));
-            renderEngine.setRefractionClippingPlane((context.getWaterLevel() - 2));
-            renderEngine.setDynamicDayTime(true);
+
             renderEngine.setSkyBox(true);
-            renderEngine.setSceneBoxMin(new Vector3(-500, -500, -500));
-            renderEngine.setSceneBoxMax(new Vector3(1000, 0, 1000));
-            renderEngine.setDayAmbientLight(.9f, .9f, .9f, 1f);
+            renderEngine.setDayAmbientLight(.3f, .3f, .3f, 1f);
+            renderEngine.setNightAmbientLight(.1f, .1f, .1f, 1f);
+            renderEngine.setAlwaysDay(true);
+            renderEngine.setDynamicDayTime(true);
+            renderEngine.setShadowEnabled(true);
+
             renderEngine.getShadowLight().setColor(Color.WHITE);
             renderEngine.setFixedShadowDirection(true);
-            renderEngine.setAmbientLight(.5f, .5f, .5f);
-            dayAmbientIntensityR = .9f;
-            dayAmbientIntensityG = .9f;
-            dayAmbientIntensityB = .9f;
-            dayShadowIntensity   = 10f;
+//            {
+//                DirectionalLightEx sun = new DirectionalLightEx();
+//                sun.direction.set(1, -1, 1).nor();
+//                sun.color.set(Color.WHITE);
+//                myIBLBuilder       ibl   = new myIBLBuilder(null);
+//                myIBLBuilder.Light light = new myIBLBuilder.Light();
+//                light.direction.set(sun.direction).nor();
+//                light.color.set(sun.color);
+//                light.exponent = 10f;
+//                ibl.lights.add(light);
+//                ibl.nearGroundColor.set(0.0F, 0.0F, 0.0F, 1.0F);
+//                ibl.farGroundColor.set(0.0F, 0.0F, .0F, 1.0F);
+//                ibl.nearSkyColor.set(0.0F, 0.0F, .0F, 1.0F);
+//                ibl.farSkyColor.set(0.0F, 0.0F, .0F, 1.0F);
+//                Cubemap environmentCubemap = ibl.buildEnvMap(1024, null, null);
+//                renderEngine.setDaySkyBox(new SceneSkybox(environmentCubemap));
+//                renderEngine.setNightSkyBox(new SceneSkybox(environmentCubemap));
+//            }
+//            renderEngine.setAmbientLight(.9f, .9f, .9f);
+//            dayAmbientIntensityR = .9f;
+//            dayAmbientIntensityG = .9f;
+//            dayAmbientIntensityB = .9f;
+//            dayShadowIntensity   = .5f;
 //            renderEngine.setNightAmbientLight(.04f, .04f, .04f, 10f);
 //            setDayAmbientLight(.9f, .9f, .9f, 1f);
             createInputProcessor(this, this);
@@ -236,7 +261,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
 
             assetManager = new AssetManager(universe);
             assetManager.create();
-            createEnvironment();
+            setupEnvironmentCreate();
             createStage();
             audioEngine.create(AtlasManager.getAssetsFolderName());
             audioEngine.enableHrtf(0);
@@ -285,25 +310,6 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
         camera.update();
         camera.setDirty(true);
         camera2D = new OrthographicCamera();
-    }
-
-    private void createEnvironment() {
-        // setup IBL (image based lighting)
-        if (renderEngine.isPbr()) {
-//            setupImageBasedLightingByFaceNames("clouds", "jpg", "jpg", "jpg", 10);
-//            if (renderEngine.isSkyBox()) {
-//                renderEngine.setDaySkyBox(new SceneSkybox(environmentNightCubemap));
-//                renderEngine.setNightSkyBox(new SceneSkybox(environmentNightCubemap));
-//            }
-//
-//            renderEngine.environment.set(PBRCubemapAttribute.createDiffuseEnv(diffuseCubemap));
-//            renderEngine.environment.set(PBRCubemapAttribute.createSpecularEnv(specularCubemap));
-//            renderEngine.environment.set(new PBRTextureAttribute(PBRTextureAttribute.BRDFLUTTexture, brdfLUT));
-//            renderEngine.environment.set(new PBRFloatAttribute(PBRFloatAttribute.ShadowBias, .001f));
-//            setupImageBasedLighting(timeOfDay);
-            updateEnvironment(timeOfDay);
-        } else {
-        }
     }
 
     private void createInputProcessor(final InputProcessor inputProcessor, GameEngine3D gameEngine) throws Exception {
@@ -487,18 +493,69 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
         return atlasManager;
     }
 
-
-//    public int getMaxFramesPerSecond() {
-//        return maxFramesPerSecond;
-//    }
-
     @Override
     public AudioEngine getAudioEngine() {
         return audioEngine;
     }
 
+
+//    public int getMaxFramesPerSecond() {
+//        return maxFramesPerSecond;
+//    }
+
     public int getCameraZoomIndex() {
         return camController.zoomIndex;
+    }
+
+    private void initColors() {
+        {
+            distinctiveColorlist.add(new Color(0.2f, 0.2f, 0.2f, 0.5f));
+            final float factor = (universe.sectorList.size() / 8) / 2.0f;
+            final int   c      = (int) Math.ceil(universe.sectorList.size() / 6.0);
+            for (float i = 0; i < Math.ceil(universe.sectorList.size() / 6.0); i++) {
+                final float low = 1.0f - (i + 1) * factor;
+                //				System.out.println(low * 255);
+                final float high  = 1.0f - i * factor;
+                final float alpha = 1.f;
+                // distinctiveColorlist.add( new Color( high, high, high, alpha ) );
+                distinctiveColorlist.add(new Color(high, high, low, alpha));
+                distinctiveColorlist.add(new Color(high, low, high, alpha));
+                distinctiveColorlist.add(new Color(low, high, high, alpha));
+                distinctiveColorlist.add(new Color(high, low, low, alpha));
+                distinctiveColorlist.add(new Color(low, low, high, alpha));
+                distinctiveColorlist.add(new Color(low, high, low, alpha));
+                // distinctiveColorlist.add( new Color( low, high, low, alpha ) );
+                // distinctiveColorlist.add( new Color( low, low, high, alpha ) );
+                // distinctiveColorlist.add( new Color( low, 1.0f, 1.0f, alpha ) );
+                // distinctiveColorlist.add( new Color( 1.0f, low, 1.0f, alpha ) );
+                // distinctiveColorlist.add( new Color( 1.0f, 1.0f, low, alpha ) );
+                // distinctiveColorlist.add( new Color( low, low, low, alpha ) );
+            }
+            // distinctiveColorArray = distinctiveColorlist.toArray( new Color[0] );
+        }
+        distinctiveTransparentColorlist.add(new Color(0.2f, 0.2f, 0.2f, 0.5f));
+        final float factor = (universe.sectorList.size() / 8) / 2.0f;
+        final int   c      = (int) Math.ceil(universe.sectorList.size() / 6.0);
+        for (float i = 0; i < Math.ceil(universe.sectorList.size() / 6.0); i++) {
+            final float low = 1.0f - (i + 1) * factor;
+            //			System.out.println(low * 255);
+            final float high  = 1.0f - i * factor;
+            final float alpha = 0.4f;
+            // distinctiveColorlist.add( new Color( high, high, high, alpha ) );
+            distinctiveTransparentColorlist.add(new Color(high, high, low, alpha));
+            distinctiveTransparentColorlist.add(new Color(high, low, high, alpha));
+            distinctiveTransparentColorlist.add(new Color(low, high, high, alpha));
+            distinctiveTransparentColorlist.add(new Color(high, low, low, alpha));
+            distinctiveTransparentColorlist.add(new Color(low, low, high, alpha));
+            distinctiveTransparentColorlist.add(new Color(low, high, low, alpha));
+            // distinctiveColorlist.add( new Color( low, high, low, alpha ) );
+            // distinctiveColorlist.add( new Color( low, low, high, alpha ) );
+            // distinctiveColorlist.add( new Color( low, 1.0f, 1.0f, alpha ) );
+            // distinctiveColorlist.add( new Color( 1.0f, low, 1.0f, alpha ) );
+            // distinctiveColorlist.add( new Color( 1.0f, 1.0f, low, alpha ) );
+            // distinctiveColorlist.add( new Color( low, low, low, alpha ) );
+        }
+        // distinctiveColorArray = distinctiveColorlist.toArray( new Color[0] );
     }
 
     //	Sector3DRenderer sector3DRenderer = new Sector3DRenderer();
@@ -564,87 +621,16 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
     //
     //	  graphics.setStroke( defaultStroke ); }
 
-    private void initColors() {
-        {
-            distinctiveColorlist.add(new Color(0.2f, 0.2f, 0.2f, 0.5f));
-            final float factor = (universe.sectorList.size() / 8) / 2.0f;
-            final int   c      = (int) Math.ceil(universe.sectorList.size() / 6.0);
-            for (float i = 0; i < Math.ceil(universe.sectorList.size() / 6.0); i++) {
-                final float low = 1.0f - (i + 1) * factor;
-                //				System.out.println(low * 255);
-                final float high  = 1.0f - i * factor;
-                final float alpha = 1.f;
-                // distinctiveColorlist.add( new Color( high, high, high, alpha ) );
-                distinctiveColorlist.add(new Color(high, high, low, alpha));
-                distinctiveColorlist.add(new Color(high, low, high, alpha));
-                distinctiveColorlist.add(new Color(low, high, high, alpha));
-                distinctiveColorlist.add(new Color(high, low, low, alpha));
-                distinctiveColorlist.add(new Color(low, low, high, alpha));
-                distinctiveColorlist.add(new Color(low, high, low, alpha));
-                // distinctiveColorlist.add( new Color( low, high, low, alpha ) );
-                // distinctiveColorlist.add( new Color( low, low, high, alpha ) );
-                // distinctiveColorlist.add( new Color( low, 1.0f, 1.0f, alpha ) );
-                // distinctiveColorlist.add( new Color( 1.0f, low, 1.0f, alpha ) );
-                // distinctiveColorlist.add( new Color( 1.0f, 1.0f, low, alpha ) );
-                // distinctiveColorlist.add( new Color( low, low, low, alpha ) );
-            }
-            // distinctiveColorArray = distinctiveColorlist.toArray( new Color[0] );
-        }
-        distinctiveTransparentColorlist.add(new Color(0.2f, 0.2f, 0.2f, 0.5f));
-        final float factor = (universe.sectorList.size() / 8) / 2.0f;
-        final int   c      = (int) Math.ceil(universe.sectorList.size() / 6.0);
-        for (float i = 0; i < Math.ceil(universe.sectorList.size() / 6.0); i++) {
-            final float low = 1.0f - (i + 1) * factor;
-            //			System.out.println(low * 255);
-            final float high  = 1.0f - i * factor;
-            final float alpha = 0.4f;
-            // distinctiveColorlist.add( new Color( high, high, high, alpha ) );
-            distinctiveTransparentColorlist.add(new Color(high, high, low, alpha));
-            distinctiveTransparentColorlist.add(new Color(high, low, high, alpha));
-            distinctiveTransparentColorlist.add(new Color(low, high, high, alpha));
-            distinctiveTransparentColorlist.add(new Color(high, low, low, alpha));
-            distinctiveTransparentColorlist.add(new Color(low, low, high, alpha));
-            distinctiveTransparentColorlist.add(new Color(low, high, low, alpha));
-            // distinctiveColorlist.add( new Color( low, high, low, alpha ) );
-            // distinctiveColorlist.add( new Color( low, low, high, alpha ) );
-            // distinctiveColorlist.add( new Color( low, 1.0f, 1.0f, alpha ) );
-            // distinctiveColorlist.add( new Color( 1.0f, low, 1.0f, alpha ) );
-            // distinctiveColorlist.add( new Color( 1.0f, 1.0f, low, alpha ) );
-            // distinctiveColorlist.add( new Color( low, low, low, alpha ) );
-        }
-        // distinctiveColorArray = distinctiveColorlist.toArray( new Color[0] );
-    }
-
     public boolean isInfoVisible() {
         return infoVisible;
     }
 
-    /*
-     * private void drawPlanetGraph( Planet planet ) { int pd = PLANET_DISTANCE - 2;
-     * int hpd = PLANET_DISTANCE / 2; int qpd = PLANET_DISTANCE / 4 - 2; int planetX
-     * = planet.x * PLANET_DISTANCE - hpd; int planetY = planet.y * PLANET_DISTANCE
-     * - hpd; int x[] = new int[planet.creditHistory.size()]; int y[] = new
-     * int[planet.creditHistory.size()]; boolean draw = true; // ---Find max int
-     * maxY = Planet.PLANET_START_CREDITS; for ( int i = 0; i <
-     * planet.creditHistory.size(); i++ ) { int ty = planet.creditHistory.get( i );
-     * if ( ty > maxY ) maxY = ty; } for ( int i = 0; i <
-     * planet.creditHistory.size(); i++ ) { x[i] = transformX( planetX + ( i * pd )
-     * / Planet.CREDIT_HISTORY_SIZE ); y[i] = transformY( planetY + pd - ( (
-     * planet.creditHistory.get( i ) * qpd ) / maxY ) ); } graphics.setColor(
-     * queryCreditColor( planet ) ); if ( draw ) { Stroke defaultStroke =
-     * graphics.getStroke(); float dash[] = { 1.0f }; BasicStroke stroke = new
-     * BasicStroke( 1.7f, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_MITER, 10.0f,
-     * dash, 0.0f ); graphics.setStroke( stroke ); graphics.drawPolyline( x, y,
-     * planet.creditHistory.size() ); graphics.setStroke( defaultStroke ); } }
-     */
-
-    //	public Canvas getCanvas() {
-    //		return myCanvas.getCanvas();
-    //	}
-
     @Override
     public boolean keyDown(final int keycode) {
         switch (keycode) {
+            case Input.Keys.ESCAPE:
+                exit();
+                return true;
             case Input.Keys.A:
             case Input.Keys.LEFT:
                 centerXD = -SCROLL_SPEED;
@@ -661,9 +647,6 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
             case Input.Keys.DOWN:
                 centerYD = SCROLL_SPEED;
                 return true;
-            case Input.Keys.ESCAPE:
-                exit();
-                return true;
             case Input.Keys.PAUSE:
                 assetManager.universe.setEnableTime(!assetManager.universe.isEnableTime());
                 return true;
@@ -671,13 +654,29 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
                 queueScreenshot();
                 return true;
             case Input.Keys.NUM_1:
-                renderEngine.setAlwaysDay(!renderEngine.isAlwaysDay());
+                renderEngine.setGammaCorrected(!renderEngine.isGammaCorrected());
+                if (renderEngine.isGammaCorrected()) logger.info("gamma correction on");
+                else logger.info("gamma correction off");
                 return true;
-            case Input.Keys.NUM_3:
+            case Input.Keys.NUM_2:
                 renderEngine.getDepthOfFieldEffect().setEnabled(!renderEngine.getDepthOfFieldEffect().isEnabled());
+                if (renderEngine.getDepthOfFieldEffect().isEnabled()) logger.info("depth of field on");
+                else logger.info("depth of field off");
                 return true;
             case Input.Keys.NUM_4:
                 renderEngine.setShowGraphs(!renderEngine.isShowGraphs());
+                return true;
+            case Input.Keys.NUM_5:
+                renderEngine.setAlwaysDay(!renderEngine.isAlwaysDay());
+                return true;
+            case Input.Keys.NUM_6:
+                if (launchMode == LaunchMode.demo) launchMode = LaunchMode.normal;
+                else launchMode = LaunchMode.demo;
+                try {
+                    startDemoMode();
+                } catch (OpenAlException e) {
+                    throw new RuntimeException(e);
+                }
                 return true;
             case Input.Keys.V:
                 vsyncEnabled = !vsyncEnabled;
@@ -706,15 +705,6 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
                     logger.error(e.getMessage(), e);
                 }
                 return true;
-            case Input.Keys.NUM_2:
-                if (launchMode == LaunchMode.demo) launchMode = LaunchMode.normal;
-                else launchMode = LaunchMode.demo;
-                try {
-                    startDemoMode();
-                } catch (OpenAlException e) {
-                    throw new RuntimeException(e);
-                }
-                return true;
             case Input.Keys.F:
                 followMode = !followMode;
                 return true;
@@ -722,6 +712,29 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
         return false;
 
     }
+
+    /*
+     * private void drawPlanetGraph( Planet planet ) { int pd = PLANET_DISTANCE - 2;
+     * int hpd = PLANET_DISTANCE / 2; int qpd = PLANET_DISTANCE / 4 - 2; int planetX
+     * = planet.x * PLANET_DISTANCE - hpd; int planetY = planet.y * PLANET_DISTANCE
+     * - hpd; int x[] = new int[planet.creditHistory.size()]; int y[] = new
+     * int[planet.creditHistory.size()]; boolean draw = true; // ---Find max int
+     * maxY = Planet.PLANET_START_CREDITS; for ( int i = 0; i <
+     * planet.creditHistory.size(); i++ ) { int ty = planet.creditHistory.get( i );
+     * if ( ty > maxY ) maxY = ty; } for ( int i = 0; i <
+     * planet.creditHistory.size(); i++ ) { x[i] = transformX( planetX + ( i * pd )
+     * / Planet.CREDIT_HISTORY_SIZE ); y[i] = transformY( planetY + pd - ( (
+     * planet.creditHistory.get( i ) * qpd ) / maxY ) ); } graphics.setColor(
+     * queryCreditColor( planet ) ); if ( draw ) { Stroke defaultStroke =
+     * graphics.getStroke(); float dash[] = { 1.0f }; BasicStroke stroke = new
+     * BasicStroke( 1.7f, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_MITER, 10.0f,
+     * dash, 0.0f ); graphics.setStroke( stroke ); graphics.drawPolyline( x, y,
+     * planet.creditHistory.size() ); graphics.setStroke( defaultStroke ); } }
+     */
+
+    //	public Canvas getCanvas() {
+    //		return myCanvas.getCanvas();
+    //	}
 
     @Override
     public boolean keyTyped(final char character) {
@@ -1137,16 +1150,16 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
         return false;
     }
 
+//    public void setDayAmbientLight(float r, float g, float b, float shadowIntensity) {
+//        dayAmbientIntensityR = r;
+//        dayAmbientIntensityG = g;
+//        dayAmbientIntensityB = b;
+//        dayShadowIntensity   = shadowIntensity;
+//    }
+
     @Override
     public void setCamera(final float x, final float z, final boolean setDirty) throws Exception {
         renderEngine.setCameraTo(x, z, setDirty);
-    }
-
-    public void setDayAmbientLight(float r, float g, float b, float shadowIntensity) {
-        dayAmbientIntensityR = r;
-        dayAmbientIntensityG = g;
-        dayAmbientIntensityB = b;
-        dayShadowIntensity   = shadowIntensity;
     }
 
     public void setInfoVisible(final boolean infoVisible) {
@@ -1158,63 +1171,112 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
         assetManager.showGood = name;
     }
 
+    private void setupEnvironmentCreate() {
+        // setup IBL (image based lighting)
+        if (renderEngine.isPbr()) {
+            updateEnvironment(timeOfDay);
+//            setupImageBasedLightingByFaceNames("clouds", "jpg", "jpg", "jpg", 10);
+//            if (renderEngine.isSkyBox()) {
+//                renderEngine.setDaySkyBox(new SceneSkybox(environmentNightCubemap));
+//                renderEngine.setNightSkyBox(new SceneSkybox(environmentNightCubemap));
+//            }
+//
+//            renderEngine.environment.set(PBRCubemapAttribute.createDiffuseEnv(diffuseCubemap));
+//            renderEngine.environment.set(PBRCubemapAttribute.createSpecularEnv(specularCubemap));
+//            renderEngine.environment.set(new PBRTextureAttribute(PBRTextureAttribute.BRDFLUTTexture, brdfLUT));
+//            renderEngine.environment.set(new PBRFloatAttribute(PBRFloatAttribute.ShadowBias, .001f));
+//            setupImageBasedLighting(timeOfDay);
+//            updateEnvironment(timeOfDay);
+        } else {
+        }
+//        if (renderEngine.isPbr()) {
+//            setupImageBasedLighting(0f);
+//            renderEngine.environment.set(PBRCubemapAttribute.createDiffuseEnv(diffuseCubemap));
+//            renderEngine.environment.set(PBRCubemapAttribute.createSpecularEnv(specularCubemap));
+//            renderEngine.environment.set(new PBRTextureAttribute(PBRTextureAttribute.BRDFLUTTexture, brdfLUT));
+//            renderEngine.environment.set(new PBRFloatAttribute(PBRFloatAttribute.ShadowBias, 0f));
+//        } else {
+//        }
+    }
+
     private void setupImageBasedLighting(float timeOfDay) {
-        if (brdfLUT == null)
-            brdfLUT = new Texture(Gdx.files.classpath("net/mgsx/gltf/shaders/brdfLUT.png"));
-        // // setup quick IBL (image based lighting)
-        {
-            Integer             index               = (int) (angle);
-            EnvironmentSnapshot environmentSnapshot = environmentSnapshotMap.get(index);
-            if (environmentSnapshot == null) {
-                logger.info(String.format("setupImageBasedLighting = %d", index));
-                DirectionalLightEx sun = new DirectionalLightEx();
-                sun.direction.set(renderEngine.getShadowLight().direction.x, renderEngine.getShadowLight().direction.y, renderEngine.getShadowLight().direction.z).nor();
-                sun.color.set(Color.WHITE);
-                myIBLBuilder ibl = new myIBLBuilder("app/assets/textures/space/");
-                {
-                    celestialBodyList.clear();
-                    int numberOfBodies;
-                    if (index == -1)
-                        numberOfBodies = 10;
-                    else
-                        numberOfBodies = NUMBER_OF_CELESTIAL_BODIES;
-                    logger.info(String.format("numberOfBodies=%d", numberOfBodies));
-                    celestialBodyList.add(new CelestialBody(sun.direction, sun.color, 10000f));
-                    for (int i = 0; i < numberOfBodies; i++) {
-                        celestialBodyList.add(new CelestialBody());
+        if (old) {
+            if (brdfLUT == null)
+                brdfLUT = new Texture(Gdx.files.classpath("net/mgsx/gltf/shaders/brdfLUT.png"));
+            // setup quick IBL (image based lighting)
+            {
+                Integer             index               = (int) (angle);
+                EnvironmentSnapshot environmentSnapshot = environmentSnapshotMap.get(index);
+                if (environmentSnapshot == null) {
+                    logger.info(String.format("setupImageBasedLighting = %d", index));
+                    DirectionalLightEx sun = new DirectionalLightEx();
+                    sun.direction.set(renderEngine.getShadowLight().direction.x, renderEngine.getShadowLight().direction.y, renderEngine.getShadowLight().direction.z).nor();
+                    sun.color.set(Color.WHITE);
+                    myIBLBuilder ibl = new myIBLBuilder("app/assets/textures/space/");
+                    {
+                        celestialBodyList.clear();
+                        int numberOfBodies;
+                        if (index == -1)
+                            numberOfBodies = 10;
+                        else
+                            numberOfBodies = NUMBER_OF_CELESTIAL_BODIES;
+                        logger.info(String.format("numberOfBodies=%d", numberOfBodies));
+                        celestialBodyList.add(new CelestialBody(sun.direction, sun.color, 10000f));
+                        for (int i = 0; i < numberOfBodies; i++) {
+                            celestialBodyList.add(new CelestialBody());
+                        }
                     }
-                }
 
-                celestialBodyList.get(0).getDirection().set(sun.direction);
-                for (CelestialBody cb : celestialBodyList) {
-                    myIBLBuilder.Light light = new myIBLBuilder.Light();
-                    light.direction.set(cb.getDirection());
-                    light.color.set(cb.getColor());
-                    light.exponent = cb.getExponent();
-                    ibl.lights.add(light);
-                }
+                    celestialBodyList.get(0).getDirection().set(sun.direction);
+                    for (CelestialBody cb : celestialBodyList) {
+                        myIBLBuilder.Light light = new myIBLBuilder.Light();
+                        light.direction.set(cb.getDirection());
+                        light.color.set(cb.getColor());
+                        light.exponent = cb.getExponent();
+                        ibl.lights.add(light);
+                    }
 
-                float tint = 0.0f;
-                ibl.nearGroundColor.set(tint, tint, tint, 1.0F);
-                ibl.farGroundColor.set(tint, tint, tint, 1.0F);
-                ibl.nearSkyColor.set(tint, tint, tint, 1.0F);
-                ibl.farSkyColor.set(tint, tint, tint, 1.0F);
-                Cubemap environmentCubemap = ibl.buildEnvMap(1024 * 4, renderEngine.batch2D, atlasManager.bold256Font);
-                Cubemap irradianceMap      = ibl.buildIrradianceMap(256 * 4, renderEngine.batch2D, atlasManager.bold256Font);
-                Cubemap radianceMap        = ibl.buildRadianceMap(12, renderEngine.batch2D, atlasManager.bold256Font);
-                environmentSnapshot = new EnvironmentSnapshot(environmentCubemap, irradianceMap, radianceMap);
-                environmentSnapshotMap.put(index, environmentSnapshot);
-                ibl.dispose();
+                    float tint = 0.0f;
+                    ibl.nearGroundColor.set(tint, tint, tint, 1.0F);
+                    ibl.farGroundColor.set(tint, tint, tint, 1.0F);
+                    ibl.nearSkyColor.set(tint, tint, tint, 1.0F);
+                    ibl.farSkyColor.set(tint, tint, tint, 1.0F);
+                    Cubemap environmentCubemap = ibl.buildEnvMap(1024 * 4, renderEngine.batch2D, atlasManager.bold256Font);
+                    tint = 0.5f;
+                    ibl.nearGroundColor.set(tint, tint, tint, 1.0F);
+                    ibl.farGroundColor.set(tint, tint, tint, 1.0F);
+                    ibl.nearSkyColor.set(tint, tint, tint, 1.0F);
+                    ibl.farSkyColor.set(tint, tint, tint, 1.0F);
+                    Cubemap irradianceMap = ibl.buildIrradianceMap(256 * 4, renderEngine.batch2D, atlasManager.bold256Font);
+                    Cubemap radianceMap   = ibl.buildRadianceMap(12, renderEngine.batch2D, atlasManager.bold256Font);
+                    environmentSnapshot = new EnvironmentSnapshot(environmentCubemap, irradianceMap, radianceMap);
+                    environmentSnapshotMap.put(index, environmentSnapshot);
+                    ibl.dispose();
+                }
+                renderEngine.setDaySkyBox(environmentSnapshot.getEnvironmentCubemap());
+                renderEngine.setNightSkyBox(environmentSnapshot.getEnvironmentCubemap());
+                diffuseCubemap  = environmentSnapshot.getIrradianceMap();
+                specularCubemap = environmentSnapshot.getRadianceMap();
             }
-            renderEngine.setDaySkyBox(environmentSnapshot.getEnvironmentCubemap());
-            renderEngine.setNightSkyBox(environmentSnapshot.getEnvironmentCubemap());
-            diffuseCubemap  = environmentSnapshot.getIrradianceMap();
-            specularCubemap = environmentSnapshot.getRadianceMap();
+        } else {
+            brdfLUT = new Texture(Gdx.files.classpath("net/mgsx/gltf/shaders/brdfLUT.png"));
+
+            DirectionalLightEx light = new DirectionalLightEx();
+            light.direction.set(1, -1, 1).nor();
+            light.color.set(Color.WHITE);
+            IBLBuilder iblBuilder         = IBLBuilder.createOutdoor(light);
+            Cubemap    environmentCubemap = iblBuilder.buildEnvMap(1024);
+            renderEngine.setDaySkyBox(new SceneSkybox(environmentCubemap));
+            renderEngine.setNightSkyBox(new SceneSkybox(environmentCubemap));
+            diffuseCubemap  = iblBuilder.buildIrradianceMap(256);
+            specularCubemap = iblBuilder.buildRadianceMap(10);
+            iblBuilder.dispose();
+
         }
         renderEngine.environment.set(PBRCubemapAttribute.createDiffuseEnv(diffuseCubemap));
         renderEngine.environment.set(PBRCubemapAttribute.createSpecularEnv(specularCubemap));
         renderEngine.environment.set(new PBRTextureAttribute(PBRTextureAttribute.BRDFLUTTexture, brdfLUT));
-        renderEngine.environment.set(new PBRFloatAttribute(PBRFloatAttribute.ShadowBias, .004f));
+        renderEngine.environment.set(new PBRFloatAttribute(PBRFloatAttribute.ShadowBias, .00f));
     }
 
     private void startDemoMode() throws OpenAlException {
@@ -1340,15 +1402,16 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
             setupImageBasedLighting(timeOfDay);
             {
                 final float intensity = 1.0f;
-                final float r         = dayAmbientIntensityR;
-                final float g         = dayAmbientIntensityG;
-                final float b         = dayAmbientIntensityB;
-                renderEngine.setShadowLight(dayShadowIntensity * intensity);
+                final float r         = renderEngine.getDayAmbientIntensityR();
+                final float g         = renderEngine.getDayAmbientIntensityG();
+                final float b         = renderEngine.getDayAmbientIntensityB();
+                renderEngine.setShadowLight(renderEngine.getDayShadowIntensity() * intensity);
                 renderEngine.setAmbientLight(r, g, b);
             }
             this.timeOfDay = timeOfDay;
         }
         return true;
+//        return false;
     }
 
     private void updateGoods(final long currentTime) throws Exception {

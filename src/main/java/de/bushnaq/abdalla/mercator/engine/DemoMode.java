@@ -14,10 +14,8 @@
  * limitations under the License.
  */
 
-package de.bushnaq.abdalla.mercator.shader;
+package de.bushnaq.abdalla.mercator.engine;
 
-import com.badlogic.gdx.graphics.glutils.ShaderProgram;
-
-public interface FullScreenRender {
-    void renderFullScreen(ShaderProgram shaderProgram);
+public enum DemoMode {
+    BLEND_OUT, BLEND_IN, EXECUTE, QUERY, UNDEFINED
 }

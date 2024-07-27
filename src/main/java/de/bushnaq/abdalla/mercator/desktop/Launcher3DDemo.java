@@ -31,50 +31,15 @@ import de.bushnaq.abdalla.mercator.util.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * @author kunterbunt
+ */
 public class Launcher3DDemo implements ApplicationListener {
-    private static final int UNIVERSE_GENERATION_RANDOM_SEED = 3;
+    private static final int UNIVERSE_GENERATION_RANDOM_SEED = 1;
     private static final int UNIVERSE_SIZE                   = 10;
-
-//    public static void main(final String[] args) throws Exception {
-//        final GraphicsDimentions gd       = GraphicsDimentions.D3;
-//        final Universe           universe = new Universe("U-0", gd, EventLevel.warning, Sim.class);
-//        universe.create(UNIVERSE_GENERATION_RANDOM_SEED, UNIVERSE_SIZE, 10L * TimeUnit.TICKS_PER_DAY);
-////		final Screen3D screen = new Screen3D(universe, LaunchMode.demo);
-////		new DesktopLauncher(universe);
-//    }
-
-    //    public static void main(final String[] args) throws Exception {
-//        final GraphicsDimentions gd       = GraphicsDimentions.D3;
-//        final Universe           universe = new Universe("U-0", gd, EventLevel.info, Sim.class);
-//        universe.create(UNIVERSE_GENERATION_RANDOM_SEED, UNIVERSE_SIZE, 10L * TimeUnit.TICKS_PER_DAY);
-//        final Sim trader = universe.traderList.seekTraderByName("T-49");
-//        universe.eventManager.setObjectFilter(trader);
-//        universe.eventManager.setEnablePrintEvent(true);
-//        universe.setSelected(trader, true);
-////		final Screen3D screen = new Screen3D(universe, LaunchMode.development);
-////		new DesktopLauncher(universe);
-//    }
     DesktopContextFactory contextFactory = new DesktopContextFactory();
     LaunchMode            launchMode     = LaunchMode.demo;
-    boolean               useOGL3        = true;
-    private Logger logger = LoggerFactory.getLogger(this.getClass());
-
-    /**
-     * called by GameEngine to create Lwjgl3Application
-     *
-     * @throws Exception
-     */
-    public Launcher3DDemo() throws Exception {
-//        this.universe = universe;
-//        if (launchMode != LaunchMode.demo && launchMode != LaunchMode.development) {
-//            final MercatorFrame frame = new MercatorFrame(universe);
-//            frame.setVisible(true);
-//        }
-//		final Lwjgl3ApplicationConfiguration config = createConfig();
-//		new Lwjgl3Application(screen, config);
-//		System.out.println("DesktopLauncher constructed");
-//		System.exit(0);
-    }
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     public static void main(final String[] args) throws Exception {
         Launcher3DDemo desktopLauncher3D = new Launcher3DDemo();
@@ -87,26 +52,6 @@ public class Launcher3DDemo implements ApplicationListener {
         Gdx.app.exit();// exit the gdx environment that we created just to read the options
     }
 
-    @Override
-    public void resize(int width, int height) {
-    }
-
-    @Override
-    public void render() {
-    }
-
-    @Override
-    public void pause() {
-    }
-
-    @Override
-    public void resume() {
-    }
-
-    @Override
-    public void dispose() {
-    }
-
     private Lwjgl3ApplicationConfiguration createConfig(Context context) {
         int                            foregroundFPS = context.getForegroundFPSProperty();
         Lwjgl3ApplicationConfiguration config;
@@ -114,8 +59,7 @@ public class Launcher3DDemo implements ApplicationListener {
         config.useVsync(context.getVsyncProperty());
         config.setForegroundFPS(foregroundFPS);
         config.setResizable(true);
-//		config.useOpenGL3(true, 3, 2);
-        config.setOpenGLEmulation(Lwjgl3ApplicationConfiguration.GLEmulation.GL30, 3, 2);
+        config.setOpenGLEmulation(Lwjgl3ApplicationConfiguration.GLEmulation.GL32, 3, 2);
 
 //		if (Context.getOeratingSystemType() == OperatingSystem.osx)
         {
@@ -148,7 +92,11 @@ public class Launcher3DDemo implements ApplicationListener {
         return config;
     }
 
-    private void loop() throws Exception, InterruptedException {
+    @Override
+    public void dispose() {
+    }
+
+    private void loop() throws Exception {
         boolean restart = false;
         do {
             if (restart) logger.info(String.format("Restarting mercator v%s.", MavenPropertiesProvider.getProperty("module.version")));
@@ -175,7 +123,23 @@ public class Launcher3DDemo implements ApplicationListener {
         } while (restart);
     }
 
-    private void start() throws InterruptedException, Exception {
+    @Override
+    public void pause() {
+    }
+
+    @Override
+    public void render() {
+    }
+
+    @Override
+    public void resize(int width, int height) {
+    }
+
+    @Override
+    public void resume() {
+    }
+
+    private void start() throws Exception {
         logger.info("------------------------------------------------------------------------------");
         logger.info(String.format("Starting mercator v%s.", MavenPropertiesProvider.getProperty("project.version")));
         logger.info("------------------------------------------------------------------------------");

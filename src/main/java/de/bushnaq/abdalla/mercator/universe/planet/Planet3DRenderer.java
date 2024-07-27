@@ -79,6 +79,7 @@ public class Planet3DRenderer extends ObjectRenderer<GameEngine3D> {
     public static final  float                          WATER_HIGHT            = 1;
     public static final  float                          WATER_SIZE             = SECTOR_SIZE;
     public static final  float                          WATER_Y                = -10;//TODO should use context.getWaterLevel()
+    static               float                          STATION_Z_SHIFT        = -12;
     private final        List<GameObject<GameEngine3D>> animatedObjects        = new ArrayList<>();
     private              boolean                        dayMode                = true;
     //	Scene scene;
@@ -244,7 +245,7 @@ public class Planet3DRenderer extends ObjectRenderer<GameEngine3D> {
         //planet
         {
             dockingStationGameObject = new GameObject<GameEngine3D>(new ModelInstanceHack(renderEngine.getGameEngine().assetManager.dockingStation.scene.model), planet, this);
-            dockingStationGameObject.instance.transform.setToTranslation(x, 0, z);
+            dockingStationGameObject.instance.transform.setToTranslation(x, 0 + STATION_Z_SHIFT, z);
             dockingStationGameObject.update();
             renderEngine.addStatic(dockingStationGameObject);
 
@@ -487,8 +488,9 @@ public class Planet3DRenderer extends ObjectRenderer<GameEngine3D> {
                 final GlyphLayout layout   = new GlyphLayout();
                 layout.setText(font, text);
                 final float   width   = layout.width;// contains the width of the current set text
+                final float   height  = layout.height;// contains the width of the current set text
                 final Vector3 xVector = new Vector3(1, 0, 0);
-                m.setToTranslation(x + PLANET_3D_SIZE / 2 - width * scaling, 1, z + PLANET_3D_SIZE / 2);
+                m.setToTranslation(x + PLANET_3D_SIZE / 2 - width * scaling, 1, z + PLANET_3D_SIZE / 2 - height * 2 * scaling);
                 m.rotate(xVector, -90);
                 m.scale(scaling, scaling, 1f);
                 renderEngine.renderEngine25D.setTransformMatrix(m);

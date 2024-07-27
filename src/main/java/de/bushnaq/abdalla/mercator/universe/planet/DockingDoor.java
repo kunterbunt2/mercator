@@ -27,6 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static de.bushnaq.abdalla.mercator.universe.planet.DockingDoor.DockingDoorState.CLOSED;
+import static de.bushnaq.abdalla.mercator.universe.planet.Planet3DRenderer.STATION_Z_SHIFT;
 
 public class DockingDoor {
     private static final float                    DOCKING_DOOR_HEIGHT = 8;
@@ -34,6 +35,8 @@ public class DockingDoor {
     private static final Color                    PLANET_NAME_COLOR   = new Color(0xffa500ff);
     private static final float                    VERTICAL_SPEED      = 2f;
     private static final float                    XZ_MOVEMENT_LEEWAY  = 58f;
+    private              GameObject<GameEngine3D> dockingDoorGameObject;
+    private              DockingDoorState         dockingDoorState    = CLOSED;
     private final        float                    dx;
     private final        float                    dz;
     private final        Logger                   logger              = LoggerFactory.getLogger(this.getClass());
@@ -43,8 +46,6 @@ public class DockingDoor {
     private final        float                    singDx;
     private final        float                    singDz;
     private final        String                   title;
-    private              GameObject<GameEngine3D> dockingDoorGameObject;
-    private              DockingDoorState         dockingDoorState    = CLOSED;
     private              float                    x                   = 0;
     private              float                    y                   = 0;
     private              float                    z                   = 0;
@@ -70,8 +71,8 @@ public class DockingDoor {
             }
             case LOWERING -> {
                 y -= realTimeDelta * VERTICAL_SPEED;
-                if (y <= planet.y - DOCKING_DOOR_HEIGHT / 2 - 5f) {
-                    y                = planet.y - DOCKING_DOOR_HEIGHT / 2 - 5f;
+                if (y <= planet.y + STATION_Z_SHIFT - DOCKING_DOOR_HEIGHT / 2 - 5f) {
+                    y                = planet.y + STATION_Z_SHIFT - DOCKING_DOOR_HEIGHT / 2 - 5f;
                     dockingDoorState = DockingDoorState.OPENING;
                 }
             }
@@ -101,8 +102,8 @@ public class DockingDoor {
             }
             case RAISING -> {
                 y += realTimeDelta * VERTICAL_SPEED;
-                if (y >= planet.y - DOCKING_DOOR_HEIGHT / 2) {
-                    y                = planet.y - DOCKING_DOOR_HEIGHT / 2;
+                if (y >= planet.y + STATION_Z_SHIFT - DOCKING_DOOR_HEIGHT / 2) {
+                    y                = planet.y + STATION_Z_SHIFT - DOCKING_DOOR_HEIGHT / 2;
                     dockingDoorState = DockingDoorState.CLOSED;
                 }
             }
@@ -111,7 +112,7 @@ public class DockingDoor {
 
     public void create(RenderEngine3D<GameEngine3D> renderEngine) {
         x                     = planet.x + dx;
-        y                     = planet.y - DOCKING_DOOR_HEIGHT / 2;
+        y                     = planet.y + STATION_Z_SHIFT - DOCKING_DOOR_HEIGHT / 2;
         z                     = planet.z + dz;
         dockingDoorGameObject = new GameObject<GameEngine3D>(new ModelInstanceHack(renderEngine.getGameEngine().assetManager.dockingDoorModel), planet, planet.renderer3D);
         dockingDoorGameObject.instance.transform.setToTranslation(x, 0, z);

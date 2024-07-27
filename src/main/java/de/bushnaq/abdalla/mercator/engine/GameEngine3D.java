@@ -21,7 +21,6 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Cubemap;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Matrix4;
@@ -39,6 +38,10 @@ import de.bushnaq.abdalla.engine.camera.MovingCamera;
 import de.bushnaq.abdalla.mercator.audio.synthesis.MercatorAudioEngine;
 import de.bushnaq.abdalla.mercator.desktop.Context;
 import de.bushnaq.abdalla.mercator.desktop.LaunchMode;
+import de.bushnaq.abdalla.mercator.engine.demo.DemoString;
+import de.bushnaq.abdalla.mercator.engine.demo.End;
+import de.bushnaq.abdalla.mercator.engine.demo.PositionCamera;
+import de.bushnaq.abdalla.mercator.engine.demo.ScheduledTask;
 import de.bushnaq.abdalla.mercator.renderer.CameraProperties;
 import de.bushnaq.abdalla.mercator.renderer.ScreenListener;
 import de.bushnaq.abdalla.mercator.renderer.ShowGood;
@@ -72,34 +75,36 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static de.bushnaq.abdalla.mercator.engine.DemoMode.*;
+
 public class GameEngine3D implements ScreenListener, ApplicationListener, InputProcessor, RenderEngineExtension, GameEngine {
     public static final  float                        CAMERA_OFFSET_X               = 300f;
     public static final  float                        CAMERA_OFFSET_Y               = 300f;
-    public static final  float                        CAMERA_OFFSET_Z               = 400f;
+    public static final  float                        CAMERA_OFFSET_Z               = 500f;
     static final         Color                        DEBUG_GRID_BORDER_COLOR       = new Color(1f, 1f, 1f, 0.1f);
     static final         Color                        DEBUG_GRID_COLOR              = new Color(.0f, .0f, .0f, 0.2f);
     //	private static final String BATCH_END_DURATION = "batch.end()";
     //	private static final String DRAW_DURATION = "draw()";
-    public static final  Color                        FACTORY_COLOR                 = Color.DARK_GRAY; // 0xff000000;
-    public static final  float                        FACTORY_HEIGHT                = 1.2f;
-    public static final  float                        FACTORY_WIDTH                 = 2.4f;
+//    public static final  Color                        FACTORY_COLOR                 = Color.DARK_GRAY; // 0xff000000;
+//    public static final  float                        FACTORY_HEIGHT                = 1.2f;
+//    public static final  float                        FACTORY_WIDTH                 = 2.4f;
     public static final  float                        FIELD_OF_VIEW_Y               = 46f;
     public static final  int                          FONT_SIZE                     = 9;
     private static final float                        MAX_TIME_DELTA                = 0.1f;//everything above will be ignored as a glitch
     // private static final float MAX_VOXEL_DIMENSION = 20;
-    public static final  Color                        NOT_PRODUCING_FACTORY_COLOR   = Color.RED; // 0xffFF0000;
+//    public static final  Color                        NOT_PRODUCING_FACTORY_COLOR   = Color.RED; // 0xffFF0000;
     public static final  int                          NUMBER_OF_CELESTIAL_BODIES    = 10000;//TODO should be 10000
-    public static final  int                          RAYS_NUM                      = 128;
-    private static final float                        RENDER_2D_UNTIL               = 1500;
-    private static final float                        RENDER_3D_UNTIL               = 2000;
+    //    public static final  int                          RAYS_NUM                      = 128;
+//    private static final float                        RENDER_2D_UNTIL               = 1500;
+//    private static final float                        RENDER_3D_UNTIL               = 2000;
     //	private static final String RENDER_DURATION = "render()";
     //	private static final String RENDER_LIGHT = "light";
     private static final float                        SCROLL_SPEED                  = 100f;
-    public static final  Color                        SELECTED_PLANET_COLOR         = Color.BLUE;
-    public static final  Color                        SELECTED_TRADER_COLOR         = Color.RED; // 0xffff0000;
-    public static final  float                        SIM_HEIGHT                    = 0.3f;
-    public static final  float                        SIM_WIDTH                     = 0.3f;
-    public static final  float                        SOOM_SPEED                    = 8.0f * 10;
+    //    public static final  Color                        SELECTED_PLANET_COLOR         = Color.BLUE;
+//    public static final  Color                        SELECTED_TRADER_COLOR         = Color.RED; // 0xffff0000;
+//    public static final  float                        SIM_HEIGHT                    = 0.3f;
+//    public static final  float                        SIM_WIDTH                     = 0.3f;
+//    public static final  float                        SOOM_SPEED                    = 8.0f * 10;
     public static final  float                        SPACE_BETWEEN_OBJECTS         = 0.1f / Universe.WORLD_SCALE;
     public static final  Color                        TEXT_COLOR                    = Color.WHITE; // 0xffffffff;
     //	private static final Color trafficEndColor = new Color(0xffff0000);
@@ -108,20 +113,25 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
     private static final Color                        TIME_MACHINE_BACKGROUND_COLOR = new Color(0.0f, 0.0f, 0.0f, 0.9f);
     public static final  int                          TIME_MACHINE_FONT_SIZE        = 10;
     private static final Color                        TIME_MACHINE_SUB_MARKER_COLOR = new Color(0.7f, 0.7f, 0.7f, 1.0f);
+    static               float                        BLEND_TIME_MS                 = 1000f;
     private              float                        angle                         = -1;
     public               AssetManager                 assetManager;
     private              AtlasManager                 atlasManager;
     //    private final        GameObject<GameEngine3D>     ocean                         = null;
     public               AudioEngine                  audioEngine                   = new MercatorAudioEngine();
+    private              long                         blendTime;
     private              Texture                      brdfLUT;
     private              ZoomingCameraInputController camController;
     private              MovingCamera                 camera;
     private              OrthographicCamera           camera2D;
     List<CelestialBody> celestialBodyList = new ArrayList<>();
-    private       float            centerXD;
-    private       float            centerYD;
-    private       Context          context;
-    private final IContextFactory  contextFactory;
+    private       float           centerXD;
+    private       float           centerYD;
+    private       Context         context;
+    private final IContextFactory contextFactory;
+    int demoIndex = 0;
+    private DemoMode demoMode = QUERY;
+    long demoStartTime;
     //    private       float            dayAmbientIntensityB            = 1f;
 //    private       float            dayAmbientIntensityG            = 1f;
 //    private       float            dayAmbientIntensityR            = 1f;
@@ -147,9 +157,10 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
     private       GameObject<GameEngine3D> instance;//TODO
     private final List<Label>              labels           = new ArrayList<>();
     private       long                     lastCameraDirty  = 0;
-    public        LaunchMode               launchMode;
-    private final Logger                   logger           = LoggerFactory.getLogger(this.getClass());
-    private       OggPlayer                oggPlayer;
+    DemoMode lastDemoMode = UNDEFINED;
+    public        LaunchMode launchMode;
+    private final Logger     logger = LoggerFactory.getLogger(this.getClass());
+    private       OggPlayer  oggPlayer;
     boolean old = true;
     public  RenderEngine3D<GameEngine3D> renderEngine;
     //    private              Render2DMaster               render2DMaster;
@@ -158,8 +169,9 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
     private Cubemap                      specularCubemap;
     private Stage                        stage;
     private StringBuilder                stringBuilder;
-    Vector3 sunPosition = new Vector3();
-    private      boolean  takeScreenShot;
+    //    Vector3 sunPosition = new Vector3();
+    private boolean                      takeScreenShot;
+    List<ScheduledTask> tasks = new ArrayList<ScheduledTask>();
     private      float    timeOfDay;
     //	private ModelInstance uberModelInstance;
     public final Universe universe;
@@ -489,13 +501,8 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
         printWriter.close();
     }
 
-    public AtlasManager getAtlasManager() {
-        return atlasManager;
-    }
-
-    @Override
-    public AudioEngine getAudioEngine() {
-        return audioEngine;
+    public float getAngle() {
+        return angle;
     }
 
 
@@ -503,59 +510,12 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
 //        return maxFramesPerSecond;
 //    }
 
-    public int getCameraZoomIndex() {
-        return camController.zoomIndex;
+    public AssetManager getAssetManager() {
+        return assetManager;
     }
 
-    private void initColors() {
-        {
-            distinctiveColorlist.add(new Color(0.2f, 0.2f, 0.2f, 0.5f));
-            final float factor = (universe.sectorList.size() / 8) / 2.0f;
-            final int   c      = (int) Math.ceil(universe.sectorList.size() / 6.0);
-            for (float i = 0; i < Math.ceil(universe.sectorList.size() / 6.0); i++) {
-                final float low = 1.0f - (i + 1) * factor;
-                //				System.out.println(low * 255);
-                final float high  = 1.0f - i * factor;
-                final float alpha = 1.f;
-                // distinctiveColorlist.add( new Color( high, high, high, alpha ) );
-                distinctiveColorlist.add(new Color(high, high, low, alpha));
-                distinctiveColorlist.add(new Color(high, low, high, alpha));
-                distinctiveColorlist.add(new Color(low, high, high, alpha));
-                distinctiveColorlist.add(new Color(high, low, low, alpha));
-                distinctiveColorlist.add(new Color(low, low, high, alpha));
-                distinctiveColorlist.add(new Color(low, high, low, alpha));
-                // distinctiveColorlist.add( new Color( low, high, low, alpha ) );
-                // distinctiveColorlist.add( new Color( low, low, high, alpha ) );
-                // distinctiveColorlist.add( new Color( low, 1.0f, 1.0f, alpha ) );
-                // distinctiveColorlist.add( new Color( 1.0f, low, 1.0f, alpha ) );
-                // distinctiveColorlist.add( new Color( 1.0f, 1.0f, low, alpha ) );
-                // distinctiveColorlist.add( new Color( low, low, low, alpha ) );
-            }
-            // distinctiveColorArray = distinctiveColorlist.toArray( new Color[0] );
-        }
-        distinctiveTransparentColorlist.add(new Color(0.2f, 0.2f, 0.2f, 0.5f));
-        final float factor = (universe.sectorList.size() / 8) / 2.0f;
-        final int   c      = (int) Math.ceil(universe.sectorList.size() / 6.0);
-        for (float i = 0; i < Math.ceil(universe.sectorList.size() / 6.0); i++) {
-            final float low = 1.0f - (i + 1) * factor;
-            //			System.out.println(low * 255);
-            final float high  = 1.0f - i * factor;
-            final float alpha = 0.4f;
-            // distinctiveColorlist.add( new Color( high, high, high, alpha ) );
-            distinctiveTransparentColorlist.add(new Color(high, high, low, alpha));
-            distinctiveTransparentColorlist.add(new Color(high, low, high, alpha));
-            distinctiveTransparentColorlist.add(new Color(low, high, high, alpha));
-            distinctiveTransparentColorlist.add(new Color(high, low, low, alpha));
-            distinctiveTransparentColorlist.add(new Color(low, low, high, alpha));
-            distinctiveTransparentColorlist.add(new Color(low, high, low, alpha));
-            // distinctiveColorlist.add( new Color( low, high, low, alpha ) );
-            // distinctiveColorlist.add( new Color( low, low, high, alpha ) );
-            // distinctiveColorlist.add( new Color( low, 1.0f, 1.0f, alpha ) );
-            // distinctiveColorlist.add( new Color( 1.0f, low, 1.0f, alpha ) );
-            // distinctiveColorlist.add( new Color( 1.0f, 1.0f, low, alpha ) );
-            // distinctiveColorlist.add( new Color( low, low, low, alpha ) );
-        }
-        // distinctiveColorArray = distinctiveColorlist.toArray( new Color[0] );
+    public AtlasManager getAtlasManager() {
+        return atlasManager;
     }
 
     //	Sector3DRenderer sector3DRenderer = new Sector3DRenderer();
@@ -620,6 +580,97 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
     //	  }
     //
     //	  graphics.setStroke( defaultStroke ); }
+
+    @Override
+    public AudioEngine getAudioEngine() {
+        return audioEngine;
+    }
+
+    public ZoomingCameraInputController getCamController() {
+        return camController;
+    }
+
+    /*
+     * private void drawPlanetGraph( Planet planet ) { int pd = PLANET_DISTANCE - 2;
+     * int hpd = PLANET_DISTANCE / 2; int qpd = PLANET_DISTANCE / 4 - 2; int planetX
+     * = planet.x * PLANET_DISTANCE - hpd; int planetY = planet.y * PLANET_DISTANCE
+     * - hpd; int x[] = new int[planet.creditHistory.size()]; int y[] = new
+     * int[planet.creditHistory.size()]; boolean draw = true; // ---Find max int
+     * maxY = Planet.PLANET_START_CREDITS; for ( int i = 0; i <
+     * planet.creditHistory.size(); i++ ) { int ty = planet.creditHistory.get( i );
+     * if ( ty > maxY ) maxY = ty; } for ( int i = 0; i <
+     * planet.creditHistory.size(); i++ ) { x[i] = transformX( planetX + ( i * pd )
+     * / Planet.CREDIT_HISTORY_SIZE ); y[i] = transformY( planetY + pd - ( (
+     * planet.creditHistory.get( i ) * qpd ) / maxY ) ); } graphics.setColor(
+     * queryCreditColor( planet ) ); if ( draw ) { Stroke defaultStroke =
+     * graphics.getStroke(); float dash[] = { 1.0f }; BasicStroke stroke = new
+     * BasicStroke( 1.7f, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_MITER, 10.0f,
+     * dash, 0.0f ); graphics.setStroke( stroke ); graphics.drawPolyline( x, y,
+     * planet.creditHistory.size() ); graphics.setStroke( defaultStroke ); } }
+     */
+
+    //	public Canvas getCanvas() {
+    //		return myCanvas.getCanvas();
+    //	}
+
+    public MovingCamera getCamera() {
+        return camera;
+    }
+
+    public int getCameraZoomIndex() {
+        return camController.zoomIndex;
+    }
+
+    private void initColors() {
+        {
+            distinctiveColorlist.add(new Color(0.2f, 0.2f, 0.2f, 0.5f));
+            final float factor = (universe.sectorList.size() / 8) / 2.0f;
+            final int   c      = (int) Math.ceil(universe.sectorList.size() / 6.0);
+            for (float i = 0; i < Math.ceil(universe.sectorList.size() / 6.0); i++) {
+                final float low = 1.0f - (i + 1) * factor;
+                //				System.out.println(low * 255);
+                final float high  = 1.0f - i * factor;
+                final float alpha = 1.f;
+                // distinctiveColorlist.add( new Color( high, high, high, alpha ) );
+                distinctiveColorlist.add(new Color(high, high, low, alpha));
+                distinctiveColorlist.add(new Color(high, low, high, alpha));
+                distinctiveColorlist.add(new Color(low, high, high, alpha));
+                distinctiveColorlist.add(new Color(high, low, low, alpha));
+                distinctiveColorlist.add(new Color(low, low, high, alpha));
+                distinctiveColorlist.add(new Color(low, high, low, alpha));
+                // distinctiveColorlist.add( new Color( low, high, low, alpha ) );
+                // distinctiveColorlist.add( new Color( low, low, high, alpha ) );
+                // distinctiveColorlist.add( new Color( low, 1.0f, 1.0f, alpha ) );
+                // distinctiveColorlist.add( new Color( 1.0f, low, 1.0f, alpha ) );
+                // distinctiveColorlist.add( new Color( 1.0f, 1.0f, low, alpha ) );
+                // distinctiveColorlist.add( new Color( low, low, low, alpha ) );
+            }
+            // distinctiveColorArray = distinctiveColorlist.toArray( new Color[0] );
+        }
+        distinctiveTransparentColorlist.add(new Color(0.2f, 0.2f, 0.2f, 0.5f));
+        final float factor = (universe.sectorList.size() / 8) / 2.0f;
+        final int   c      = (int) Math.ceil(universe.sectorList.size() / 6.0);
+        for (float i = 0; i < Math.ceil(universe.sectorList.size() / 6.0); i++) {
+            final float low = 1.0f - (i + 1) * factor;
+            //			System.out.println(low * 255);
+            final float high  = 1.0f - i * factor;
+            final float alpha = 0.4f;
+            // distinctiveColorlist.add( new Color( high, high, high, alpha ) );
+            distinctiveTransparentColorlist.add(new Color(high, high, low, alpha));
+            distinctiveTransparentColorlist.add(new Color(high, low, high, alpha));
+            distinctiveTransparentColorlist.add(new Color(low, high, high, alpha));
+            distinctiveTransparentColorlist.add(new Color(high, low, low, alpha));
+            distinctiveTransparentColorlist.add(new Color(low, low, high, alpha));
+            distinctiveTransparentColorlist.add(new Color(low, high, low, alpha));
+            // distinctiveColorlist.add( new Color( low, high, low, alpha ) );
+            // distinctiveColorlist.add( new Color( low, low, high, alpha ) );
+            // distinctiveColorlist.add( new Color( low, 1.0f, 1.0f, alpha ) );
+            // distinctiveColorlist.add( new Color( 1.0f, low, 1.0f, alpha ) );
+            // distinctiveColorlist.add( new Color( 1.0f, 1.0f, low, alpha ) );
+            // distinctiveColorlist.add( new Color( low, low, low, alpha ) );
+        }
+        // distinctiveColorArray = distinctiveColorlist.toArray( new Color[0] );
+    }
 
     public boolean isInfoVisible() {
         return infoVisible;
@@ -724,29 +775,6 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
         return false;
 
     }
-
-    /*
-     * private void drawPlanetGraph( Planet planet ) { int pd = PLANET_DISTANCE - 2;
-     * int hpd = PLANET_DISTANCE / 2; int qpd = PLANET_DISTANCE / 4 - 2; int planetX
-     * = planet.x * PLANET_DISTANCE - hpd; int planetY = planet.y * PLANET_DISTANCE
-     * - hpd; int x[] = new int[planet.creditHistory.size()]; int y[] = new
-     * int[planet.creditHistory.size()]; boolean draw = true; // ---Find max int
-     * maxY = Planet.PLANET_START_CREDITS; for ( int i = 0; i <
-     * planet.creditHistory.size(); i++ ) { int ty = planet.creditHistory.get( i );
-     * if ( ty > maxY ) maxY = ty; } for ( int i = 0; i <
-     * planet.creditHistory.size(); i++ ) { x[i] = transformX( planetX + ( i * pd )
-     * / Planet.CREDIT_HISTORY_SIZE ); y[i] = transformY( planetY + pd - ( (
-     * planet.creditHistory.get( i ) * qpd ) / maxY ) ); } graphics.setColor(
-     * queryCreditColor( planet ) ); if ( draw ) { Stroke defaultStroke =
-     * graphics.getStroke(); float dash[] = { 1.0f }; BasicStroke stroke = new
-     * BasicStroke( 1.7f, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_MITER, 10.0f,
-     * dash, 0.0f ); graphics.setStroke( stroke ); graphics.drawPolyline( x, y,
-     * planet.creditHistory.size() ); graphics.setStroke( defaultStroke ); } }
-     */
-
-    //	public Canvas getCanvas() {
-    //		return myCanvas.getCanvas();
-    //	}
 
     @Override
     public boolean keyTyped(final char character) {
@@ -942,7 +970,54 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
     }
 
     private void renderDemo(float deltaTime) throws IOException, OpenAlException {
+
         if (launchMode == LaunchMode.demo) {
+            if (tasks.isEmpty())
+                startDemoMode();
+            else if (tasks.get(0).afterSeconds * 1000 + demoStartTime < System.currentTimeMillis()) {
+                ScheduledTask task = tasks.get(0);
+                if (lastDemoMode != demoMode) {
+                    logger.info(demoMode.name());
+                    lastDemoMode = demoMode;
+                }
+                switch (demoMode) {
+                    case BLEND_OUT -> {
+                        long deltaSeconds = (System.currentTimeMillis() - blendTime);
+                        if (deltaSeconds > BLEND_TIME_MS) {
+                            demoMode = EXECUTE;
+                        } else {
+                            renderEngine.getFadeEffect().setIntensity(1f - deltaSeconds / BLEND_TIME_MS);
+                        }
+                    }
+                    case BLEND_IN -> {
+                        long deltaSeconds = (System.currentTimeMillis() - blendTime);
+                        if (deltaSeconds > BLEND_TIME_MS) {
+                            tasks.remove(0);
+                            demoMode = QUERY;
+                        } else {
+                            renderEngine.getFadeEffect().setIntensity(deltaSeconds / BLEND_TIME_MS);
+                        }
+                    }
+                    case EXECUTE -> {
+                        logger.info(String.format("Executing task %d", demoIndex++));
+                        task.execute();
+                        blendTime = System.currentTimeMillis();
+                        if (task.requiresBlending()) {
+                            demoMode = DemoMode.BLEND_IN;
+                        } else {
+                            tasks.remove(0);
+                            demoMode = QUERY;
+                        }
+                    }
+                    case QUERY -> {
+                        if (task.requiresBlending()) {
+                            blendTime = System.currentTimeMillis();
+                            demoMode  = DemoMode.BLEND_OUT;
+                        } else
+                            demoMode = EXECUTE;
+                    }
+                }
+            }
             final float lineHeightFactor = 2f;
             if (demoText.isEmpty()) {
                 demoText.add(new DemoString("Mercator", getAtlasManager().bold128Font));
@@ -1041,7 +1116,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
         //camera properties
         {
             stringBuilder.setLength(0);
-            stringBuilder.append(String.format(" camera: [%d] [%+.0f %+.0f %+.0f] [%+.0f %+.0f %+.0f]", camController.zoomIndex, camera.position.x, camera.position.y, camera.position.z, camera.lookat.x, camera.lookat.y, camera.lookat.z));
+            stringBuilder.append(String.format(" camera: zoomIndex(%d) position(%+.0f,%+.0f,%+.0f) lookAt(%+.0f, %+.0f, %+.0f)", camController.zoomIndex, camera.position.x, camera.position.y, camera.position.z, camera.lookat.x, camera.lookat.y, camera.lookat.z));
             labels.get(labelIndex++).setText(stringBuilder);
         }
         //depth of field
@@ -1151,6 +1226,13 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
 
     }
 
+//    public void setDayAmbientLight(float r, float g, float b, float shadowIntensity) {
+//        dayAmbientIntensityR = r;
+//        dayAmbientIntensityG = g;
+//        dayAmbientIntensityB = b;
+//        dayShadowIntensity   = shadowIntensity;
+//    }
+
     @Override
     public boolean scrolled(final float amountX, final float amountY) {
 
@@ -1161,13 +1243,6 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
         //		}
         return false;
     }
-
-//    public void setDayAmbientLight(float r, float g, float b, float shadowIntensity) {
-//        dayAmbientIntensityR = r;
-//        dayAmbientIntensityG = g;
-//        dayAmbientIntensityB = b;
-//        dayShadowIntensity   = shadowIntensity;
-//    }
 
     @Override
     public void setCamera(final float x, final float z, final boolean setDirty) throws Exception {
@@ -1292,14 +1367,26 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
     }
 
     private void startDemoMode() throws OpenAlException {
+        int i     = 1;
+        int delta = 20;
+//        tasks.add(new PositionCamera(this, 0, 3, new Vector3(8697f, 153f, 7539f), new Vector3(8019f, 0f, -8639f)));
+        tasks.add(new PositionCamera(this, i++ * delta, 3, "P-81"));
+        tasks.add(new PositionCamera(this, i++ * delta, 3, "P-80"));
+        tasks.add(new PositionCamera(this, i++ * delta, 3, "P-98"));
+        tasks.add(new PositionCamera(this, i++ * delta, 3, "P-160"));
+        tasks.add(new End(this, i++ * delta));
+
 //        renderEngine.getDepthOfFieldEffect().setEnabled(true);
-        updateDepthOfFieldFocusDistance();
+//        updateDepthOfFieldFocusDistance();
         renderEngine.setAlwaysDay(false);
         oggPlayer = audioEngine.createAudioProducer(OggPlayer.class);
         oggPlayer.setFile(Gdx.files.internal(AtlasManager.getAssetsFolderName() + "/audio/06-abyss(m).ogg"));
         oggPlayer.setGain(1.0f);
         oggPlayer.play();
         AudioEngine.checkAlError("Failed to set listener orientation with error #");
+        demoIndex     = 0;
+        demoStartTime = System.currentTimeMillis();
+        demoTextY     = 0;
     }
 
     @Override
@@ -1461,15 +1548,5 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
         }
     }
 
-    class DemoString {
-        BitmapFont font;
-
-        String text;
-
-        public DemoString(final String text, final BitmapFont font) {
-            this.text = text;
-            this.font = font;
-        }
-    }
 
 }

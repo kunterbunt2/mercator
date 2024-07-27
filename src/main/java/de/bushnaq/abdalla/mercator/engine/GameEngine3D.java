@@ -217,7 +217,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
             renderEngine.getFog().setFullDistance(3000f);
 
             renderEngine.setSkyBox(true);
-            renderEngine.setDayAmbientLight(.3f, .3f, .3f, 1f);
+            renderEngine.setDayAmbientLight(.1f, .1f, .1f, 1f);
             renderEngine.setNightAmbientLight(.1f, .1f, .1f, 1f);
             renderEngine.setAlwaysDay(true);
             renderEngine.setDynamicDayTime(true);
@@ -653,23 +653,25 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
             case Input.Keys.PRINT_SCREEN:
                 queueScreenshot();
                 return true;
-            case Input.Keys.NUM_1:
+            case Input.Keys.F1:
                 renderEngine.setGammaCorrected(!renderEngine.isGammaCorrected());
                 if (renderEngine.isGammaCorrected()) logger.info("gamma correction on");
                 else logger.info("gamma correction off");
                 return true;
-            case Input.Keys.NUM_2:
+            case Input.Keys.F2:
                 renderEngine.getDepthOfFieldEffect().setEnabled(!renderEngine.getDepthOfFieldEffect().isEnabled());
                 if (renderEngine.getDepthOfFieldEffect().isEnabled()) logger.info("depth of field on");
                 else logger.info("depth of field off");
                 return true;
-            case Input.Keys.NUM_4:
-                renderEngine.setShowGraphs(!renderEngine.isShowGraphs());
+            case Input.Keys.F3:
+                renderEngine.setRenderBokeh(!renderEngine.isRenderBokeh());
+                if (renderEngine.isRenderBokeh()) logger.info("render bokeh on");
+                else logger.info("render bokeh off");
                 return true;
-            case Input.Keys.NUM_5:
+            case Input.Keys.F5:
                 renderEngine.setAlwaysDay(!renderEngine.isAlwaysDay());
                 return true;
-            case Input.Keys.NUM_6:
+            case Input.Keys.F6:
                 if (launchMode == LaunchMode.demo) launchMode = LaunchMode.normal;
                 else launchMode = LaunchMode.demo;
                 try {
@@ -677,6 +679,16 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
                 } catch (OpenAlException e) {
                     throw new RuntimeException(e);
                 }
+                return true;
+            case Input.Keys.F9:
+                renderEngine.setShowGraphs(!renderEngine.isShowGraphs());
+                if (renderEngine.isShowGraphs()) logger.info("graphs are on");
+                else logger.info("graphs are off");
+                return true;
+            case Input.Keys.F10:
+                renderEngine.setDebugMode(!renderEngine.isDebugMode());
+                if (renderEngine.isDebugMode()) logger.info("debug mode on");
+                else logger.info("debug mode off");
                 return true;
             case Input.Keys.V:
                 vsyncEnabled = !vsyncEnabled;
@@ -1242,7 +1254,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
                     ibl.nearSkyColor.set(tint, tint, tint, 1.0F);
                     ibl.farSkyColor.set(tint, tint, tint, 1.0F);
                     Cubemap environmentCubemap = ibl.buildEnvMap(1024 * 4, renderEngine.batch2D, atlasManager.bold256Font);
-                    tint = 0.5f;
+                    tint = 0.0f;
                     ibl.nearGroundColor.set(tint, tint, tint, 1.0F);
                     ibl.farGroundColor.set(tint, tint, tint, 1.0F);
                     ibl.nearSkyColor.set(tint, tint, tint, 1.0F);

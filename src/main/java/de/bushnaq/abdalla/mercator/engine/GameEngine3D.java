@@ -29,7 +29,6 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.Ray;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
-import com.badlogic.gdx.utils.Align;
 import de.bushnaq.abdalla.engine.*;
 import de.bushnaq.abdalla.engine.audio.AudioEngine;
 import de.bushnaq.abdalla.engine.audio.OggPlayer;
@@ -38,10 +37,7 @@ import de.bushnaq.abdalla.engine.camera.MovingCamera;
 import de.bushnaq.abdalla.mercator.audio.synthesis.MercatorAudioEngine;
 import de.bushnaq.abdalla.mercator.desktop.Context;
 import de.bushnaq.abdalla.mercator.desktop.LaunchMode;
-import de.bushnaq.abdalla.mercator.engine.demo.DemoString;
-import de.bushnaq.abdalla.mercator.engine.demo.End;
-import de.bushnaq.abdalla.mercator.engine.demo.PositionCamera;
-import de.bushnaq.abdalla.mercator.engine.demo.ScheduledTask;
+import de.bushnaq.abdalla.mercator.engine.demo.Demo;
 import de.bushnaq.abdalla.mercator.renderer.CameraProperties;
 import de.bushnaq.abdalla.mercator.renderer.ScreenListener;
 import de.bushnaq.abdalla.mercator.renderer.ShowGood;
@@ -57,6 +53,7 @@ import de.bushnaq.abdalla.mercator.universe.sim.Sim;
 import de.bushnaq.abdalla.mercator.universe.sim.trader.Trader;
 import de.bushnaq.abdalla.mercator.util.TimeAccuracy;
 import de.bushnaq.abdalla.mercator.util.TimeUnit;
+import de.bushnaq.abdalla.mercator.util.TimeUtil;
 import net.mgsx.gltf.scene3d.attributes.PBRCubemapAttribute;
 import net.mgsx.gltf.scene3d.attributes.PBRFloatAttribute;
 import net.mgsx.gltf.scene3d.attributes.PBRTextureAttribute;
@@ -67,15 +64,10 @@ import net.mgsx.gltf.scene3d.utils.IBLBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static de.bushnaq.abdalla.mercator.engine.DemoMode.*;
 
 public class GameEngine3D implements ScreenListener, ApplicationListener, InputProcessor, RenderEngineExtension, GameEngine {
     public static final  float                        CAMERA_OFFSET_X               = 300f;
@@ -113,13 +105,11 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
     private static final Color                        TIME_MACHINE_BACKGROUND_COLOR = new Color(0.0f, 0.0f, 0.0f, 0.9f);
     public static final  int                          TIME_MACHINE_FONT_SIZE        = 10;
     private static final Color                        TIME_MACHINE_SUB_MARKER_COLOR = new Color(0.7f, 0.7f, 0.7f, 1.0f);
-    static               float                        BLEND_TIME_MS                 = 1000f;
     private              float                        angle                         = -1;
     public               AssetManager                 assetManager;
     private              AtlasManager                 atlasManager;
     //    private final        GameObject<GameEngine3D>     ocean                         = null;
     public               AudioEngine                  audioEngine                   = new MercatorAudioEngine();
-    private              long                         blendTime;
     private              Texture                      brdfLUT;
     private              ZoomingCameraInputController camController;
     private              MovingCamera                 camera;
@@ -129,24 +119,19 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
     private       float           centerYD;
     private       Context         context;
     private final IContextFactory contextFactory;
-    int demoIndex = 0;
-    private DemoMode demoMode = QUERY;
-    long demoStartTime;
+    private       Demo            demo;
     //    private       float            dayAmbientIntensityB            = 1f;
 //    private       float            dayAmbientIntensityG            = 1f;
 //    private       float            dayAmbientIntensityR            = 1f;
 //    private       float            dayShadowIntensity              = 5f;
-    private final List<DemoString> demoText                        = new ArrayList<>();
-    private final float            demoTextX                       = 100;
-    private       float            demoTextY                       = 0;
-    private       Cubemap          diffuseCubemap;
-    public        List<Color>      distinctiveColorlist            = new ArrayList<Color>();
-    public        List<Color>      distinctiveTransparentColorlist = new ArrayList<Color>();
+    private       Cubemap         diffuseCubemap;
+    public        List<Color>     distinctiveColorlist            = new ArrayList<Color>();
+    public        List<Color>     distinctiveTransparentColorlist = new ArrayList<Color>();
     //	private boolean end = false;
     //	private MercatorFrame frame;
     //	private LwjglApplicationConfiguration config;
-    private       Cubemap          environmentDayCubemap;
-    private       Cubemap          environmentNightCubemap;
+    private       Cubemap         environmentDayCubemap;
+    private       Cubemap         environmentNightCubemap;
     Map<Integer, EnvironmentSnapshot> environmentSnapshotMap = new HashMap<>();
     private       boolean                  followMode;
     //    private              BitmapFont                   font;
@@ -157,25 +142,23 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
     private       GameObject<GameEngine3D> instance;//TODO
     private final List<Label>              labels           = new ArrayList<>();
     private       long                     lastCameraDirty  = 0;
-    DemoMode lastDemoMode = UNDEFINED;
-    public        LaunchMode launchMode;
-    private final Logger     logger = LoggerFactory.getLogger(this.getClass());
-    private       OggPlayer  oggPlayer;
+    public        LaunchMode               launchMode;
+    private final Logger                   logger           = LoggerFactory.getLogger(this.getClass());
+    public        OggPlayer                oggPlayer;
     boolean old = true;
-    public  RenderEngine3D<GameEngine3D> renderEngine;
+    public       RenderEngine3D<GameEngine3D> renderEngine;
     //    private              Render2DMaster               render2DMaster;
-    private boolean                      showFps;
-    public  ShowGood                     showGood = ShowGood.Name;
-    private Cubemap                      specularCubemap;
-    private Stage                        stage;
-    private StringBuilder                stringBuilder;
+    private      boolean                      showFps;
+    public       ShowGood                     showGood     = ShowGood.Name;
+    private      Cubemap                      specularCubemap;
+    private      Stage                        stage;
+    private      StringBuilder                stringBuilder;
     //    Vector3 sunPosition = new Vector3();
-    private boolean                      takeScreenShot;
-    List<ScheduledTask> tasks = new ArrayList<ScheduledTask>();
-    private      float    timeOfDay;
+    private      boolean                      takeScreenShot;
+    private      float                        timeOfDay;
     //	private ModelInstance uberModelInstance;
-    public final Universe universe;
-    private      boolean  vsyncEnabled = true;
+    public final Universe                     universe;
+    private      boolean                      vsyncEnabled = true;
 
     public GameEngine3D(final IContextFactory contextFactory, final Universe universe, final LaunchMode launchMode) throws Exception {
         this.contextFactory = contextFactory;
@@ -292,7 +275,8 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
             createJumpGates();
 
             if (launchMode == LaunchMode.demo) {
-                startDemoMode();
+                demo = new Demo(this, launchMode);
+                demo.startDemoMode();
             }
             if (universe.selected != null) {
                 universe.setSelected(universe.selected, true);
@@ -314,7 +298,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
         if (planet != null) lookat = new Vector3(planet.x, 0, planet.z);
         else
             lookat = new Vector3(0, 0, 0);
-        camera.position.set(lookat.x /*+ CAMERA_OFFSET_X / Universe.WORLD_SCALE*/, lookat.y + CAMERA_OFFSET_Y / Universe.WORLD_SCALE, lookat.z + CAMERA_OFFSET_Z / Universe.WORLD_SCALE);
+        camera.position.set(lookat.x + CAMERA_OFFSET_X / Universe.WORLD_SCALE, lookat.y + CAMERA_OFFSET_Y / Universe.WORLD_SCALE, lookat.z + CAMERA_OFFSET_Z / Universe.WORLD_SCALE);
         camera.up.set(0, 1, 0);
         camera.lookAt(lookat);
         camera.near = 2f;
@@ -490,15 +474,6 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
 
     private void exit() {
         Gdx.app.exit();
-    }
-
-    private void export(final String fileName, final List<DemoString> Strings) throws IOException {
-        final FileWriter  fileWriter  = new FileWriter(fileName);
-        final PrintWriter printWriter = new PrintWriter(fileWriter);
-        for (final DemoString demoString : Strings) {
-            printWriter.println(demoString.text);
-        }
-        printWriter.close();
     }
 
     public float getAngle() {
@@ -726,7 +701,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
                 if (launchMode == LaunchMode.demo) launchMode = LaunchMode.normal;
                 else launchMode = LaunchMode.demo;
                 try {
-                    startDemoMode();
+                    demo.startDemoMode();
                 } catch (OpenAlException e) {
                     throw new RuntimeException(e);
                 }
@@ -939,7 +914,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
 
         renderEngine.renderEngine2D.batch.begin();
         renderUniverse();
-        renderDemo(deltaTime);
+        demo.renderDemo(deltaTime);
         renderEngine.renderEngine2D.batch.end();
 
         renderEngine.gpuGraph.end();
@@ -969,112 +944,6 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
         audioEngine.radioTTS.renderAllTTSStrings(names);
     }
 
-    private void renderDemo(float deltaTime) throws IOException, OpenAlException {
-
-        if (launchMode == LaunchMode.demo) {
-            if (tasks.isEmpty())
-                startDemoMode();
-            else if (tasks.get(0).afterSeconds * 1000 + demoStartTime < System.currentTimeMillis()) {
-                ScheduledTask task = tasks.get(0);
-                if (lastDemoMode != demoMode) {
-                    logger.info(demoMode.name());
-                    lastDemoMode = demoMode;
-                }
-                switch (demoMode) {
-                    case BLEND_OUT -> {
-                        long deltaSeconds = (System.currentTimeMillis() - blendTime);
-                        if (deltaSeconds > BLEND_TIME_MS) {
-                            demoMode = EXECUTE;
-                        } else {
-                            renderEngine.getFadeEffect().setIntensity(1f - deltaSeconds / BLEND_TIME_MS);
-                        }
-                    }
-                    case BLEND_IN -> {
-                        long deltaSeconds = (System.currentTimeMillis() - blendTime);
-                        if (deltaSeconds > BLEND_TIME_MS) {
-                            tasks.remove(0);
-                            demoMode = QUERY;
-                        } else {
-                            renderEngine.getFadeEffect().setIntensity(deltaSeconds / BLEND_TIME_MS);
-                        }
-                    }
-                    case EXECUTE -> {
-                        logger.info(String.format("Executing task %d", demoIndex++));
-                        task.execute();
-                        blendTime = System.currentTimeMillis();
-                        if (task.requiresBlending()) {
-                            demoMode = DemoMode.BLEND_IN;
-                        } else {
-                            tasks.remove(0);
-                            demoMode = QUERY;
-                        }
-                    }
-                    case QUERY -> {
-                        if (task.requiresBlending()) {
-                            blendTime = System.currentTimeMillis();
-                            demoMode  = DemoMode.BLEND_OUT;
-                        } else
-                            demoMode = EXECUTE;
-                    }
-                }
-            }
-            final float lineHeightFactor = 2f;
-            if (demoText.isEmpty()) {
-                demoText.add(new DemoString("Mercator", getAtlasManager().bold128Font));
-                demoText.add(new DemoString("A computer game implementation of a closed economical simulation.", getAtlasManager().demoMidFont));
-                demoText.add(new DemoString(String.format("The current world is generated proceduraly and includes %d cities, %d factories, %d traders and %d sims.", universe.planetList.size(), universe.planetList.size() * 2, universe.traderList.size(), universe.simList.size()), getAtlasManager().demoMidFont));
-                demoText.add(new DemoString(String.format("There exist %d static models, %d dynamic models, %d audio producers.", renderEngine.staticGameObjects.size, renderEngine.dynamicGameObjects.size, audioEngine.getNumberOfAudioProducers()), getAtlasManager().demoMidFont));
-                demoText.add(new DemoString("The amount of wealth in the system, including products and money is constant at all times. ", getAtlasManager().demoMidFont));
-                demoText.add(new DemoString("Factories pay wages to sims to produce goods that are sold on a free market.", getAtlasManager().demoMidFont));
-                demoText.add(new DemoString("Some sims are traders that buy products in one city and sell them with profit in another city.", getAtlasManager().demoMidFont));
-                demoText.add(new DemoString("All sims have needs that they need to fulfill else they die.", getAtlasManager().demoMidFont));
-                demoText.add(new DemoString("All sims have cravings that they need to fulfill to keep their satisfaction level up.", getAtlasManager().demoMidFont));
-                demoText.add(new DemoString("All sounds are generated by a openal based audio render engine for libgdx supporting procedurally generated audio using HRTF.", getAtlasManager().demoMidFont));
-                //				demoText.add(new DemoString("Demo song is 'abyss' by Abdalla Bushnaq.", render2DMaster.atlasManager.demoMidFont));
-                demoText.add(new DemoString("Work in progress...", getAtlasManager().demoMidFont));
-                demoText.add(new DemoString("Developed using libgdx and gdx-gltf open source frameworks.", getAtlasManager().demoMidFont));
-                export("target/demo.txt", demoText);
-            }
-
-            Color demoTextColor;
-//            if (renderEngine.isNight())
-            demoTextColor = new Color(1f, 1f, 1f, 0.2f);
-//            else demoTextColor = new Color(0f, 0f, 0f, 0.6f);
-            float deltaY = 0;
-
-            final GlyphLayout layout = new GlyphLayout();
-            layout.setText(demoText.get(0).font, demoText.get(0).text);
-            final float width = layout.width;// contains the width of the current set text
-            //		final float height = layout.height; // contains the height of the current set text
-
-            final float topMargine    = 50f;
-            final float buttomMargine = 200f;
-            for (int i = 0; i < demoText.size(); i++) {
-                final DemoString ds = demoText.get(i);
-                ds.font.setColor(demoTextColor);
-                final float y = demoTextY - deltaY;
-                if (y < buttomMargine) {
-                    ds.font.setColor(demoTextColor);
-                    ds.font.getColor().a = 0f;
-                } else if (y < buttomMargine * 2) {
-                    ds.font.setColor(demoTextColor);
-                    ds.font.getColor().a = demoTextColor.a * (y - buttomMargine) / buttomMargine;
-                } else if (y > renderEngine.renderEngine2D.height - topMargine) {
-                    ds.font.setColor(demoTextColor);
-                    ds.font.getColor().a = 0;
-                } else if (y > renderEngine.renderEngine2D.height - topMargine * 2) {
-                    ds.font.setColor(demoTextColor);
-                    ds.font.getColor().a = demoTextColor.a * (1 - (y - renderEngine.renderEngine2D.height + topMargine * 2) / topMargine);
-                } else {
-                    ds.font.setColor(demoTextColor);
-                }
-                final GlyphLayout lastLayout = ds.font.draw(renderEngine.renderEngine2D.batch, ds.text, demoTextX, y, width, Align.left, true);
-                deltaY += lastLayout.height * lineHeightFactor;
-            }
-            demoTextY += 100 * deltaTime;
-            if (demoTextY - deltaY > renderEngine.renderEngine2D.height * lineHeightFactor) demoTextY = 0;
-        }
-    }
 
     private void renderGoods() {
         for (final Planet planet : universe.planetList) {
@@ -1112,6 +981,12 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
             stringBuilder.append(" FPS ").append(Gdx.graphics.getFramesPerSecond());
             labels.get(labelIndex).setText(stringBuilder);
             labelIndex++;
+        }
+        //demo mode
+        {
+            stringBuilder.setLength(0);
+            stringBuilder.append(String.format(" demo index(%d) demo time=%s", demo.index, TimeUtil.create24hDurationString(System.currentTimeMillis() - demo.startTime, true, false, true, true, false)));
+            labels.get(labelIndex++).setText(stringBuilder);
         }
         //camera properties
         {
@@ -1364,29 +1239,6 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
         renderEngine.environment.set(PBRCubemapAttribute.createSpecularEnv(specularCubemap));
         renderEngine.environment.set(new PBRTextureAttribute(PBRTextureAttribute.BRDFLUTTexture, brdfLUT));
         renderEngine.environment.set(new PBRFloatAttribute(PBRFloatAttribute.ShadowBias, .00f));
-    }
-
-    private void startDemoMode() throws OpenAlException {
-        int i     = 1;
-        int delta = 20;
-//        tasks.add(new PositionCamera(this, 0, 3, new Vector3(8697f, 153f, 7539f), new Vector3(8019f, 0f, -8639f)));
-        tasks.add(new PositionCamera(this, i++ * delta, 3, "P-81"));
-        tasks.add(new PositionCamera(this, i++ * delta, 3, "P-80"));
-        tasks.add(new PositionCamera(this, i++ * delta, 3, "P-98"));
-        tasks.add(new PositionCamera(this, i++ * delta, 3, "P-160"));
-        tasks.add(new End(this, i++ * delta));
-
-//        renderEngine.getDepthOfFieldEffect().setEnabled(true);
-//        updateDepthOfFieldFocusDistance();
-        renderEngine.setAlwaysDay(false);
-        oggPlayer = audioEngine.createAudioProducer(OggPlayer.class);
-        oggPlayer.setFile(Gdx.files.internal(AtlasManager.getAssetsFolderName() + "/audio/06-abyss(m).ogg"));
-        oggPlayer.setGain(1.0f);
-        oggPlayer.play();
-        AudioEngine.checkAlError("Failed to set listener orientation with error #");
-        demoIndex     = 0;
-        demoStartTime = System.currentTimeMillis();
-        demoTextY     = 0;
     }
 
     @Override

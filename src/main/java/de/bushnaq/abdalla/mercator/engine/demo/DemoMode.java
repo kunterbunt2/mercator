@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package de.bushnaq.abdalla.mercator.engine;
+package de.bushnaq.abdalla.mercator.engine.demo;
 
 public enum DemoMode {
     BLEND_OUT, BLEND_IN, EXECUTE, QUERY, UNDEFINED

@@ -257,7 +257,7 @@ public class Trader3DRenderer extends ObjectRenderer<GameEngine3D> {
             }
 
             TextureAtlas.AtlasRegion systemTextureRegion = renderEngine.getGameEngine().getAtlasManager().systemTextureRegion;
-            renderEngine.renderEngine25D.fillCircle(systemTextureRegion, 0, 0, TRADER_SIZE_Z, 128, new Color(.2f, .2f, .4f, 0.2f));
+//            renderEngine.renderEngine25D.fillCircle(systemTextureRegion, 0, 0, TRADER_SIZE_Z, 128, new Color(.2f, .2f, .4f, 0.2f));
             renderEngine.renderEngine25D.circle(renderEngine.getGameEngine().getAtlasManager().patternCircle24, 0, 0, TRADER_SIZE_Z - .5f, 1f, new Color(.9f, .9f, .9f, .5f), 128);
             if (renderEngine.getGameEngine().getCameraZoomIndex() < 3) renderEngine.renderEngine25D.renderRose(systemTextureRegion, renderEngine.getGameEngine().getAtlasManager().modelFont, translation, TRADER_SIZE_Z / 2, -TRADER_SIZE_Y);
             BitmapFont modelFont = renderEngine.getGameEngine().getAtlasManager().modelFont;

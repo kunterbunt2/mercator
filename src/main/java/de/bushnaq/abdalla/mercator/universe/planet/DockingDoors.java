@@ -26,12 +26,12 @@ import de.bushnaq.abdalla.mercator.engine.GameEngine3D;
 import java.util.ArrayList;
 
 public class DockingDoors extends ArrayList<DockingDoor> {
-    private final float[]   position = new float[3];
     private       OggPlayer oggPlayer;
+    private final float[]   position = new float[3];
 
     public DockingDoors(Planet planet) {
         add(new DockingDoor(planet, planet.getName().substring(2, 3), -32f, 0));
-        add(new DockingDoor(planet, planet.getName().substring(3, planet.getName().length()), 32f, 0));
+        add(new DockingDoor(planet, planet.getName().substring(3), 32f, 0));
         position[0] = planet.x;
         position[1] = planet.y;
         position[2] = planet.z;
@@ -53,6 +53,7 @@ public class DockingDoors extends ArrayList<DockingDoor> {
             oggPlayer.setGain(200.0f);
             oggPlayer.setAmbient(false);
             oggPlayer.setLoop(true);
+            oggPlayer.ignore(true);
         } catch (OpenAlException e) {
             throw new RuntimeException(e);
         }

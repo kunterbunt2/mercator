@@ -73,14 +73,18 @@ public class PositionCamera extends ScheduledTask {
             gameEngine.getCamera().lookAt(lookat);
 //            gameEngine.getCamera().near = 2f;
 //            gameEngine.getCamera().far  = 8000f;
-            gameEngine.getCamera().update();
-            gameEngine.getCamera().setDirty(true);
+            gameEngine.getCamController().setTargetZoomIndex(zoomIndex);
             gameEngine.getCamController().zoomIndex = zoomIndex;
+            gameEngine.getCamController().update(true);
+            gameEngine.getCamera().update(true);
+            gameEngine.getCamera().setDirty(true);
         } else {
             gameEngine.getCamera().position.set(position);
             gameEngine.getCamera().up.set(Vector3.Y);
             gameEngine.getCamera().lookAt(lookAt);
+            gameEngine.getCamController().setTargetZoomIndex(zoomIndex);
             gameEngine.getCamController().zoomIndex = zoomIndex;
+            gameEngine.getCamController().update(true);
             gameEngine.getCamera().update();
             gameEngine.getCamera().setDirty(true);
         }

@@ -37,11 +37,11 @@ import de.bushnaq.abdalla.engine.camera.MovingCamera;
 import de.bushnaq.abdalla.mercator.audio.synthesis.MercatorAudioEngine;
 import de.bushnaq.abdalla.mercator.desktop.Context;
 import de.bushnaq.abdalla.mercator.desktop.LaunchMode;
+import de.bushnaq.abdalla.mercator.engine.camera.CameraProperties;
+import de.bushnaq.abdalla.mercator.engine.camera.ZoomingCameraInputController;
 import de.bushnaq.abdalla.mercator.engine.demo.Demo;
-import de.bushnaq.abdalla.mercator.renderer.CameraProperties;
 import de.bushnaq.abdalla.mercator.renderer.ScreenListener;
 import de.bushnaq.abdalla.mercator.renderer.ShowGood;
-import de.bushnaq.abdalla.mercator.renderer.ZoomingCameraInputController;
 import de.bushnaq.abdalla.mercator.ui.Info;
 import de.bushnaq.abdalla.mercator.universe.Universe;
 import de.bushnaq.abdalla.mercator.universe.good.Good;
@@ -70,7 +70,7 @@ import java.util.List;
 import java.util.Map;
 
 public class GameEngine3D implements ScreenListener, ApplicationListener, InputProcessor, RenderEngineExtension, GameEngine {
-    public static final  float                        CAMERA_OFFSET_X               = 300f;
+    public static final  float                        CAMERA_OFFSET_X               = 100f;
     public static final  float                        CAMERA_OFFSET_Y               = 300f;
     public static final  float                        CAMERA_OFFSET_Z               = 500f;
     static final         Color                        DEBUG_GRID_BORDER_COLOR       = new Color(1f, 1f, 1f, 0.1f);
@@ -274,10 +274,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
 //			createLand();
             createJumpGates();
 
-            if (launchMode == LaunchMode.demo) {
-                demo = new Demo(this, launchMode);
-                demo.startDemoMode();
-            }
+            demo = new Demo(this, launchMode);
             if (universe.selected != null) {
                 universe.setSelected(universe.selected, true);
                 followMode = true;
@@ -296,8 +293,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
         if (planet == null && !universe.planetList.isEmpty()) planet = universe.planetList.get(0);
         Vector3 lookat;
         if (planet != null) lookat = new Vector3(planet.x, 0, planet.z);
-        else
-            lookat = new Vector3(0, 0, 0);
+        else lookat = new Vector3(0, 0, 0);
         camera.position.set(lookat.x + CAMERA_OFFSET_X / Universe.WORLD_SCALE, lookat.y + CAMERA_OFFSET_Y / Universe.WORLD_SCALE, lookat.z + CAMERA_OFFSET_Z / Universe.WORLD_SCALE);
         camera.up.set(0, 1, 0);
         camera.lookAt(lookat);
@@ -1163,8 +1159,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
 
     private void setupImageBasedLighting(float timeOfDay) {
         if (old) {
-            if (brdfLUT == null)
-                brdfLUT = new Texture(Gdx.files.classpath("net/mgsx/gltf/shaders/brdfLUT.png"));
+            if (brdfLUT == null) brdfLUT = new Texture(Gdx.files.classpath("net/mgsx/gltf/shaders/brdfLUT.png"));
             // setup quick IBL (image based lighting)
             {
                 Integer             index               = (int) (angle);
@@ -1178,10 +1173,8 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
                     {
                         celestialBodyList.clear();
                         int numberOfBodies;
-                        if (index == -1)
-                            numberOfBodies = 10;
-                        else
-                            numberOfBodies = NUMBER_OF_CELESTIAL_BODIES;
+                        if (index == -1) numberOfBodies = 10;
+                        else numberOfBodies = NUMBER_OF_CELESTIAL_BODIES;
                         logger.info(String.format("numberOfBodies=%d", numberOfBodies));
                         celestialBodyList.add(new CelestialBody(sun.direction, sun.color, 10000f));
                         for (int i = 0; i < numberOfBodies; i++) {

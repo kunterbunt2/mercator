@@ -52,9 +52,59 @@ public class Demo {
     private final float            textX = 100;
     private       float            textY = 0;
 
-    public Demo(GameEngine3D gameEngine, LaunchMode launchMode) {
+    public Demo(GameEngine3D gameEngine, LaunchMode launchMode) throws OpenAlException {
         this.gameEngine = gameEngine;
         this.launchMode = launchMode;
+        if (launchMode == LaunchMode.demo) {
+            startDemoMode();
+        }
+    }
+
+    private void executeTasks() throws OpenAlException {
+        if (tasks.isEmpty()) startDemoMode();
+        else if (tasks.get(0).afterSeconds * 1000 + startTime < System.currentTimeMillis()) {
+            ScheduledTask task = tasks.get(0);
+            if (lastMode != mode) {
+                logger.info(mode.name());
+                lastMode = mode;
+            }
+            switch (mode) {
+                case BLEND_OUT -> {
+                    long deltaSeconds = (System.currentTimeMillis() - blendTime);
+                    if (deltaSeconds > BLEND_TIME_MS) {
+                        mode = EXECUTE;
+                    } else {
+                        gameEngine.renderEngine.getFadeEffect().setIntensity(1f - deltaSeconds / BLEND_TIME_MS);
+                    }
+                }
+                case BLEND_IN -> {
+                    long deltaSeconds = (System.currentTimeMillis() - blendTime);
+                    if (deltaSeconds > BLEND_TIME_MS) {
+                        tasks.remove(0);
+                        mode = QUERY;
+                    } else {
+                        gameEngine.renderEngine.getFadeEffect().setIntensity(deltaSeconds / BLEND_TIME_MS);
+                    }
+                }
+                case EXECUTE -> {
+                    logger.info(String.format("Executing task %d", index++));
+                    task.execute();
+                    blendTime = System.currentTimeMillis();
+                    if (task.requiresBlending()) {
+                        mode = DemoMode.BLEND_IN;
+                    } else {
+                        tasks.remove(0);
+                        mode = QUERY;
+                    }
+                }
+                case QUERY -> {
+                    if (task.requiresBlending()) {
+                        blendTime = System.currentTimeMillis();
+                        mode      = DemoMode.BLEND_OUT;
+                    } else mode = EXECUTE;
+                }
+            }
+        }
     }
 
     private void export(final String fileName, final List<DemoString> Strings) throws IOException {
@@ -69,50 +119,7 @@ public class Demo {
     public void renderDemo(float deltaTime) throws IOException, OpenAlException {
 
         if (launchMode == LaunchMode.demo) {
-            if (tasks.isEmpty()) startDemoMode();
-            else if (tasks.get(0).afterSeconds * 1000 + startTime < System.currentTimeMillis()) {
-                ScheduledTask task = tasks.get(0);
-                if (lastMode != mode) {
-                    logger.info(mode.name());
-                    lastMode = mode;
-                }
-                switch (mode) {
-                    case BLEND_OUT -> {
-                        long deltaSeconds = (System.currentTimeMillis() - blendTime);
-                        if (deltaSeconds > BLEND_TIME_MS) {
-                            mode = EXECUTE;
-                        } else {
-                            gameEngine.renderEngine.getFadeEffect().setIntensity(1f - deltaSeconds / BLEND_TIME_MS);
-                        }
-                    }
-                    case BLEND_IN -> {
-                        long deltaSeconds = (System.currentTimeMillis() - blendTime);
-                        if (deltaSeconds > BLEND_TIME_MS) {
-                            tasks.remove(0);
-                            mode = QUERY;
-                        } else {
-                            gameEngine.renderEngine.getFadeEffect().setIntensity(deltaSeconds / BLEND_TIME_MS);
-                        }
-                    }
-                    case EXECUTE -> {
-                        logger.info(String.format("Executing task %d", index++));
-                        task.execute();
-                        blendTime = System.currentTimeMillis();
-                        if (task.requiresBlending()) {
-                            mode = DemoMode.BLEND_IN;
-                        } else {
-                            tasks.remove(0);
-                            mode = QUERY;
-                        }
-                    }
-                    case QUERY -> {
-                        if (task.requiresBlending()) {
-                            blendTime = System.currentTimeMillis();
-                            mode      = DemoMode.BLEND_OUT;
-                        } else mode = EXECUTE;
-                    }
-                }
-            }
+            executeTasks();
             final float lineHeightFactor = 2f;
             if (text.isEmpty()) {
                 text.add(new DemoString("Mercator", gameEngine.getAtlasManager().bold128Font));
@@ -175,10 +182,10 @@ public class Demo {
         int delta = 20;
 //        tasks.add(new PositionCamera(this, 0, 3, new Vector3(8697f, 153f, 7539f), new Vector3(8019f, 0f, -8639f)));
         //starting ith T-81
-        tasks.add(new PositionCamera(gameEngine, i++ * delta, 3, "P-80"));
-        tasks.add(new PositionCamera(gameEngine, i++ * delta, 3, "P-98"));
-        tasks.add(new PositionCamera(gameEngine, i++ * delta, 3, "P-160"));
-        tasks.add(new PositionCamera(gameEngine, i++ * delta, 3, "P-130"));
+        tasks.add(new PositionCamera(gameEngine, i++ * delta, 2, "P-80"));
+        tasks.add(new PositionCamera(gameEngine, i++ * delta, 2, "P-98"));
+        tasks.add(new PositionCamera(gameEngine, i++ * delta, 2, "P-160"));
+        tasks.add(new PositionCamera(gameEngine, i++ * delta, 2, "P-130"));
 //        tasks.add(new End(gameEngine, i++ * delta));
 
 //        renderEngine.getDepthOfFieldEffect().setEnabled(true);

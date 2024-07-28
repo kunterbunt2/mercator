@@ -14,24 +14,30 @@
  * limitations under the License.
  */
 
-package de.bushnaq.abdalla.mercator.renderer;
+package de.bushnaq.abdalla.mercator.engine.camera;
 
+/**
+ * properties that can change when moving from one camera zoom index to the next
+ */
 public class CameraProperties {
-    public final float distanceXZ;//distance to lookat point
+    public final float distanceXZ;//distance to look-at point
+    public final float distanceY;//height of look-at point
     public final float far;//the far clipping plane distance, has to be positive
     public final float focalDistance;
     public final float y;//height of camera
 
-    public CameraProperties(float y, float distanceXZ, float far, float focalDistance) {
+    public CameraProperties(float y, float distanceXZ, float distanceY, float far, float focalDistance) {
         this.y             = y;
         this.distanceXZ    = distanceXZ;
+        this.distanceY     = distanceY;
         this.far           = far;
         this.focalDistance = focalDistance;
     }
 
-    public CameraProperties(float y, float distanceXZ, float far) {
+    public CameraProperties(float y, float distanceXZ, float distanceY, float far) {
         this.y             = y;
         this.distanceXZ    = distanceXZ;
+        this.distanceY     = distanceY;
         this.far           = far;
         this.focalDistance = 0;
     }

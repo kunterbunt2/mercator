@@ -41,15 +41,15 @@ import java.util.Map;
 
 public class Demo {
     private final GameEngine3D            gameEngine;
-    public        int                     index           = 0;
+    //    public        int                     index           = 0;
     private final LaunchMode              launchMode;
     private final Logger                  logger          = LoggerFactory.getLogger(this.getClass());
     public        MercatorRandomGenerator randomGenerator = new MercatorRandomGenerator(1, null);
     public        long                    startTime;//start time of demo
-    List<ScheduledTask> tasks = new ArrayList<>();
-    private final List<DemoString> text  = new ArrayList<>();
-    private final float            textX = 100;
-    private       float            textY = 0;
+    private final List<ScheduledTask>     tasks           = new ArrayList<>();
+    private final List<DemoString>        text            = new ArrayList<>();
+    private final float                   textX           = 100;
+    private       float                   textY           = 0;
 
     public Demo(GameEngine3D gameEngine, LaunchMode launchMode) throws OpenAlException {
         this.gameEngine = gameEngine;
@@ -63,12 +63,6 @@ public class Demo {
         if (tasks.isEmpty()) startDemoMode();
         if (tasks.get(0).execute(deltaTime)) {
             tasks.remove(0);
-
-
-//            gameEngine.getCamera().rotateAround(gameEngine.getCamera().lookat, Vector3.Y, -angle * deltaTime);
-//            gameEngine.getCamera().setDirty(true);
-//            gameEngine.getCamera().update();
-
         }
     }
 
@@ -160,8 +154,12 @@ public class Demo {
             if (neighbors > 3) {
                 List<Planet> planetList = planetNeighbors.get(neighbors);
                 for (Planet planet : planetList) {
-                    int   zoomIndex = (int) (4 * Math.random());
-                    float angle     = (float) (360 * Math.random());
+                    int zoomIndex;
+                    if (randomGenerator.nextInt(2) == 1)
+                        zoomIndex = 2;
+                    else
+                        zoomIndex = randomGenerator.nextInt(7);
+                    float angle = (float) randomGenerator.nextInt(360);
                     if (firstPlanet) {
                         firstPlanet = false;
                         tasks.add(new PositionCamera(gameEngine, zoomIndex, planet.name));
@@ -195,7 +193,7 @@ public class Demo {
         gameEngine.oggPlayer.setGain(.1f);
         gameEngine.oggPlayer.play();
         AudioEngine.checkAlError("Failed to set listener orientation with error #");
-        index     = 0;
+//        index     = 0;
         textY     = 0;
         startTime = System.currentTimeMillis();
     }

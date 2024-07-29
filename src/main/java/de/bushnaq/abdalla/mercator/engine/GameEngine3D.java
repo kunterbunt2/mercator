@@ -984,7 +984,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
         //demo mode
         {
             stringBuilder.setLength(0);
-            stringBuilder.append(String.format(" demo index(%d) demo time=%s", demo.index, TimeUtil.create24hDurationString(System.currentTimeMillis() - demo.startTime, true, false, true, true, false)));
+            stringBuilder.append(String.format(" demo time=%s", TimeUtil.create24hDurationString(System.currentTimeMillis() - demo.startTime, true, false, true, true, false)));
             labels.get(labelIndex++).setText(stringBuilder);
         }
         //camera properties

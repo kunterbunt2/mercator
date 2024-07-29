@@ -316,6 +316,9 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
         inputMultiplexer.addProcessor(inputProcessor);
         inputMultiplexer.addProcessor(camController);
         Gdx.input.setInputProcessor(inputMultiplexer);
+        camController.setTargetZoomIndex(2);
+        camController.zoomIndex = 2;
+        camController.update(true);
     }
 
     private void createJumpGates() {

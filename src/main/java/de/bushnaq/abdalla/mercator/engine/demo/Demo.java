@@ -26,6 +26,8 @@ import de.bushnaq.abdalla.engine.audio.OpenAlException;
 import de.bushnaq.abdalla.mercator.desktop.LaunchMode;
 import de.bushnaq.abdalla.mercator.engine.AtlasManager;
 import de.bushnaq.abdalla.mercator.engine.GameEngine3D;
+import de.bushnaq.abdalla.mercator.universe.planet.Planet;
+import de.bushnaq.abdalla.mercator.util.MercatorRandomGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,20 +35,17 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-
-import static de.bushnaq.abdalla.mercator.engine.demo.DemoMode.*;
+import java.util.Map;
 
 public class Demo {
-    private static final float        BLEND_TIME_MS = 1000f;
-    private              long         blendTime;
-    private final        GameEngine3D gameEngine;
-    public               int          index         = 0;
-    private              DemoMode     lastMode      = UNDEFINED;
-    private final        LaunchMode   launchMode;
-    private final        Logger       logger        = LoggerFactory.getLogger(this.getClass());
-    private              DemoMode     mode          = QUERY;
-    public               long         startTime;
+    private final GameEngine3D            gameEngine;
+    public        int                     index           = 0;
+    private final LaunchMode              launchMode;
+    private final Logger                  logger          = LoggerFactory.getLogger(this.getClass());
+    public        MercatorRandomGenerator randomGenerator = new MercatorRandomGenerator(1, null);
+    public        long                    startTime;//start time of demo
     List<ScheduledTask> tasks = new ArrayList<>();
     private final List<DemoString> text  = new ArrayList<>();
     private final float            textX = 100;
@@ -60,50 +59,16 @@ public class Demo {
         }
     }
 
-    private void executeTasks() throws OpenAlException {
+    private void executeTasks(float deltaTime) throws OpenAlException {
         if (tasks.isEmpty()) startDemoMode();
-        else if (tasks.get(0).afterSeconds * 1000 + startTime < System.currentTimeMillis()) {
-            ScheduledTask task = tasks.get(0);
-            if (lastMode != mode) {
-                logger.info(mode.name());
-                lastMode = mode;
-            }
-            switch (mode) {
-                case BLEND_OUT -> {
-                    long deltaSeconds = (System.currentTimeMillis() - blendTime);
-                    if (deltaSeconds > BLEND_TIME_MS) {
-                        mode = EXECUTE;
-                    } else {
-                        gameEngine.renderEngine.getFadeEffect().setIntensity(1f - deltaSeconds / BLEND_TIME_MS);
-                    }
-                }
-                case BLEND_IN -> {
-                    long deltaSeconds = (System.currentTimeMillis() - blendTime);
-                    if (deltaSeconds > BLEND_TIME_MS) {
-                        tasks.remove(0);
-                        mode = QUERY;
-                    } else {
-                        gameEngine.renderEngine.getFadeEffect().setIntensity(deltaSeconds / BLEND_TIME_MS);
-                    }
-                }
-                case EXECUTE -> {
-                    logger.info(String.format("Executing task %d", index++));
-                    task.execute();
-                    blendTime = System.currentTimeMillis();
-                    if (task.requiresBlending()) {
-                        mode = DemoMode.BLEND_IN;
-                    } else {
-                        tasks.remove(0);
-                        mode = QUERY;
-                    }
-                }
-                case QUERY -> {
-                    if (task.requiresBlending()) {
-                        blendTime = System.currentTimeMillis();
-                        mode      = DemoMode.BLEND_OUT;
-                    } else mode = EXECUTE;
-                }
-            }
+        if (tasks.get(0).execute(deltaTime)) {
+            tasks.remove(0);
+
+
+//            gameEngine.getCamera().rotateAround(gameEngine.getCamera().lookat, Vector3.Y, -angle * deltaTime);
+//            gameEngine.getCamera().setDirty(true);
+//            gameEngine.getCamera().update();
+
         }
     }
 
@@ -119,7 +84,7 @@ public class Demo {
     public void renderDemo(float deltaTime) throws IOException, OpenAlException {
 
         if (launchMode == LaunchMode.demo) {
-            executeTasks();
+            executeTasks(deltaTime);
             final float lineHeightFactor = 2f;
             if (text.isEmpty()) {
                 text.add(new DemoString("Mercator", gameEngine.getAtlasManager().bold128Font));
@@ -178,15 +143,49 @@ public class Demo {
     }
 
     public void startDemoMode() throws OpenAlException {
-        int i     = 1;
-        int delta = 20;
-//        tasks.add(new PositionCamera(this, 0, 3, new Vector3(8697f, 153f, 7539f), new Vector3(8019f, 0f, -8639f)));
-        //starting ith T-81
-        tasks.add(new PositionCamera(gameEngine, i++ * delta, 2, "P-80"));
-        tasks.add(new PositionCamera(gameEngine, i++ * delta, 2, "P-98"));
-        tasks.add(new PositionCamera(gameEngine, i++ * delta, 2, "P-160"));
-        tasks.add(new PositionCamera(gameEngine, i++ * delta, 2, "P-130"));
-//        tasks.add(new End(gameEngine, i++ * delta));
+        int                        secondsDelta      = 18;
+        int                        firstSecondsDelta = 19;
+        Map<Integer, List<Planet>> planetNeighbors   = new HashMap<>();
+
+        for (Planet planet : gameEngine.universe.planetList) {
+            int          gateCount  = planet.pathList.size();
+            List<Planet> planetList = planetNeighbors.get(gateCount);
+            if (planetList == null)
+                planetList = new ArrayList<>();
+            planetList.add(planet);
+            planetNeighbors.put(gateCount, planetList);
+        }
+        boolean firstPlanet = true;
+        for (Integer neighbors : planetNeighbors.keySet()) {
+            if (neighbors > 3) {
+                List<Planet> planetList = planetNeighbors.get(neighbors);
+                for (Planet planet : planetList) {
+                    int   zoomIndex = (int) (4 * Math.random());
+                    float angle     = (float) (360 * Math.random());
+                    if (firstPlanet) {
+                        firstPlanet = false;
+                        tasks.add(new PositionCamera(gameEngine, zoomIndex, planet.name));
+                        tasks.add(new RotateCamera(gameEngine, angle));
+                        tasks.add(new PauseTask(gameEngine, firstSecondsDelta));
+                    } else {
+                        tasks.add(new PositionCamera(gameEngine, zoomIndex, planet.name));
+                        tasks.add(new RotateCamera(gameEngine, angle));
+                        tasks.add(new FadeInTask(gameEngine));
+                        tasks.add(new PauseTask(gameEngine, secondsDelta));
+//                        if (randomGenerator.nextInt(10) == 0)
+//                        {
+//                            for (int zoomIndex = 0; zoomIndex < gameEngine.getCamController().zoomFactors.length; zoomIndex++) {
+//                                tasks.add(new ZoomCamera(gameEngine, zoomIndex, planet.name));
+//                                tasks.add(new RotateingCamera(gameEngine, 1, 0));
+//                            }
+//                        } else
+                        {
+                        }
+                    }
+                    tasks.add(new FadeOutTask(gameEngine));
+                }
+            }
+        }
 
 //        renderEngine.getDepthOfFieldEffect().setEnabled(true);
 //        updateDepthOfFieldFocusDistance();
@@ -197,8 +196,8 @@ public class Demo {
         gameEngine.oggPlayer.play();
         AudioEngine.checkAlError("Failed to set listener orientation with error #");
         index     = 0;
-        startTime = System.currentTimeMillis();
         textY     = 0;
+        startTime = System.currentTimeMillis();
     }
 
 }

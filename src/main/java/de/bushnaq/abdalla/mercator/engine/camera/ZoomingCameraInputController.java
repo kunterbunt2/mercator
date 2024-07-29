@@ -160,7 +160,9 @@ public class ZoomingCameraInputController extends CameraInputController {
                 movingCamera.setDirty(true);
 //                logger.info(String.format("%f %f %f  %f %f %f", movingCamera.position.x, movingCamera.position.y, movingCamera.position.z, movingCamera.lookat.x, movingCamera.lookat.y, movingCamera.lookat.z));
 //                logger.info("");
-                progress += 0.03f;
+                //not if we are forcing and actually both zoom levels are the same, otherwise process will never be updated again
+                if (!force || targetZoomIndex != zoomIndex)
+                    progress += 0.03f;
                 if (progress >= 1.0f) {
                     progress  = 0;
                     zoomIndex = targetZoomIndex;

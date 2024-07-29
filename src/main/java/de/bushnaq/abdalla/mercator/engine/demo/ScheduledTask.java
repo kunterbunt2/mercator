@@ -21,16 +21,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public abstract class ScheduledTask {
-    public          long         afterSeconds;//after this time, trigger this action
+    public          long         durationMs;//duration of this task
     protected final GameEngine3D gameEngine;
     protected final Logger       logger = LoggerFactory.getLogger(this.getClass());
+    long taskStartTime;
 
-    public ScheduledTask(GameEngine3D gameEngine, int afterSeconds) {
-        this.gameEngine   = gameEngine;
-        this.afterSeconds = afterSeconds;
+    public ScheduledTask(GameEngine3D gameEngine, int durationSeconds) {
+        this.gameEngine = gameEngine;
+        this.durationMs = durationSeconds * 1000L;
     }
 
-    public abstract void execute();
+    /**
+     * @return true if task has finished and can be removed from the queue
+     */
+    public abstract boolean execute(float deltaTime);
 
-    public abstract boolean requiresBlending();
+    public abstract void subexecute(float deltaTime);
 }

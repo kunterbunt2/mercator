@@ -16,6 +16,16 @@
 
 package de.bushnaq.abdalla.mercator.engine.demo;
 
-public enum DemoMode {
-    EXECUTE, START, WAIT
+import de.bushnaq.abdalla.mercator.engine.GameEngine3D;
+
+public class PauseTask extends WaitAfterExecuteAbstractTask {
+
+    public PauseTask(GameEngine3D gameEngine, int afterSeconds) {
+        super(gameEngine, afterSeconds);
+    }
+
+    @Override
+    public void subexecute(float deltaTime) {
+    }
+
 }

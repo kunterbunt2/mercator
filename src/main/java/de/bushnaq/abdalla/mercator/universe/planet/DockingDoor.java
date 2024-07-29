@@ -133,7 +133,7 @@ public class DockingDoor {
     public void renderText(final RenderEngine3D<GameEngine3D> renderEngine) {
         Vector3          translation = new Vector3(x, y, z);
         final BitmapFont font        = renderEngine.getGameEngine().getAtlasManager().bold256Font;
-        renderEngine.renderEngine25D.renderTextCenterOnTop(translation, 0, 0, 4 + .1f, 0, font, Color.BLACK, PLANET_NAME_COLOR, title, 64);
+        renderEngine.renderEngine25D.renderTextCenterOnTop(translation, 0, 0, 4 + .2f, 0, font, Color.BLACK, PLANET_NAME_COLOR, title, 64);
 
     }
 

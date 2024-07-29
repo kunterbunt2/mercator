@@ -18,18 +18,27 @@ package de.bushnaq.abdalla.mercator.engine.demo;
 
 import de.bushnaq.abdalla.mercator.engine.GameEngine3D;
 
-public class End extends ScheduledTask {
+public class ZoomCamera extends ScheduledTask {
+    private final String name;
+    private final int    zoomIndex;
 
-    public End(GameEngine3D gameEngine, int afterSeconds) {
-        super(gameEngine, afterSeconds);
+    public ZoomCamera(GameEngine3D gameEngine, int zoomIndex, String name) {
+        super(gameEngine, 0);
+        this.zoomIndex = zoomIndex;
+        this.name      = name;
     }
 
     @Override
-    public void execute() {
+    public boolean execute(float deltaTime) {
+        gameEngine.getCamController().setTargetZoomIndex(zoomIndex);
+        gameEngine.getCamera().lookAt(gameEngine.getCamera().lookat);
+        gameEngine.getCamera().update(true);
+        gameEngine.getCamera().setDirty(true);
+        return true;
     }
 
     @Override
-    public boolean requiresBlending() {
-        return false;
+    public void subexecute(float deltaTime) {
+
     }
 }

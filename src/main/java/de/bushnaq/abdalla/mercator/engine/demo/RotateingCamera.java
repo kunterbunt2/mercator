@@ -16,6 +16,22 @@
 
 package de.bushnaq.abdalla.mercator.engine.demo;
 
-public enum DemoMode {
-    EXECUTE, START, WAIT
+import com.badlogic.gdx.math.Vector3;
+import de.bushnaq.abdalla.mercator.engine.GameEngine3D;
+
+public class RotateingCamera extends WaitDuringExecuteAbstractTask {
+    private final float angle;
+
+    public RotateingCamera(GameEngine3D gameEngine, int afterSeconds, float angle) {
+        super(gameEngine, afterSeconds);
+        this.angle = angle;
+    }
+
+    @Override
+    public void subexecute(float deltaTime) {
+        gameEngine.getCamera().rotateAround(gameEngine.getCamera().lookat, Vector3.Y, -angle * deltaTime);
+        gameEngine.getCamera().setDirty(true);
+        gameEngine.getCamera().update();
+    }
+
 }

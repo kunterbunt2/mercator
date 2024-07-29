@@ -18,8 +18,6 @@ package de.bushnaq.abdalla.mercator.universe.planet;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.PointLight;
@@ -478,24 +476,24 @@ public class Planet3DRenderer extends ObjectRenderer<GameEngine3D> {
             final float z    = planet.z;
             translation.set(planet.x, 0, planet.z);
             //draw text
-            final BitmapFont font = renderEngine.getGameEngine().getAtlasManager().bold256Font;
-            String           text = planet.getName();
+//            final BitmapFont font = renderEngine.getGameEngine().getAtlasManager().bold256Font;
+//            String           text = planet.getName();
 //            renderEngine.renderEngine25D.renderTextOnTop(translation, 0, -PLANET_3D_SIZE / 2, 10, -PLANET_3D_SIZE / 2, font, Color.BLACK, PLANET_NAME_COLOR, text, size);
-            {
-                final Matrix4     m        = new Matrix4();
-                final float       fontSize = font.getLineHeight();
-                final float       scaling  = size / fontSize;
-                final GlyphLayout layout   = new GlyphLayout();
-                layout.setText(font, text);
-                final float   width   = layout.width;// contains the width of the current set text
-                final float   height  = layout.height;// contains the width of the current set text
-                final Vector3 xVector = new Vector3(1, 0, 0);
-                m.setToTranslation(x + PLANET_3D_SIZE / 2 - width * scaling, 1, z + PLANET_3D_SIZE / 2 - height * 2 * scaling);
-                m.rotate(xVector, -90);
-                m.scale(scaling, scaling, 1f);
-                renderEngine.renderEngine25D.setTransformMatrix(m);
-                renderEngine.renderEngine25D.text(0, 0, font, Color.BLACK, PLANET_NAME_COLOR, text);
-            }
+//            {
+//                final Matrix4     m        = new Matrix4();
+//                final float       fontSize = font.getLineHeight();
+//                final float       scaling  = size / fontSize;
+//                final GlyphLayout layout   = new GlyphLayout();
+//                layout.setText(font, text);
+//                final float   width   = layout.width;// contains the width of the current set text
+//                final float   height  = layout.height;// contains the width of the current set text
+//                final Vector3 xVector = new Vector3(1, 0, 0);
+//                m.setToTranslation(x + PLANET_3D_SIZE / 2 - width * scaling, 1, z + PLANET_3D_SIZE / 2 - height * 2 * scaling);
+//                m.rotate(xVector, -90);
+//                m.scale(scaling, scaling, 1f);
+//                renderEngine.renderEngine25D.setTransformMatrix(m);
+//                renderEngine.renderEngine25D.text(0, 0, font, Color.BLACK, PLANET_NAME_COLOR, text);
+//            }
             int i = 0;
             for (final Good good : planet.getGoodList()) {
                 good.get3DRenderer().renderText(planet.x, planet.y, planet.z, renderEngine, i++);
@@ -513,7 +511,7 @@ public class Planet3DRenderer extends ObjectRenderer<GameEngine3D> {
                     renderEngine.renderEngine25D.setTransformMatrix(m);
                 }
                 TextureAtlas.AtlasRegion systemTextureRegion = renderEngine.getGameEngine().getAtlasManager().systemTextureRegion;
-                renderEngine.renderEngine25D.fillCircle(systemTextureRegion, 0, 0, PLANET_3D_SIZE, 128, new Color(.2f, .2f, .4f, 0.2f));
+//                renderEngine.renderEngine25D.fillCircle(systemTextureRegion, 0, 0, PLANET_3D_SIZE, 128, new Color(.2f, .2f, .4f, 0.2f));
                 renderEngine.renderEngine25D.circle(renderEngine.getGameEngine().getAtlasManager().patternCircle24, 0, 0, PLANET_3D_SIZE - .5f, 1f, new Color(.9f, .9f, .9f, .5f), 128);
                 if (renderEngine.getGameEngine().getCameraZoomIndex() < 4)
                     renderEngine.renderEngine25D.renderRose(systemTextureRegion, renderEngine.getGameEngine().getAtlasManager().modelFont, translation, PLANET_3D_SIZE / 2, -1);

@@ -256,7 +256,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
 
             assetManager = new AssetManager(universe);
             assetManager.create();
-            setupEnvironmentCreate();
+            createEnvironment();
             createStage();
             audioEngine.create(AtlasManager.getAssetsFolderName());
             audioEngine.enableHrtf(0);
@@ -302,6 +302,111 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
         camera.update();
         camera.setDirty(true);
         camera2D = new OrthographicCamera();
+    }
+
+    private void createEnvironment() {
+        // setup IBL (image based lighting)
+        if (renderEngine.isPbr()) {
+            updateEnvironment(timeOfDay);
+//            setupImageBasedLightingByFaceNames("clouds", "jpg", "jpg", "jpg", 10);
+//            if (renderEngine.isSkyBox()) {
+//                renderEngine.setDaySkyBox(new SceneSkybox(environmentNightCubemap));
+//                renderEngine.setNightSkyBox(new SceneSkybox(environmentNightCubemap));
+//            }
+//
+//            renderEngine.environment.set(PBRCubemapAttribute.createDiffuseEnv(diffuseCubemap));
+//            renderEngine.environment.set(PBRCubemapAttribute.createSpecularEnv(specularCubemap));
+//            renderEngine.environment.set(new PBRTextureAttribute(PBRTextureAttribute.BRDFLUTTexture, brdfLUT));
+//            renderEngine.environment.set(new PBRFloatAttribute(PBRFloatAttribute.ShadowBias, .001f));
+//            setupImageBasedLighting(timeOfDay);
+//            updateEnvironment(timeOfDay);
+        } else {
+        }
+//        if (renderEngine.isPbr()) {
+//            setupImageBasedLighting(0f);
+//            renderEngine.environment.set(PBRCubemapAttribute.createDiffuseEnv(diffuseCubemap));
+//            renderEngine.environment.set(PBRCubemapAttribute.createSpecularEnv(specularCubemap));
+//            renderEngine.environment.set(new PBRTextureAttribute(PBRTextureAttribute.BRDFLUTTexture, brdfLUT));
+//            renderEngine.environment.set(new PBRFloatAttribute(PBRFloatAttribute.ShadowBias, 0f));
+//        } else {
+//        }
+    }
+
+    private void createImageBasedLighting(float timeOfDay) {
+        if (old) {
+            if (brdfLUT == null) brdfLUT = new Texture(Gdx.files.classpath("net/mgsx/gltf/shaders/brdfLUT.png"));
+            // setup quick IBL (image based lighting)
+            {
+                Integer             index               = (int) (angle);
+                EnvironmentSnapshot environmentSnapshot = environmentSnapshotMap.get(index);
+                if (environmentSnapshot == null) {
+                    logger.info(String.format("setupImageBasedLighting = %d", index));
+                    DirectionalLightEx sun = new DirectionalLightEx();
+                    sun.direction.set(renderEngine.getShadowLight().direction.x, renderEngine.getShadowLight().direction.y, renderEngine.getShadowLight().direction.z).nor();
+                    sun.color.set(Color.WHITE);
+                    myIBLBuilder ibl = new myIBLBuilder("app/assets/textures/space/");
+                    {
+                        celestialBodyList.clear();
+                        int numberOfBodies;
+                        if (index == -1) numberOfBodies = 10;
+                        else numberOfBodies = NUMBER_OF_CELESTIAL_BODIES;
+                        logger.info(String.format("numberOfBodies=%d", numberOfBodies));
+                        celestialBodyList.add(new CelestialBody(sun.direction, sun.color, 10000f));
+                        for (int i = 0; i < numberOfBodies; i++) {
+                            celestialBodyList.add(new CelestialBody());
+                        }
+                    }
+
+                    celestialBodyList.get(0).getDirection().set(sun.direction);
+                    for (CelestialBody cb : celestialBodyList) {
+                        myIBLBuilder.Light light = new myIBLBuilder.Light();
+                        light.direction.set(cb.getDirection());
+                        light.color.set(cb.getColor());
+                        light.exponent = cb.getExponent();
+                        ibl.lights.add(light);
+                    }
+
+                    float tint = 0.0f;
+                    ibl.nearGroundColor.set(tint, tint, tint, 1.0F);
+                    ibl.farGroundColor.set(tint, tint, tint, 1.0F);
+                    ibl.nearSkyColor.set(tint, tint, tint, 1.0F);
+                    ibl.farSkyColor.set(tint, tint, tint, 1.0F);
+                    Cubemap environmentCubemap = ibl.buildEnvMap(1024 * 4, renderEngine.batch2D, atlasManager.bold256Font);
+                    tint = 0.0f;
+                    ibl.nearGroundColor.set(tint, tint, tint, 1.0F);
+                    ibl.farGroundColor.set(tint, tint, tint, 1.0F);
+                    ibl.nearSkyColor.set(tint, tint, tint, 1.0F);
+                    ibl.farSkyColor.set(tint, tint, tint, 1.0F);
+                    Cubemap irradianceMap = ibl.buildIrradianceMap(256 * 4, renderEngine.batch2D, atlasManager.bold256Font);
+                    Cubemap radianceMap   = ibl.buildRadianceMap(12, renderEngine.batch2D, atlasManager.bold256Font);
+                    environmentSnapshot = new EnvironmentSnapshot(environmentCubemap, irradianceMap, radianceMap);
+                    environmentSnapshotMap.put(index, environmentSnapshot);
+                    ibl.dispose();
+                }
+                renderEngine.setDaySkyBox(environmentSnapshot.getEnvironmentCubemap());
+                renderEngine.setNightSkyBox(environmentSnapshot.getEnvironmentCubemap());
+                diffuseCubemap  = environmentSnapshot.getIrradianceMap();
+                specularCubemap = environmentSnapshot.getRadianceMap();
+            }
+        } else {
+            brdfLUT = new Texture(Gdx.files.classpath("net/mgsx/gltf/shaders/brdfLUT.png"));
+
+            DirectionalLightEx light = new DirectionalLightEx();
+            light.direction.set(1, -1, 1).nor();
+            light.color.set(Color.WHITE);
+            IBLBuilder iblBuilder         = IBLBuilder.createOutdoor(light);
+            Cubemap    environmentCubemap = iblBuilder.buildEnvMap(1024);
+            renderEngine.setDaySkyBox(new SceneSkybox(environmentCubemap));
+            renderEngine.setNightSkyBox(new SceneSkybox(environmentCubemap));
+            diffuseCubemap  = iblBuilder.buildIrradianceMap(256);
+            specularCubemap = iblBuilder.buildRadianceMap(10);
+            iblBuilder.dispose();
+
+        }
+        renderEngine.environment.set(PBRCubemapAttribute.createDiffuseEnv(diffuseCubemap));
+        renderEngine.environment.set(PBRCubemapAttribute.createSpecularEnv(specularCubemap));
+        renderEngine.environment.set(new PBRTextureAttribute(PBRTextureAttribute.BRDFLUTTexture, brdfLUT));
+        renderEngine.environment.set(new PBRFloatAttribute(PBRFloatAttribute.ShadowBias, .03f));
     }
 
     private void createInputProcessor(final InputProcessor inputProcessor, GameEngine3D gameEngine) throws Exception {
@@ -436,7 +541,6 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
     @Override
     public void dispose() {
         try {
-            if (oggPlayer != null) oggPlayer.dispose();
             audioEngine.dispose();
             //		myCanvas.stop();
             assetManager.dispose();
@@ -471,25 +575,17 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
         }
     }
 
+
+//    public int getMaxFramesPerSecond() {
+//        return maxFramesPerSecond;
+//    }
+
     private void exit() {
         Gdx.app.exit();
     }
 
     public float getAngle() {
         return angle;
-    }
-
-
-//    public int getMaxFramesPerSecond() {
-//        return maxFramesPerSecond;
-//    }
-
-    public AssetManager getAssetManager() {
-        return assetManager;
-    }
-
-    public AtlasManager getAtlasManager() {
-        return atlasManager;
     }
 
     //	Sector3DRenderer sector3DRenderer = new Sector3DRenderer();
@@ -555,13 +651,12 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
     //
     //	  graphics.setStroke( defaultStroke ); }
 
-    @Override
-    public AudioEngine getAudioEngine() {
-        return audioEngine;
+    public AssetManager getAssetManager() {
+        return assetManager;
     }
 
-    public ZoomingCameraInputController getCamController() {
-        return camController;
+    public AtlasManager getAtlasManager() {
+        return atlasManager;
     }
 
     /*
@@ -586,6 +681,15 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
     //	public Canvas getCanvas() {
     //		return myCanvas.getCanvas();
     //	}
+
+    @Override
+    public AudioEngine getAudioEngine() {
+        return audioEngine;
+    }
+
+    public ZoomingCameraInputController getCamController() {
+        return camController;
+    }
 
     public MovingCamera getCamera() {
         return camera;
@@ -943,7 +1047,6 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
         audioEngine.radioTTS.renderAllTTSStrings(names);
     }
 
-
     private void renderGoods() {
         for (final Planet planet : universe.planetList) {
             int index = 0;
@@ -978,31 +1081,35 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
         if (showFps) {
             stringBuilder.setLength(0);
             stringBuilder.append(" FPS ").append(Gdx.graphics.getFramesPerSecond());
+            labels.get(labelIndex).getStyle().fontColor = Color.ROYAL;
             labels.get(labelIndex).setText(stringBuilder);
             labelIndex++;
         }
         //demo mode
         {
             stringBuilder.setLength(0);
-            stringBuilder.append(String.format(" demo time=%s", TimeUtil.create24hDurationString(System.currentTimeMillis() - demo.startTime, true, false, true, true, false)));
+            stringBuilder.append(String.format(" demo time=%s, demo index = %d, ambient music=%s", TimeUtil.create24hDurationString(System.currentTimeMillis() - demo.startTime, true, false, true, true, false), demo.index, demo.files[demo.index]));
+            labels.get(labelIndex).getStyle().fontColor = Color.PINK;
             labels.get(labelIndex++).setText(stringBuilder);
         }
         //camera properties
         {
             stringBuilder.setLength(0);
-            stringBuilder.append(String.format(" camera: zoomIndex(%d) position(%+.0f,%+.0f,%+.0f) lookAt(%+.0f, %+.0f, %+.0f)", camController.zoomIndex, camera.position.x, camera.position.y, camera.position.z, camera.lookat.x, camera.lookat.y, camera.lookat.z));
+            stringBuilder.append(String.format(" camera: zoomIndex(%d), position(%+.0f,%+.0f,%+.0f), lookAt(%+.0f, %+.0f, %+.0f)", camController.zoomIndex, camera.position.x, camera.position.y, camera.position.z, camera.lookat.x, camera.lookat.y, camera.lookat.z));
+            labels.get(labelIndex).getStyle().fontColor = Color.ORANGE;
             labels.get(labelIndex++).setText(stringBuilder);
         }
         //depth of field
         {
             stringBuilder.setLength(0);
-            stringBuilder.append(String.format(" focal depth: [%f]", renderEngine.getDepthOfFieldEffect().getFocalDepth()));
+            stringBuilder.append(String.format(" focal depth = %.0f", renderEngine.getDepthOfFieldEffect().getFocalDepth()));
             labels.get(labelIndex++).setText(stringBuilder);
         }
         //audio sources
         {
             stringBuilder.setLength(0);
-            stringBuilder.append(" audio sources: ").append(audioEngine.getEnabledAudioSourceCount() + " / " + audioEngine.getDisabledAudioSourceCount()).append(" " + audioEngine.getNumberOfSources());
+            stringBuilder.append(" audio sources enabled(").append(audioEngine.getEnabledAudioSourceCount()).append(") + disabled(").append(audioEngine.getDisabledAudioSourceCount()).append(") = total(").append(audioEngine.getNumberOfSources()).append(")");
+            labels.get(labelIndex).getStyle().fontColor = Color.GREEN;
             labels.get(labelIndex++).setText(stringBuilder);
         }
         //time
@@ -1012,7 +1119,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
             final float time    = renderEngine.getCurrentDayTime();
             final int   hours   = (int) time;
             final int   minutes = (int) (60 * ((time - (int) time) * 100) / 100);
-            stringBuilder.append(" time ").append(String.format("%2df", hours)).append(":").append(String.format("%2df", minutes)).append(" sun :").append(String.format("%.0f", angle));
+            stringBuilder.append(" time = ").append(String.format("%2d", hours)).append(":").append(String.format("%2d", minutes)).append(", sun = ").append(String.format("%.0f", angle));
             labels.get(labelIndex++).setText(stringBuilder);
         }
         stage.draw();
@@ -1088,6 +1195,13 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
         }
     }
 
+//    public void setDayAmbientLight(float r, float g, float b, float shadowIntensity) {
+//        dayAmbientIntensityR = r;
+//        dayAmbientIntensityG = g;
+//        dayAmbientIntensityB = b;
+//        dayShadowIntensity   = shadowIntensity;
+//    }
+
     @Override
     public void resize(final int width, final int height) {
         renderEngine.renderEngine2D.width  = width;
@@ -1099,13 +1213,6 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
         // TODO Auto-generated method stub
 
     }
-
-//    public void setDayAmbientLight(float r, float g, float b, float shadowIntensity) {
-//        dayAmbientIntensityR = r;
-//        dayAmbientIntensityG = g;
-//        dayAmbientIntensityB = b;
-//        dayShadowIntensity   = shadowIntensity;
-//    }
 
     @Override
     public boolean scrolled(final float amountX, final float amountY) {
@@ -1130,111 +1237,6 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
     @Override
     public void setShowGood(final ShowGood name) {
         assetManager.showGood = name;
-    }
-
-    private void setupEnvironmentCreate() {
-        // setup IBL (image based lighting)
-        if (renderEngine.isPbr()) {
-            updateEnvironment(timeOfDay);
-//            setupImageBasedLightingByFaceNames("clouds", "jpg", "jpg", "jpg", 10);
-//            if (renderEngine.isSkyBox()) {
-//                renderEngine.setDaySkyBox(new SceneSkybox(environmentNightCubemap));
-//                renderEngine.setNightSkyBox(new SceneSkybox(environmentNightCubemap));
-//            }
-//
-//            renderEngine.environment.set(PBRCubemapAttribute.createDiffuseEnv(diffuseCubemap));
-//            renderEngine.environment.set(PBRCubemapAttribute.createSpecularEnv(specularCubemap));
-//            renderEngine.environment.set(new PBRTextureAttribute(PBRTextureAttribute.BRDFLUTTexture, brdfLUT));
-//            renderEngine.environment.set(new PBRFloatAttribute(PBRFloatAttribute.ShadowBias, .001f));
-//            setupImageBasedLighting(timeOfDay);
-//            updateEnvironment(timeOfDay);
-        } else {
-        }
-//        if (renderEngine.isPbr()) {
-//            setupImageBasedLighting(0f);
-//            renderEngine.environment.set(PBRCubemapAttribute.createDiffuseEnv(diffuseCubemap));
-//            renderEngine.environment.set(PBRCubemapAttribute.createSpecularEnv(specularCubemap));
-//            renderEngine.environment.set(new PBRTextureAttribute(PBRTextureAttribute.BRDFLUTTexture, brdfLUT));
-//            renderEngine.environment.set(new PBRFloatAttribute(PBRFloatAttribute.ShadowBias, 0f));
-//        } else {
-//        }
-    }
-
-    private void setupImageBasedLighting(float timeOfDay) {
-        if (old) {
-            if (brdfLUT == null) brdfLUT = new Texture(Gdx.files.classpath("net/mgsx/gltf/shaders/brdfLUT.png"));
-            // setup quick IBL (image based lighting)
-            {
-                Integer             index               = (int) (angle);
-                EnvironmentSnapshot environmentSnapshot = environmentSnapshotMap.get(index);
-                if (environmentSnapshot == null) {
-                    logger.info(String.format("setupImageBasedLighting = %d", index));
-                    DirectionalLightEx sun = new DirectionalLightEx();
-                    sun.direction.set(renderEngine.getShadowLight().direction.x, renderEngine.getShadowLight().direction.y, renderEngine.getShadowLight().direction.z).nor();
-                    sun.color.set(Color.WHITE);
-                    myIBLBuilder ibl = new myIBLBuilder("app/assets/textures/space/");
-                    {
-                        celestialBodyList.clear();
-                        int numberOfBodies;
-                        if (index == -1) numberOfBodies = 10;
-                        else numberOfBodies = NUMBER_OF_CELESTIAL_BODIES;
-                        logger.info(String.format("numberOfBodies=%d", numberOfBodies));
-                        celestialBodyList.add(new CelestialBody(sun.direction, sun.color, 10000f));
-                        for (int i = 0; i < numberOfBodies; i++) {
-                            celestialBodyList.add(new CelestialBody());
-                        }
-                    }
-
-                    celestialBodyList.get(0).getDirection().set(sun.direction);
-                    for (CelestialBody cb : celestialBodyList) {
-                        myIBLBuilder.Light light = new myIBLBuilder.Light();
-                        light.direction.set(cb.getDirection());
-                        light.color.set(cb.getColor());
-                        light.exponent = cb.getExponent();
-                        ibl.lights.add(light);
-                    }
-
-                    float tint = 0.0f;
-                    ibl.nearGroundColor.set(tint, tint, tint, 1.0F);
-                    ibl.farGroundColor.set(tint, tint, tint, 1.0F);
-                    ibl.nearSkyColor.set(tint, tint, tint, 1.0F);
-                    ibl.farSkyColor.set(tint, tint, tint, 1.0F);
-                    Cubemap environmentCubemap = ibl.buildEnvMap(1024 * 4, renderEngine.batch2D, atlasManager.bold256Font);
-                    tint = 0.0f;
-                    ibl.nearGroundColor.set(tint, tint, tint, 1.0F);
-                    ibl.farGroundColor.set(tint, tint, tint, 1.0F);
-                    ibl.nearSkyColor.set(tint, tint, tint, 1.0F);
-                    ibl.farSkyColor.set(tint, tint, tint, 1.0F);
-                    Cubemap irradianceMap = ibl.buildIrradianceMap(256 * 4, renderEngine.batch2D, atlasManager.bold256Font);
-                    Cubemap radianceMap   = ibl.buildRadianceMap(12, renderEngine.batch2D, atlasManager.bold256Font);
-                    environmentSnapshot = new EnvironmentSnapshot(environmentCubemap, irradianceMap, radianceMap);
-                    environmentSnapshotMap.put(index, environmentSnapshot);
-                    ibl.dispose();
-                }
-                renderEngine.setDaySkyBox(environmentSnapshot.getEnvironmentCubemap());
-                renderEngine.setNightSkyBox(environmentSnapshot.getEnvironmentCubemap());
-                diffuseCubemap  = environmentSnapshot.getIrradianceMap();
-                specularCubemap = environmentSnapshot.getRadianceMap();
-            }
-        } else {
-            brdfLUT = new Texture(Gdx.files.classpath("net/mgsx/gltf/shaders/brdfLUT.png"));
-
-            DirectionalLightEx light = new DirectionalLightEx();
-            light.direction.set(1, -1, 1).nor();
-            light.color.set(Color.WHITE);
-            IBLBuilder iblBuilder         = IBLBuilder.createOutdoor(light);
-            Cubemap    environmentCubemap = iblBuilder.buildEnvMap(1024);
-            renderEngine.setDaySkyBox(new SceneSkybox(environmentCubemap));
-            renderEngine.setNightSkyBox(new SceneSkybox(environmentCubemap));
-            diffuseCubemap  = iblBuilder.buildIrradianceMap(256);
-            specularCubemap = iblBuilder.buildRadianceMap(10);
-            iblBuilder.dispose();
-
-        }
-        renderEngine.environment.set(PBRCubemapAttribute.createDiffuseEnv(diffuseCubemap));
-        renderEngine.environment.set(PBRCubemapAttribute.createSpecularEnv(specularCubemap));
-        renderEngine.environment.set(new PBRTextureAttribute(PBRTextureAttribute.BRDFLUTTexture, brdfLUT));
-        renderEngine.environment.set(new PBRFloatAttribute(PBRFloatAttribute.ShadowBias, .00f));
     }
 
     @Override
@@ -1346,7 +1348,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
             m.getTranslation(shadowLightDirection);
             shadowLightDirection.nor();
             renderEngine.getShadowLight().setDirection(shadowLightDirection);
-            setupImageBasedLighting(timeOfDay);
+            createImageBasedLighting(timeOfDay);
             {
                 final float intensity = 1.0f;
                 final float r         = renderEngine.getDayAmbientIntensityR();

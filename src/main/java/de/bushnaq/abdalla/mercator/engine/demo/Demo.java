@@ -20,7 +20,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.utils.Align;
-import de.bushnaq.abdalla.engine.audio.AudioEngine;
 import de.bushnaq.abdalla.engine.audio.OggPlayer;
 import de.bushnaq.abdalla.engine.audio.OpenAlException;
 import de.bushnaq.abdalla.mercator.desktop.LaunchMode;
@@ -40,7 +39,9 @@ import java.util.List;
 import java.util.Map;
 
 public class Demo {
+    public        String[]                files           = {"01-morning.ogg", "02-methodica.ogg", "05-massive.ogg", "06-abyss.ogg"};
     private final GameEngine3D            gameEngine;
+    public        int                     index           = -1;
     //    public        int                     index           = 0;
     private final LaunchMode              launchMode;
     private final Logger                  logger          = LoggerFactory.getLogger(this.getClass());
@@ -136,6 +137,16 @@ public class Demo {
         }
     }
 
+    private void startAmbientMusic() throws OpenAlException {
+        gameEngine.renderEngine.setAlwaysDay(false);
+        gameEngine.oggPlayer = gameEngine.audioEngine.createAudioProducer(OggPlayer.class);
+        index++;
+        index = index % 5;
+        gameEngine.oggPlayer.setFile(Gdx.files.internal(AtlasManager.getAssetsFolderName() + "/audio/" + files[index]));
+        gameEngine.oggPlayer.setGain(.1f);
+        gameEngine.oggPlayer.play();
+    }
+
     public void startDemoMode() throws OpenAlException {
         int                        secondsDelta      = 18;
         int                        firstSecondsDelta = 19;
@@ -187,12 +198,8 @@ public class Demo {
 
 //        renderEngine.getDepthOfFieldEffect().setEnabled(true);
 //        updateDepthOfFieldFocusDistance();
-        gameEngine.renderEngine.setAlwaysDay(false);
-        gameEngine.oggPlayer = gameEngine.audioEngine.createAudioProducer(OggPlayer.class);
-        gameEngine.oggPlayer.setFile(Gdx.files.internal(AtlasManager.getAssetsFolderName() + "/audio/06-abyss(m).ogg"));
-        gameEngine.oggPlayer.setGain(.1f);
-        gameEngine.oggPlayer.play();
-        AudioEngine.checkAlError("Failed to set listener orientation with error #");
+        startAmbientMusic();
+//        AudioEngine.checkAlError("Failed to set listener orientation with error #");
 //        index     = 0;
         textY     = 0;
         startTime = System.currentTimeMillis();

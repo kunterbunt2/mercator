@@ -757,9 +757,6 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
     @Override
     public boolean keyDown(final int keycode) {
         switch (keycode) {
-            case Input.Keys.ESCAPE:
-                exit();
-                return true;
             case Input.Keys.A:
             case Input.Keys.LEFT:
                 centerXD = -SCROLL_SPEED;
@@ -776,12 +773,24 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
             case Input.Keys.DOWN:
                 centerYD = SCROLL_SPEED;
                 return true;
+
+            case Input.Keys.ESCAPE:
+                exit();
+                return true;
             case Input.Keys.PAUSE:
                 assetManager.universe.setEnableTime(!assetManager.universe.isEnableTime());
                 return true;
             case Input.Keys.PRINT_SCREEN:
                 queueScreenshot();
                 return true;
+            case Input.Keys.TAB:
+                try {
+                    universe.setSelected(renderEngine.getProfiler(), false);
+                } catch (final Exception e) {
+                    logger.error(e.getMessage(), e);
+                }
+                return true;
+
             case Input.Keys.F1:
                 renderEngine.setGammaCorrected(!renderEngine.isGammaCorrected());
                 if (renderEngine.isGammaCorrected()) logger.info("gamma correction on");
@@ -819,12 +828,9 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
                 if (renderEngine.isDebugMode()) logger.info("debug mode on");
                 else logger.info("debug mode off");
                 return true;
-            case Input.Keys.V:
-                vsyncEnabled = !vsyncEnabled;
-                Gdx.graphics.setVSync(vsyncEnabled);
-                return true;
-            case Input.Keys.I:
-                setInfoVisible(!isInfoVisible());
+
+            case Input.Keys.F:
+                followMode = !followMode;
                 return true;
             case Input.Keys.H:
                 try {
@@ -839,15 +845,12 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
                     logger.error(e.getMessage(), e);
                 }
                 return true;
-            case Input.Keys.TAB:
-                try {
-                    universe.setSelected(renderEngine.getProfiler(), false);
-                } catch (final Exception e) {
-                    logger.error(e.getMessage(), e);
-                }
+            case Input.Keys.I:
+                setInfoVisible(!isInfoVisible());
                 return true;
-            case Input.Keys.F:
-                followMode = !followMode;
+            case Input.Keys.V:
+                vsyncEnabled = !vsyncEnabled;
+                Gdx.graphics.setVSync(vsyncEnabled);
                 return true;
         }
         return false;

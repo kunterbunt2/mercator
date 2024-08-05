@@ -76,6 +76,20 @@ public class Demo {
         printWriter.close();
     }
 
+    private void playNext() throws OpenAlException {
+        index++;
+        index = index % 5;
+        gameEngine.oggPlayer.setFile(Gdx.files.internal(AtlasManager.getAssetsFolderName() + "/audio/" + files[index]));
+        gameEngine.oggPlayer.setGain(.1f);
+        gameEngine.oggPlayer.play();
+    }
+
+    private void renderAmbientMusic() throws OpenAlException {
+        if (!gameEngine.oggPlayer.isPlaying()) {
+            playNext();
+        }
+    }
+
     public void renderDemo(float deltaTime) throws IOException, OpenAlException {
 
         if (launchMode == LaunchMode.demo) {
@@ -134,17 +148,13 @@ public class Demo {
             }
             textY += 100 * deltaTime;
             if (textY - deltaY > gameEngine.renderEngine.renderEngine2D.height * lineHeightFactor) textY = 0;
+            renderAmbientMusic();
         }
     }
 
     private void startAmbientMusic() throws OpenAlException {
-        gameEngine.renderEngine.setAlwaysDay(false);
         gameEngine.oggPlayer = gameEngine.audioEngine.createAudioProducer(OggPlayer.class);
-        index++;
-        index = index % 5;
-        gameEngine.oggPlayer.setFile(Gdx.files.internal(AtlasManager.getAssetsFolderName() + "/audio/" + files[index]));
-        gameEngine.oggPlayer.setGain(.1f);
-        gameEngine.oggPlayer.play();
+        playNext();
     }
 
     public void startDemoMode() throws OpenAlException {
@@ -152,6 +162,7 @@ public class Demo {
         int                        firstSecondsDelta = 19;
         Map<Integer, List<Planet>> planetNeighbors   = new HashMap<>();
 
+        gameEngine.renderEngine.setAlwaysDay(false);
         for (Planet planet : gameEngine.universe.planetList) {
             int          gateCount  = planet.pathList.size();
             List<Planet> planetList = planetNeighbors.get(gateCount);

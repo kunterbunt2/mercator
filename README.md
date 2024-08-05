@@ -26,22 +26,30 @@ Then you can start mercator by one of its starting classes
 
 ## Key mapping
 
-| key(s)                | description                    |
-|-----------------------|--------------------------------|
-| a, w, d, s            | move camera (still broken)     |
-| left, up, right, down | move camera (still broken)     |
-| q                     | quit                           |
-| pause                 | pause/unpause                  |
-| print                 | print screen/                  |
-| v                     | enable/disable vsync           |
-| n                     | enable/disable scene manager   |
-| h                     | enable/disable hrtf audio      |
-| tab                   | show profiler in scene manager |
-| f                     | follow selected trader         |
-| 1                     | enable/disable always day      |
-| 2                     | enable/disable demo mode       |
-| 3                     | enable/disable depth filter    |
-| 4                     | enable/disable debug graphs    |
+| key(s)                | description                     |
+|-----------------------|---------------------------------|
+| a, w, d, s            | move camera (still broken)      |
+| left, up, right, down | move camera (still broken)      |
+| ESC                   | quit                            |
+| pause                 | pause/unpause                   |
+| print                 | print screen/                   |
+| tab                   | show profiler in scene manager  |
+| f                     | follow selected trader          |
+| h                     | enable/disable hrtf audio       |
+| i                     | enable/disable information      |
+| v                     | enable/disable vsync            |
+| F1                    | enable/disable gamma correction |
+| F2                    | enable/disable depth of field   |
+| F3                    | enable/disable depth filter     |
+| F4                    |                                 |
+| F5                    | enable/disable always day       |
+| F6                    | enable/disable demo mode        |
+| F7                    |                                 |
+| F8                    |                                 |
+| F9                    | enable/disable graphs           |
+| F10                   | enable/disable debug mode       |
+| F11                   |                                 |
+| F12                   |                                 |
 
 ## Issues
 
@@ -52,6 +60,16 @@ Then you can start mercator by one of its starting classes
 5. optimize selected path performance
 6. ships will collide while navigating from planet to planet.
 7. zooming does not change center
+
+## Tasks
+
+1. FIXED - ambient music ending should trigger new music to play.
+2. fix ships will collide while navigating from planet to planet.
+3. add SSAO
+4. fix openAL error when stopping demo mode
+5. add ship tts 
+
+
 
 
 

@@ -220,6 +220,8 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
 
             renderEngine.getShadowLight().setColor(Color.WHITE);
             renderEngine.setFixedShadowDirection(true);
+            renderEngine.getDepthOfFieldEffect().setEnabled(true);
+
 //            {
 //                DirectionalLightEx sun = new DirectionalLightEx();
 //                sun.direction.set(1, -1, 1).nor();
@@ -806,6 +808,11 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
                 if (renderEngine.isRenderBokeh()) logger.info("render bokeh on");
                 else logger.info("render bokeh off");
                 return true;
+            case Input.Keys.F4:
+                renderEngine.getSsaoEffect().setEnabled(!renderEngine.getSsaoEffect().isEnabled());
+                if (renderEngine.getSsaoEffect().isEnabled()) logger.info("ssao on");
+                else logger.info("ssao off");
+                return true;
             case Input.Keys.F5:
                 renderEngine.setAlwaysDay(!renderEngine.isAlwaysDay());
                 return true;
@@ -1089,7 +1096,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
             labelIndex++;
         }
         //demo mode
-        {
+        if (launchMode == LaunchMode.demo) {
             stringBuilder.setLength(0);
             stringBuilder.append(String.format(" demo time=%s, demo index = %d, ambient music=%s", TimeUtil.create24hDurationString(System.currentTimeMillis() - demo.startTime, true, false, true, true, false), demo.index, demo.files[demo.index]));
             labels.get(labelIndex).getStyle().fontColor = Color.PINK;

@@ -44,42 +44,42 @@ import static de.bushnaq.abdalla.mercator.universe.sim.trader.Trader3DRenderer.T
  * @author bushnaq Created 13.02.2005
  */
 public class Trader extends Sim {
+    private static final float                      JUMP_UNIT_COST                      = 1f / (1000f);
     public static final  int                        MAX_GOOD_SPACE                      = 160;
     public static final  int                        MIN_GOOD_SPACE                      = 30;
     public final static  int                        TRADER_MAX_PORT_REST_TIME           = 3;
     public static final  float                      TRADER_START_CREDITS                = 1000.0f;
-    private static final float                      JUMP_UNIT_COST                      = 1f / (1000f);
-    public final         Vector3                    speed                               = new Vector3(0, 0, 0);
-    private final        Engine                     engine                              = new Engine(this);
-    private final        Logger                     logger                              = LoggerFactory.getLogger(this.getClass());
-    private final        ManeuveringSystem          maneuveringSystem                   = new ManeuveringSystem(this);
-    private final        int                        numberOfWaypointsBetweenTraders     = 1;
     public               TraderCommunicationPartner communicationPartner;
     public               long                       currentTime                         = 0;
+    private              int                        currentTransportedAmount;
     public               Planet                     destinationPlanet                   = null; // ---The planet we want to reach ultimately
+    private              float                      destinationPlanetDistance;
     public               float                      destinationPlanetDistanceProgress   = 0;
     public               float                      destinationWaypointDistance         = 0;
     public               float                      destinationWaypointDistanceProgress = 0;
     public               int                        destinationWaypointIndex            = 0; // ---The index into the WaypointList
+    private final        Engine                     engine                              = new Engine(this);
+    private              boolean                    foundTradedGood                     = false;
     public               int                        goodSpace                           = 0;
     public               int                        lastYearTransportedAmount;
+    private final        Logger                     logger                              = LoggerFactory.getLogger(this.getClass());
+    private final        ManeuveringSystem          maneuveringSystem                   = new ManeuveringSystem(this);
+    private final        int                        numberOfWaypointsBetweenTraders     = 1;
     public               long                       portRestingTime                     = 0; // ---After a transaction or to wait for better prices, we recreate at a port
+    protected            boolean                    selected                            = false;
     public               Planet                     sourcePlanet                        = null; // ---The planet origin of the good we are currently selling
     public               Waypoint                   sourceWaypoint                      = null; // ---The previous waypoint we reach in our way to the destinationPlanet
+    public final         Vector3                    speed                               = new Vector3(0, 0, 0);
+    //    private              float                      realTimeDelta;
+    private              GoodType                   targetGoodType                      = null; // ---Used to remember the index of good that we where to sell
     public               Waypoint                   targetWaypoint                      = null; // ---The next waypoint we want to reach in our way to the destinationPlanet
+    private              long                       timeDelta                           = 0;
+    private              TraderStatus               traderStatus                        = TraderStatus.TRADER_STATUS_RESTING;
+    private              TraderSubStatus            traderSubStatus                     = TraderSubStatus.TRADER_STATUS_DOCKED;
     public               WaypointList               waypointList                        = new WaypointList();
     public               float                      x;
     public               float                      y                                   = TRADER_DOCKING_HEIGHT;
     public               float                      z;
-    protected            boolean                    selected                            = false;
-    private              int                        currentTransportedAmount;
-    private              float                      destinationPlanetDistance;
-    private              boolean                    foundTradedGood                     = false;
-    //    private              float                      realTimeDelta;
-    private              GoodType                   targetGoodType                      = null; // ---Used to remember the index of good that we where to sell
-    private              long                       timeDelta                           = 0;
-    private              TraderStatus               traderStatus                        = TraderStatus.TRADER_STATUS_RESTING;
-    private              TraderSubStatus            traderSubStatus                     = TraderSubStatus.TRADER_STATUS_DOCKED;
 
     public Trader(final Planet planet, final String name, final float credits) throws Exception {
         super(planet, name, credits);
@@ -122,7 +122,7 @@ public class Trader extends Sim {
         // Good ownGood = goodList.getByType( targetGoodType );
         // ---we can only buy what we can afford, what we can store into the ship, or
         // the amount that is there. We take the minimum of all 3.
-        final int amountWeCanAfford = (int) Math.floor((getCredits() - calcualteCreditBuffer()) / portGood.price);
+        final int amountWeCanAfford = (int) Math.floor((getCredits() - calculateCreditBuffer()) / portGood.price);
         final int transactionAmount = Math.min(goodSpace, Math.min(amountWeCanAfford, portGood.getAmount()));
         // float transactionCost = transactionAmount * portGood.price;
         // ---In case we cannot afford any of the these prices or the planet has no
@@ -159,7 +159,7 @@ public class Trader extends Sim {
      * @return credits trader should keep to be able to pay for jump cost to sell
      * the good
      */
-    private float calcualteCreditBuffer() {
+    private float calculateCreditBuffer() {
         return planet.universe.traderCreditBuffer;
     }
 
@@ -202,7 +202,7 @@ public class Trader extends Sim {
                     destinationWaypointDistance         = sourceWaypoint.queryDistance(targetWaypoint);
                     setTraderSubStatus(TraderSubStatus.TRADER_STATUS_ALIGNING);
                     if (Debug.isFilterTrader(getName()))
-                        logger.info(String.format("startRotation"));
+                        logger.info("startRotation");
                     maneuveringSystem.startRotation();
                 } else {
                     //we reached a city

@@ -221,6 +221,8 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
             renderEngine.getShadowLight().setColor(Color.WHITE);
             renderEngine.setFixedShadowDirection(true);
             renderEngine.getDepthOfFieldEffect().setEnabled(true);
+            renderEngine.getSsaoEffect().setEnabled(true);
+            renderEngine.getSsaoComboneEffect().setEnabled(true);
 
 //            {
 //                DirectionalLightEx sun = new DirectionalLightEx();
@@ -810,6 +812,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
                 return true;
             case Input.Keys.F4:
                 renderEngine.getSsaoEffect().setEnabled(!renderEngine.getSsaoEffect().isEnabled());
+                renderEngine.getSsaoComboneEffect().setEnabled(!renderEngine.getSsaoComboneEffect().isEnabled());
                 if (renderEngine.getSsaoEffect().isEnabled()) logger.info("ssao on");
                 else logger.info("ssao off");
                 return true;

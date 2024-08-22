@@ -212,8 +212,8 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
             renderEngine.getFog().setFullDistance(3000f);
 
             renderEngine.setSkyBox(true);
-            renderEngine.setDayAmbientLight(.1f, .1f, .1f, 1f);
-            renderEngine.setNightAmbientLight(.1f, .1f, .1f, 1f);
+            renderEngine.setDayAmbientLight(.0f, .0f, .0f, 1f);
+            renderEngine.setNightAmbientLight(.0f, .0f, .0f, 1f);
             renderEngine.setAlwaysDay(true);
             renderEngine.setDynamicDayTime(true);
             renderEngine.setShadowEnabled(true);
@@ -221,8 +221,8 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
             renderEngine.getShadowLight().setColor(Color.WHITE);
             renderEngine.setFixedShadowDirection(true);
             renderEngine.getDepthOfFieldEffect().setEnabled(true);
-            renderEngine.getSsaoEffect().setEnabled(true);
-            renderEngine.getSsaoComboneEffect().setEnabled(true);
+            renderEngine.getSsaoEffect().setEnabled(false);
+            renderEngine.getSsaoComboneEffect().setEnabled(false);
 
 //            {
 //                DirectionalLightEx sun = new DirectionalLightEx();
@@ -816,6 +816,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
                 if (renderEngine.getSsaoEffect().isEnabled()) logger.info("ssao on");
                 else logger.info("ssao off");
                 return true;
+
             case Input.Keys.F5:
                 renderEngine.setAlwaysDay(!renderEngine.isAlwaysDay());
                 return true;
@@ -828,6 +829,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
                     throw new RuntimeException(e);
                 }
                 return true;
+
             case Input.Keys.F9:
                 renderEngine.setShowGraphs(!renderEngine.isShowGraphs());
                 if (renderEngine.isShowGraphs()) logger.info("graphs are on");

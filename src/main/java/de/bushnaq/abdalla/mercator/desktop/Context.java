@@ -36,17 +36,17 @@ enum OperatingSystem {
 public abstract class Context extends ApplicationProperties implements IContext {
     protected final static Logger          logger           = LoggerFactory.getLogger(Context.class);
     private static         String          appFolderName    = "app";
+    private                String          appVersion       = "0.0.0";
     private static         String          configFolderName = "app/config";
-    private static         String          homeFolderName;
     public                 long            currentTime      = 8L * 10000;
+    private final          boolean         enableTime       = true;
+    private static         String          homeFolderName;
+    private final          String          installationFolder;
+    private final          long            lastTime         = 0;
+    private final          OperatingSystem operatingSystem;
     public                 boolean         restart          = false;
     public                 Object          selected         = null;
     public                 long            timeDelta        = 0L;
-    private                String          appVersion       = "0.0.0";
-    private                boolean         enableTime       = true;
-    private                String          installationFolder;
-    private                long            lastTime         = 0;
-    private                OperatingSystem operatingSystem;
 
     public Context() {
         try {
@@ -56,7 +56,7 @@ public abstract class Context extends ApplicationProperties implements IContext 
         }
         homeFolderName   = "app/";
         configFolderName = homeFolderName;
-        operatingSystem  = getOeratingSystemType();
+        operatingSystem  = getOperatingSystemType();
         switch (operatingSystem) {
             case windows:
             default:
@@ -139,7 +139,7 @@ public abstract class Context extends ApplicationProperties implements IContext 
         return homeFolderName;
     }
 
-    public static OperatingSystem getOeratingSystemType() {
+    public static OperatingSystem getOperatingSystemType() {
         String os = System.getProperty("os.name").toLowerCase();
         if (os.contains("win")) {
             return OperatingSystem.windows;
@@ -156,7 +156,7 @@ public abstract class Context extends ApplicationProperties implements IContext 
     }
 
     public static boolean isIos() {
-        return getOeratingSystemType().equals(OperatingSystem.ios) || getOeratingSystemType().equals(OperatingSystem.iosSimulator);
+        return getOperatingSystemType().equals(OperatingSystem.ios) || getOperatingSystemType().equals(OperatingSystem.iosSimulator);
     }
 
     public static boolean isRunningInEclipse() {

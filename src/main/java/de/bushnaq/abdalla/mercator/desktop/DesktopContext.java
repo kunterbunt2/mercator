@@ -28,7 +28,6 @@ import java.net.URISyntaxException;
  * @author kunterbunt
  */
 public class DesktopContext extends Context {
-    private static final String PLUVIA_MONITOR = "pluvia.monitor";
 
     @Override
     public void disableClipping() {
@@ -41,16 +40,6 @@ public class DesktopContext extends Context {
         if (!Context.isIos())
             Gdx.gl.glEnable(GL30C.GL_CLIP_DISTANCE0);
 
-    }
-
-    @Override
-    public float getMirrorLevel() {
-        return -12f;
-    }
-
-    @Override
-    public float getWaterLevel() {
-        return -10f;
     }
 
     @Override
@@ -71,9 +60,14 @@ public class DesktopContext extends Context {
     }
 
     @Override
+    public float getMirrorLevel() {
+        return -12f;
+    }
+
+    @Override
     public int getMonitorProperty() {
         final Monitor[] monitors = Lwjgl3ApplicationConfiguration.getMonitors();
-        int             monitor  = readIntegerProperty(PLUVIA_MONITOR, 0, 0, monitors.length);
+        int             monitor  = readIntegerProperty(ApplicationProperties.GAME_MONITOR, 0, 0, monitors.length);
         if (monitor < 0 || monitor >= monitors.length) {
             monitor = 0;
             logger.error(String.format("pluvia.monitiro=%d cannot be negative or higher than the number of monitors %d.", monitor, monitors.length));
@@ -85,6 +79,11 @@ public class DesktopContext extends Context {
     public int getNumberOfMonitors() {
         final Monitor[] monitors = Lwjgl3ApplicationConfiguration.getMonitors();
         return monitors.length;
+    }
+
+    @Override
+    public float getWaterLevel() {
+        return -10f;
     }
 
     @Override
@@ -129,7 +128,7 @@ public class DesktopContext extends Context {
 
     @Override
     public void setMonitor(int value) {
-        properties.setProperty(PLUVIA_MONITOR, "" + value);
+        properties.setProperty(ApplicationProperties.GAME_MONITOR, "" + value);
     }
 
 }

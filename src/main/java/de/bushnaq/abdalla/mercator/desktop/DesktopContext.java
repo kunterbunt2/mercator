@@ -59,10 +59,10 @@ public class DesktopContext extends Context {
         return "";
     }
 
-    @Override
-    public float getMirrorLevel() {
-        return -12f;
-    }
+//    @Override
+//    public float getMirrorLevel() {
+//        return -12f;
+//    }
 
     @Override
     public int getMonitorProperty() {
@@ -81,10 +81,10 @@ public class DesktopContext extends Context {
         return monitors.length;
     }
 
-    @Override
-    public float getWaterLevel() {
-        return -10f;
-    }
+//    @Override
+//    public float getWaterLevel() {
+//        return -10f;
+//    }
 
     @Override
     public boolean isDebugModeSupported() {

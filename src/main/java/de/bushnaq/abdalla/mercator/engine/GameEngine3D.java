@@ -416,12 +416,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
     }
 
     private void createInputProcessor(final InputProcessor inputProcessor, GameEngine3D gameEngine) throws Exception {
-        if (renderEngine.testCase == 1) {
-            camController = new ZoomingCameraInputController(camera, gameEngine);
-        }
-        if (renderEngine.testCase == 2 || renderEngine.testCase == 3) {
-            camController = new ZoomingCameraInputController(camera2D, gameEngine);
-        }
+        camController                = new ZoomingCameraInputController(camera, gameEngine);
         camController.scrollFactor   = -0.1f;
         camController.translateUnits = 1000f;
         inputMultiplexer.addProcessor(inputProcessor);
@@ -1075,15 +1070,13 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
 
     private void renderJumpGates() {
         for (final Path path : universe.pathList) {
-            if (renderEngine.testCase == 1 | renderEngine.testCase == 2) path.get3DRenderer().render2D(renderEngine, 0, false);
-            if (renderEngine.testCase == 3) path.get3DRenderer().render2Da(renderEngine, 0, false);
+            path.get3DRenderer().render2D(renderEngine, 0, false);
         }
     }
 
     private void renderPlanets() {
         for (final Planet planet : universe.planetList) {
-            if (renderEngine.testCase == 1 | renderEngine.testCase == 2) planet.get3DRenderer().render2D(renderEngine, 0, false);
-            if (renderEngine.testCase == 3) planet.get3DRenderer().render2Da(renderEngine, 0, false);
+            planet.get3DRenderer().render2D(renderEngine, 0, false);
         }
     }
 
@@ -1146,8 +1139,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
         for (final Planet planet : universe.planetList) {
             int index = 0;
             for (final Sim trader : planet.traderList) {
-                if (renderEngine.testCase == 1 | renderEngine.testCase == 2) trader.get3DRenderer().render2D(renderEngine, 0, false);
-                if (renderEngine.testCase == 3) trader.get3DRenderer().render2Da(renderEngine, 0, false);
+                trader.get3DRenderer().render2D(renderEngine, 0, false);
             }
         }
     }

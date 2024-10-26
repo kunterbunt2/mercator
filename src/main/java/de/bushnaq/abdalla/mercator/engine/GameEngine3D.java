@@ -69,7 +69,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class GameEngine3D implements ScreenListener, ApplicationListener, InputProcessor, RenderEngineExtension, GameEngine {
+public class GameEngine3D implements ScreenListener, ApplicationListener, InputProcessor, IGameEngine {
     public static final  float                        CAMERA_OFFSET_X               = 100f;
     public static final  float                        CAMERA_OFFSET_Y               = 300f;
     public static final  float                        CAMERA_OFFSET_Z               = 500f;
@@ -700,6 +700,11 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
         return camController.zoomIndex;
     }
 
+    @Override
+    public RenderEngine3D<?> getRenderEngine() {
+        return renderEngine;
+    }
+
     private void initColors() {
         {
             distinctiveColorlist.add(new Color(0.2f, 0.2f, 0.2f, 0.5f));
@@ -1243,10 +1248,10 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
         this.infoVisible = infoVisible;
     }
 
-    @Override
-    public void setShowGood(final ShowGood name) {
-        assetManager.showGood = name;
-    }
+//    @Override
+//    public void setShowGood(final ShowGood name) {
+//        assetManager.showGood = name;
+//    }
 
     @Override
     public boolean touchCancelled(int screenX, int screenY, int pointer, int button) {

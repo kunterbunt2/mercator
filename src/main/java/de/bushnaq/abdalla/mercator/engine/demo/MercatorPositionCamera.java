@@ -17,17 +17,19 @@
 package de.bushnaq.abdalla.mercator.engine.demo;
 
 import com.badlogic.gdx.math.Vector3;
+import de.bushnaq.abdalla.engine.IGameEngine;
+import de.bushnaq.abdalla.engine.shader.effect.scheduled.ScheduledTask;
 import de.bushnaq.abdalla.mercator.engine.GameEngine3D;
 import de.bushnaq.abdalla.mercator.universe.Universe;
 import de.bushnaq.abdalla.mercator.universe.planet.Planet;
 
 import static de.bushnaq.abdalla.mercator.engine.GameEngine3D.*;
 
-public class PositionCamera extends ScheduledTask {
+public class MercatorPositionCamera<T extends IGameEngine> extends ScheduledTask<T> {
     private final String name;
     private final int    zoomIndex;
 
-    public PositionCamera(GameEngine3D gameEngine, int zoomIndex, String name) {
+    public MercatorPositionCamera(T gameEngine, int zoomIndex, String name) {
         super(gameEngine, 0);
         this.zoomIndex = zoomIndex;
         this.name      = name;
@@ -35,22 +37,28 @@ public class PositionCamera extends ScheduledTask {
 
     @Override
     public boolean execute(float deltaTime) {
-        Planet planet = gameEngine.universe.planetList.findByName(name);
+        GameEngine3D ge     = (GameEngine3D) gameEngine;
+        Planet       planet = ge.universe.planetList.findByName(name);
 //        if (planet == null && !gameEngine.universe.planetList.isEmpty()) planet = gameEngine.universe.planetList.get(0);
         Vector3 lookat;
         if (planet != null) lookat = new Vector3(planet.x, 0, planet.z);
         else lookat = new Vector3(0, 0, 0);
-        gameEngine.getCamera().position.set(lookat.x + CAMERA_OFFSET_X / Universe.WORLD_SCALE, lookat.y + CAMERA_OFFSET_Y / Universe.WORLD_SCALE, lookat.z + CAMERA_OFFSET_Z / Universe.WORLD_SCALE);
-        gameEngine.getCamera().up.set(0, 1, 0);
-        gameEngine.getCamera().lookAt(lookat);
+        ge.getCamera().position.set(lookat.x + CAMERA_OFFSET_X / Universe.WORLD_SCALE, lookat.y + CAMERA_OFFSET_Y / Universe.WORLD_SCALE, lookat.z + CAMERA_OFFSET_Z / Universe.WORLD_SCALE);
+        ge.getCamera().up.set(0, 1, 0);
+        ge.getCamera().lookAt(lookat);
 //            gameEngine.getCamera().near = 2f;
 //            gameEngine.getCamera().far  = 8000f;
-        gameEngine.getCamController().setTargetZoomIndex(zoomIndex);
-        gameEngine.getCamController().zoomIndex = zoomIndex;
-        gameEngine.getCamController().update(true);
-        gameEngine.getCamera().update(true);
-        gameEngine.getCamera().setDirty(true);
+        ge.getCamController().setTargetZoomIndex(zoomIndex);
+        ge.getCamController().zoomIndex = zoomIndex;
+        ge.getCamController().update(true);
+        ge.getCamera().update(true);
+        ge.getCamera().setDirty(true);
         return true;
+    }
+
+    @Override
+    public long secondToRun() {
+        return 0;
     }
 
     @Override

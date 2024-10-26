@@ -16,8 +16,8 @@
 
 package de.bushnaq.abdalla.mercator.universe.planet;
 
+import de.bushnaq.abdalla.engine.IGameEngine;
 import de.bushnaq.abdalla.engine.audio.OpenAlException;
-import de.bushnaq.abdalla.mercator.engine.GameEngine;
 import de.bushnaq.abdalla.mercator.universe.Universe;
 import de.bushnaq.abdalla.mercator.universe.factory.Factory;
 import de.bushnaq.abdalla.mercator.universe.factory.ProductionFacility;
@@ -44,25 +44,25 @@ public class Planet extends Waypoint implements TradingPartner {
     public final static int                        PLANET_MAX_SIMS        = 10;
     public final static float                      PLANET_START_CREDITS   = 20000;
     public              PlanetCommunicationPartner communicationPartner;
-    private float          credits  = PLANET_START_CREDITS;
+    private             float                      credits                = PLANET_START_CREDITS;
     public              long                       currentTime            = 0;
     public              SimList                    deadSimList            = new SimList(this);
     public              DockingDoors               dockingDoors           = new DockingDoors(this);
     public              PlanetEventManager         eventManager;
-    private GoodList       goodList = new GoodList();
-    private HistoryManager historyManager;
+    private             GoodList                   goodList               = new GoodList();
+    private             HistoryManager             historyManager;
     public              long                       lastTransaction        = 0;
     //	private String name = null;
     public              float                      orbitAngle             = 0.0f;
     public              PathSeeker                 pathSeeker             = new PathSeeker();
     public              ProductionFacilityList     productionFacilityList = new ProductionFacilityList();
     boolean selected;
-    public              SimList                    simList                = new SimList(this);
-    public              PlanetStatisticManager     statisticManager       = new PlanetStatisticManager();
-    public              PlanetStatus               status                 = PlanetStatus.LIVING;
-    public              long                       timeDelta              = 0;
-    public              TraderList                 traderList             = new TraderList();
-    public              Universe                   universe;
+    public SimList                simList          = new SimList(this);
+    public PlanetStatisticManager statisticManager = new PlanetStatisticManager();
+    public PlanetStatus           status           = PlanetStatus.LIVING;
+    public long                   timeDelta        = 0;
+    public TraderList             traderList       = new TraderList();
+    public Universe               universe;
 
     public Planet(final String name, final float x, final float y, final float z, final Universe universe) {
         super(name, x, y, z);
@@ -116,7 +116,7 @@ public class Planet extends Waypoint implements TradingPartner {
     // transported( producer.getPlanet(), transactionAmount );
     // from.sell( currentTime, goodType, price, transactionAmount, this );
     // }
-    public void create(GameEngine gameEngine, final MercatorRandomGenerator randomGenerator) throws OpenAlException {
+    public void create(IGameEngine gameEngine, final MercatorRandomGenerator randomGenerator) throws OpenAlException {
         setHistoryManager(new HistoryManager());
         getGoodList().createGoodList(this);
         simList.create(this, Sim.SIM_START_CREDITS, /* Universe.randomGenerator.nextInt( 10 ) + 10 */5);

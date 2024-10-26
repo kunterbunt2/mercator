@@ -17,8 +17,8 @@
 package de.bushnaq.abdalla.mercator.universe.sim.trader;
 
 import com.badlogic.gdx.math.Vector3;
+import de.bushnaq.abdalla.engine.IGameEngine;
 import de.bushnaq.abdalla.engine.audio.OpenAlException;
-import de.bushnaq.abdalla.mercator.engine.GameEngine;
 import de.bushnaq.abdalla.mercator.universe.event.EventLevel;
 import de.bushnaq.abdalla.mercator.universe.event.SimEventType;
 import de.bushnaq.abdalla.mercator.universe.good.Good;
@@ -334,7 +334,7 @@ public class Trader extends Sim {
         return JUMP_UNIT_COST * distance;
     }
 
-    public void create(GameEngine gameEngine, final MercatorRandomGenerator randomGenerator) throws OpenAlException {
+    public void create(IGameEngine gameEngine, final MercatorRandomGenerator randomGenerator) throws OpenAlException {
         goodSpace            = Trader.MIN_GOOD_SPACE + randomGenerator.nextInt(0, this, Trader.MAX_GOOD_SPACE - Trader.MIN_GOOD_SPACE);
         portRestingTime      = randomGenerator.nextInt(0, this, Trader.TRADER_MAX_PORT_REST_TIME) * TimeUnit.TICKS_PER_DAY;
         communicationPartner = new TraderCommunicationPartner(gameEngine.getAudioEngine(), this);

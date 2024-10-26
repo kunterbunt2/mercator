@@ -17,8 +17,8 @@
 package de.bushnaq.abdalla.mercator.universe;
 
 import com.badlogic.gdx.graphics.Color;
+import de.bushnaq.abdalla.engine.IGameEngine;
 import de.bushnaq.abdalla.mercator.desktop.GraphicsDimentions;
-import de.bushnaq.abdalla.mercator.engine.GameEngine;
 import de.bushnaq.abdalla.mercator.renderer.ScreenListener;
 import de.bushnaq.abdalla.mercator.ui.GraphChartData;
 import de.bushnaq.abdalla.mercator.ui.PieChartData;
@@ -45,25 +45,31 @@ import org.slf4j.LoggerFactory;
  * @author bushnaq Created 13.02.2005
  */
 public class Universe {
-    public static final  float                   WORLD_SCALE                       = 1.0f;
     private static final String                  ADVANCE_IN_TIME_PLANET_DURATION   = "planet   AIT";
     private static final String                  ADVANCE_IN_TIME_TRADER_DURATION   = "trader   AIT";
     private static final String                  ADVANCE_IN_TIME_UNIVERSE_DURATION = "All      AIT";
     private static final long                    SIMULATION_DELTA                  = 20L;//ms
-    private final        GraphicsDimentions      graphicsDimentions;
-    private final        Logger                  logger                            = LoggerFactory.getLogger(this.getClass());
-    private final        TimeStatisticManager    timeStatisticManager              = new TimeStatisticManager();
+    public static final  float                   WORLD_SCALE                       = 1.0f;
+    //    VoiceManager voiceManager;
+    private              ScreenListener          ScreenListener;
     //	private static final String APPLICATION_VERSION_STRING = "0.1.0.0";
     public               PieChartData            amountPieChart                    = new PieChartData("volumen");
     public               PieChartData            creditPieChart                    = new PieChartData("credits");
+    private              float                   credits; // ---credits at creation time, should never change
     public               long                    currentTime                       = 0L;//simulation time in milliseconds
     public               PlanetList              deadPlanetList                    = new PlanetList();
     public               SimList                 deadSimList                       = new SimList(null);
     public               GraphChartData          deadSimStatistics                 = new GraphChartData("dead sims", Color.RED);
     public               TraderList              deadTraderList                    = new TraderList();
     public               GraphChartData          deadTraderStatistics              = new GraphChartData("dead traders", Color.RED);
+    private              boolean                 enableTime                        = true;
     public               EventManager            eventManager;
+    private final        GraphicsDimentions      graphicsDimentions;
+    private              HistoryManager          historyManager;
     public               LandList                landList                          = new LandList();
+    private              long                    lastTime                          = 0;
+    private final        Logger                  logger                            = LoggerFactory.getLogger(this.getClass());
+    private              String                  name;
     public               PathList                pathList                          = new PathList();
     public               PieChartData            planetDeadReasonPieChart          = new PieChartData("planet death");
     public               PlanetList              planetList                        = new PlanetList();
@@ -71,7 +77,9 @@ public class Universe {
     public               PieChartData            satisfactionPieChart              = new PieChartData("satisfaction");
     public               SectorList              sectorList                        = new SectorList();
     public               Object                  selected                          = null;
+    private              Event                   selectedEvent;
     public               Good                    selectedGood                      = null;
+    private              int                     selectedGoodIndex;
     public               Planet                  selectedPlanet                    = null;
     public               ProductionFacility      selectedProductionFacility        = null;
     public               Sim                     selectedSim;
@@ -81,22 +89,14 @@ public class Universe {
     public               int                     size;
     public               PieChartData            statisticsPieChart                = new PieChartData("statistics");
     public               long                    timeDelta                         = 0L;
+    private final        TimeStatisticManager    timeStatisticManager              = new TimeStatisticManager();
     public               float                   traderCreditBuffer                = 0;
     public               PieChartData            traderDeadReasonPieChart          = new PieChartData("trader death");
     public               TraderList              traderList                        = new TraderList();
+    private              long                    universeAge                       = 100L * TimeUnit.TICKS_PER_DAY;
     public               MercatorRandomGenerator universeRG;
     //    Voice   helloVoice;
     boolean useFixedDelta = false;
-    //    VoiceManager voiceManager;
-    private ScreenListener ScreenListener;
-    private float          credits; // ---credits at creation time, should never change
-    private boolean        enableTime  = true;
-    private HistoryManager historyManager;
-    private long           lastTime    = 0;
-    private String         name;
-    private Event          selectedEvent;
-    private int            selectedGoodIndex;
-    private long           universeAge = 100L * TimeUnit.TICKS_PER_DAY;
 
 
     public Universe(final String name, final GraphicsDimentions graphicsDimentions, final EventLevel level, final Class<?> eventFilter) {
@@ -248,7 +248,7 @@ public class Universe {
      * @param days                days of universe in days
      * @throws Exception
      */
-    public void create(GameEngine gameEngine, final int randomGeneratorSeed, final int universeSize, final long days) throws Exception {
+    public void create(IGameEngine gameEngine, final int randomGeneratorSeed, final int universeSize, final long days) throws Exception {
         universeAge = days;
         {
             size = universeSize;

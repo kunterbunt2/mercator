@@ -21,6 +21,7 @@ import com.badlogic.gdx.Input.Buttons;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g3d.utils.CameraInputController;
 import com.badlogic.gdx.graphics.profiling.GLErrorListener;
 import com.badlogic.gdx.graphics.profiling.GLProfiler;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -28,9 +29,11 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.utils.BufferUtils;
 import com.badlogic.gdx.utils.ScreenUtils;
 import de.bushnaq.abdalla.engine.IContextFactory;
+import de.bushnaq.abdalla.engine.IGameEngine;
 import de.bushnaq.abdalla.engine.RenderEngine2D;
-import de.bushnaq.abdalla.engine.RenderEngineExtension;
+import de.bushnaq.abdalla.engine.RenderEngine3D;
 import de.bushnaq.abdalla.engine.audio.AudioEngine;
+import de.bushnaq.abdalla.engine.camera.MovingCamera;
 import de.bushnaq.abdalla.mercator.audio.synthesis.MercatorAudioEngine;
 import de.bushnaq.abdalla.mercator.desktop.Context;
 import de.bushnaq.abdalla.mercator.desktop.LaunchMode;
@@ -57,14 +60,18 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
-public class GameEngine2D implements ScreenListener, ApplicationListener, InputProcessor, Message, RenderEngineExtension, GameEngine {
+public class GameEngine2D implements ScreenListener, ApplicationListener, InputProcessor, Message, IGameEngine {
     //	private static final String BATCH_END_DURATION = "batch.end()";
     public static final  int                          CHART_FONT_SIZE                 = 10;
     public static final  Color                        DARK_RED_COLOR                  = new Color(0.475f, 0.035f, 0.027f, 1.0f);
     public static final  Color                        DEAD_COLOR                      = Color.GRAY;
+    //    static final         Color                    BACKGROUND_COLOR                = new Color(35.0f / 255, 135.0f / 255, 159.5f / 255, 1.0f);
+    static final         Color                        DEBUG_GRID_BORDER_COLOR         = new Color(1f, 1f, 1f, 0.2f);
+    static final         Color                        DEBUG_GRID_COLOR                = new Color(.0f, .0f, .0f, 0.2f);
     //	private static final String DRAW_DURATION = "draw()";
     public static final  int                          FONT_SIZE                       = 14;
     public static final  int                          MENU_FONT_SIZE                  = 12;
+    private static final float                        SCROLL_SPEED                    = 100f;
     //    public static final  float                    PLANET_DISTANCE                 = 512;
     //	private static final String RENDER_DURATION = "render()";
     public static final  Color                        SELECTED_COLOR                  = Color.GOLDENROD;
@@ -73,14 +80,13 @@ public class GameEngine2D implements ScreenListener, ApplicationListener, InputP
     // static final float SPACE_BETWEEN_OBJECTS = 1 * 4;
 //    public static final  float                    SOOM_SPEED                      = 8.0f;
     public static final  Color                        TEXT_COLOR                      = Color.WHITE; // 0xffffffff;
-    public static final  int                          TIME_MACHINE_FONT_SIZE          = 10;
-    //    static final         Color                    BACKGROUND_COLOR                = new Color(35.0f / 255, 135.0f / 255, 159.5f / 255, 1.0f);
-    static final         Color                        DEBUG_GRID_BORDER_COLOR         = new Color(1f, 1f, 1f, 0.2f);
-    static final         Color                        DEBUG_GRID_COLOR                = new Color(.0f, .0f, .0f, 0.2f);
-    private static final float                        SCROLL_SPEED                    = 100f;
     private static final Color                        TIME_MACHINE_BACKGROUND_COLOR   = new Color(0.0f, 0.0f, 0.0f, 0.9f);
+    public static final  int                          TIME_MACHINE_FONT_SIZE          = 10;
     private static final Color                        TIME_MACHINE_SUB_MARKER_COLOR   = new Color(0.7f, 0.7f, 0.7f, 1.0f);
-    public final         Universe                     universe;
+    public               AtlasManager                 atlasManager;
+    public               AudioEngine                  audioEngine                     = new MercatorAudioEngine();
+    public               OrthographicCamera           camera;
+    private              Context                      context;
     private final        IContextFactory              contextFactory;
     //	private static final Color trafficEndColor = new Color(0xffff0000);
     //	private static final Color trafficStartColor = new Color(0xff55ff55);
@@ -89,26 +95,17 @@ public class GameEngine2D implements ScreenListener, ApplicationListener, InputP
     // private float centerXD;
     // private float centerYD;
     private final        TimeStatistic                debugTimer;
-    private final        InputMultiplexer             inputMultiplexer                = new InputMultiplexer();
-    private final        List<Label>                  labels                          = new ArrayList<>();
-    private final        LaunchMode                   launchMode;
-    private final        Logger                       logger                          = LoggerFactory.getLogger(this.getClass());
-    private final        List<MercatorMessage>        messageQueue                    = new LinkedList<MercatorMessage>();
-    public               AtlasManager                 atlasManager;
-    public               AudioEngine                  audioEngine                     = new MercatorAudioEngine();
-    public               OrthographicCamera           camera;
-    public               List<Color>                  distinctiveColorlist            = new ArrayList<Color>();
-    public               List<Color>                  distinctiveTransparentColorlist = new ArrayList<Color>();
-    public               RenderEngine2D<GameEngine2D> renderEngine;
-    public               ShowGood                     showGood                        = ShowGood.Name;
-    private              Context                      context;
     //	private MyCanvas myCanvas;
 //	public Render2DMaster render2DMaster;
-    private              int                          defaultFontSize                 = GameEngine2D.FONT_SIZE;
+    private final        int                          defaultFontSize                 = GameEngine2D.FONT_SIZE;
+    public               List<Color>                  distinctiveColorlist            = new ArrayList<Color>();
+    public               List<Color>                  distinctiveTransparentColorlist = new ArrayList<Color>();
     private              BitmapFont                   font;
     //	private Environment environment;
     private              Info                         info;
     private              boolean                      infoVisible;
+    private final        InputMultiplexer             inputMultiplexer                = new InputMultiplexer();
+    private final        List<Label>                  labels                          = new ArrayList<>();
     //	private void drawBackground() {
     //		float d = 10;
     //		float z = 10;
@@ -120,12 +117,18 @@ public class GameEngine2D implements ScreenListener, ApplicationListener, InputP
     //	}
     private              int                          lastDragX                       = -1;
     private              int                          lastDragY                       = -1;
+    private final        LaunchMode                   launchMode;
+    private final        Logger                       logger                          = LoggerFactory.getLogger(this.getClass());
     private              int                          maxFramesPerSecond;
+    private final        List<MercatorMessage>        messageQueue                    = new LinkedList<MercatorMessage>();
     private              GLProfiler                   profiler;
+    public               RenderEngine2D<GameEngine2D> renderEngine;
+    public               ShowGood                     showGood                        = ShowGood.Name;
     private              Stage                        stage;
     private              StringBuilder                stringBuilder;
     private              boolean                      takeScreenShot;
-    private              int                          timeMachineFontSize             = GameEngine2D.TIME_MACHINE_FONT_SIZE;
+    private final        int                          timeMachineFontSize             = GameEngine2D.TIME_MACHINE_FONT_SIZE;
+    public final         Universe                     universe;
     private              boolean                      vsyncEnabled                    = true;
 
     public GameEngine2D(final IContextFactory contextFactory, final Universe universe, final LaunchMode launchMode) throws Exception {
@@ -182,48 +185,30 @@ public class GameEngine2D implements ScreenListener, ApplicationListener, InputP
         }
     }
 
-    @Override
-    public void resize(final int width, final int height) {
-        renderEngine.width  = width;
-        renderEngine.height = height;
-        renderEngine.camera.setToOrtho(false, width, height);
-        renderEngine.camera.update();
-        renderEngine.batch.setProjectionMatrix(renderEngine.camera.combined);
-        info.resize(width, height);
+    public void createCamera() {
+        camera = new OrthographicCamera(300, 0);
+        Planet planet = universe.planetList.findBusyCenterPlanet();
+        if (planet == null) planet = universe.planetList.get(0);
+        camera.position.set(planet.x, planet.z, 0);
+        camera.zoom = 1.0f;
+        camera.update();
     }
 
-    @Override
-    public void render() {
-        try {
-            universe.advanceInTime();
-            if (profiler.isEnabled()) {
-                profiler.reset();// reset on each frame
-            }
-            // universe.timeStatisticManager.start( RENDER_DURATION );
-            // postProcessor.capture();
-            render(universe.currentTime);
-            // postProcessor.render();
-            // universe.timeStatisticManager.stop( RENDER_LIGHT );
-            //			GLProfiler.reset();
-            // universe.timeStatisticManager.stop( RENDER_DURATION );
-            // System.out.printf( "advance in time %d\n",
-            // universe.timeStatisticManager.getStatistic(
-            // Universe.ADVANCE_IN_TIME_UNIVERSE_DURATION ).lastTime );
-            // System.out.printf( "render time %d\n\n",
-            // universe.timeStatisticManager.getStatistic( RENDER_DURATION ).lastTime );
-            renderStage();
-        } catch (final Exception e) {
-            logger.error(e.getMessage(), e);
-            System.exit(0);
-        }
+    private String createFileName(final Date date, final String append) {
+        final String           pattern          = "yyyy-MM-dd-HH-mm-ss";
+        final SimpleDateFormat simpleDateFormat = new SimpleDateFormat(pattern);
+        final String           dateAsString     = simpleDateFormat.format(date);
+        final String           fileName         = "docs/pics/" + dateAsString + "-" + append + ".png";
+        return fileName;
     }
 
     //	private void enableProfiler() {
     //		//		GLProfiler.enable();
     //	}
 
-    @Override
-    public void pause() {
+    private void createInputProcessor(final InputProcessor inputProcessor) throws Exception {
+        inputMultiplexer.addProcessor(inputProcessor);
+        Gdx.input.setInputProcessor(inputMultiplexer);
     }
 
     //	private int getMaxFramesPerSecond() {
@@ -249,45 +234,6 @@ public class GameEngine2D implements ScreenListener, ApplicationListener, InputP
     //		}
     //	}
 
-    @Override
-    public void resume() {
-        // TODO Auto-generated method stub
-    }
-
-    @Override
-    public void dispose() {
-        System.out.println("dispose() called");
-        profiler.disable();
-        // postProcessor.dispose();
-        renderEngine.dispose();
-        info.dispose();
-        //		synchronized (desktopLauncher) {
-        //			desktopLauncher.notify();
-        //		}
-    }
-
-    public void createCamera() {
-        camera = new OrthographicCamera(300, 300 * (600 / 800));
-        Planet planet = universe.planetList.findBusyCenterPlanet();
-        if (planet == null) planet = universe.planetList.get(0);
-        camera.position.set(planet.x, planet.z, 0);
-        camera.zoom = 1.0f;
-        camera.update();
-    }
-
-    private String createFileName(final Date date, final String append) {
-        final String           pattern          = "yyyy-MM-dd-HH-mm-ss";
-        final SimpleDateFormat simpleDateFormat = new SimpleDateFormat(pattern);
-        final String           dateAsString     = simpleDateFormat.format(date);
-        final String           fileName         = "docs/pics/" + dateAsString + "-" + append + ".png";
-        return fileName;
-    }
-
-    private void createInputProcessor(final InputProcessor inputProcessor) throws Exception {
-        inputMultiplexer.addProcessor(inputProcessor);
-        Gdx.input.setInputProcessor(inputMultiplexer);
-    }
-
     private void createStage() throws Exception {
         info = new Info(null, atlasManager, camera, renderEngine.batch, inputMultiplexer);
         info.createStage();
@@ -301,6 +247,18 @@ public class GameEngine2D implements ScreenListener, ApplicationListener, InputP
             labels.add(label);
         }
         stringBuilder = new StringBuilder();
+    }
+
+    @Override
+    public void dispose() {
+        System.out.println("dispose() called");
+        profiler.disable();
+        // postProcessor.dispose();
+        renderEngine.dispose();
+        info.dispose();
+        //		synchronized (desktopLauncher) {
+        //			desktopLauncher.notify();
+        //		}
     }
 
     private void drawDebugGrid() {
@@ -328,39 +286,19 @@ public class GameEngine2D implements ScreenListener, ApplicationListener, InputP
         Gdx.app.exit();
     }
 
-    //	private void printStatistics() throws Exception {
-    //		if (profiler.isEnabled()) {
-    //			setMaxFramesPerSecond(Math.max(getMaxFramesPerSecond(), Gdx.graphics.getFramesPerSecond()));
-    //			// once a second
-    //			if (debugTimer.getTime() > 1000) {
-    //				// for ( String statisticName : universe.timeStatisticManager.getSet() )
-    //				// {
-    //				// TimeStatistic statistic = universe.timeStatisticManager.getStatistic(
-    //				// statisticName );
-    //				// System.out.println( String.format( "%s %dms %dms %dms %dms", statisticName,
-    //				// statistic.lastTime, statistic.minTime, statistic.averageTime,
-    //				// statistic.maxTime ) );
-    //				// }
-    //				System.out.printf("----------------------------------------------------\n");
-    //				System.out.printf("profiler.textureBindings %d\n", profiler.getTextureBindings());
-    //				System.out.printf("GLProfiler.drawCalls %d\n", profiler.getDrawCalls());
-    //				System.out.printf("GLProfiler.shaderSwitches %d\n", profiler.getShaderSwitches());
-    //				System.out.printf("GLProfiler.vertexCount.min %.0f\n", profiler.getVertexCount().min);
-    //				System.out.printf("GLProfiler.vertexCount.average %.0f\n", profiler.getVertexCount().average);
-    //				System.out.printf("GLProfiler.vertexCount.max %.0f\n", profiler.getVertexCount().max);
-    //				System.out.printf("GLProfiler.calls %d\n", profiler.getCalls());
-    //				System.out.printf("Texture.getNumManagedTextures() %d\n", Texture.getNumManagedTextures());
-    //				System.out.printf("Gdx.graphics.getDeltaTime() %f\n", Gdx.graphics.getDeltaTime());
-    //				System.out.printf("batch.renderCalls %d\n", render2DMaster.batch.renderCalls);
-    //				System.out.printf(Gdx.graphics.getFramesPerSecond() + " fps\n");
-    //				System.out.printf("----------------------------------------------------\n");
-    //			}
-    //		}
-    //	}
-
     @Override
     public AudioEngine getAudioEngine() {
         return audioEngine;
+    }
+
+    @Override
+    public CameraInputController getCamController() {
+        return null;
+    }
+
+    @Override
+    public MovingCamera getCamera() {
+        return null;
     }
 
     private Object getRendablePosition(final float x, final float y) {
@@ -407,6 +345,41 @@ public class GameEngine2D implements ScreenListener, ApplicationListener, InputP
                 }
             }
         }
+        return null;
+    }
+
+    //	private void printStatistics() throws Exception {
+    //		if (profiler.isEnabled()) {
+    //			setMaxFramesPerSecond(Math.max(getMaxFramesPerSecond(), Gdx.graphics.getFramesPerSecond()));
+    //			// once a second
+    //			if (debugTimer.getTime() > 1000) {
+    //				// for ( String statisticName : universe.timeStatisticManager.getSet() )
+    //				// {
+    //				// TimeStatistic statistic = universe.timeStatisticManager.getStatistic(
+    //				// statisticName );
+    //				// System.out.println( String.format( "%s %dms %dms %dms %dms", statisticName,
+    //				// statistic.lastTime, statistic.minTime, statistic.averageTime,
+    //				// statistic.maxTime ) );
+    //				// }
+    //				System.out.printf("----------------------------------------------------\n");
+    //				System.out.printf("profiler.textureBindings %d\n", profiler.getTextureBindings());
+    //				System.out.printf("GLProfiler.drawCalls %d\n", profiler.getDrawCalls());
+    //				System.out.printf("GLProfiler.shaderSwitches %d\n", profiler.getShaderSwitches());
+    //				System.out.printf("GLProfiler.vertexCount.min %.0f\n", profiler.getVertexCount().min);
+    //				System.out.printf("GLProfiler.vertexCount.average %.0f\n", profiler.getVertexCount().average);
+    //				System.out.printf("GLProfiler.vertexCount.max %.0f\n", profiler.getVertexCount().max);
+    //				System.out.printf("GLProfiler.calls %d\n", profiler.getCalls());
+    //				System.out.printf("Texture.getNumManagedTextures() %d\n", Texture.getNumManagedTextures());
+    //				System.out.printf("Gdx.graphics.getDeltaTime() %f\n", Gdx.graphics.getDeltaTime());
+    //				System.out.printf("batch.renderCalls %d\n", render2DMaster.batch.renderCalls);
+    //				System.out.printf(Gdx.graphics.getFramesPerSecond() + " fps\n");
+    //				System.out.printf("----------------------------------------------------\n");
+    //			}
+    //		}
+    //	}
+
+    @Override
+    public RenderEngine3D<?> getRenderEngine() {
         return null;
     }
 
@@ -549,6 +522,11 @@ public class GameEngine2D implements ScreenListener, ApplicationListener, InputP
     }
 
     @Override
+    public boolean keyTyped(final char character) {
+        return false;
+    }
+
+    @Override
     public boolean keyUp(final int keycode) {
         //		switch (keycode) {
         //		case Input.Keys.A:
@@ -568,7 +546,7 @@ public class GameEngine2D implements ScreenListener, ApplicationListener, InputP
     }
 
     @Override
-    public boolean keyTyped(final char character) {
+    public boolean mouseMoved(final int screenX, final int screenY) {
         return false;
     }
     // private void drawSectors()
@@ -588,72 +566,13 @@ public class GameEngine2D implements ScreenListener, ApplicationListener, InputP
     // }
 
     @Override
-    public boolean touchDown(final int screenX, final int screenY, final int pointer, final int button) {
-        final float x = renderEngine.centerX + (screenX - renderEngine.width / 2) * renderEngine.camera.zoom;
-        final float y = renderEngine.centerY + (screenY - renderEngine.height / 2) * renderEngine.camera.zoom;
-        // ---What did we select?
-        //		Object selected = null;
-        if (Gdx.input.isButtonPressed(Buttons.LEFT)) {
-            final Object selected = getRendablePosition(x, y);
-            try {
-                universe.setSelected(selected, true);
-            } catch (final Exception e) {
-                // TODO Auto-generated catch block
-                logger.error(e.getMessage(), e);
-            }
-        }
-        return false;
-    }
-
-    @Override
-    public boolean touchUp(final int screenX, final int screenY, final int pointer, final int button) {
-        lastDragX = -1;
-        lastDragY = -1;
-        return true;
-    }
-
-    @Override
-    public boolean touchCancelled(int screenX, int screenY, int pointer, int button) {
-        return false;
-    }
-
-    @Override
-    public boolean touchDragged(final int screenX, final int screenY, final int pointer) {
-        if (Gdx.input.isButtonPressed(Buttons.RIGHT)) {
-            if ((lastDragX != screenX || lastDragY != screenY) && lastDragX != -1) {
-                renderEngine.centerX = renderEngine.centerX - (screenX - lastDragX) * renderEngine.camera.zoom;
-                renderEngine.centerY = renderEngine.centerY - (screenY - lastDragY) * renderEngine.camera.zoom;
-            }
-            lastDragX = screenX;
-            lastDragY = screenY;
-            return true;
-        }
-        return false;
-    }
-
-    @Override
-    public boolean mouseMoved(final int screenX, final int screenY) {
-        return false;
-    }
-
-    @Override
-    public boolean scrolled(final float amountX, final float amountY) {
-        if (amountY < 0) {
-            renderEngine.soomIn(Gdx.input.getX(), Gdx.input.getY());
-        } else {
-            renderEngine.soomOut(Gdx.input.getX(), Gdx.input.getY());
-        }
-        return false;
+    public void pause() {
     }
 
     @Override
     public void post(final MercatorMessage message) {
         messageQueue.add(message);
     }
-
-    //	private void setMaxFramesPerSecond(int maxFramesPerSecond) {
-    //		this.maxFramesPerSecond = maxFramesPerSecond;
-    //	}
 
     public Color priceColor(final Good good) {
         return availabilityColor(good.price, good.getMaxPrice());
@@ -673,6 +592,32 @@ public class GameEngine2D implements ScreenListener, ApplicationListener, InputP
 
     private void queueScreenshot() {
         takeScreenShot = true;
+    }
+
+    @Override
+    public void render() {
+        try {
+            universe.advanceInTime();
+            if (profiler.isEnabled()) {
+                profiler.reset();// reset on each frame
+            }
+            // universe.timeStatisticManager.start( RENDER_DURATION );
+            // postProcessor.capture();
+            render(universe.currentTime);
+            // postProcessor.render();
+            // universe.timeStatisticManager.stop( RENDER_LIGHT );
+            //			GLProfiler.reset();
+            // universe.timeStatisticManager.stop( RENDER_DURATION );
+            // System.out.printf( "advance in time %d\n",
+            // universe.timeStatisticManager.getStatistic(
+            // Universe.ADVANCE_IN_TIME_UNIVERSE_DURATION ).lastTime );
+            // System.out.printf( "render time %d\n\n",
+            // universe.timeStatisticManager.getStatistic( RENDER_DURATION ).lastTime );
+            renderStage();
+        } catch (final Exception e) {
+            logger.error(e.getMessage(), e);
+            System.exit(0);
+        }
     }
 
     private void render(final long currentTime) throws Exception {
@@ -718,14 +663,13 @@ public class GameEngine2D implements ScreenListener, ApplicationListener, InputP
         takeScreenShot = false;
     }
 
+    //	private void setMaxFramesPerSecond(int maxFramesPerSecond) {
+    //		this.maxFramesPerSecond = maxFramesPerSecond;
+    //	}
+
     @Override
     public void render2Dxz() {
 
-    }
-
-    @Override
-    public boolean updateEnvironment(float timeOfDay) {
-        return false;
     }
 
     private void renderGoods() {
@@ -871,6 +815,21 @@ public class GameEngine2D implements ScreenListener, ApplicationListener, InputP
         }
     }
 
+    @Override
+    public void resize(final int width, final int height) {
+        renderEngine.width  = width;
+        renderEngine.height = height;
+        renderEngine.camera.setToOrtho(false, width, height);
+        renderEngine.camera.update();
+        renderEngine.batch.setProjectionMatrix(renderEngine.camera.combined);
+        info.resize(width, height);
+    }
+
+    @Override
+    public void resume() {
+        // TODO Auto-generated method stub
+    }
+
     Color satesfactionColor(final float satisfactionFactor) {
         if (satisfactionFactor >= 50) {
             return Color.GREEN;
@@ -882,16 +841,75 @@ public class GameEngine2D implements ScreenListener, ApplicationListener, InputP
     }
 
     @Override
+    public boolean scrolled(final float amountX, final float amountY) {
+        if (amountY < 0) {
+            renderEngine.soomIn(Gdx.input.getX(), Gdx.input.getY());
+        } else {
+            renderEngine.soomOut(Gdx.input.getX(), Gdx.input.getY());
+        }
+        return false;
+    }
+
+    @Override
     public void setCamera(final float x, final float z, final boolean setDirty) {
         // TODO Auto-generated method stub
     }
 
-    @Override
-    public void setShowGood(final ShowGood name) {
-        showGood = name;
-    }
-
     public void setInfoVisible(final boolean infoVisible) {
         this.infoVisible = infoVisible;
+    }
+
+//    @Override
+//    public void setShowGood(final ShowGood name) {
+//        showGood = name;
+//    }
+
+    @Override
+    public boolean touchCancelled(int screenX, int screenY, int pointer, int button) {
+        return false;
+    }
+
+    @Override
+    public boolean touchDown(final int screenX, final int screenY, final int pointer, final int button) {
+        final float x = renderEngine.centerX + (screenX - renderEngine.width / 2) * renderEngine.camera.zoom;
+        final float y = renderEngine.centerY + (screenY - renderEngine.height / 2) * renderEngine.camera.zoom;
+        // ---What did we select?
+        //		Object selected = null;
+        if (Gdx.input.isButtonPressed(Buttons.LEFT)) {
+            final Object selected = getRendablePosition(x, y);
+            try {
+                universe.setSelected(selected, true);
+            } catch (final Exception e) {
+                // TODO Auto-generated catch block
+                logger.error(e.getMessage(), e);
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public boolean touchDragged(final int screenX, final int screenY, final int pointer) {
+        if (Gdx.input.isButtonPressed(Buttons.RIGHT)) {
+            if ((lastDragX != screenX || lastDragY != screenY) && lastDragX != -1) {
+                renderEngine.centerX = renderEngine.centerX - (screenX - lastDragX) * renderEngine.camera.zoom;
+                renderEngine.centerY = renderEngine.centerY - (screenY - lastDragY) * renderEngine.camera.zoom;
+            }
+            lastDragX = screenX;
+            lastDragY = screenY;
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean touchUp(final int screenX, final int screenY, final int pointer, final int button) {
+        lastDragX = -1;
+        lastDragY = -1;
+        return true;
+    }
+
+    @Override
+    public boolean updateEnvironment(float timeOfDay) {
+        return false;
     }
 }

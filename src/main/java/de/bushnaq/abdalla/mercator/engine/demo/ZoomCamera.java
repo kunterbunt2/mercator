@@ -16,6 +16,7 @@
 
 package de.bushnaq.abdalla.mercator.engine.demo;
 
+import de.bushnaq.abdalla.engine.shader.effect.scheduled.ScheduledTask;
 import de.bushnaq.abdalla.mercator.engine.GameEngine3D;
 
 public class ZoomCamera extends ScheduledTask {
@@ -30,11 +31,17 @@ public class ZoomCamera extends ScheduledTask {
 
     @Override
     public boolean execute(float deltaTime) {
-        gameEngine.getCamController().setTargetZoomIndex(zoomIndex);
-        gameEngine.getCamera().lookAt(gameEngine.getCamera().lookat);
-        gameEngine.getCamera().update(true);
-        gameEngine.getCamera().setDirty(true);
+        GameEngine3D ge = (GameEngine3D) gameEngine;
+        ge.getCamController().setTargetZoomIndex(zoomIndex);
+        ge.getCamera().lookAt(ge.getCamera().lookat);
+        ge.getCamera().update(true);
+        ge.getCamera().setDirty(true);
         return true;
+    }
+
+    @Override
+    public long secondToRun() {
+        return 0;
     }
 
     @Override

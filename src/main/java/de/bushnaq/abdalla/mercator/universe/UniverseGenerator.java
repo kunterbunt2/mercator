@@ -16,8 +16,8 @@
 
 package de.bushnaq.abdalla.mercator.universe;
 
+import de.bushnaq.abdalla.engine.IGameEngine;
 import de.bushnaq.abdalla.engine.audio.OpenAlException;
-import de.bushnaq.abdalla.mercator.engine.GameEngine;
 import de.bushnaq.abdalla.mercator.universe.good.GoodList;
 import de.bushnaq.abdalla.mercator.universe.land.Land;
 import de.bushnaq.abdalla.mercator.universe.land.LandList;
@@ -40,23 +40,23 @@ import org.slf4j.LoggerFactory;
  * @author bushnaq Created 13.02.2005
  */
 public class UniverseGenerator {
-    public static final int                     PLANET_CHANCE_DICE_PORLTION = 6;
+    public static final int      PLANET_CHANCE_DICE_PORLTION = 6;
     //	public static final float PLANET_MAX_JUMP_GATE_DISTANCE = 1610;// TODO adapt to 2D 1636
-    public static final int                     PLANET_CHANCE_DICE_SIZE     = 10;
-    public static final int                     PLANET_MAX_HIGHT            = 256;
-    public static final int                     PLANET_MAX_SHIFT            = Planet.PLANET_DISTANCE / 2;
-    public static final float                   PLANET_MAX_SHIFT_JUMP_GATE  = (float) Planet.PLANET_DISTANCE + PLANET_MAX_SHIFT + 10;
-    final               int                     MAX_NUMBER_OF_TRADERS       = 1;
-    private final       Logger                  logger                      = LoggerFactory.getLogger(this.getClass());
-    public              GoodList                goodList;
-    public              PathList                pathList;
-    public              MercatorRandomGenerator randomGenerator;
-    public              TraderList              traderList;
-    LandList   landList;
+    public static final int      PLANET_CHANCE_DICE_SIZE     = 10;
+    public static final int      PLANET_MAX_HIGHT            = 256;
+    public static final int      PLANET_MAX_SHIFT            = Planet.PLANET_DISTANCE / 2;
+    public static final float    PLANET_MAX_SHIFT_JUMP_GATE  = (float) Planet.PLANET_DISTANCE + PLANET_MAX_SHIFT + 10;
+    final               int      MAX_NUMBER_OF_TRADERS       = 1;
+    public              GoodList goodList;
+    LandList landList;
+    private final Logger   logger = LoggerFactory.getLogger(this.getClass());
+    public        PathList pathList;
     PlanetList planetList;
+    public MercatorRandomGenerator randomGenerator;
     // public int randomGeneratorSeed = 5;
     SectorList sectorList;
-    private int size;
+    private int        size;
+    public  TraderList traderList;
 
     public UniverseGenerator() {
     }
@@ -226,7 +226,7 @@ public class UniverseGenerator {
 //
 //    }
 
-    public void generate(GameEngine gameEngine, final Universe universe) throws Exception {
+    public void generate(IGameEngine gameEngine, final Universe universe) throws Exception {
         logger.info("----------------------------------------------------------------------------------");
         logger.info(String.format("creating universe of %d light years across.", universe.size));
         final long time = System.currentTimeMillis();
@@ -360,7 +360,7 @@ public class UniverseGenerator {
     }
 
     // ---Create the planets
-    private PlanetList generatePlanetList(GameEngine gameEngine, final Universe universe) throws OpenAlException {
+    private PlanetList generatePlanetList(IGameEngine gameEngine, final Universe universe) throws OpenAlException {
         final PlanetList planetList = new PlanetList();
         int              count      = 0;
         do {
@@ -404,7 +404,7 @@ public class UniverseGenerator {
         return sectorList;
     }
 
-    private TraderList generateTraders(GameEngine gameEngine) throws Exception {
+    private TraderList generateTraders(IGameEngine gameEngine) throws Exception {
         final TraderList traderList = new TraderList();
         int              count      = 0;
         for (final Planet planet : planetList) {

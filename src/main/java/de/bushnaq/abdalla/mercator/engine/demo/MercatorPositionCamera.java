@@ -18,14 +18,14 @@ package de.bushnaq.abdalla.mercator.engine.demo;
 
 import com.badlogic.gdx.math.Vector3;
 import de.bushnaq.abdalla.engine.IGameEngine;
-import de.bushnaq.abdalla.engine.shader.effect.scheduled.ScheduledTask;
+import de.bushnaq.abdalla.engine.chronos.Task;
 import de.bushnaq.abdalla.mercator.engine.GameEngine3D;
 import de.bushnaq.abdalla.mercator.universe.Universe;
 import de.bushnaq.abdalla.mercator.universe.planet.Planet;
 
 import static de.bushnaq.abdalla.mercator.engine.GameEngine3D.*;
 
-public class MercatorPositionCamera<T extends IGameEngine> extends ScheduledTask<T> {
+public class MercatorPositionCamera<T extends IGameEngine> extends Task<T> {
     private final String name;
     private final int    zoomIndex;
 
@@ -62,7 +62,7 @@ public class MercatorPositionCamera<T extends IGameEngine> extends ScheduledTask
     }
 
     @Override
-    public void subexecute(float deltaTime) {
+    public void subExecute(float deltaTime) {
 
     }
 }

@@ -195,7 +195,6 @@ public class Demo {
                         gameEngine.getRenderEngine().getScheduledEffectEngine().add((Task) new FadeIn<>(gameEngine));
                         gameEngine.getRenderEngine().getScheduledEffectEngine().add((Task) new Pause<>(gameEngine, secondsDelta));
 
-                        gameEngine.getRenderEngine().getScheduledEffectEngine().add((Task) new FadeIn<>(gameEngine, 0.5f));
                         //                        if (randomGenerator.nextInt(10) == 0)
 //                        {
 //                            for (int zoomIndex = 0; zoomIndex < gameEngine.getCamController().zoomFactors.length; zoomIndex++) {

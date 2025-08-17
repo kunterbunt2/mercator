@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package de.bushnaq.abdalla.mercator.audio.synthesis;
+package de.bushnaq.abdalla.mercator.engine.audio.synthesis;
 
 import de.bushnaq.abdalla.engine.audio.OpenAlException;
 import de.bushnaq.abdalla.engine.audio.synthesis.*;

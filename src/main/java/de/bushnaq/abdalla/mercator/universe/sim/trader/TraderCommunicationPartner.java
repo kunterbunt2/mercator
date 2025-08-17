@@ -17,18 +17,22 @@
 package de.bushnaq.abdalla.mercator.universe.sim.trader;
 
 import de.bushnaq.abdalla.engine.audio.*;
+import de.bushnaq.abdalla.mercator.engine.ai.LLMTTS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import static de.bushnaq.abdalla.engine.audio.RadioTTS.SHIP_TAG;
+import static de.bushnaq.abdalla.engine.audio.RadioTTS.STATION_TAG;
+
 public class TraderCommunicationPartner implements CommunicationPartner {
-    private final Logger logger = LoggerFactory.getLogger(this.getClass());
-    private final Trader trader;
+    private final AudioEngine audioEngine;
+    private final Logger      logger = LoggerFactory.getLogger(this.getClass());
     List<RadioMessage> radioMessages = new ArrayList<>();
-    TTSPlayer          ttsPlayer;
-    private AudioEngine audioEngine;
+    private final Trader trader;
+    TTSPlayer ttsPlayer;
 
     public TraderCommunicationPartner(AudioEngine audioEngine, Trader trader) throws OpenAlException {
         this.trader      = trader;
@@ -42,6 +46,14 @@ public class TraderCommunicationPartner implements CommunicationPartner {
         return trader.getName();
     }
 
+    private void handleRadioMessage() {
+        for (RadioMessage rm : radioMessages) {
+            if (trader.currentTime - rm.time > CommunicationPartner.RADIO_ANSWER_DELAY) {
+
+            }
+        }
+    }
+
     @Override
     public boolean isSelected() {
         return trader.selected;
@@ -51,6 +63,33 @@ public class TraderCommunicationPartner implements CommunicationPartner {
     public void radio(RadioMessage message) {
         radioMessages.add(message);
 //        say(message.message);
+    }
+
+    public void requestDocking() {
+        if (audioEngine.radioTTS != null && trader.destinationPlanet.isSelected()) {
+            String       string = RadioMessage.createMessage(audioEngine.radioTTS.resolveString(LLMTTS.REQUEST_DOCKING), SHIP_TAG, getName(), STATION_TAG, trader.destinationPlanet.getName());
+            RadioMessage rm     = new RadioMessage(trader.currentTime, this, trader.destinationPlanet.communicationPartner, RadioMessageId.REQUEST_TO_DOCK, string);
+            say(rm);
+            trader.destinationPlanet.communicationPartner.radio(rm);// send to partner
+
+        }
+    }
+
+    public void requestUndocking() {
+        if (audioEngine.radioTTS != null && trader.sourcePlanet.isSelected()) {
+            String       string = RadioMessage.createMessage(audioEngine.radioTTS.resolveString(LLMTTS.REQUEST_UNDOCKING), SHIP_TAG, getName(), STATION_TAG, trader.sourcePlanet.getName());
+            RadioMessage rm     = new RadioMessage(trader.currentTime, this, trader.destinationPlanet.communicationPartner, RadioMessageId.REQUEST_TO_UNDOCK, string);
+            say(rm);
+            trader.sourcePlanet.communicationPartner.radio(rm);// send to partner
+
+        }
+    }
+
+    public void say(RadioMessage msg) {
+        if (isSelected()) {
+            ttsPlayer.speak(msg);
+            logger.info(msg.message);
+        }
     }
 
     /**
@@ -65,31 +104,5 @@ public class TraderCommunicationPartner implements CommunicationPartner {
     public void unselect() {
         ttsPlayer.setOptIn(false);
     }
-
-    private void handleRadioMessage() {
-        for (RadioMessage rm : radioMessages) {
-            if (trader.currentTime - rm.time > CommunicationPartner.RADIO_ANSWER_DELAY) {
-
-            }
-        }
-    }
-
-    public void informControlTower() {
-        if (audioEngine.radioTTS != null) {
-            String string = String.format(audioEngine.radioTTS.resolveString(RadioTTS.REQUESTING_APPROVAL_TO_DOCK_01), getName(), trader.destinationPlanet.getName());
-            say(string);
-            RadioMessage rm = new RadioMessage(trader.currentTime, this, trader.destinationPlanet.communicationPartner, RadioMessageId.REQUEST_TO_DOCK, string);
-            trader.destinationPlanet.communicationPartner.radio(rm);// send to partner
-
-        }
-    }
-
-    public void say(String msg) {
-        if (isSelected()) {
-            ttsPlayer.speak(msg);
-            logger.info(msg);
-        }
-    }
-
 
 }

@@ -23,7 +23,7 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
 import de.bushnaq.abdalla.engine.*;
-import de.bushnaq.abdalla.mercator.audio.synthesis.MercatorSynthesizer;
+import de.bushnaq.abdalla.mercator.engine.audio.synthesis.MercatorSynthesizer;
 import de.bushnaq.abdalla.mercator.desktop.LaunchMode;
 import de.bushnaq.abdalla.mercator.engine.GameEngine2D;
 import de.bushnaq.abdalla.mercator.engine.GameEngine3D;

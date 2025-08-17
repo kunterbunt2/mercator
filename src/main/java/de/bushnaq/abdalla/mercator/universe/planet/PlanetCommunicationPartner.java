@@ -17,6 +17,7 @@
 package de.bushnaq.abdalla.mercator.universe.planet;
 
 import de.bushnaq.abdalla.engine.audio.*;
+import de.bushnaq.abdalla.mercator.engine.ai.LLMTTS;
 import de.bushnaq.abdalla.mercator.util.Debug;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,12 +26,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
 
+import static de.bushnaq.abdalla.engine.audio.RadioTTS.SHIP_TAG;
+import static de.bushnaq.abdalla.engine.audio.RadioTTS.STATION_TAG;
+
 public class PlanetCommunicationPartner implements CommunicationPartner {
-    final         TTSPlayer          ttsPlayer;
     private final AudioEngine        audioEngine;
     private final Logger             logger        = LoggerFactory.getLogger(this.getClass());
     private final Planet             planet;
     private final List<RadioMessage> radioMessages = new ArrayList<>();
+    final         TTSPlayer          ttsPlayer;
 
     public PlanetCommunicationPartner(AudioEngine audioEngine, Planet planet) throws OpenAlException {
         this.audioEngine = audioEngine;
@@ -44,31 +48,6 @@ public class PlanetCommunicationPartner implements CommunicationPartner {
         return planet.getName();
     }
 
-    @Override
-    public boolean isSelected() {
-        return planet.selected;
-    }
-
-
-    @Override
-    public void radio(RadioMessage message) {
-        radioMessages.add(message);
-        say(message.message);
-    }
-
-    /**
-     * selecting this partner should enable its ttsPlayer
-     */
-    @Override
-    public void select() {
-        ttsPlayer.setOptIn(true);
-    }
-
-    @Override
-    public void unselect() {
-        ttsPlayer.setOptIn(false);
-    }
-
     void handleRadioMessage() {
         boolean changed;
         do {
@@ -80,14 +59,25 @@ public class PlanetCommunicationPartner implements CommunicationPartner {
                 RadioMessage rm = crunchifyIterator.next();
 //                if (Debug.isFilterPlanet(planet.getName()))
 //                    logger.info(String.format("%d messages to answer, waiting for right time to answer", radioMessages.size()));
-                if (planet.currentTime - rm.time > RADIO_ANSWER_DELAY) {
+                if (planet.currentTime - rm.time > RADIO_ANSWER_DELAY && planet.isSelected()) {
                     switch (rm.id) {
                         case REQUEST_TO_DOCK -> {
 //                            if (Debug.isFilterPlanet(planet.getName()))
 //                                logger.info(String.format("answering %s message", rm.id.name()));
-                            String string = String.format(audioEngine.radioTTS.resolveString(RadioTTS.REQUEST_TO_DOCK_APPROVED_01), getName(), rm.from.getName());
-                            say(string);
+                            String       string       = RadioMessage.createMessage(audioEngine.radioTTS.resolveString(LLMTTS.APPROVE_DOCKING), STATION_TAG, getName(), SHIP_TAG, rm.from.getName());
                             RadioMessage replyMessage = new RadioMessage(planet.currentTime, this, rm.from, RadioMessageId.APPROVE_TO_DOCK, string);
+                            say(replyMessage);
+                            rm.from.radio(replyMessage);
+                            crunchifyIterator.remove();//remove message
+                            changed = true;
+                            break;
+                        }
+                        case REQUEST_TO_UNDOCK -> {
+//                            if (Debug.isFilterPlanet(planet.getName()))
+//                                logger.info(String.format("answering %s message", rm.id.name()));
+                            String       string       = RadioMessage.createMessage(audioEngine.radioTTS.resolveString(LLMTTS.APPROVE_UNDOCKING), STATION_TAG, getName(), SHIP_TAG, rm.from.getName());
+                            RadioMessage replyMessage = new RadioMessage(planet.currentTime, this, rm.from, RadioMessageId.APPROVE_TO_UNDOCK, string);
+                            say(replyMessage);
                             rm.from.radio(replyMessage);
                             crunchifyIterator.remove();//remove message
                             changed = true;
@@ -103,14 +93,43 @@ public class PlanetCommunicationPartner implements CommunicationPartner {
         while (changed);
     }
 
-    public void say(String msg) {
+    @Override
+    public boolean isSelected() {
+        return planet.selected;
+    }
+
+    @Override
+    public void radio(RadioMessage message) {
+        radioMessages.add(message);
+        say(message);
+    }
+
+    /**
+     * Used by the planet and its communication partners to talk to each other
+     *
+     * @param msg
+     */
+    public void say(RadioMessage msg) {
         if (Debug.isFilterPlanet(planet.getName())) {
             logger.info(String.format("say %s selected=%b", msg, isSelected()));
         }
         if (isSelected()) {
             ttsPlayer.speak(msg);
-            logger.info(msg);
+            logger.info(msg.message);
         }
+    }
+
+    /**
+     * selecting this partner should enable its ttsPlayer
+     */
+    @Override
+    public void select() {
+        ttsPlayer.setOptIn(true);
+    }
+
+    @Override
+    public void unselect() {
+        ttsPlayer.setOptIn(false);
     }
 
 

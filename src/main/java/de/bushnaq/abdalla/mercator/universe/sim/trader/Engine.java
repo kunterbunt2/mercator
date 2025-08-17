@@ -224,6 +224,7 @@ public class Engine {
                 trader.destinationPlanet.dockingDoors.setDockingDoorStatus(CLOSING);
                 trader.setTraderSubStatus(TraderSubStatus.TRADER_STATUS_ALIGNING);
                 trader.getThrusters().startRotation();
+                trader.communicationPartner.requestUndocking();
             }
         }
     }

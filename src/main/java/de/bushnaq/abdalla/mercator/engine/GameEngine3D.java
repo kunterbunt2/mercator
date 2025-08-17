@@ -33,10 +33,12 @@ import de.bushnaq.abdalla.engine.*;
 import de.bushnaq.abdalla.engine.audio.AudioEngine;
 import de.bushnaq.abdalla.engine.audio.OggPlayer;
 import de.bushnaq.abdalla.engine.audio.OpenAlException;
+import de.bushnaq.abdalla.engine.audio.RadioTTS;
 import de.bushnaq.abdalla.engine.camera.MovingCamera;
-import de.bushnaq.abdalla.mercator.audio.synthesis.MercatorAudioEngine;
 import de.bushnaq.abdalla.mercator.desktop.Context;
 import de.bushnaq.abdalla.mercator.desktop.LaunchMode;
+import de.bushnaq.abdalla.mercator.engine.ai.LLMTTS;
+import de.bushnaq.abdalla.mercator.engine.audio.synthesis.MercatorAudioEngine;
 import de.bushnaq.abdalla.mercator.engine.camera.CameraProperties;
 import de.bushnaq.abdalla.mercator.engine.camera.ZoomingCameraInputController;
 import de.bushnaq.abdalla.mercator.engine.demo.Demo;
@@ -267,8 +269,9 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
             audioEngine.create(AtlasManager.getAssetsFolderName());
             audioEngine.enableHrtf(0);
             audioEngine.radioTTS.loadResource(this.getClass());
+            LLMTTS.register(getRadioTTS());//register all ai prompts to the radioTTS
 //            renderAllTTSStrings();
-            audioEngine.radioTTS.loadAudio();
+//            audioEngine.radioTTS.loadAudio();
 //            audioEngine.radioTTS.test();
 
 
@@ -576,17 +579,21 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
         }
     }
 
+    private void exit() {
+        Gdx.app.exit();
+    }
+
 
 //    public int getMaxFramesPerSecond() {
 //        return maxFramesPerSecond;
 //    }
 
-    private void exit() {
-        Gdx.app.exit();
-    }
-
     public float getAngle() {
         return angle;
+    }
+
+    public AssetManager getAssetManager() {
+        return assetManager;
     }
 
     //	Sector3DRenderer sector3DRenderer = new Sector3DRenderer();
@@ -652,12 +659,13 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
     //
     //	  graphics.setStroke( defaultStroke ); }
 
-    public AssetManager getAssetManager() {
-        return assetManager;
-    }
-
     public AtlasManager getAtlasManager() {
         return atlasManager;
+    }
+
+    @Override
+    public AudioEngine getAudioEngine() {
+        return audioEngine;
     }
 
     /*
@@ -683,11 +691,6 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
     //		return myCanvas.getCanvas();
     //	}
 
-    @Override
-    public AudioEngine getAudioEngine() {
-        return audioEngine;
-    }
-
     public ZoomingCameraInputController getCamController() {
         return camController;
     }
@@ -698,6 +701,10 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
 
     public int getCameraZoomIndex() {
         return camController.zoomIndex;
+    }
+
+    public RadioTTS getRadioTTS() {
+        return audioEngine.radioTTS;
     }
 
     @Override
@@ -1053,16 +1060,16 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
         drawDebugGrid();
     }
 
-    private void renderAllTTSStrings() {
-        List<String> names = new ArrayList<>();
-        for (Trader trader : universe.traderList) {
-            names.add(trader.getName());
-        }
-        for (Planet planet : universe.planetList) {
-            names.add(planet.getName());
-        }
-        audioEngine.radioTTS.renderAllTTSStrings(names);
-    }
+//    private void renderAllTTSStrings() {
+//        List<String> names = new ArrayList<>();
+//        for (Trader trader : universe.traderList) {
+//            names.add(trader.getName());
+//        }
+//        for (Planet planet : universe.planetList) {
+//            names.add(planet.getName());
+//        }
+//        audioEngine.radioTTS.renderAllTTSStrings(names);
+//    }
 
     private void renderGoods() {
         for (final Planet planet : universe.planetList) {

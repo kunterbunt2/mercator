@@ -33,10 +33,11 @@ import de.bushnaq.abdalla.engine.IGameEngine;
 import de.bushnaq.abdalla.engine.RenderEngine2D;
 import de.bushnaq.abdalla.engine.RenderEngine3D;
 import de.bushnaq.abdalla.engine.audio.AudioEngine;
+import de.bushnaq.abdalla.engine.audio.RadioTTS;
 import de.bushnaq.abdalla.engine.camera.MovingCamera;
-import de.bushnaq.abdalla.mercator.audio.synthesis.MercatorAudioEngine;
 import de.bushnaq.abdalla.mercator.desktop.Context;
 import de.bushnaq.abdalla.mercator.desktop.LaunchMode;
+import de.bushnaq.abdalla.mercator.engine.audio.synthesis.MercatorAudioEngine;
 import de.bushnaq.abdalla.mercator.renderer.ScreenListener;
 import de.bushnaq.abdalla.mercator.renderer.ShowGood;
 import de.bushnaq.abdalla.mercator.ui.Info;
@@ -299,6 +300,11 @@ public class GameEngine2D implements ScreenListener, ApplicationListener, InputP
     @Override
     public MovingCamera getCamera() {
         return null;
+    }
+
+    @Override
+    public RadioTTS getRadioTTS() {
+        return audioEngine.radioTTS;
     }
 
     private Object getRendablePosition(final float x, final float y) {

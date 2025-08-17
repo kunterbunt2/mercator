@@ -179,7 +179,7 @@ public class ManeuveringSystem {
 //                logger.info("end");
             trader.setTraderSubStatus(TraderSubStatus.TRADER_STATUS_WAITING_FOR_WAYPOINT);
             if (trader.targetWaypoint.city != null)
-                trader.communicationPartner.informControlTower();
+                trader.communicationPartner.requestDocking();
         } else {
 //            if (Debug.isFilter(trader.getName()))
 //                logger.info("not-end");

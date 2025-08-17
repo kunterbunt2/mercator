@@ -14,27 +14,22 @@
  * limitations under the License.
  */
 
-package de.bushnaq.abdalla.mercator.audio.synthesis;
-
+package de.bushnaq.abdalla.mercator.engine.audio.synthesis;
 
 import de.bushnaq.abdalla.engine.audio.AudioEngine;
-import de.bushnaq.abdalla.engine.audio.OggPlayerFactory;
-import de.bushnaq.abdalla.engine.audio.TTSPlayerFactory;
+import de.bushnaq.abdalla.engine.audio.OpenAlException;
+import de.bushnaq.abdalla.engine.audio.synthesis.AbstractSynthesizerFactory;
 
-public class MercatorAudioEngine extends AudioEngine {
+public class MercatorSynthesizerFactory extends AbstractSynthesizerFactory<MercatorSynthesizer> {
 
-    public MercatorAudioEngine() {
-        super(4410, 44100, 16);
-        add(new MercatorSynthesizerFactory());
-        add(new OggPlayerFactory());
-        add(new TTSPlayerFactory());
+    @Override
+    public Class<MercatorSynthesizer> handles() {
+        return MercatorSynthesizer.class;
     }
 
-    public MercatorAudioEngine(final int samples) {
-        super(samples, 44100, 16);
-        add(new MercatorSynthesizerFactory());
-        add(new OggPlayerFactory());
-        add(new TTSPlayerFactory());
+    @Override
+    public MercatorSynthesizer uncacheSynth(AudioEngine audioEngine) throws OpenAlException {
+        return new MercatorSynthesizer();
     }
 
 }

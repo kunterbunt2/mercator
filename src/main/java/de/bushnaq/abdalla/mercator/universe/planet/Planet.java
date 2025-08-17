@@ -52,10 +52,18 @@ public class Planet extends Waypoint implements TradingPartner {
     private             GoodList                   goodList               = new GoodList();
     private             HistoryManager             historyManager;
     public              long                       lastTransaction        = 0;
-    //	private String name = null;
     public              float                      orbitAngle             = 0.0f;
     public              PathSeeker                 pathSeeker             = new PathSeeker();
     public              ProductionFacilityList     productionFacilityList = new ProductionFacilityList();
+
+    public boolean isSelected() {
+        return selected;
+    }
+
+    public void setSelected(boolean selected) {
+        this.selected = selected;
+    }
+
     boolean selected;
     public SimList                simList          = new SimList(this);
     public PlanetStatisticManager statisticManager = new PlanetStatisticManager();

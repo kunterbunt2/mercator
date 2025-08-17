@@ -55,15 +55,6 @@ public class Planet extends Waypoint implements TradingPartner {
     public              float                      orbitAngle             = 0.0f;
     public              PathSeeker                 pathSeeker             = new PathSeeker();
     public              ProductionFacilityList     productionFacilityList = new ProductionFacilityList();
-
-    public boolean isSelected() {
-        return selected;
-    }
-
-    public void setSelected(boolean selected) {
-        this.selected = selected;
-    }
-
     boolean selected;
     public SimList                simList          = new SimList(this);
     public PlanetStatisticManager statisticManager = new PlanetStatisticManager();
@@ -89,7 +80,7 @@ public class Planet extends Waypoint implements TradingPartner {
         this.currentTime = currentTime;
         orbitAngle -= (Math.PI * ((float) timeDelta / TimeUnit.TICKS_PER_DAY)) / 360f;
         if (TimeUnit.isInt(currentTime)/* ( currentTime - (int)currentTime ) == 0.0f */) {
-            communicationPartner.handleRadioMessage();
+//            communicationPartner.handleRadioMessage();
             pathList.reduceUsage();
             getGoodList().calculatePrice(currentTime);
             distributeEnigneers();
@@ -186,7 +177,7 @@ public class Planet extends Waypoint implements TradingPartner {
         // }
         // factoryList.add( factory );
         // }
-        communicationPartner = new PlanetCommunicationPartner(gameEngine.getAudioEngine(), this);
+        communicationPartner = new PlanetCommunicationPartner(gameEngine, this);
     }
 
     private void distributeEnigneers() {
@@ -276,20 +267,13 @@ public class Planet extends Waypoint implements TradingPartner {
             return satisfaction / simList.size();
     }
 
+    public boolean isSelected() {
+        return selected;
+    }
+
     public float queryAverageFoodPrice() {
         return goodList.getByType(GoodType.FOOD).getAveragePrice();
     }
-
-    // @Override
-    // public void pay( long currentTime, float price, float transactionAmount,
-    // TradingPartner transaction )
-    // {
-    // setCredits( getCredits() - price * transactionAmount );
-    // transaction.setCredits( transaction.getCredits() + price * transactionAmount
-    // );
-    // getHistoryManager().get( currentTime ).buy( null, price * transactionAmount,
-    // transactionAmount, transaction.getPlanet() );
-    // }
 
     public float queryDistance(final WaypointList waypointList) {
         //ignore first and last waypoint, as they only mark a city, but not an actual waypoint
@@ -302,6 +286,17 @@ public class Planet extends Waypoint implements TradingPartner {
         }
         return distance;
     }
+
+    // @Override
+    // public void pay( long currentTime, float price, float transactionAmount,
+    // TradingPartner transaction )
+    // {
+    // setCredits( getCredits() - price * transactionAmount );
+    // transaction.setCredits( transaction.getCredits() + price * transactionAmount
+    // );
+    // getHistoryManager().get( currentTime ).buy( null, price * transactionAmount,
+    // transactionAmount, transaction.getPlanet() );
+    // }
 
     public void remove(final Sim sim) {
         for (final ProductionFacility ProductionFacility : productionFacilityList) {
@@ -325,17 +320,21 @@ public class Planet extends Waypoint implements TradingPartner {
         this.goodList = goodList;
     }
 
-    //	public void setName(final String name) {
-    //		this.name = name;
-    //	}
-
     public void setHistoryManager(final HistoryManager historyManager) {
         this.historyManager = historyManager;
     }
 
+    //	public void setName(final String name) {
+    //		this.name = name;
+    //	}
+
     @Override
     public void setLastTransaction(final long currentTime) {
         lastTransaction = currentTime;
+    }
+
+    public void setSelected(boolean selected) {
+        this.selected = selected;
     }
 
     public void transported(final Planet from, final int amount) {

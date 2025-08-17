@@ -93,7 +93,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
 //    private static final float                        RENDER_3D_UNTIL               = 2000;
     //	private static final String RENDER_DURATION = "render()";
     //	private static final String RENDER_LIGHT = "light";
-    private static final float                        SCROLL_SPEED                  = 100f;
+    private static final float                        SCROLL_SPEED                  = 10f;
     //    public static final  Color                        SELECTED_PLANET_COLOR         = Color.BLUE;
 //    public static final  Color                        SELECTED_TRADER_COLOR         = Color.RED; // 0xffff0000;
 //    public static final  float                        SIM_HEIGHT                    = 0.3f;
@@ -155,6 +155,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
     private      Cubemap                      specularCubemap;
     private      Stage                        stage;
     private      StringBuilder                stringBuilder;
+    private      Subtitles                    subtitles;
     //    Vector3 sunPosition = new Vector3();
     private      boolean                      takeScreenShot;
     private      float                        timeOfDay;
@@ -283,11 +284,14 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
 //			createLand();
             createJumpGates();
 
-            demo = new Demo(this, launchMode);
+            demo      = new Demo(this, launchMode);
+            subtitles = new Subtitles(this);
+
             if (universe.selected != null) {
                 universe.setSelected(universe.selected, true);
                 followMode = true;
             }
+            universe.updateSelectedPlanet();
         } catch (final Exception e) {
             Gdx.app.log(this.getClass().getSimpleName(), e.getMessage(), e);
             System.exit(1);
@@ -712,6 +716,11 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
         return renderEngine;
     }
 
+    @Override
+    public ISubtitles getSubtitles() {
+        return subtitles;
+    }
+
     private void initColors() {
         {
             distinctiveColorlist.add(new Color(0.2f, 0.2f, 0.2f, 0.5f));
@@ -773,18 +782,22 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
             case Input.Keys.A:
             case Input.Keys.LEFT:
                 centerXD = -SCROLL_SPEED;
+                universe.updateSelectedPlanet();
                 return true;
             case Input.Keys.D:
             case Input.Keys.RIGHT:
                 centerXD = SCROLL_SPEED;
+                universe.updateSelectedPlanet();
                 return true;
             case Input.Keys.W:
             case Input.Keys.UP:
                 centerYD = -SCROLL_SPEED;
+                universe.updateSelectedPlanet();
                 return true;
             case Input.Keys.S:
             case Input.Keys.DOWN:
                 centerYD = SCROLL_SPEED;
+                universe.updateSelectedPlanet();
                 return true;
 
             case Input.Keys.ESCAPE:
@@ -1042,6 +1055,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
         renderEngine.renderEngine2D.batch.begin();
         renderUniverse();
         demo.renderDemo(deltaTime);
+        subtitles.render(deltaTime);
         renderEngine.renderEngine2D.batch.end();
 
         renderEngine.gpuGraph.end();
@@ -1060,6 +1074,15 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
         drawDebugGrid();
     }
 
+    private void renderGoods() {
+        for (final Planet planet : universe.planetList) {
+            int index = 0;
+            for (final Good good : planet.getGoodList()) {
+                good.get3DRenderer().render2D(planet.x, planet.z, renderEngine, index++, universe.selectedGood == good);
+            }
+        }
+    }
+
 //    private void renderAllTTSStrings() {
 //        List<String> names = new ArrayList<>();
 //        for (Trader trader : universe.traderList) {
@@ -1070,15 +1093,6 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
 //        }
 //        audioEngine.radioTTS.renderAllTTSStrings(names);
 //    }
-
-    private void renderGoods() {
-        for (final Planet planet : universe.planetList) {
-            int index = 0;
-            for (final Good good : planet.getGoodList()) {
-                good.get3DRenderer().render2D(planet.x, planet.z, renderEngine, index++, universe.selectedGood == good);
-            }
-        }
-    }
 
     private void renderJumpGates() {
         for (final Path path : universe.pathList) {
@@ -1216,18 +1230,18 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
         }
     }
 
+    @Override
+    public void resize(final int width, final int height) {
+        renderEngine.renderEngine2D.width  = width;
+        renderEngine.renderEngine2D.height = height;
+    }
+
 //    public void setDayAmbientLight(float r, float g, float b, float shadowIntensity) {
 //        dayAmbientIntensityR = r;
 //        dayAmbientIntensityG = g;
 //        dayAmbientIntensityB = b;
 //        dayShadowIntensity   = shadowIntensity;
 //    }
-
-    @Override
-    public void resize(final int width, final int height) {
-        renderEngine.renderEngine2D.width  = width;
-        renderEngine.renderEngine2D.height = height;
-    }
 
     @Override
     public void resume() {
@@ -1255,13 +1269,38 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
         this.infoVisible = infoVisible;
     }
 
+    @Override
+    public boolean touchCancelled(int screenX, int screenY, int pointer, int button) {
+        return false;
+    }
+
 //    @Override
 //    public void setShowGood(final ShowGood name) {
 //        assetManager.showGood = name;
 //    }
 
     @Override
-    public boolean touchCancelled(int screenX, int screenY, int pointer, int button) {
+    public boolean touchDown(final int screenX, final int screenY, final int pointer, final int button) {
+        switch (button) {
+            case Input.Buttons.LEFT:
+                //did we select an object?
+                //			renderMaster.sceneClusterManager.createCoordinates();
+                final GameObject<GameEngine3D> selected = renderEngine.getGameObject(screenX, screenY);
+                if (selected != null) try {
+                    System.out.println("selected " + selected.interactive);
+                    universe.setSelected(selected.interactive, true);
+                } catch (final Exception e) {
+                    // TODO Auto-generated catch block
+                    logger.error(e.getMessage(), e);
+                }
+                else try {
+                    universe.setSelected(selected, true);
+                } catch (final Exception e) {
+                    // TODO Auto-generated catch block
+                    logger.error(e.getMessage(), e);
+                }
+                return true;
+        }
         return false;
     }
 
@@ -1290,38 +1329,13 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
     //	}
 
     @Override
-    public boolean touchDown(final int screenX, final int screenY, final int pointer, final int button) {
-        switch (button) {
-            case Input.Buttons.LEFT:
-                //did we select an object?
-                //			renderMaster.sceneClusterManager.createCoordinates();
-                final GameObject<GameEngine3D> selected = renderEngine.getGameObject(screenX, screenY);
-                if (selected != null) try {
-                    System.out.println("selected " + selected.interactive);
-                    universe.setSelected(selected.interactive, true);
-                } catch (final Exception e) {
-                    // TODO Auto-generated catch block
-                    logger.error(e.getMessage(), e);
-                }
-                else try {
-                    universe.setSelected(selected, true);
-                } catch (final Exception e) {
-                    // TODO Auto-generated catch block
-                    logger.error(e.getMessage(), e);
-                }
-                return true;
-        }
+    public boolean touchDragged(final int screenX, final int screenY, final int pointer) {
         return false;
     }
 
     //	private void setMaxFramesPerSecond(int maxFramesPerSecond) {
     //		this.maxFramesPerSecond = maxFramesPerSecond;
     //	}
-
-    @Override
-    public boolean touchDragged(final int screenX, final int screenY, final int pointer) {
-        return false;
-    }
 
     @Override
     public boolean touchUp(final int screenX, final int screenY, final int pointer, final int button) {
@@ -1407,6 +1421,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
             }
         }
     }
+
 
     private void updateTraders(final long currentTime) throws Exception {
         if (universe.isEnableTime()) {

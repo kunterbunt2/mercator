@@ -16,8 +16,10 @@
 
 package de.bushnaq.abdalla.mercator.universe.sim.trader;
 
+import de.bushnaq.abdalla.engine.IGameEngine;
 import de.bushnaq.abdalla.engine.audio.*;
 import de.bushnaq.abdalla.mercator.engine.ai.LLMTTS;
+import de.bushnaq.abdalla.mercator.universe.event.EventLevel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,17 +28,20 @@ import java.util.List;
 
 import static de.bushnaq.abdalla.engine.audio.RadioTTS.SHIP_TAG;
 import static de.bushnaq.abdalla.engine.audio.RadioTTS.STATION_TAG;
+import static de.bushnaq.abdalla.mercator.universe.planet.DockingDoor.DockingDoorState.LOWERING;
 
 public class TraderCommunicationPartner implements CommunicationPartner {
     private final AudioEngine audioEngine;
+    private final IGameEngine gameEngine;
     private final Logger      logger = LoggerFactory.getLogger(this.getClass());
     List<RadioMessage> radioMessages = new ArrayList<>();
     private final Trader trader;
     TTSPlayer ttsPlayer;
 
-    public TraderCommunicationPartner(AudioEngine audioEngine, Trader trader) throws OpenAlException {
+    public TraderCommunicationPartner(IGameEngine gameEngine, Trader trader) throws OpenAlException {
+        this.gameEngine  = gameEngine;
         this.trader      = trader;
-        this.audioEngine = audioEngine;
+        this.audioEngine = gameEngine.getAudioEngine();
         ttsPlayer        = audioEngine.createAudioProducer(TTSPlayer.class);
         ttsPlayer.setGain(1f);
     }
@@ -46,10 +51,22 @@ public class TraderCommunicationPartner implements CommunicationPartner {
         return trader.getName();
     }
 
-    private void handleRadioMessage() {
-        for (RadioMessage rm : radioMessages) {
-            if (trader.currentTime - rm.time > CommunicationPartner.RADIO_ANSWER_DELAY) {
+//    private void handleRadioMessage() {
+//        for (RadioMessage rm : radioMessages) {
+//            if (trader.currentTime - rm.time > CommunicationPartner.RADIO_ANSWER_DELAY) {
+//
+//            }
+//        }
+//    }
 
+    private void handleRadioReplies(RadioMessage rm) {
+        switch (rm.id) {
+            case APPROVE_TO_DOCK -> {
+            }
+            case APPROVE_TO_UNDOCK -> {
+                trader.setTraderSubStatus(TraderSubStatus.TRADER_STATUS_UNDOCKING_ACC);
+                trader.sourcePlanet.dockingDoors.setDockingDoorStatus(LOWERING);
+                trader.planet.universe.eventManager.add(EventLevel.trace, trader.currentTime, this, String.format("departing %s to reach %s", trader.planet.getName(), trader.destinationPlanet.city.getName()));
             }
         }
     }
@@ -60,37 +77,43 @@ public class TraderCommunicationPartner implements CommunicationPartner {
     }
 
     @Override
+    public void notifyFinishedTalking(RadioMessage rm) {
+//        System.out.println("TraderCommunicationPartner.notifyFinishedTalking");
+        handleRadioReplies(rm);
+    }
+
+    @Override
     public void radio(RadioMessage message) {
-        radioMessages.add(message);
+//        radioMessages.add(message);
 //        say(message.message);
     }
 
     public void requestDocking() {
-        if (audioEngine.radioTTS != null && trader.destinationPlanet.isSelected()) {
-            String       string = RadioMessage.createMessage(audioEngine.radioTTS.resolveString(LLMTTS.REQUEST_DOCKING), SHIP_TAG, getName(), STATION_TAG, trader.destinationPlanet.getName());
-            RadioMessage rm     = new RadioMessage(trader.currentTime, this, trader.destinationPlanet.communicationPartner, RadioMessageId.REQUEST_TO_DOCK, string);
-            say(rm);
-            trader.destinationPlanet.communicationPartner.radio(rm);// send to partner
-
-        }
+        boolean silent = !trader.destinationPlanet.isSelected();
+        String  string = RadioMessage.createMessage(audioEngine.radioTTS.resolveString(LLMTTS.REQUEST_DOCKING, silent), SHIP_TAG, getName(), STATION_TAG, trader.destinationPlanet.getName());
+        if (!silent)
+            gameEngine.getSubtitles().add(string);
+        RadioMessage rm = new RadioMessage(trader.currentTime, this, trader.destinationPlanet.communicationPartner, RadioMessageId.REQUEST_TO_DOCK, string, silent);
+//            say(rm);
+        trader.destinationPlanet.communicationPartner.radio(rm);// send to partner
     }
 
     public void requestUndocking() {
-        if (audioEngine.radioTTS != null && trader.sourcePlanet.isSelected()) {
-            String       string = RadioMessage.createMessage(audioEngine.radioTTS.resolveString(LLMTTS.REQUEST_UNDOCKING), SHIP_TAG, getName(), STATION_TAG, trader.sourcePlanet.getName());
-            RadioMessage rm     = new RadioMessage(trader.currentTime, this, trader.destinationPlanet.communicationPartner, RadioMessageId.REQUEST_TO_UNDOCK, string);
-            say(rm);
-            trader.sourcePlanet.communicationPartner.radio(rm);// send to partner
-
-        }
+        boolean silent = !trader.sourcePlanet.isSelected();
+        String  string = RadioMessage.createMessage(audioEngine.radioTTS.resolveString(LLMTTS.REQUEST_UNDOCKING, silent), SHIP_TAG, getName(), STATION_TAG, trader.sourcePlanet.getName());
+        if (!silent)
+            gameEngine.getSubtitles().add(string);
+        RadioMessage rm = new RadioMessage(trader.currentTime, this, trader.sourcePlanet.communicationPartner, RadioMessageId.REQUEST_TO_UNDOCK, string, silent);
+//            say(rm);
+        trader.sourcePlanet.communicationPartner.radio(rm);// send to partner
     }
 
-    public void say(RadioMessage msg) {
-        if (isSelected()) {
-            ttsPlayer.speak(msg);
-            logger.info(msg.message);
-        }
-    }
+//    public void say(RadioMessage msg) {
+//        if (isSelected()) {
+//            ttsPlayer.speak(msg);
+//            logger.info(msg.message);
+//        }
+//    }
 
     /**
      * selecting this partner should enable its ttsPlayer

@@ -23,10 +23,10 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
 import de.bushnaq.abdalla.engine.*;
-import de.bushnaq.abdalla.mercator.engine.audio.synthesis.MercatorSynthesizer;
 import de.bushnaq.abdalla.mercator.desktop.LaunchMode;
 import de.bushnaq.abdalla.mercator.engine.GameEngine2D;
 import de.bushnaq.abdalla.mercator.engine.GameEngine3D;
+import de.bushnaq.abdalla.mercator.engine.audio.synthesis.MercatorSynthesizer;
 import de.bushnaq.abdalla.mercator.universe.Universe;
 import de.bushnaq.abdalla.mercator.universe.good.Good;
 import de.bushnaq.abdalla.mercator.universe.good.Good3DRenderer;
@@ -48,6 +48,7 @@ public class Trader3DRenderer extends ObjectRenderer<GameEngine3D> {
     private static final int                                           DRAW_GOOD_FACTOR        = 5;// we only draw a portion of the actual good containers
     private static final int                                           NUMBER_OF_LIGHTS        = 4;
     private static final int                                           NUMBER_OF_THRUSTERS     = 4;
+    private static final float                                         PORT_HIGHT              = -128f;
     private static final float                                         TRADER_ANTENNA_MARGINE  = 1f;
     private static final float                                         TRADER_COCKPIT_SIZE_Z   = 16f;
     public static final  Color                                         TRADER_COLOR            = new Color(.7f, .7f, .7f, 0.45f); // 0xffcc5555;
@@ -512,7 +513,7 @@ public class Trader3DRenderer extends ObjectRenderer<GameEngine3D> {
             synth.pause();
             translation.x = trader.planet.x /*- Planet3DRenderer.PLANET_ATMOSPHARE_SIZE / 2*/;
 //			translation.y = trader.planet.y + TRADER_TRAVELING_HEIGHT;
-//            translation.y = TRADER_HEIGHT;
+            translation.y = PORT_HIGHT;
             translation.z = trader.planet.z /*- Planet3DRenderer.PLANET_ATMOSPHARE_SIZE / 2 + index * TRADER_SIZE_Z*/;
         }
         //translation.add(0, TRADER_SIZE_Y / 2, 0);

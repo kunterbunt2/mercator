@@ -64,6 +64,7 @@ public class Universe {
     public               GraphChartData          deadTraderStatistics              = new GraphChartData("dead traders", Color.RED);
     private              boolean                 enableTime                        = true;
     public               EventManager            eventManager;
+    private              IGameEngine             gameEngine;
     private final        GraphicsDimentions      graphicsDimentions;
     private              HistoryManager          historyManager;
     public               LandList                landList                          = new LandList();
@@ -249,7 +250,8 @@ public class Universe {
      * @throws Exception
      */
     public void create(IGameEngine gameEngine, final int randomGeneratorSeed, final int universeSize, final long days) throws Exception {
-        universeAge = days;
+        this.gameEngine = gameEngine;
+        universeAge     = days;
         {
             size = universeSize;
             // EventLogManager.Clear();
@@ -267,12 +269,11 @@ public class Universe {
         // advanceInTime( true );
         // currentTime = 0;
         useFixedDelta = true;
-        advanceInTime(days);
+//        advanceInTime(days);
     }
 
     public void dispose() {
     }
-
 
     public GraphicsDimentions getGraphicsDimentions() {
         return graphicsDimentions;
@@ -477,19 +478,18 @@ public class Universe {
         }
     }
 
-
     public void selectEvent(final Event event) {
         selectedEvent = event;
+    }
+
+    public void setEnableTime(final boolean enableTime) {
+        this.enableTime = enableTime;
     }
 
     //	public void selectTrader(final Trader aTrader) {
     //		setSelected(aTrader);
     //		planetList.markTraderPath(selectedTrader);
     //	}
-
-    public void setEnableTime(final boolean enableTime) {
-        this.enableTime = enableTime;
-    }
 
     private void setHistoryManager(final HistoryManager historyManager) {
         this.historyManager = historyManager;
@@ -541,6 +541,16 @@ public class Universe {
         } else {
         }
         this.selected = selected;
+    }
+
+    public void updateSelectedPlanet() {
+        try {
+            Planet planet = planetList.findNearestPlanet(gameEngine.getCamera().position.x, gameEngine.getCamera().position.y, gameEngine.getCamera().position.z);
+            selected = planet;
+            planet.select();
+        } catch (final Exception e) {
+            logger.error(e.getMessage(), e);
+        }
     }
 
 //    private void windowstts() {

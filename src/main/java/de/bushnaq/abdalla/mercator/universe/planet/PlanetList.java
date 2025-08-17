@@ -71,6 +71,21 @@ public class PlanetList extends Vector<Planet> {
         return null;
     }
 
+    public Planet findNearestPlanet(float x, float y, float z) {
+        Planet planet      = null;
+        float  minDistance = Float.MAX_VALUE;
+        for (final Planet p : this) {
+            if (p.pathList.size() > 3) {
+                final float distance = (x - p.x) * (x - p.x) + (z - p.z) * (z - p.z);
+                if (distance < minDistance) {
+                    minDistance = distance;
+                    planet      = p;
+                }
+            }
+        }
+        return planet;
+    }
+
     public int getIndex(final Planet planet) {
         int index = 0;
         for (final Planet p : this) {

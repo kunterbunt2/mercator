@@ -28,10 +28,7 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.utils.BufferUtils;
 import com.badlogic.gdx.utils.ScreenUtils;
-import de.bushnaq.abdalla.engine.IContextFactory;
-import de.bushnaq.abdalla.engine.IGameEngine;
-import de.bushnaq.abdalla.engine.RenderEngine2D;
-import de.bushnaq.abdalla.engine.RenderEngine3D;
+import de.bushnaq.abdalla.engine.*;
 import de.bushnaq.abdalla.engine.audio.AudioEngine;
 import de.bushnaq.abdalla.engine.audio.RadioTTS;
 import de.bushnaq.abdalla.engine.camera.MovingCamera;
@@ -127,6 +124,7 @@ public class GameEngine2D implements ScreenListener, ApplicationListener, InputP
     public               ShowGood                     showGood                        = ShowGood.Name;
     private              Stage                        stage;
     private              StringBuilder                stringBuilder;
+    private              ISubtitles                   subtitles;
     private              boolean                      takeScreenShot;
     private final        int                          timeMachineFontSize             = GameEngine2D.TIME_MACHINE_FONT_SIZE;
     public final         Universe                     universe;
@@ -173,6 +171,7 @@ public class GameEngine2D implements ScreenListener, ApplicationListener, InputP
 //            info = new Info(null, atlasManager, renderEngine.batch, camera, inputMultiplexer);
             //		info = new Info(render2DMaster, inputMultiplexer);
 //			info.createStage();
+//            subtitles = new Subtitles(this);
             createInputProcessor(this);
 
 
@@ -387,6 +386,11 @@ public class GameEngine2D implements ScreenListener, ApplicationListener, InputP
     @Override
     public RenderEngine3D<?> getRenderEngine() {
         return null;
+    }
+
+    @Override
+    public ISubtitles getSubtitles() {
+        return subtitles;
     }
 
     private void handleQueuedScreenshot(final boolean takeScreenShot) {

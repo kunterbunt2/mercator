@@ -41,6 +41,7 @@ import static de.bushnaq.abdalla.mercator.universe.sim.trader.Trader3DRenderer.T
 
 
 public class Engine {
+    private static final float                    ENGINE_FORCE                 = 3f;//newton
     public static final  float                    ENGINE_TO_REALITY_FACTOR     = 10;
     public static final  float                    LIGHT_MAX_INTENSITY          = 600f;
     public static final  float                    LIGHT_MIN_INTENSITY          = 500f;
@@ -50,24 +51,23 @@ public class Engine {
     public static final  float                    LIGHT_SIZE                   = .2f;
     public static final  int                      MAX_ENGINE_SPEED             = 100;
     public static final  float                    MIN_ENGINE_SPEED             = .1f;
-    final static         Vector3                  yVector                      = new Vector3(0, 1, 0);
-    private static final float                    ENGINE_FORCE                 = 3f;//newton
     //    private static final float                    MAX_TIME_DELTA               = 0.1f;//everything above will be ignored as a glitch
     private static final float                    PY2                          = 3.14159f / 2;
-    public final         PointLight               pointLight;
-    private final        Logger                   logger                       = LoggerFactory.getLogger(this.getClass());
-    private final        float[]                  position                     = new float[3];
-    private final        Trader                   trader;
-    private final        float[]                  velocity                     = new float[3];
+    final static         Vector3                  yVector                      = new Vector3(0, 1, 0);
+    private              float                    engineSpeed                  = MIN_ENGINE_SPEED;
+    private              GameObject<GameEngine3D> gameObject;
+    private              boolean                  gameObjectAdded              = false;
     public               int                      lightMode                    = 0;
     //    public float getAcceleration() {
 //        return acceleration;
 //    }
     public               float                    lightTimer                   = 0;
-    private              float                    engineSpeed                  = MIN_ENGINE_SPEED;
-    private              GameObject<GameEngine3D> gameObject;
-    private              boolean                  gameObjectAdded              = false;
+    private final        Logger                   logger                       = LoggerFactory.getLogger(this.getClass());
     private              OggPlayer                oggPlayer;
+    public final         PointLight               pointLight;
+    private final        float[]                  position                     = new float[3];
+    private final        Trader                   trader;
+    private final        float[]                  velocity                     = new float[3];
 
     public Engine(Trader trader) {
         this.trader     = trader;
@@ -224,7 +224,7 @@ public class Engine {
                 trader.destinationPlanet.dockingDoors.setDockingDoorStatus(CLOSING);
                 trader.setTraderSubStatus(TraderSubStatus.TRADER_STATUS_ALIGNING);
                 trader.getThrusters().startRotation();
-                trader.communicationPartner.requestUndocking();
+//                trader.communicationPartner.requestUndocking();
             }
         }
     }

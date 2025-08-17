@@ -16,11 +16,14 @@
 
 package de.bushnaq.abdalla.mercator.util;
 
+import de.bushnaq.abdalla.mercator.universe.planet.Planet;
+import de.bushnaq.abdalla.mercator.universe.sim.trader.Trader;
+
 public class Debug {
-    private static boolean enablePlanetFilter = false;
-    private static boolean enableTraderFilter = true;
-    private static String  filterPlanet       = "P-95";
-    private static String  filterTrader       = "T-31";
+    private static final boolean enablePlanetFilter = false;
+    private static final boolean enableTraderFilter = true;
+    private static final String  filterPlanet       = "P-95";
+    private static final String  filterTrader       = "T-25";
 
 //    public static String getCallerMethodName() {
 //        return StackWalker.getInstance()
@@ -43,5 +46,14 @@ public class Debug {
 
     public static boolean isFilterTrader(String name) {
         return enableTraderFilter && name.equals(filterTrader);
+    }
+
+    public static boolean isFiltered(Object object) {
+        if (object instanceof Trader) {
+            return isFilterTrader(((Trader) object).getName());
+        } else if (object instanceof Planet) {
+            return isFilterTrader(((Planet) object).getName());
+        }
+        return false;
     }
 }

@@ -33,9 +33,10 @@ public enum TraderSubStatus {
     TRADER_STATUS_DOCKING_DEC("Docking Dec.", false),//
     TRADER_STATUS_DOCKED("Docked", false),//
     TRADER_STATUS_UNDOCKING_ACC("Undocking Acc.", false),//
-    TRADER_STATUS_UNDOCKING_DEC("undocking Dec.", false);
-    private String  name;
-    private boolean traveling;
+    TRADER_STATUS_UNDOCKING_DEC("undocking Dec.", false),
+    TRADER_STATUS_REQUESTING_UNDOCKING("Req. undock", false);
+    private       String  name;
+    private final boolean traveling;
 
     TraderSubStatus(final String name, boolean traveling) {
         this.setName(name);

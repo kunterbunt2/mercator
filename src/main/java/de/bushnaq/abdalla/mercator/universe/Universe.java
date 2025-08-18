@@ -546,8 +546,18 @@ public class Universe {
     public void updateSelectedPlanet() {
         try {
             Planet planet = planetList.findNearestPlanet(gameEngine.getCamera().position.x, gameEngine.getCamera().position.y, gameEngine.getCamera().position.z);
-            selected = planet;
-            planet.select();
+            System.out.println("updateSelectedPlanet: " + planet);
+            if (planet != selectedPlanet) {
+                System.out.println("updateSelectedPlanet: " + planet + " is not the same as " + selectedPlanet);
+//                selected       = planet;
+                if (selectedPlanet != null) {
+                    selectedPlanet.unselect();
+                }
+                selectedPlanet = planet;
+                selectedPlanet.select();
+                if (ScreenListener != null)
+                    ScreenListener.setCamera(selectedPlanet.x, selectedPlanet.z, true);
+            }
         } catch (final Exception e) {
             logger.error(e.getMessage(), e);
         }

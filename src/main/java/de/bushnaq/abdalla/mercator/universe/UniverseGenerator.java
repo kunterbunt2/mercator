@@ -36,6 +36,12 @@ import de.bushnaq.abdalla.mercator.util.MercatorRandomGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
+
 /**
  * @author bushnaq Created 13.02.2005
  */
@@ -47,6 +53,8 @@ public class UniverseGenerator {
     public static final int      PLANET_MAX_SHIFT            = Planet.PLANET_DISTANCE / 2;
     public static final float    PLANET_MAX_SHIFT_JUMP_GATE  = (float) Planet.PLANET_DISTANCE + PLANET_MAX_SHIFT + 10;
     final               int      MAX_NUMBER_OF_TRADERS       = 1;
+    private             int      currentShipNameIndex        = 0;
+    private             int      currentStationNameIndex     = 0;
     public              GoodList goodList;
     LandList landList;
     private final Logger   logger = LoggerFactory.getLogger(this.getClass());
@@ -55,10 +63,14 @@ public class UniverseGenerator {
     public MercatorRandomGenerator randomGenerator;
     // public int randomGeneratorSeed = 5;
     SectorList sectorList;
-    private int        size;
-    public  TraderList traderList;
+    // Name management fields
+    private List<String> shipNames;
+    private int          size;
+    private List<String> stationNames;
+    public  TraderList   traderList;
 
     public UniverseGenerator() {
+        loadNameLists();
     }
 
     private void addPath(final PathList pathList, final Waypoint w, final Object seed) {
@@ -178,53 +190,6 @@ public class UniverseGenerator {
         }
 
     }
-//    private void connectPlanets(final Planet sourcePlanet, final Planet targetPlanet, final float zSign, final float xSign, final String name) {
-//        final Waypoint w0 = new Waypoint(sourcePlanet.getName() + "-0" + name, sourcePlanet.x + zSign * Planet.CHANNEL_SIZE / 2 - xSign * (Planet3DRenderer.PLANET_3D_SIZE / 4), sourcePlanet.y, sourcePlanet.z - zSign * (Planet3DRenderer.PLANET_3D_SIZE / 4) - xSign * Planet.CHANNEL_SIZE / 2);
-//        final Path     p0 = new Path(sourcePlanet, w0);
-//        sourcePlanet.pathList.add(p0);
-//
-//        final Waypoint w1 = new Waypoint(sourcePlanet.getName() + "-1*" + name, sourcePlanet.x + zSign * Planet.CHANNEL_SIZE / 2 - xSign * (Planet3DRenderer.PLANET_3D_SIZE / 2 + Planet.CHANNEL_SIZE), sourcePlanet.y, sourcePlanet.z - zSign * (Planet3DRenderer.PLANET_3D_SIZE / 2 + Planet.CHANNEL_SIZE) - xSign * Planet.CHANNEL_SIZE / 2);
-//
-//        final Waypoint w2 = new Waypoint(sourcePlanet.getName() + "-2*" + name, targetPlanet.x + zSign * Planet.CHANNEL_SIZE / 2 + xSign * (Planet3DRenderer.PLANET_3D_SIZE / 2 + Planet.CHANNEL_SIZE), targetPlanet.y, targetPlanet.z + zSign * (Planet3DRenderer.PLANET_3D_SIZE / 2 + Planet.CHANNEL_SIZE) - xSign * Planet.CHANNEL_SIZE / 2);
-//
-//        {
-//            final float p0X = w1.x;
-//            final float p0Z = w1.z;
-//
-//            final float p1X = w1.x - xSign * (Planet3DRenderer.PLANET_3D_SIZE);
-//            final float p1Z = w1.z - zSign * (Planet3DRenderer.PLANET_3D_SIZE);
-//
-//            final float p2X = w2.x + xSign * (Planet3DRenderer.PLANET_3D_SIZE);
-//            final float p2Z = w2.z + zSign * (Planet3DRenderer.PLANET_3D_SIZE);
-//
-//            final float p3X = w2.x;
-//            final float p3Z = w2.z;
-//
-//            Waypoint lastW = w0;
-//            Waypoint w     = null;
-//            int      n     = 1;
-//            //use smaller incrementation to increase number of spline elements
-//            for (float t = 0.0f; t <= 1.0f; t += 0.05f) {
-//                final float x = ((1.0f - t) * (1.0f - t) * (1.0f - t) * p0X + 3 * (1.0f - t) * (1.0f - t) * t * p1X + 3 * (1.0f - t) * t * t * p2X + t * t * t * p3X);
-//                final float z = ((1.0f - t) * (1.0f - t) * (1.0f - t) * p0Z + 3 * (1.0f - t) * (1.0f - t) * t * p1Z + 3 * (1.0f - t) * t * t * p2Z + t * t * t * p3Z);
-//                final float y = sourcePlanet.y;
-//                w = new Waypoint(sourcePlanet.getName() + "-" + n++ + name, x, y, z);
-//                final Path p = new Path(lastW, w);
-//                lastW.pathList.add(p);
-//                lastW = w;
-//            }
-//
-//
-//            final Waypoint w3 = new Waypoint(sourcePlanet.getName() + "-" + n + name, targetPlanet.x + zSign * Planet.CHANNEL_SIZE / 2 + xSign * (Planet3DRenderer.PLANET_3D_SIZE / 4), targetPlanet.y, targetPlanet.z + zSign * (Planet3DRenderer.PLANET_3D_SIZE / 4) - xSign * Planet.CHANNEL_SIZE / 2);
-//            final Path     p3 = new Path(w, w3);
-//            w.pathList.add(p3);
-//
-//            final Path p4 = new Path(w3, targetPlanet);
-//            w3.pathList.add(p4);
-//
-//        }
-//
-//    }
 
     public void generate(IGameEngine gameEngine, final Universe universe) throws Exception {
         logger.info("----------------------------------------------------------------------------------");
@@ -304,6 +269,53 @@ public class UniverseGenerator {
         logger.info(String.format("generated %d paths.", pathList.size()));
         return pathList;
     }
+//    private void connectPlanets(final Planet sourcePlanet, final Planet targetPlanet, final float zSign, final float xSign, final String name) {
+//        final Waypoint w0 = new Waypoint(sourcePlanet.getName() + "-0" + name, sourcePlanet.x + zSign * Planet.CHANNEL_SIZE / 2 - xSign * (Planet3DRenderer.PLANET_3D_SIZE / 4), sourcePlanet.y, sourcePlanet.z - zSign * (Planet3DRenderer.PLANET_3D_SIZE / 4) - xSign * Planet.CHANNEL_SIZE / 2);
+//        final Path     p0 = new Path(sourcePlanet, w0);
+//        sourcePlanet.pathList.add(p0);
+//
+//        final Waypoint w1 = new Waypoint(sourcePlanet.getName() + "-1*" + name, sourcePlanet.x + zSign * Planet.CHANNEL_SIZE / 2 - xSign * (Planet3DRenderer.PLANET_3D_SIZE / 2 + Planet.CHANNEL_SIZE), sourcePlanet.y, sourcePlanet.z - zSign * (Planet3DRenderer.PLANET_3D_SIZE / 2 + Planet.CHANNEL_SIZE) - xSign * Planet.CHANNEL_SIZE / 2);
+//
+//        final Waypoint w2 = new Waypoint(sourcePlanet.getName() + "-2*" + name, targetPlanet.x + zSign * Planet.CHANNEL_SIZE / 2 + xSign * (Planet3DRenderer.PLANET_3D_SIZE / 2 + Planet.CHANNEL_SIZE), targetPlanet.y, targetPlanet.z + zSign * (Planet3DRenderer.PLANET_3D_SIZE / 2 + Planet.CHANNEL_SIZE) - xSign * Planet.CHANNEL_SIZE / 2);
+//
+//        {
+//            final float p0X = w1.x;
+//            final float p0Z = w1.z;
+//
+//            final float p1X = w1.x - xSign * (Planet3DRenderer.PLANET_3D_SIZE);
+//            final float p1Z = w1.z - zSign * (Planet3DRenderer.PLANET_3D_SIZE);
+//
+//            final float p2X = w2.x + xSign * (Planet3DRenderer.PLANET_3D_SIZE);
+//            final float p2Z = w2.z + zSign * (Planet3DRenderer.PLANET_3D_SIZE);
+//
+//            final float p3X = w2.x;
+//            final float p3Z = w2.z;
+//
+//            Waypoint lastW = w0;
+//            Waypoint w     = null;
+//            int      n     = 1;
+//            //use smaller incrementation to increase number of spline elements
+//            for (float t = 0.0f; t <= 1.0f; t += 0.05f) {
+//                final float x = ((1.0f - t) * (1.0f - t) * (1.0f - t) * p0X + 3 * (1.0f - t) * (1.0f - t) * t * p1X + 3 * (1.0f - t) * t * t * p2X + t * t * t * p3X);
+//                final float z = ((1.0f - t) * (1.0f - t) * (1.0f - t) * p0Z + 3 * (1.0f - t) * (1.0f - t) * t * p1Z + 3 * (1.0f - t) * t * t * p2Z + t * t * t * p3Z);
+//                final float y = sourcePlanet.y;
+//                w = new Waypoint(sourcePlanet.getName() + "-" + n++ + name, x, y, z);
+//                final Path p = new Path(lastW, w);
+//                lastW.pathList.add(p);
+//                lastW = w;
+//            }
+//
+//
+//            final Waypoint w3 = new Waypoint(sourcePlanet.getName() + "-" + n + name, targetPlanet.x + zSign * Planet.CHANNEL_SIZE / 2 + xSign * (Planet3DRenderer.PLANET_3D_SIZE / 4), targetPlanet.y, targetPlanet.z + zSign * (Planet3DRenderer.PLANET_3D_SIZE / 4) - xSign * Planet.CHANNEL_SIZE / 2);
+//            final Path     p3 = new Path(w, w3);
+//            w.pathList.add(p3);
+//
+//            final Path p4 = new Path(w3, targetPlanet);
+//            w3.pathList.add(p4);
+//
+//        }
+//
+//    }
 
     private void generatePaths() throws Exception {
         // ---Create the jump gates
@@ -376,7 +388,7 @@ public class UniverseGenerator {
                         final float  tx     = x * Planet.PLANET_DISTANCE + randomGenerator.nextInt(0, this, PLANET_MAX_SHIFT) / 2;
                         final float  ty     = 0/*randomGenerator.nextInt(0, this, PLANET_MAX_HIGHT)*/;
                         final float  tz     = z * Planet.PLANET_DISTANCE + randomGenerator.nextInt(0, this, PLANET_MAX_SHIFT) / 2;
-                        final Planet planet = new Planet(name, tx, ty, tz, universe);
+                        final Planet planet = new Planet(index, name, tx, ty, tz, universe);
                         planet.create(gameEngine, randomGenerator);
                         count++;
                         planetList.add(planet);
@@ -394,8 +406,7 @@ public class UniverseGenerator {
     }
 
     private String generatePlanetName(final int index, final int x, final int z) {
-//        return String.format("P-%02d%02d", x + size, z + size);
-        return String.format("P-%d", index);
+        return getNextStationName(index);
     }
 
     private SectorList generateSectorList() {
@@ -411,7 +422,8 @@ public class UniverseGenerator {
             planet.traderList.clear();
             final int number = 1 + randomGenerator.nextInt(0, this, MAX_NUMBER_OF_TRADERS);
             for (int i = 0; i < number; i++) {
-                final Trader trader = new Trader(planet, "T-" + count++, Trader.TRADER_START_CREDITS);
+                final String traderName = getNextShipName(count++);
+                final Trader trader     = new Trader(count, planet, traderName, Trader.TRADER_START_CREDITS);
                 trader.create(gameEngine, randomGenerator);
                 planet.traderList.add(trader);
                 traderList.add(trader);
@@ -419,6 +431,84 @@ public class UniverseGenerator {
         }
         logger.info(String.format("generated %d traders.", traderList.size()));
         return traderList;
+    }
+
+    /**
+     * Get the next available ship name, or fallback to old naming if exhausted
+     */
+    private String getNextShipName(int fallbackIndex) {
+        if (currentShipNameIndex < shipNames.size()) {
+            return shipNames.get(currentShipNameIndex++);
+        } else {
+            // Fallback to old naming schema when we run out of names
+            return "T-" + fallbackIndex;
+        }
+    }
+
+    /**
+     * Get the next available station name, or fallback to old naming if exhausted
+     */
+    private String getNextStationName(int fallbackIndex) {
+        if (currentStationNameIndex < stationNames.size()) {
+            return stationNames.get(currentStationNameIndex++);
+        } else {
+            // Fallback to old naming schema when we run out of names
+            return "P-" + fallbackIndex;
+        }
+    }
+
+    /**
+     * Load ship and station names from properties files
+     * Fails fast if properties files don't exist or can't be loaded
+     */
+    private void loadNameLists() {
+        try {
+            shipNames    = loadPropertiesFile("ship-names.properties", "ship");
+            stationNames = loadPropertiesFile("station-names.properties", "station");
+
+            logger.info(String.format("Loaded %d ship names and %d station names from properties files.",
+                    shipNames.size(), stationNames.size()));
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to load name properties files. Game cannot start without them.", e);
+        }
+    }
+
+    /**
+     * Load names from a properties file
+     *
+     * @param filename the properties filename
+     * @param prefix   the key prefix (e.g., "ship" for "ship1", "ship2", etc.)
+     * @return list of names extracted from the properties
+     */
+    private List<String> loadPropertiesFile(String filename, String prefix) throws IOException {
+        List<String> names      = new ArrayList<>();
+        Properties   properties = new Properties();
+
+        try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream(filename)) {
+            if (inputStream == null) {
+                throw new IOException("Properties file not found: " + filename);
+            }
+
+            properties.load(inputStream);
+
+            // Extract names from properties (ship1=Atlas, ship2=Galactic Dawn, etc.)
+            int index = 1;
+            while (true) {
+                String key  = prefix + index;
+                String name = properties.getProperty(key);
+                if (name == null) {
+                    break; // No more names
+                }
+                names.add(name.trim());
+                index++;
+            }
+
+            if (names.isEmpty()) {
+                throw new IOException("No names found in properties file: " + filename);
+            }
+        }
+
+        return names;
     }
 
     private void mapGalaxy() {

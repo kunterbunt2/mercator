@@ -30,8 +30,8 @@ public class DockingDoors extends ArrayList<DockingDoor> {
     private final float[]   position = new float[3];
 
     public DockingDoors(Planet planet) {
-        add(new DockingDoor(planet, planet.getName().substring(2, 3), -32f, 0));
-        add(new DockingDoor(planet, planet.getName().substring(3), 32f, 0));
+        add(new DockingDoor(planet, planet.getName().substring(0, planet.getName().length() / 2), -32f, 0));
+        add(new DockingDoor(planet, planet.getName().substring(planet.getName().length() / 2), 32f, 0));
         position[0] = planet.x;
         position[1] = planet.y;
         position[2] = planet.z;

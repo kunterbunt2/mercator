@@ -66,6 +66,11 @@ public class TraderCommunicationPartner implements CommunicationPartner {
 //    }
 
     @Override
+    public int getId() {
+        return trader.getId();
+    }
+
+    @Override
     public String getName() {
         return trader.getName();
     }

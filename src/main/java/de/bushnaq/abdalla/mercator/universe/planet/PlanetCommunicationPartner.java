@@ -56,6 +56,11 @@ public class PlanetCommunicationPartner implements CommunicationPartner {
     }
 
     @Override
+    public int getId() {
+        return planet.getId();
+    }
+
+    @Override
     public String getName() {
         return planet.getName();
     }

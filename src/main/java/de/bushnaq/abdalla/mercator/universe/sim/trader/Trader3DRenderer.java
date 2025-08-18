@@ -306,7 +306,8 @@ public class Trader3DRenderer extends ObjectRenderer<GameEngine3D> {
 
     @Override
     public void renderText(final RenderEngine3D<GameEngine3D> renderEngine, final int index, final boolean selected) {
-        renderTextOnTop(renderEngine, 0, 0, trader.getName().substring(2), TRADER_ENGINE_SIZE_Z);
+//        renderTextOnTop(renderEngine, 0, 0, trader.getName().substring(2), TRADER_ENGINE_SIZE_Z);//old name
+        renderTextOnTop(renderEngine, 0, 0, trader.getName(), (40 / (float) trader.getName().length()));
         if (renderEngine.isDebugMode()) {
             renderTextOnTop(renderEngine, -6, -5f, "" + (int) velocity[0], 3);//x speed
             renderTextOnTop(renderEngine, 6, -5f, "" + (int) velocity[2], 3);//z speed

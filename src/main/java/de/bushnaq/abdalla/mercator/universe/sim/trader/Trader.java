@@ -60,24 +60,28 @@ public class Trader extends Sim {
     private final        Engine                     engine                              = new Engine(this);
     private              boolean                    foundTradedGood                     = false;
     public               int                        goodSpace                           = 0;
-    public               int                        lastYearTransportedAmount;
-    private final        Logger                     logger                              = LoggerFactory.getLogger(this.getClass());
-    private final        ManeuveringSystem          maneuveringSystem                   = new ManeuveringSystem(this);
-    private final        int                        numberOfWaypointsBetweenTraders     = 1;
-    public               long                       portRestingTime                     = 0; // ---After a transaction or to wait for better prices, we recreate at a port
-    protected            boolean                    selected                            = false;
-    public               Planet                     sourcePlanet                        = null; // ---The planet origin of the good we are currently selling
-    public               Waypoint                   sourceWaypoint                      = null; // ---The previous waypoint we reach in our way to the destinationPlanet
-    public final         Vector3                    speed                               = new Vector3(0, 0, 0);
+    private final int               id;
+    public        int               lastYearTransportedAmount;
+    private final Logger            logger                          = LoggerFactory.getLogger(this.getClass());
+    private final ManeuveringSystem maneuveringSystem               = new ManeuveringSystem(this);
+    private final int               numberOfWaypointsBetweenTraders = 1;
+    public        long              portRestingTime                 = 0; // ---After a transaction or to wait for better prices, we recreate at a port
+    protected     boolean           selected                        = false;
+    public        Planet            sourcePlanet                    = null; // ---The planet origin of the good we are currently selling
+    public        Waypoint          sourceWaypoint                  = null; // ---The previous waypoint we reach in our way to the destinationPlanet
+    public final  Vector3           speed                           = new Vector3(0, 0, 0);
     //    private              float                      realTimeDelta;
-    private              GoodType                   targetGoodType                      = null; // ---Used to remember the index of good that we where to sell
-    public               Waypoint                   targetWaypoint                      = null; // ---The next waypoint we want to reach in our way to the destinationPlanet
-    private              long                       timeDelta                           = 0;
-    private              TraderStatus               traderStatus                        = TraderStatus.TRADER_STATUS_RESTING;
-    private              TraderSubStatus            traderSubStatus                     = TraderSubStatus.TRADER_STATUS_DOCKED;
-    public               WaypointList               waypointList                        = new WaypointList();
-    public               float                      x;
-    public               float                      y                                   = TRADER_DOCKING_HEIGHT;
+    private       GoodType          targetGoodType                  = null; // ---Used to remember the index of good that we where to sell
+    public        Waypoint          targetWaypoint                  = null; // ---The next waypoint we want to reach in our way to the destinationPlanet
+    private       long              timeDelta                       = 0;
+    private       TraderStatus      traderStatus                    = TraderStatus.TRADER_STATUS_RESTING;
+    private       TraderSubStatus   traderSubStatus                 = TraderSubStatus.TRADER_STATUS_DOCKED;
+    public        WaypointList      waypointList                    = new WaypointList();
+    public        float             x;
+    public        float             y                               = TRADER_DOCKING_HEIGHT;
+    /// /            } else
+//            {
+    public float z;
 
 //    private void alignToWaypoint() {
 //        if (subStatus == TraderSubStatus.TRADER_STATUS_ALIGNING) {
@@ -88,12 +92,9 @@ public class Trader extends Sim {
 //                if (Debug.isFilter(getName())
 //                    logger.info("cannot startRotation");
 //            }
-    /// /            } else
-//            {
-    public float z;
-
-    public Trader(final Planet planet, final String name, final float credits) throws Exception {
+    public Trader(int id, final Planet planet, final String name, final float credits) throws Exception {
         super(planet, name, credits);
+        this.id       = id;
         creditsToSave = TRADER_START_CREDITS * 1000;
         set2DRenderer(new Trader2DRenderer(this));
         set3DRenderer(new Trader3DRenderer(this));
@@ -166,6 +167,14 @@ public class Trader extends Sim {
         // portRestingTime ), planet.getName() ) );
     }
 
+    /**
+     * @return credits trader should keep to be able to pay for jump cost to sell
+     * the good
+     */
+    private float calculateCreditBuffer() {
+        return planet.universe.traderCreditBuffer;
+    }
+
 //    float calculateAcceleration() {
 //        float amount = 0;
 //        for (final Good g : getGoodList()) {
@@ -194,34 +203,6 @@ public class Trader extends Sim {
 //                    engineSpeed = Math.max(engineSpeed - acceleration, MIN_ENGINE_SPEED);
 ////                    if (Debug.isFilter(getName())) logger.info("engine deceleration currentMaxEngineSpeed=" + engineSpeed);
 //                }
-
-    /**
-     * @return credits trader should keep to be able to pay for jump cost to sell
-     * the good
-     */
-    private float calculateCreditBuffer() {
-        return planet.universe.traderCreditBuffer;
-    }
-
-//    float calculateRotationAcceleration() {
-//        float amount = 0;
-//        for (final Good g : getGoodList()) {
-//            amount += g.getAmount();
-//        }
-//        return THRUSTER_FORCE / amount;
-//    }
-
-//    private void calculateRotationProgress() {
-//        rotationProgress = calculateAngleDifference(rotation, startRotation) / calculateAngleDifference(endRotation, startRotation);
-//    }
-
-//    float calculateRotationSpeed() {
-//        float deltaRealTime = Gdx.graphics.getDeltaTime();
-//        float acceleration  = calculateRotationAcceleration();
-//        float a1            = calculateAngleDifference(rotation, startRotation);
-//        float a2            = calculateAngleDifference(endRotation, startRotation);
-//        if (rotationProgress < 0.5) {
-//            //accelerating
 
     /// /            if (Debug.isFilter(getName())) logger.info("rotation acceleration");
 //            return Math.min(rotationSpeed + acceleration * deltaRealTime * 10, MAX_ROTATION_SPEED);
@@ -323,6 +304,26 @@ public class Trader extends Sim {
         }
     }
 
+//    float calculateRotationAcceleration() {
+//        float amount = 0;
+//        for (final Good g : getGoodList()) {
+//            amount += g.getAmount();
+//        }
+//        return THRUSTER_FORCE / amount;
+//    }
+
+//    private void calculateRotationProgress() {
+//        rotationProgress = calculateAngleDifference(rotation, startRotation) / calculateAngleDifference(endRotation, startRotation);
+//    }
+
+//    float calculateRotationSpeed() {
+//        float deltaRealTime = Gdx.graphics.getDeltaTime();
+//        float acceleration  = calculateRotationAcceleration();
+//        float a1            = calculateAngleDifference(rotation, startRotation);
+//        float a2            = calculateAngleDifference(endRotation, startRotation);
+//        if (rotationProgress < 0.5) {
+//            //accelerating
+
     /// /                if (Debug.isFilter(trader.getName()))
     /// /                    logger.info(String.format("destinationWaypointIndex=%d waypointList.size()=%d", destinationWaypointIndex, waypointList.size()));
 //            }
@@ -389,16 +390,16 @@ public class Trader extends Sim {
         return JUMP_UNIT_COST * distance;
     }
 
-//    public float getEngineSpeed() {
-//        //max engine speed depends on how much goods we are carrying.
-//        return engineSpeed;
-//    }
-
     public void create(IGameEngine gameEngine, final MercatorRandomGenerator randomGenerator) throws OpenAlException {
         goodSpace            = Trader.MIN_GOOD_SPACE + randomGenerator.nextInt(0, this, Trader.MAX_GOOD_SPACE - Trader.MIN_GOOD_SPACE);
         portRestingTime      = randomGenerator.nextInt(0, this, Trader.TRADER_MAX_PORT_REST_TIME) * TimeUnit.TICKS_PER_DAY;
         communicationPartner = new TraderCommunicationPartner(gameEngine, this);
     }
+
+//    public float getEngineSpeed() {
+//        //max engine speed depends on how much goods we are carrying.
+//        return engineSpeed;
+//    }
 
     /// /            else {
     /// /            }
@@ -444,6 +445,10 @@ public class Trader extends Sim {
         sourceWaypoint.trader = null;//free
     }
 
+    public Engine getEngine() {
+        return engine;
+    }
+
 //    private void normalizeRotation() {
 //        if (rotation < 0)
 //            rotation += 360;
@@ -451,8 +456,8 @@ public class Trader extends Sim {
 //            rotation -= 360;
 //    }
 
-    public Engine getEngine() {
-        return engine;
+    public int getId() {
+        return id;
     }
 
     public ManeuveringSystem getManeuveringSystem() {

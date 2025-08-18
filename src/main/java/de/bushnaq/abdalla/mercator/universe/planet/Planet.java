@@ -39,8 +39,7 @@ import de.bushnaq.abdalla.mercator.util.*;
 public class Planet extends Waypoint implements TradingPartner {
     public static final float                      CHANNEL_SIZE           = 196 / Universe.WORLD_SCALE;
     //    public final static float                  MIN_PLANET_DISTANCE    = 30;
-    public static final int                        PLANET_DISTANCE        = 2048 /** 2*/
-            ;
+    public static final int                        PLANET_DISTANCE        = 2048;
     public final static int                        PLANET_MAX_SIMS        = 10;
     public final static float                      PLANET_START_CREDITS   = 20000;
     public              PlanetCommunicationPartner communicationPartner;
@@ -51,20 +50,22 @@ public class Planet extends Waypoint implements TradingPartner {
     public              PlanetEventManager         eventManager;
     private             GoodList                   goodList               = new GoodList();
     private             HistoryManager             historyManager;
+    private final       int                        id;
     public              long                       lastTransaction        = 0;
     public              float                      orbitAngle             = 0.0f;
     public              PathSeeker                 pathSeeker             = new PathSeeker();
     public              ProductionFacilityList     productionFacilityList = new ProductionFacilityList();
-    boolean selected;
-    public SimList                simList          = new SimList(this);
-    public PlanetStatisticManager statisticManager = new PlanetStatisticManager();
-    public PlanetStatus           status           = PlanetStatus.LIVING;
-    public long                   timeDelta        = 0;
-    public TraderList             traderList       = new TraderList();
-    public Universe               universe;
+    public              boolean                    selected;
+    public              SimList                    simList                = new SimList(this);
+    public              PlanetStatisticManager     statisticManager       = new PlanetStatisticManager();
+    public              PlanetStatus               status                 = PlanetStatus.LIVING;
+    public              long                       timeDelta              = 0;
+    public              TraderList                 traderList             = new TraderList();
+    public              Universe                   universe;
 
-    public Planet(final String name, final float x, final float y, final float z, final Universe universe) {
+    public Planet(int id, final String name, final float x, final float y, final float z, final Universe universe) {
         super(name, x, y, z);
+        this.id = id;
         //		this.setName(name);
         this.universe = universe;
         set2DRenderer(new Planet2DRenderer(this));
@@ -238,6 +239,10 @@ public class Planet extends Waypoint implements TradingPartner {
     @Override
     public HistoryManager getHistoryManager() {
         return historyManager;
+    }
+
+    public int getId() {
+        return id;
     }
 
     @Override

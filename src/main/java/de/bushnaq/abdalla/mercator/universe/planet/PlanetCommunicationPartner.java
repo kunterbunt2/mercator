@@ -17,17 +17,16 @@
 package de.bushnaq.abdalla.mercator.universe.planet;
 
 import de.bushnaq.abdalla.engine.IGameEngine;
+import de.bushnaq.abdalla.engine.ai.PromptTags;
 import de.bushnaq.abdalla.engine.audio.*;
 import de.bushnaq.abdalla.mercator.engine.ai.LLMTTS;
+import de.bushnaq.abdalla.mercator.engine.ai.MerkatorPromptTags;
 import de.bushnaq.abdalla.mercator.util.Debug;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static de.bushnaq.abdalla.engine.audio.RadioTTS.SHIP_TAG;
-import static de.bushnaq.abdalla.engine.audio.RadioTTS.STATION_TAG;
 
 public class PlanetCommunicationPartner implements CommunicationPartner {
     private final AudioEngine        audioEngine;
@@ -43,6 +42,17 @@ public class PlanetCommunicationPartner implements CommunicationPartner {
         this.planet      = planet;
         this.ttsPlayer   = audioEngine.createAudioProducer(TTSPlayer.class);
         this.ttsPlayer.setGain(1f);
+    }
+
+    /**
+     * Adds a subtitle to the game engine's subtitle list.
+     * This method removes any post tags in the string.
+     *
+     * @param string The subtitle text to be added.
+     * @param tags   The PromptTags containing post tags to be replaced in the string.
+     */
+    private void addSubtitle(String string, PromptTags tags) {
+        gameEngine.getSubtitles().add(tags.removeAllPostTags(string));
     }
 
     @Override
@@ -68,14 +78,16 @@ public class PlanetCommunicationPartner implements CommunicationPartner {
 //                    logger.info(String.format("%d messages to answer, waiting for right time to answer", radioMessages.size()));
 //                if (planet.currentTime - rm.time > RADIO_ANSWER_DELAY && planet.isSelected())
             {
+                PromptTags tags = new MerkatorPromptTags(planet, rm.from);
+//                PromptTags tags = new PromptTags();
                 switch (rm.id) {
                     case REQUEST_TO_DOCK -> {
 //                            if (Debug.isFilterPlanet(planet.getName()))
 //                                logger.info(String.format("answering %s message", rm.id.name()));
-                        String string = RadioMessage.createMessage(audioEngine.radioTTS.resolveString(LLMTTS.APPROVE_DOCKING, silent), STATION_TAG, getName(), SHIP_TAG, rm.from.getName());
+                        String string = RadioMessage.createMessage(audioEngine.radioTTS.resolveString(LLMTTS.APPROVE_DOCKING, tags, silent), tags);
                         if (!silent)
-                            gameEngine.getSubtitles().add(string);
-                        RadioMessage replyMessage = new RadioMessage(planet.currentTime, this, rm.from, RadioMessageId.APPROVE_TO_DOCK, string, silent);
+                            addSubtitle(string, tags);
+                        RadioMessage replyMessage = new RadioMessage(planet.currentTime, this, rm.from, RadioMessageId.APPROVE_TO_DOCK, tags.replaceAllPostTags(string), silent);
 //                        logger.info("replyMessage" + replyMessage.message);
                         say(replyMessage);
                         rm.from.radio(replyMessage);
@@ -86,10 +98,10 @@ public class PlanetCommunicationPartner implements CommunicationPartner {
                     case REQUEST_TO_UNDOCK -> {
 //                            if (Debug.isFilterPlanet(planet.getName()))
 //                                logger.info(String.format("answering %s message", rm.id.name()));
-                        String string = RadioMessage.createMessage(audioEngine.radioTTS.resolveString(LLMTTS.APPROVE_UNDOCKING, silent), STATION_TAG, getName(), SHIP_TAG, rm.from.getName());
+                        String string = RadioMessage.createMessage(audioEngine.radioTTS.resolveString(LLMTTS.APPROVE_UNDOCKING, tags, silent), tags);
                         if (!silent)
-                            gameEngine.getSubtitles().add(string);
-                        RadioMessage replyMessage = new RadioMessage(planet.currentTime, this, rm.from, RadioMessageId.APPROVE_TO_UNDOCK, string, silent);
+                            addSubtitle(string, tags);
+                        RadioMessage replyMessage = new RadioMessage(planet.currentTime, this, rm.from, RadioMessageId.APPROVE_TO_UNDOCK, tags.replaceAllPostTags(string), silent);
 //                        logger.info("replyMessage" + replyMessage.message);
                         say(replyMessage);
                         rm.from.radio(replyMessage);

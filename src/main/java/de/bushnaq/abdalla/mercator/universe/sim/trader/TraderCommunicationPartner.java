@@ -17,8 +17,10 @@
 package de.bushnaq.abdalla.mercator.universe.sim.trader;
 
 import de.bushnaq.abdalla.engine.IGameEngine;
+import de.bushnaq.abdalla.engine.ai.PromptTags;
 import de.bushnaq.abdalla.engine.audio.*;
 import de.bushnaq.abdalla.mercator.engine.ai.LLMTTS;
+import de.bushnaq.abdalla.mercator.engine.ai.MerkatorPromptTags;
 import de.bushnaq.abdalla.mercator.universe.event.EventLevel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,8 +28,6 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 
-import static de.bushnaq.abdalla.engine.audio.RadioTTS.SHIP_TAG;
-import static de.bushnaq.abdalla.engine.audio.RadioTTS.STATION_TAG;
 import static de.bushnaq.abdalla.mercator.universe.planet.DockingDoor.DockingDoorState.LOWERING;
 
 public class TraderCommunicationPartner implements CommunicationPartner {
@@ -46,9 +46,15 @@ public class TraderCommunicationPartner implements CommunicationPartner {
         ttsPlayer.setGain(1f);
     }
 
-    @Override
-    public String getName() {
-        return trader.getName();
+    /**
+     * Adds a subtitle to the game engine's subtitle list.
+     * This method removes any post tags in the string.
+     *
+     * @param string The subtitle text to be added.
+     * @param tags   The PromptTags containing post tags to be replaced in the string.
+     */
+    private void addSubtitle(String string, PromptTags tags) {
+        gameEngine.getSubtitles().add(tags.removeAllPostTags(string));
     }
 
 //    private void handleRadioMessage() {
@@ -58,6 +64,11 @@ public class TraderCommunicationPartner implements CommunicationPartner {
 //            }
 //        }
 //    }
+
+    @Override
+    public String getName() {
+        return trader.getName();
+    }
 
     private void handleRadioReplies(RadioMessage rm) {
         switch (rm.id) {
@@ -89,21 +100,23 @@ public class TraderCommunicationPartner implements CommunicationPartner {
     }
 
     public void requestDocking() {
-        boolean silent = !trader.destinationPlanet.isSelected();
-        String  string = RadioMessage.createMessage(audioEngine.radioTTS.resolveString(LLMTTS.REQUEST_DOCKING, silent), SHIP_TAG, getName(), STATION_TAG, trader.destinationPlanet.getName());
+        boolean    silent = !trader.destinationPlanet.isSelected();
+        PromptTags tags   = new MerkatorPromptTags(trader, trader.destinationPlanet);
+        String     string = RadioMessage.createMessage(audioEngine.radioTTS.resolveString(LLMTTS.REQUEST_DOCKING, tags, silent), tags);
         if (!silent)
-            gameEngine.getSubtitles().add(string);
-        RadioMessage rm = new RadioMessage(trader.currentTime, this, trader.destinationPlanet.communicationPartner, RadioMessageId.REQUEST_TO_DOCK, string, silent);
+            addSubtitle(string, tags);
+        RadioMessage rm = new RadioMessage(trader.currentTime, this, trader.destinationPlanet.communicationPartner, RadioMessageId.REQUEST_TO_DOCK, tags.replaceAllPostTags(string), silent);
 //            say(rm);
         trader.destinationPlanet.communicationPartner.radio(rm);// send to partner
     }
 
     public void requestUndocking() {
-        boolean silent = !trader.sourcePlanet.isSelected();
-        String  string = RadioMessage.createMessage(audioEngine.radioTTS.resolveString(LLMTTS.REQUEST_UNDOCKING, silent), SHIP_TAG, getName(), STATION_TAG, trader.sourcePlanet.getName());
+        boolean    silent = !trader.sourcePlanet.isSelected();
+        PromptTags tags   = new MerkatorPromptTags(trader, trader.sourcePlanet);
+        String     string = RadioMessage.createMessage(audioEngine.radioTTS.resolveString(LLMTTS.REQUEST_UNDOCKING, tags, silent), tags);
         if (!silent)
-            gameEngine.getSubtitles().add(string);
-        RadioMessage rm = new RadioMessage(trader.currentTime, this, trader.sourcePlanet.communicationPartner, RadioMessageId.REQUEST_TO_UNDOCK, string, silent);
+            addSubtitle(string, tags);
+        RadioMessage rm = new RadioMessage(trader.currentTime, this, trader.sourcePlanet.communicationPartner, RadioMessageId.REQUEST_TO_UNDOCK, tags.replaceAllPostTags(string), silent);
 //            say(rm);
         trader.sourcePlanet.communicationPartner.radio(rm);// send to partner
     }

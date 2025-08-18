@@ -60,30 +60,30 @@ public class Trader extends Sim {
     private final        Engine                     engine                              = new Engine(this);
     private              boolean                    foundTradedGood                     = false;
     public               int                        goodSpace                           = 0;
-    private final int               id;
-    public        int               lastYearTransportedAmount;
-    private final Logger            logger                          = LoggerFactory.getLogger(this.getClass());
-    private final ManeuveringSystem maneuveringSystem               = new ManeuveringSystem(this);
-    private final int               numberOfWaypointsBetweenTraders = 1;
-    public        long              portRestingTime                 = 0; // ---After a transaction or to wait for better prices, we recreate at a port
-    protected     boolean           selected                        = false;
-    public        Planet            sourcePlanet                    = null; // ---The planet origin of the good we are currently selling
-    public        Waypoint          sourceWaypoint                  = null; // ---The previous waypoint we reach in our way to the destinationPlanet
-    public final  Vector3           speed                           = new Vector3(0, 0, 0);
+    private final        int                        id;
+    public               int                        lastYearTransportedAmount;
+    private final        Logger                     logger                              = LoggerFactory.getLogger(this.getClass());
+    private final        ManeuveringSystem          maneuveringSystem                   = new ManeuveringSystem(this);
+    private final        int                        numberOfWaypointsBetweenTraders     = 1;
+    public               long                       portRestingTime                     = 0; // ---After a transaction or to wait for better prices, we recreate at a port
+    protected            boolean                    selected                            = false;
+    public               Planet                     sourcePlanet                        = null; // ---The planet origin of the good we are currently selling
+    public               Waypoint                   sourceWaypoint                      = null; // ---The previous waypoint we reach in our way to the destinationPlanet
+    public final         Vector3                    speed                               = new Vector3(0, 0, 0);
     //    private              float                      realTimeDelta;
-    private       GoodType          targetGoodType                  = null; // ---Used to remember the index of good that we where to sell
-    public        Waypoint          targetWaypoint                  = null; // ---The next waypoint we want to reach in our way to the destinationPlanet
-    private       long              timeDelta                       = 0;
-    private       TraderStatus      traderStatus                    = TraderStatus.TRADER_STATUS_RESTING;
-    private       TraderSubStatus   traderSubStatus                 = TraderSubStatus.TRADER_STATUS_DOCKED;
-    public        WaypointList      waypointList                    = new WaypointList();
-    public        float             x;
-    public        float             y                               = TRADER_DOCKING_HEIGHT;
+    private              GoodType                   targetGoodType                      = null; // ---Used to remember the index of good that we where to sell
+    public               Waypoint                   targetWaypoint                      = null; // ---The next waypoint we want to reach in our way to the destinationPlanet
+    private              long                       timeDelta                           = 0;
+    private              TraderStatus               traderStatus                        = TraderStatus.TRADER_STATUS_RESTING;
+    private              TraderSubStatus            traderSubStatus                     = TraderSubStatus.TRADER_STATUS_DOCKED;
+    public               WaypointList               waypointList                        = new WaypointList();
+    public               float                      x;
+    public               float                      y                                   = TRADER_DOCKING_HEIGHT;
     /// /            } else
 //            {
-    public float z;
+    public               float                      z;
 
-//    private void alignToWaypoint() {
+    //    private void alignToWaypoint() {
 //        if (subStatus == TraderSubStatus.TRADER_STATUS_ALIGNING) {
 //            if (destinationWaypointIndex < waypointList.size()) {
 //                maneuveringSystem.startRotation();
@@ -360,6 +360,9 @@ public class Trader extends Sim {
             case TRADER_STATUS_DOCKING_DEC: {
             }
             case TRADER_STATUS_REQUESTING_UNDOCKING: {
+                //wait for approval
+            }
+            case TRADER_STATUS_REQUESTING_DOCKING: {
                 //wait for approval
             }
             break;

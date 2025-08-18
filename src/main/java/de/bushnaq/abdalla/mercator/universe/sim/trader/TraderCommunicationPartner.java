@@ -78,6 +78,7 @@ public class TraderCommunicationPartner implements CommunicationPartner {
     private void handleRadioReplies(RadioMessage rm) {
         switch (rm.id) {
             case APPROVE_TO_DOCK -> {
+                trader.setTraderSubStatus(TraderSubStatus.TRADER_STATUS_WAITING_FOR_WAYPOINT);
             }
             case APPROVE_TO_UNDOCK -> {
                 trader.setTraderSubStatus(TraderSubStatus.TRADER_STATUS_UNDOCKING_ACC);

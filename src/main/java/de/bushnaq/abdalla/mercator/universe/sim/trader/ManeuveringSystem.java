@@ -39,21 +39,21 @@ import java.util.List;
 public class ManeuveringSystem {
     public static final  float                MAX_ROTATION_SPEED   = 15;
     public static final  float                MIN_ROTATION_SPEED   = 0.1f;
-    final static         Vector2              zVector              = new Vector2(0, -1);
     private static final float                THRUSTER_FORCE       = 0.8f;//newton
+    final static         Vector2              zVector              = new Vector2(0, -1);
+    private              float                endRotation          = 90;
     private final        Logger               logger               = LoggerFactory.getLogger(this.getClass());
+    private              OggPlayer            oggPlayer;
     private final        float[]              position             = new float[3];
+    private              float                progress             = 0;
+    public               float                rotation             = 270;//0 degrees orientation
+    private              RotationAcceleration rotationAcceleration = RotationAcceleration.ACCELERATING;
+    private              RotationDirection    rotationDirection;
+    public               float                rotationSpeed        = 0;
+    private              float                startRotation        = 1000;
     private final        List<Thruster>       thrusters            = new ArrayList<>();
     private final        Trader               trader;
     private final        float[]              velocity             = new float[3];
-    public               float                rotation             = 270;//0 degrees orientation
-    public               float                rotationSpeed        = 0;
-    private              float                endRotation          = 90;
-    private              OggPlayer            oggPlayer;
-    private              float                progress             = 0;
-    private              RotationAcceleration rotationAcceleration = RotationAcceleration.ACCELERATING;
-    private              RotationDirection    rotationDirection;
-    private              float                startRotation        = 1000;
 
     public ManeuveringSystem(Trader trader) {
         this.trader = trader;
@@ -177,9 +177,12 @@ public class ManeuveringSystem {
             rotation = endRotation;
 //            if (Debug.isFilter(trader.getName()))
 //                logger.info("end");
-            trader.setTraderSubStatus(TraderSubStatus.TRADER_STATUS_WAITING_FOR_WAYPOINT);
-            if (trader.targetWaypoint.city != null)
+            if (trader.targetWaypoint.city != null) {
+                trader.setTraderSubStatus(TraderSubStatus.TRADER_STATUS_REQUESTING_DOCKING);
                 trader.communicationPartner.requestDocking();
+            } else {
+                trader.setTraderSubStatus(TraderSubStatus.TRADER_STATUS_WAITING_FOR_WAYPOINT);
+            }
         } else {
 //            if (Debug.isFilter(trader.getName()))
 //                logger.info("not-end");

@@ -34,7 +34,8 @@ public enum TraderSubStatus {
     TRADER_STATUS_DOCKED("Docked", false),//
     TRADER_STATUS_UNDOCKING_ACC("Undocking Acc.", false),//
     TRADER_STATUS_UNDOCKING_DEC("undocking Dec.", false),
-    TRADER_STATUS_REQUESTING_UNDOCKING("Req. undock", false);
+    TRADER_STATUS_REQUESTING_UNDOCKING("Req. undock", false),
+    TRADER_STATUS_REQUESTING_DOCKING("Req. dock", true);
     private       String  name;
     private final boolean traveling;
 

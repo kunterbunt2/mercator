@@ -53,6 +53,7 @@ Then you can start mercator by one of its starting classes
 
 ## Issues
 
+1. on silent stations, many traders can be handles by traffic at the same time.
 1. moving camera breaks tts, as transitioning to disabled tts will never trigger the end.
 2. tts generation must be anyc
 3. station needs to reject docking/udocking if dock is busy

@@ -135,33 +135,33 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
     private       Cubemap         environmentDayCubemap;
     private       Cubemap         environmentNightCubemap;
     Map<Integer, EnvironmentSnapshot> environmentSnapshotMap = new HashMap<>();
-    private       boolean                  followMode;
+    private       boolean                      followMode;
     //    private              BitmapFont                   font;
-    private       boolean                  hrtfEnabled      = true;
-    private       Info                     info;
-    private       boolean                  infoVisible;
-    private final InputMultiplexer         inputMultiplexer = new InputMultiplexer();
-    private       GameObject<GameEngine3D> instance;//TODO
-    private final List<Label>              labels           = new ArrayList<>();
-    private       long                     lastCameraDirty  = 0;
-    public        LaunchMode               launchMode;
-    private final Logger                   logger           = LoggerFactory.getLogger(this.getClass());
-    public        OggPlayer                oggPlayer;
-    boolean old = true;
-    public       RenderEngine3D<GameEngine3D> renderEngine;
+    private       boolean                      hrtfEnabled      = true;
+    private       Info                         info;
+    private       boolean                      infoVisible;
+    private final InputMultiplexer             inputMultiplexer = new InputMultiplexer();
+    private       GameObject<GameEngine3D>     instance;//TODO
+    private final List<Label>                  labels           = new ArrayList<>();
+    private       long                         lastCameraDirty  = 0;
+    public        LaunchMode                   launchMode;
+    private final Logger                       logger           = LoggerFactory.getLogger(this.getClass());
+    public        OggPlayer                    oggPlayer;
+    private final boolean                      old              = true;
+    public        RenderEngine3D<GameEngine3D> renderEngine;
     //    private              Render2DMaster               render2DMaster;
-    private      boolean                      showFps;
-    public       ShowGood                     showGood     = ShowGood.Name;
-    private      Cubemap                      specularCubemap;
-    private      Stage                        stage;
-    private      StringBuilder                stringBuilder;
-    private      Subtitles                    subtitles;
+    private       boolean                      showFps;
+    public        ShowGood                     showGood         = ShowGood.Name;
+    private       Cubemap                      specularCubemap;
+    private       Stage                        stage;
+    private       StringBuilder                stringBuilder;
+    private       Subtitles                    subtitles;
     //    Vector3 sunPosition = new Vector3();
-    private      boolean                      takeScreenShot;
-    private      float                        timeOfDay;
+    private       boolean                      takeScreenShot;
+    private       float                        timeOfDay;
     //	private ModelInstance uberModelInstance;
-    public final Universe                     universe;
-    private      boolean                      vsyncEnabled = true;
+    public final  Universe                     universe;
+    private       boolean                      vsyncEnabled     = true;
 
     public GameEngine3D(final IContextFactory contextFactory, final Universe universe, final LaunchMode launchMode) throws Exception {
         this.contextFactory = contextFactory;

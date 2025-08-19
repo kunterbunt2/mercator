@@ -806,14 +806,14 @@ public class Trader extends Sim {
 
     public void setTraderStatus(TraderStatus traderStatus) {
         if (Debug.isFilterTrader(getName()))
-            logger.info(String.format("** trader status changed from %s to %s", this.traderStatus.getName(), traderStatus.getName()));
+            logger.info(String.format("** trader %s status changed from %s to %s", this.getName(), this.traderStatus.getName(), traderStatus.getName()));
         planet.universe.eventManager.add(EventLevel.trace, currentTime, this, String.format("change status to [%s-%s]", traderStatus.getName(), traderSubStatus.getName()));
         this.traderStatus = traderStatus;
     }
 
     public void setTraderSubStatus(TraderSubStatus traderSubStatus) {
         if (Debug.isFilterTrader(getName()))
-            logger.info(String.format("** trader sub-status changed from %s to %s", this.traderSubStatus.getName(), traderSubStatus.getName()));
+            logger.info(String.format("** trader %s sub-status changed from %s to %s", this.getName(), this.traderSubStatus.getName(), traderSubStatus.getName()));
         planet.universe.eventManager.add(EventLevel.trace, currentTime, this, String.format("change status to [%s-%s]", traderStatus.getName(), traderSubStatus.getName()));
         this.traderSubStatus = traderSubStatus;
     }

@@ -21,27 +21,20 @@ import de.bushnaq.abdalla.engine.ai.PromptTags;
 import de.bushnaq.abdalla.engine.audio.*;
 import de.bushnaq.abdalla.mercator.engine.ai.LLMTTS;
 import de.bushnaq.abdalla.mercator.engine.ai.MerkatorPromptTags;
-import de.bushnaq.abdalla.mercator.util.Debug;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class PlanetCommunicationPartner implements CommunicationPartner {
-    private final AudioEngine        audioEngine;
-    private final IGameEngine        gameEngine;
-    private final Logger             logger        = LoggerFactory.getLogger(this.getClass());
-    private final Planet             planet;
-    private final List<RadioMessage> radioMessages = new ArrayList<>();
-    final         TTSPlayer          ttsPlayer;
+    private final AudioEngine audioEngine;
+    private final IGameEngine gameEngine;
+    private final Logger      logger = LoggerFactory.getLogger(this.getClass());
+    private final Planet      planet;
+//    private final List<RadioMessage> radioMessages = new ArrayList<>();
 
     public PlanetCommunicationPartner(IGameEngine gameEngine, Planet planet) throws OpenAlException {
         this.gameEngine  = gameEngine;
         this.audioEngine = gameEngine.getAudioEngine();
         this.planet      = planet;
-        this.ttsPlayer   = audioEngine.createAudioProducer(TTSPlayer.class);
-        this.ttsPlayer.setGain(1f);
     }
 
     /**
@@ -66,70 +59,56 @@ public class PlanetCommunicationPartner implements CommunicationPartner {
     }
 
     void handleRadioMessage(RadioMessage rm) {
-        boolean changed;
-//        do {
-//            changed = false;
-//            ListIterator<RadioMessage> crunchifyIterator = radioMessages.listIterator();
-        // hasNext(): Returns true if this list iterator has more elements when traversing the list in the forward direction.
-        // (In other words, returns true if next would return an element rather than throwing an exception.)
-//            while (crunchifyIterator.hasNext())
         boolean silent = !isSelected();
-        if (!silent)
-            logger.info("handleRadioMessage " + planet.getName() + " selected=" + isSelected() + " id=" + rm.id.name());
-//        if (isSelected())
-        {
-//                RadioMessage rm = crunchifyIterator.next();
-//                if (Debug.isFilterPlanet(planet.getName()))
-//                    logger.info(String.format("%d messages to answer, waiting for right time to answer", radioMessages.size()));
-//                if (planet.currentTime - rm.time > RADIO_ANSWER_DELAY && planet.isSelected())
-            {
-                PromptTags tags = new MerkatorPromptTags(planet, rm.from);
-//                PromptTags tags = new PromptTags();
-                switch (rm.id) {
-                    case REQUEST_TO_DOCK -> {
+//        if (!silent)
+//            logger.info("handleRadioMessage " + planet.getName() + " selected=" + isSelected() + " id=" + rm.id.name());
+        PromptTags tags = new MerkatorPromptTags(planet, rm.from);
+        switch (rm.id) {
+            case REQUEST_TO_DOCK -> {
+                audioEngine.radio.queueRadioMessageGeneration(new RadioRequest(!planet.isSelected(), this, rm.from, RadioMessageId.APPROVE_TO_DOCK, LLMTTS.APPROVE_DOCKING, tags));
 //                            if (Debug.isFilterPlanet(planet.getName()))
 //                                logger.info(String.format("answering %s message", rm.id.name()));
-                        String string = RadioMessage.createMessage(audioEngine.radio.resolveString(LLMTTS.APPROVE_DOCKING, tags, silent), tags);
-                        if (!silent)
-                            addSubtitle(string, tags);
-                        RadioMessage replyMessage = new RadioMessage(planet.currentTime, this, rm.from, RadioMessageId.APPROVE_TO_DOCK, tags.replaceAllPostTags(string), silent);
-//                        logger.info("replyMessage" + replyMessage.message);
-                        say(replyMessage);
-                        gameEngine.getRadio().talk(replyMessage);// send to partner
-//                        rm.from.radio(replyMessage);
-//                            crunchifyIterator.remove();//remove message
-                        changed = true;
-                        break;
-                    }
-                    case REQUEST_TO_UNDOCK -> {
-//                            if (Debug.isFilterPlanet(planet.getName()))
-//                                logger.info(String.format("answering %s message", rm.id.name()));
-                        String string = RadioMessage.createMessage(audioEngine.radio.resolveString(LLMTTS.APPROVE_UNDOCKING, tags, silent), tags);
-                        if (!silent)
-                            addSubtitle(string, tags);
-                        RadioMessage replyMessage = new RadioMessage(planet.currentTime, this, rm.from, RadioMessageId.APPROVE_TO_UNDOCK, tags.replaceAllPostTags(string), silent);
-//                        logger.info("replyMessage" + replyMessage.message);
-                        say(replyMessage);
-                        gameEngine.getRadio().talk(replyMessage);// send to partner
-//                        rm.from.radio(replyMessage);
-//                            crunchifyIterator.remove();//remove message
-                        changed = true;
-                        break;
-                    }
-                }
+//                String string = RadioMessage.createMessage(audioEngine.radio.resolveString(LLMTTS.APPROVE_DOCKING, tags, silent), tags);
+//                if (!silent)
+//                    addSubtitle(string, tags);
+//                RadioMessage replyMessage = new RadioMessage(planet.currentTime, this, rm.from, RadioMessageId.APPROVE_TO_DOCK, tags.replaceAllPostTags(string), silent);
+////                        logger.info("replyMessage" + replyMessage.message);
+//                gameEngine.getRadio().radio(replyMessage);// send to partner
             }
-
+            case REQUEST_TO_UNDOCK -> {
+                audioEngine.radio.queueRadioMessageGeneration(new RadioRequest(!planet.isSelected(), this, rm.from, RadioMessageId.APPROVE_TO_UNDOCK, LLMTTS.APPROVE_UNDOCKING, tags));
+//                            if (Debug.isFilterPlanet(planet.getName()))
+//                                logger.info(String.format("answering %s message", rm.id.name()));
+//                String string = RadioMessage.createMessage(audioEngine.radio.resolveString(LLMTTS.APPROVE_UNDOCKING, tags, silent), tags);
+//                if (!silent)
+//                    addSubtitle(string, tags);
+//                RadioMessage replyMessage = new RadioMessage(planet.currentTime, this, rm.from, RadioMessageId.APPROVE_TO_UNDOCK, tags.replaceAllPostTags(string), silent);
+////                        logger.info("replyMessage" + replyMessage.message);
+//                gameEngine.getRadio().radio(replyMessage);// send to partner
+            }
         }
-//            for (RadioMessage rm : radioMessages) {
-//            }
-//        }
-//        while (changed);
+    }
+
+    @Override
+    public void handleRadioRequest(RadioRequest rr) {
+//                            if (Debug.isFilterPlanet(planet.getName()))
+//                                logger.info(String.format("answering %s message", rm.id.name()));
+        String string = RadioMessage.createMessage(audioEngine.radio.resolveString(rr.getMessageId(), rr.getTags(), rr.isSilent()), rr.getTags());
+        if (!rr.isSilent())
+            addSubtitle(string, rr.getTags());
+        RadioMessage rm = new RadioMessage(planet.currentTime, rr.getFrom(), rr.getTo(), rr.getRadioMessageId(), rr.getTags().replaceAllPostTags(string), rr.isSilent());
+        gameEngine.getRadio().radio(rm);// send to partner
     }
 
     @Override
     public boolean isSelected() {
         return planet.selected;
     }
+
+//    @Override
+//    public boolean isSilent() {
+//        return !planet.isSelected();
+//    }
 
     @Override
     public void notifyFinishedTalking(RadioMessage rm) {
@@ -139,25 +118,8 @@ public class PlanetCommunicationPartner implements CommunicationPartner {
 
     @Override
     public void radio(RadioMessage message) {
-        radioMessages.add(message);
-        say(message);
-    }
-
-    /**
-     * Used by the planet and its communication partners to talk to each other
-     *
-     * @param msg
-     */
-    public void say(RadioMessage msg) {
-        if (Debug.isFilterPlanet(planet.getName())) {
-            logger.info(String.format("say %s selected=%b", msg, isSelected()));
-        }
-//        if (isSelected())
-        {
-//            logger.info("say" + msg.message);
-            ttsPlayer.speak(msg);
-//            logger.info(msg.message);
-        }
+//        radioMessages.add(message);
+//        say(message);
     }
 
     /**
@@ -165,12 +127,12 @@ public class PlanetCommunicationPartner implements CommunicationPartner {
      */
     @Override
     public void select() {
-        ttsPlayer.setOptIn(true);
+//        ttsPlayer.setOptIn(true);
     }
 
     @Override
     public void unselect() {
-        ttsPlayer.setOptIn(false);
+//        ttsPlayer.setOptIn(false);
     }
 
 

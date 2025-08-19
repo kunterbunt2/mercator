@@ -23,14 +23,8 @@ public class Debug {
     private static final boolean enablePlanetFilter = false;
     private static final boolean enableTraderFilter = true;
     private static final String  filterPlanet       = "P-95";
-    private static final String  filterTrader       = "Starpath";
-
-//    public static String getCallerMethodName() {
-//        return StackWalker.getInstance()
-//                .walk(s -> s.skip(1).findFirst())
-//                .get()
-//                .getMethodName();
-//    }
+    //    private static final String  filterTrader       = "Starpath";
+    private static final String  filterTrader       = "Frontier Star";
 
     public static String getFilterPlanet() {
         return filterPlanet;

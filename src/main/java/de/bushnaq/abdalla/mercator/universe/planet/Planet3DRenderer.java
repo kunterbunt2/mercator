@@ -108,25 +108,6 @@ public class Planet3DRenderer extends ObjectRenderer<GameEngine3D> {
         this.planet = planet;
     }
 
-    public static Color getBuildingColor(final int index) {
-        switch (index % 6) {
-            case 0:
-                return PEACOCK_BLUE;
-            case 1:
-                return FOUNDRY_RED;
-            case 2:
-                return ORANGE_YELLOW;
-            case 3:
-                return BRIGHT_WHITE;
-            case 4:
-                return SKY_BLUE;
-            case 5:
-                return HAWAIIAN_BLUE;
-            default:
-                return DEEP_YELLOW;
-        }
-    }
-
     @Override
     public void create(final RenderEngine3D<GameEngine3D> renderEngine) {
         createPlanet3D(renderEngine);
@@ -313,6 +294,25 @@ public class Planet3DRenderer extends ObjectRenderer<GameEngine3D> {
         //			sectorInstance.update();
         //			renderMaster.sceneManager.addStatic(sectorInstance);
         //		}
+    }
+
+    public static Color getBuildingColor(final int index) {
+        switch (index % 6) {
+            case 0:
+                return PEACOCK_BLUE;
+            case 1:
+                return FOUNDRY_RED;
+            case 2:
+                return ORANGE_YELLOW;
+            case 3:
+                return BRIGHT_WHITE;
+            case 4:
+                return SKY_BLUE;
+            case 5:
+                return HAWAIIAN_BLUE;
+            default:
+                return DEEP_YELLOW;
+        }
     }
 
     private GameObject<GameEngine3D> instanciateBuilding(final RenderEngine3D<GameEngine3D> renderEngine, final int index) {
@@ -553,7 +553,7 @@ public class Planet3DRenderer extends ObjectRenderer<GameEngine3D> {
         planetGameObject.instance.transform.setToTranslation(planet.x, -512 - 2024, planet.z - 512);
         planetGameObject.instance.transform.rotate(Vector3.Y, rotation);
         planetGameObject.update();
-        planet.communicationPartner.ttsPlayer.play();
+//        planet.communicationPartner.ttsPlayer.play();
 //        planet.communicationPartner.ttsPlayer.setPositionAndVelocity(position, velocity);
 
         planet.dockingDoors.render(renderEngine);

@@ -484,11 +484,11 @@ public class Trader3DRenderer extends ObjectRenderer<GameEngine3D> {
             }
             if (update) {
                 synth.setPositionAndVelocity(position, velocity);
-                trader.communicationPartner.ttsPlayer.setPositionAndVelocity(position, velocity);
+//                trader.communicationPartner.ttsPlayer.setPositionAndVelocity(position, velocity);
                 System.arraycopy(velocity, 0, lastVelocity, 0, 3);
             }
             synth.play();
-            trader.communicationPartner.ttsPlayer.play();
+//            trader.communicationPartner.ttsPlayer.play();
             translation.y = TRADER_FLIGHT_HEIGHT;
             // ---Traveling to next waypoint
             if (trader.destinationWaypointDistance != 0) {
@@ -504,7 +504,7 @@ public class Trader3DRenderer extends ObjectRenderer<GameEngine3D> {
             }
         } else if (trader.getTraderSubStatus() == TraderSubStatus.TRADER_STATUS_DOCKING_ACC || trader.getTraderSubStatus() == TraderSubStatus.TRADER_STATUS_DOCKING_DEC || trader.getTraderSubStatus() == TraderSubStatus.TRADER_STATUS_UNDOCKING_ACC || trader.getTraderSubStatus() == TraderSubStatus.TRADER_STATUS_UNDOCKING_DEC) {
             synth.play();
-            trader.communicationPartner.ttsPlayer.play();
+//            trader.communicationPartner.ttsPlayer.play();
             translation.x = trader.planet.x;
             translation.y = trader.y;
             translation.z = trader.planet.z;

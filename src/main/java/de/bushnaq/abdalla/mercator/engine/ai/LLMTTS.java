@@ -1,7 +1,7 @@
 package de.bushnaq.abdalla.mercator.engine.ai;
 
 import de.bushnaq.abdalla.engine.LLMPrompt;
-import de.bushnaq.abdalla.engine.audio.RadioTTS;
+import de.bushnaq.abdalla.engine.audio.Radio;
 
 public class LLMTTS {
     public static final  String APPROVE_DOCKING                 = "REQUEST_TO_DOCK_APPROVED";
@@ -97,7 +97,7 @@ public class LLMTTS {
             - "<ship>,<pause> to station <station>,<pause> medical transfer complete,<pause> requesting to undock."
             """;
 
-    public static void register(RadioTTS radio) {
+    public static void register(Radio radio) {
         radio.registerSystemPrompt(REQUEST_DOCKING, new LLMPrompt("request docking approval", REQUEST_DOCKING_SYSTEM_PROMPT));
         radio.registerSystemPrompt(REQUEST_UNDOCKING, new LLMPrompt("request undocking approval", REQUEST_UNDOCKING_SYSTEM_PROMPT));
         radio.registerSystemPrompt(APPROVE_DOCKING, new LLMPrompt("approve docking request", APPROVE_DOCKING_SYSTEM_PROMPT));

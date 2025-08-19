@@ -89,13 +89,14 @@ public class PlanetCommunicationPartner implements CommunicationPartner {
                     case REQUEST_TO_DOCK -> {
 //                            if (Debug.isFilterPlanet(planet.getName()))
 //                                logger.info(String.format("answering %s message", rm.id.name()));
-                        String string = RadioMessage.createMessage(audioEngine.radioTTS.resolveString(LLMTTS.APPROVE_DOCKING, tags, silent), tags);
+                        String string = RadioMessage.createMessage(audioEngine.radio.resolveString(LLMTTS.APPROVE_DOCKING, tags, silent), tags);
                         if (!silent)
                             addSubtitle(string, tags);
                         RadioMessage replyMessage = new RadioMessage(planet.currentTime, this, rm.from, RadioMessageId.APPROVE_TO_DOCK, tags.replaceAllPostTags(string), silent);
 //                        logger.info("replyMessage" + replyMessage.message);
                         say(replyMessage);
-                        rm.from.radio(replyMessage);
+                        gameEngine.getRadio().talk(replyMessage);// send to partner
+//                        rm.from.radio(replyMessage);
 //                            crunchifyIterator.remove();//remove message
                         changed = true;
                         break;
@@ -103,13 +104,14 @@ public class PlanetCommunicationPartner implements CommunicationPartner {
                     case REQUEST_TO_UNDOCK -> {
 //                            if (Debug.isFilterPlanet(planet.getName()))
 //                                logger.info(String.format("answering %s message", rm.id.name()));
-                        String string = RadioMessage.createMessage(audioEngine.radioTTS.resolveString(LLMTTS.APPROVE_UNDOCKING, tags, silent), tags);
+                        String string = RadioMessage.createMessage(audioEngine.radio.resolveString(LLMTTS.APPROVE_UNDOCKING, tags, silent), tags);
                         if (!silent)
                             addSubtitle(string, tags);
                         RadioMessage replyMessage = new RadioMessage(planet.currentTime, this, rm.from, RadioMessageId.APPROVE_TO_UNDOCK, tags.replaceAllPostTags(string), silent);
 //                        logger.info("replyMessage" + replyMessage.message);
                         say(replyMessage);
-                        rm.from.radio(replyMessage);
+                        gameEngine.getRadio().talk(replyMessage);// send to partner
+//                        rm.from.radio(replyMessage);
 //                            crunchifyIterator.remove();//remove message
                         changed = true;
                         break;

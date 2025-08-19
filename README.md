@@ -41,7 +41,7 @@ Then you can start mercator by one of its starting classes
 | F1                    | enable/disable gamma correction |
 | F2                    | enable/disable depth of field   |
 | F3                    | enable/disable depth filter     |
-| F4                    |                                 |
+| F4                    | enable/disable ssao             |
 | F5                    | enable/disable always day       |
 | F6                    | enable/disable demo mode        |
 | F7                    |                                 |
@@ -54,7 +54,8 @@ Then you can start mercator by one of its starting classes
 ## Issues
 
 1. moving camera breaks tts, as transitioning to disabled tts will never trigger the end.
-2. traders ask too late for docking permission and donot wait for the answer.
+2. tts generation must be anyc
+3. station needs to reject docking/udocking if dock is busy
 1. Form selecting an item does not show info in the lower pane.
 2. Economy is not stable, all sims eventually die of hunger.
 3. simulation advanceintime is triggered every frame.
@@ -65,11 +66,14 @@ Then you can start mercator by one of its starting classes
 
 ## Tasks
 
-1. FIXED - ambient music ending should trigger new music to play.
+1. remove "" from tts subtitles
+1. add more light
+2. reduce blur
+3. add demo scheduled effect to blend in, maybe camera to follow nearest trader?
 2. fix ships will collide while navigating from planet to planet.
 3. add SSAO
 4. fix openAL error when stopping demo mode
-5. add ship tts 
+ 
 
 
 

@@ -30,7 +30,7 @@ import com.badlogic.gdx.utils.BufferUtils;
 import com.badlogic.gdx.utils.ScreenUtils;
 import de.bushnaq.abdalla.engine.*;
 import de.bushnaq.abdalla.engine.audio.AudioEngine;
-import de.bushnaq.abdalla.engine.audio.RadioTTS;
+import de.bushnaq.abdalla.engine.audio.Radio;
 import de.bushnaq.abdalla.engine.camera.MovingCamera;
 import de.bushnaq.abdalla.mercator.desktop.Context;
 import de.bushnaq.abdalla.mercator.desktop.LaunchMode;
@@ -302,8 +302,8 @@ public class GameEngine2D implements ScreenListener, ApplicationListener, InputP
     }
 
     @Override
-    public RadioTTS getRadioTTS() {
-        return audioEngine.radioTTS;
+    public Radio getRadio() {
+        return audioEngine.radio;
     }
 
     private Object getRendablePosition(final float x, final float y) {

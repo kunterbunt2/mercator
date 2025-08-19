@@ -33,7 +33,7 @@ import de.bushnaq.abdalla.engine.*;
 import de.bushnaq.abdalla.engine.audio.AudioEngine;
 import de.bushnaq.abdalla.engine.audio.OggPlayer;
 import de.bushnaq.abdalla.engine.audio.OpenAlException;
-import de.bushnaq.abdalla.engine.audio.RadioTTS;
+import de.bushnaq.abdalla.engine.audio.Radio;
 import de.bushnaq.abdalla.engine.camera.MovingCamera;
 import de.bushnaq.abdalla.mercator.desktop.Context;
 import de.bushnaq.abdalla.mercator.desktop.LaunchMode;
@@ -269,8 +269,8 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
             createStage();
             audioEngine.create(AtlasManager.getAssetsFolderName());
             audioEngine.enableHrtf(0);
-            audioEngine.radioTTS.loadResource(this.getClass());
-            LLMTTS.register(getRadioTTS());//register all ai prompts to the radioTTS
+            audioEngine.radio.loadResource(this.getClass());
+            LLMTTS.register(getRadio());//register all ai prompts to the radioTTS
 //            renderAllTTSStrings();
 //            audioEngine.radioTTS.loadAudio();
 //            audioEngine.radioTTS.test();
@@ -707,8 +707,8 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
         return camController.zoomIndex;
     }
 
-    public RadioTTS getRadioTTS() {
-        return audioEngine.radioTTS;
+    public Radio getRadio() {
+        return audioEngine.radio;
     }
 
     @Override

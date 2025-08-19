@@ -108,23 +108,26 @@ public class TraderCommunicationPartner implements CommunicationPartner {
     public void requestDocking() {
         boolean    silent = !trader.destinationPlanet.isSelected();
         PromptTags tags   = new MerkatorPromptTags(trader, trader.destinationPlanet);
-        String     string = RadioMessage.createMessage(audioEngine.radioTTS.resolveString(LLMTTS.REQUEST_DOCKING, tags, silent), tags);
+        String     string = RadioMessage.createMessage(audioEngine.radio.resolveString(LLMTTS.REQUEST_DOCKING, tags, silent), tags);
         if (!silent)
             addSubtitle(string, tags);
         RadioMessage rm = new RadioMessage(trader.currentTime, this, trader.destinationPlanet.communicationPartner, RadioMessageId.REQUEST_TO_DOCK, tags.replaceAllPostTags(string), silent);
 //            say(rm);
-        trader.destinationPlanet.communicationPartner.radio(rm);// send to partner
+        gameEngine.getRadio().talk(rm);// send to partner
+//        trader.destinationPlanet.communicationPartner.radio(rm);// send to partner
     }
 
     public void requestUndocking() {
         boolean    silent = !trader.sourcePlanet.isSelected();
         PromptTags tags   = new MerkatorPromptTags(trader, trader.sourcePlanet);
-        String     string = RadioMessage.createMessage(audioEngine.radioTTS.resolveString(LLMTTS.REQUEST_UNDOCKING, tags, silent), tags);
+        String     string = RadioMessage.createMessage(audioEngine.radio.resolveString(LLMTTS.REQUEST_UNDOCKING, tags, silent), tags);
         if (!silent)
             addSubtitle(string, tags);
         RadioMessage rm = new RadioMessage(trader.currentTime, this, trader.sourcePlanet.communicationPartner, RadioMessageId.REQUEST_TO_UNDOCK, tags.replaceAllPostTags(string), silent);
 //            say(rm);
-        trader.sourcePlanet.communicationPartner.radio(rm);// send to partner
+        gameEngine.getRadio().talk(rm);// send to partner
+
+//        trader.sourcePlanet.communicationPartner.radio(rm);// send to partner
     }
 
 //    public void say(RadioMessage msg) {

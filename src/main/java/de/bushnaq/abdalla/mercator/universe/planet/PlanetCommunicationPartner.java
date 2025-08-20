@@ -21,6 +21,7 @@ import de.bushnaq.abdalla.engine.ai.PromptTags;
 import de.bushnaq.abdalla.engine.audio.*;
 import de.bushnaq.abdalla.mercator.engine.ai.LLMTTS;
 import de.bushnaq.abdalla.mercator.engine.ai.MerkatorPromptTags;
+import de.bushnaq.abdalla.mercator.engine.ai.RadioMessageId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,9 +64,9 @@ public class PlanetCommunicationPartner implements CommunicationPartner {
 //        if (!silent)
 //            logger.info("handleRadioMessage " + planet.getName() + " selected=" + isSelected() + " id=" + rm.id.name());
         PromptTags tags = new MerkatorPromptTags(planet, rm.from);
-        switch (rm.id) {
+        switch (RadioMessageId.valueOf(rm.radioMessageId)) {
             case REQUEST_TO_DOCK -> {
-                audioEngine.radio.queueRadioMessageGeneration(new RadioRequest(!planet.isSelected(), this, rm.from, RadioMessageId.APPROVE_TO_DOCK, LLMTTS.APPROVE_DOCKING, tags));
+                audioEngine.radio.queueRadioMessageGeneration(new RadioRequest(!planet.isSelected(), this, rm.from, RadioMessageId.APPROVE_TO_DOCK.name(), LLMTTS.APPROVE_DOCKING, tags));
 //                            if (Debug.isFilterPlanet(planet.getName()))
 //                                logger.info(String.format("answering %s message", rm.id.name()));
 //                String string = RadioMessage.createMessage(audioEngine.radio.resolveString(LLMTTS.APPROVE_DOCKING, tags, silent), tags);
@@ -76,7 +77,7 @@ public class PlanetCommunicationPartner implements CommunicationPartner {
 //                gameEngine.getRadio().radio(replyMessage);// send to partner
             }
             case REQUEST_TO_UNDOCK -> {
-                audioEngine.radio.queueRadioMessageGeneration(new RadioRequest(!planet.isSelected(), this, rm.from, RadioMessageId.APPROVE_TO_UNDOCK, LLMTTS.APPROVE_UNDOCKING, tags));
+                audioEngine.radio.queueRadioMessageGeneration(new RadioRequest(!planet.isSelected(), this, rm.from, RadioMessageId.APPROVE_TO_UNDOCK.name(), LLMTTS.APPROVE_UNDOCKING, tags));
 //                            if (Debug.isFilterPlanet(planet.getName()))
 //                                logger.info(String.format("answering %s message", rm.id.name()));
 //                String string = RadioMessage.createMessage(audioEngine.radio.resolveString(LLMTTS.APPROVE_UNDOCKING, tags, silent), tags);

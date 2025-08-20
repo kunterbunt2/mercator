@@ -21,6 +21,7 @@ import de.bushnaq.abdalla.engine.ai.PromptTags;
 import de.bushnaq.abdalla.engine.audio.*;
 import de.bushnaq.abdalla.mercator.engine.ai.LLMTTS;
 import de.bushnaq.abdalla.mercator.engine.ai.MerkatorPromptTags;
+import de.bushnaq.abdalla.mercator.engine.ai.RadioMessageId;
 import de.bushnaq.abdalla.mercator.universe.event.EventLevel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,7 +64,7 @@ public class TraderCommunicationPartner implements CommunicationPartner {
 
 
     private void handleRadioMessages(RadioMessage rm) {
-        switch (rm.id) {
+        switch (RadioMessageId.valueOf(rm.radioMessageId)) {
             case APPROVE_TO_DOCK -> {
                 trader.setTraderSubStatus(TraderSubStatus.TRADER_STATUS_WAITING_FOR_WAYPOINT);
             }
@@ -103,7 +104,7 @@ public class TraderCommunicationPartner implements CommunicationPartner {
 
     public void requestDocking() {
         PromptTags tags = new MerkatorPromptTags(trader, trader.destinationPlanet);
-        audioEngine.radio.queueRadioMessageGeneration(new RadioRequest(!trader.destinationPlanet.isSelected(), this, trader.destinationPlanet.communicationPartner, RadioMessageId.REQUEST_TO_DOCK, LLMTTS.REQUEST_DOCKING, tags));
+        audioEngine.radio.queueRadioMessageGeneration(new RadioRequest(!trader.destinationPlanet.isSelected(), this, trader.destinationPlanet.communicationPartner, RadioMessageId.REQUEST_TO_DOCK.name(), LLMTTS.REQUEST_DOCKING, tags));
 //        boolean    silent = !trader.destinationPlanet.isSelected();
 //        String     string = RadioMessage.createMessage(audioEngine.radio.resolveString(LLMTTS.REQUEST_DOCKING, tags, silent), tags);
 //        if (!silent)
@@ -114,7 +115,7 @@ public class TraderCommunicationPartner implements CommunicationPartner {
 
     public void requestUndocking() {
         PromptTags tags = new MerkatorPromptTags(trader, trader.sourcePlanet);
-        audioEngine.radio.queueRadioMessageGeneration(new RadioRequest(!trader.sourcePlanet.isSelected(), this, trader.sourcePlanet.communicationPartner, RadioMessageId.REQUEST_TO_UNDOCK, LLMTTS.REQUEST_UNDOCKING, tags));
+        audioEngine.radio.queueRadioMessageGeneration(new RadioRequest(!trader.sourcePlanet.isSelected(), this, trader.sourcePlanet.communicationPartner, RadioMessageId.REQUEST_TO_UNDOCK.name(), LLMTTS.REQUEST_UNDOCKING, tags));
 //        String string = RadioMessage.createMessage(audioEngine.radio.resolveString(LLMTTS.REQUEST_UNDOCKING, tags, isSilent()), tags);
 //        if (!isSilent())
 //            addSubtitle(string, tags);

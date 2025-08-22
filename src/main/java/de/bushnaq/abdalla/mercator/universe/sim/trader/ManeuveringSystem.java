@@ -177,9 +177,9 @@ public class ManeuveringSystem {
             rotation = endRotation;
 //            if (Debug.isFilter(trader.getName()))
 //                logger.info("end");
-            if (trader.targetWaypoint.city != null) {
+            if (trader.navigator.nextWaypoint.city != null) {
                 trader.setTraderSubStatus(TraderSubStatus.TRADER_STATUS_REQUESTING_DOCKING);
-                trader.communicationPartner.requestDocking();
+                trader.communicationPartner.requestDocking(trader.navigator.nextWaypoint.city);
             } else {
                 trader.setTraderSubStatus(TraderSubStatus.TRADER_STATUS_WAITING_FOR_WAYPOINT);
             }
@@ -204,10 +204,10 @@ public class ManeuveringSystem {
      */
     public void startRotation() {
         if (trader.getTraderSubStatus() == TraderSubStatus.TRADER_STATUS_ALIGNING) {
-            Waypoint    targetWaypoint = trader.waypointList.get(trader.destinationWaypointIndex).waypoint;
-            final float scalex         = (targetWaypoint.x - trader.sourceWaypoint.x);
-            final float scaley         = (targetWaypoint.y - trader.sourceWaypoint.y);
-            final float scalez         = (targetWaypoint.z - trader.sourceWaypoint.z);
+            Waypoint    targetWaypoint = trader.navigator.waypointList.get(trader.navigator.destinationWaypointIndex).waypoint;
+            final float scalex         = (targetWaypoint.x - trader.navigator.previousWaypoint.x);
+            final float scaley         = (targetWaypoint.y - trader.navigator.previousWaypoint.y);
+            final float scalez         = (targetWaypoint.z - trader.navigator.previousWaypoint.z);
             startRotation = rotation;
             Vector2 d = new Vector2(scalex, scalez);
             endRotation = zVector.angleDeg(d);

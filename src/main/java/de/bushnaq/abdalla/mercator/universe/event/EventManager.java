@@ -30,32 +30,31 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class EventManager {
-    private final Class<?>    classFilter;
-    private       boolean     enablePrintEvent = false;
-    public        List<Event> eventList        = new ArrayList<Event>();
-    private final List<Event> filteredList     = new ArrayList<Event>();
-    private final EventLevel  level;
-    private final Logger      logger           = LoggerFactory.getLogger(this.getClass());
-    private       Object      objectFilter;
+    protected final Class<?>        classFilter;
+    private         boolean         enablePrintEvent     = true;
+    public          boolean         enabled              = false;
+    public          List<Event>     eventList            = new ArrayList<Event>();
+    private final   String          fileName;
+    private final   ExecutorService fileWriterExecutor   = Executors.newSingleThreadExecutor(r -> {
+        Thread t = new Thread(r, "EventFileWriter");
+        t.setDaemon(true);
+        return t;
+    });
+    private final   List<Event>     filteredList         = new ArrayList<Event>();
+    protected final EventLevel      level;
+    private final   Logger          logger               = LoggerFactory.getLogger(this.getClass());
+    private         Object          objectFilter;
+    private final   boolean         writeAllEventsToFile = false; // Write all events to file, not just filtered ones
 
-    /**
-     * @param level  set to a specific EventLevel
-     * @param filter set to a specific class or to null to disable filtering
-     */
-    public EventManager(final EventLevel level, final Class<?> filter) {
+    public EventManager(final EventLevel level, final Class<?> filter, String fileName) {
         this.level       = level;
         this.classFilter = filter;
-
-        // Remove events.txt file at startup to start with a clean log
-        File eventsFile = new File("events.txt");
-        if (eventsFile.exists()) {
-            boolean deleted = eventsFile.delete();
-            if (!deleted) {
-                logger.warn("Could not delete existing events.txt file");
-            }
-        }
+        this.fileName    = fileName;
+        new File(fileName).delete();
     }
 
     public void add(final EventLevel level, final long when, final Object who, final String what) {
@@ -64,21 +63,20 @@ public class EventManager {
             eventList.add(e);
             if (e.who == objectFilter) {
                 filteredList.add(e);
-
-                // Write to events.txt file with different formats based on object type
-
                 if (enablePrintEvent) {
-                    if (e.who instanceof Trader) {
-                        logger.info(String.format("%s %s %s %s", TimeUnit.toString(e.when), e.level.name(), ((Trader) e.who).getName(), e.what));
-                    } else if (e.who instanceof Sim) {
-                        logger.info(String.format("%s %s %s %s", TimeUnit.toString(e.when), e.level.name(), ((Sim) e.who).getName(), e.what));
-                    }
+                    logger.info(formatEventForObject(e));
                 }
             }
         }
-        if (Debug.isFiltered(who)) {
-            final Event e = new Event(level, when, who, what);
-            writeEventToFile(e);
+        {
+            final Event e              = new Event(level, when, who, what);
+            String      formattedEvent = formatEventForObject(e);
+            if (Debug.isFiltered(who)) {
+                logger.info(formattedEvent);
+                writeEventToFile(e);
+            } else if (writeAllEventsToFile) {
+                writeEventToFile(e);
+            }
         }
     }
 
@@ -98,10 +96,19 @@ public class EventManager {
         String levelStr = event.level.name();
 
         return switch (event.who) {
-            case Trader trader -> String.format("[TRADER ] %10s | %s | %s | %s", timeStr, levelStr, trader.getName(), event.what);
-            case Sim sim -> String.format("[SIM    ] %10s | %s | %s | %s", timeStr, levelStr, sim.getName(), event.what);
-            case Planet planet -> String.format("[PLANET] %10s | %s | %s | %s", timeStr, levelStr, planet.getName(), event.what);
+            case Trader trader -> String.format("[TRADER ] %10s | %s | %15s | %s", timeStr, levelStr, trader.getName(), event.what);
+            case Sim sim -> String.format("[SIM    ] %10s | %s | %15s | %s", timeStr, levelStr, sim.getName(), event.what);
+            case Planet planet -> String.format("[PLANET ] %10s | %s | %15s | %s", timeStr, levelStr, planet.getName(), event.what);
             default -> String.format("[UNKNOWN] %10s | %s | %s | %s", timeStr, levelStr, event.who.getClass().getSimpleName(), event.what);
+        };
+    }
+
+    private String getWhoName(Event event) {
+        return switch (event.who) {
+            case Trader trader -> trader.getName();
+            case Sim sim -> sim.getName();
+            case Planet planet -> planet.getName();
+            default -> event.who.getClass().getSimpleName();
         };
     }
 
@@ -117,12 +124,40 @@ public class EventManager {
         this.objectFilter = objectFilter;
     }
 
-    private void writeEventToFile(Event event) {
-        try (PrintWriter writer = new PrintWriter(new FileWriter("events.txt", true))) {
-            String formattedEvent = formatEventForObject(event);
-            writer.println(formattedEvent);
-        } catch (IOException e) {
-            logger.error("Failed to write event to file", e);
+    /**
+     * Shutdown the event manager and wait for pending file writes to complete
+     */
+    public void shutdown() {
+        fileWriterExecutor.shutdown();
+        try {
+            if (!fileWriterExecutor.awaitTermination(10, java.util.concurrent.TimeUnit.SECONDS)) {
+                logger.warn("File writer executor did not terminate gracefully, forcing shutdown");
+                fileWriterExecutor.shutdownNow();
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            fileWriterExecutor.shutdownNow();
         }
+    }
+
+    private void writeEventToFile(Event event) {
+        fileWriterExecutor.submit(() -> {
+            try {
+                // Create directory if it doesn't exist
+                File debugDir = new File("debug/events");
+                if (!debugDir.exists()) {
+                    debugDir.mkdirs();
+                }
+
+                try (PrintWriter writer = new PrintWriter(new FileWriter(fileName, true))) {
+                    String formattedEvent = formatEventForObject(event);
+                    writer.println(formattedEvent);
+                } catch (IOException e) {
+                    logger.error("Failed to write event to file", e);
+                }
+            } catch (Exception e) {
+                logger.error("Unexpected error in file writing task", e);
+            }
+        });
     }
 }

@@ -37,8 +37,8 @@ public class RandomGeneratorTest {
 
     @Test
     public void testParralelReproducability() throws Exception {
-        final EventManager            eventManager0 = new EventManager(EventLevel.all, null);
-        final EventManager            eventManager1 = new EventManager(EventLevel.all, null);
+        final EventManager            eventManager0 = new EventManager(EventLevel.all, null, "debug/events/universe.txt");
+        final EventManager            eventManager1 = new EventManager(EventLevel.all, null, "debug/events/universe.txt");
         final MercatorRandomGenerator g0            = new MercatorRandomGenerator(UNIVERSE_GENERATION_RANDOM_SEED, eventManager0);
         final MercatorRandomGenerator g1            = new MercatorRandomGenerator(UNIVERSE_GENERATION_RANDOM_SEED, eventManager1);
         final int[]                   results0      = new int[MAX_TEXT_LENGTH];
@@ -61,7 +61,7 @@ public class RandomGeneratorTest {
                         System.out.printf("%s %s %s %s\n", "g1", TimeUnit.toString(event1.when), event1.getWhosName(), event1.what);
                         for (final StackTraceElement trace : event1.stackTrace)
                             System.out.println("\t" + trace);
-                        System.out.printf("-\n");
+                        System.out.print("-\n");
                     }
                 }
                 assertEquals(eventList0.size(), eventList1.size(), String.format("in year %d event size is different", g0.index));
@@ -71,8 +71,8 @@ public class RandomGeneratorTest {
 
     @Test
     public void testSerializedReproducability() throws Exception {
-        final EventManager            eventManager0 = new EventManager(EventLevel.all, null);
-        final EventManager            eventManager1 = new EventManager(EventLevel.all, null);
+        final EventManager            eventManager0 = new EventManager(EventLevel.all, null, "debug/events/universe.txt");
+        final EventManager            eventManager1 = new EventManager(EventLevel.all, null, "debug/events/universe.txt");
         final MercatorRandomGenerator g0            = new MercatorRandomGenerator(UNIVERSE_GENERATION_RANDOM_SEED, eventManager0);
         final MercatorRandomGenerator g1            = new MercatorRandomGenerator(UNIVERSE_GENERATION_RANDOM_SEED, eventManager1);
         final int[]                   results0      = new int[MAX_TEXT_LENGTH];
@@ -100,7 +100,7 @@ public class RandomGeneratorTest {
                         System.out.printf("%s %s %s %s\n", "g1", TimeUnit.toString(event1.when), event1.getWhosName(), event1.what);
                         for (final StackTraceElement trace : event1.stackTrace)
                             System.out.println("\t" + trace);
-                        System.out.printf("-\n");
+                        System.out.print("-\n");
                     }
                 }
                 assertEquals(eventList0.size(), eventList1.size(), String.format("in year %d event size is different", g0.index));

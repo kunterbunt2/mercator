@@ -67,6 +67,11 @@ Then you can start mercator by one of its starting classes
 
 ## Tasks
 
+1. traders need to document event of planning a trip
+2. traders also need to document the event of occupying/freeing the dock
+3. traders need to document the event of requesting docking/undocking
+4. should trader rather use sim eventmanager?
+5. should planet rather use sim eventmanager?
 1. remove "" from tts subtitles
 1. add more light
 2. reduce blur
@@ -74,9 +79,10 @@ Then you can start mercator by one of its starting classes
 2. fix ships will collide while navigating from planet to planet.
 3. add SSAO
 4. fix openAL error when stopping demo mode
- 
 
+# Bugs
 
+01- 'Driftwood' is occupying 'Leo Minor Port' dock, but not showing up.
 
 
 

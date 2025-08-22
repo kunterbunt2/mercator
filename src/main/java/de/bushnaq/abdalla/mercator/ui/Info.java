@@ -61,15 +61,15 @@ public class Info {
     private final        OrthographicCamera           camera;
     private final        TimeStatistic                debugTimer;
     private final        InputMultiplexer             inputMultiplexer;
-    private final        List<LabelData>              labels         = new ArrayList<LabelData>();
-    private final        StringBuilder                stringBuilder  = new StringBuilder();
-    private final        String                       title          = "info";
     // private TextButton closeButton;
     private              int                          labelIndex     = 0;
+    private final        List<LabelData>              labels         = new ArrayList<LabelData>();
     private              RenderEngine3D<GameEngine3D> renderEngine;
     private              float                        screenHeight   = 0;
     private              Skin                         skin;
     private              Stage                        stage;
+    private final        StringBuilder                stringBuilder  = new StringBuilder();
+    private final        String                       title          = "info";
     private              Class<?>                     type;
     //	private final Universe universe;
     private              Window                       window;
@@ -180,8 +180,6 @@ public class Info {
         labelIndex = 0;
     }
 
-    ;
-
     private void update(final Universe universe, final GLProfiler profiler) {
         if (profiler != null && profiler.isEnabled() && debugTimer.getTime() > 1000) {
             int size = 10;
@@ -259,17 +257,17 @@ public class Info {
 
     public void update(final Universe universe, final Object selected, final RenderEngine3D<GameEngine3D> renderEngine) throws Exception {
         this.renderEngine = renderEngine;
-        if (Planet.class.isInstance(selected)) {
+        if (selected instanceof Planet) {
             update(universe, (Planet) selected);
-        } else if (Trader.class.isInstance(selected)) {
+        } else if (selected instanceof Trader) {
             update(universe, (Trader) selected);
-        } else if (Sim.class.isInstance(selected)) {
+        } else if (selected instanceof Sim) {
             update(universe, (Sim) selected);
-        } else if (ProductionFacility.class.isInstance(selected)) {
+        } else if (selected instanceof ProductionFacility) {
             update(universe, (ProductionFacility) selected);
-        } else if (Good.class.isInstance(selected)) {
+        } else if (selected instanceof Good) {
             update(universe, (Good) selected);
-        } else if (GLProfiler.class.isInstance(selected)) {
+        } else if (selected instanceof GLProfiler) {
             update(universe, (GLProfiler) selected);
         } else {
             update(universe);
@@ -300,9 +298,8 @@ public class Info {
 
     private void update(final Universe universe, final ProductionFacility productionFacility) {
         if (productionFacility != null) {
-            if (Factory.class.isInstance(productionFacility)) {
-                final Factory factory = (Factory) productionFacility;
-                final int     size    = 10 + 1 + factory.inputGood.size();
+            if (productionFacility instanceof Factory factory) {
+                final int size = 10 + 1 + factory.inputGood.size();
                 clearUnmatchedSizeAndType(size, ProductionFacility.class);
                 updateNameAndValue("name", productionFacility.getName(), NAME_LABEL);
                 updateNameAndValue("planet", productionFacility.planet.getName(), NAME_LABEL);
@@ -360,8 +357,8 @@ public class Info {
             clearUnmatchedSizeAndType(size, Trader.class);
             updateNameAndValue("name", trader.getName(), NAME_LABEL);
             updateNameAndValue("status", trader.status.getName(), VARIABLE_LABEL);
-            updateNameAndValue("traderStatus", trader.getTraderStatus().getName(), VARIABLE_LABEL);
-            updateNameAndValue("traderSubStatus", trader.getTraderSubStatus().getName(), VARIABLE_LABEL);
+            updateNameAndValue("traderStatus", trader.getTraderStatus().getDisplayName(), VARIABLE_LABEL);
+            updateNameAndValue("traderSubStatus", trader.getTraderSubStatus().getDisplayName(), VARIABLE_LABEL);
             updateNameAndValue("start credits", Sim.SIM_START_CREDITS, STATIC_LABEL);
             updateNameAndValue("cargo size", trader.goodSpace, STATIC_LABEL);
             updateNameAndValue("engine speed", trader.getEngine().getEngineSpeed() * Engine.ENGINE_TO_REALITY_FACTOR, STATIC_LABEL);
@@ -373,11 +370,11 @@ public class Info {
             updateNameAndValue("profession", trader.profession.name(), VARIABLE_LABEL);
             updateNameAndValue("satisfaction", trader.getSatisfactionFactor(universe.currentTime), VARIABLE_LABEL);
             updateNameAndValue("resting", trader.portRestingTime, VARIABLE_LABEL);
-            updateNameAndValue("source", trader.sourcePlanet != null ? trader.sourcePlanet.getName() : "-", NAME_LABEL);
+            updateNameAndValue("source", trader.navigator.sourcePlanet != null ? trader.navigator.sourcePlanet.getName() : "-", NAME_LABEL);
             updateNameAndValue("planet", trader.planet != null ? trader.planet.getName() : "-", NAME_LABEL);
-            updateNameAndValue("destination", trader.destinationPlanet != null ? trader.destinationPlanet.getName() : "-", NAME_LABEL);
-            updateNameAndValue("sourceWaypoint", trader.sourceWaypoint != null ? trader.sourceWaypoint.getName() : "-", NAME_LABEL);
-            updateNameAndValue("targetWaypoint", trader.targetWaypoint != null ? trader.targetWaypoint.getName() : "-", NAME_LABEL);
+            updateNameAndValue("destination", trader.navigator.destinationPlanet != null ? trader.navigator.destinationPlanet.getName() : "-", NAME_LABEL);
+            updateNameAndValue("sourceWaypoint", trader.navigator.previousWaypoint != null ? trader.navigator.previousWaypoint.getName() : "-", NAME_LABEL);
+            updateNameAndValue("targetWaypoint", trader.navigator.nextWaypoint != null ? trader.navigator.nextWaypoint.getName() : "-", NAME_LABEL);
             updateNameAndValue("", "", VARIABLE_LABEL);
             updateGood("good", CAPTION_LABEL, "price", CAPTION_LABEL, "average", CAPTION_LABEL, "amount", CAPTION_LABEL, "average", CAPTION_LABEL);
             for (final Good good : trader.getGoodList()) {

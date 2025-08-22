@@ -33,23 +33,23 @@ public class TradersTableModel extends AbstractTableModel {
     }
 
     @Override
-    public String getColumnName(final int col) {
-        return columnNames[col];
-    }
-
-    @Override
     public Class getColumnClass(final int c) {
         return getValueAt(0, c).getClass();
     }
 
     @Override
-    public int getRowCount() {
-        return traderList.size();
+    public int getColumnCount() {
+        return columnNames.length;
     }
 
     @Override
-    public int getColumnCount() {
-        return columnNames.length;
+    public String getColumnName(final int col) {
+        return columnNames[col];
+    }
+
+    @Override
+    public int getRowCount() {
+        return traderList.size();
     }
 
     @Override
@@ -63,7 +63,7 @@ public class TradersTableModel extends AbstractTableModel {
                 case 2:
                     return traderList.get(row).getCredits();
                 case 3:
-                    return traderList.get(row).getTraderStatus().getName();
+                    return traderList.get(row).getTraderStatus().getDisplayName();
                 case 4:
                     return traderList.get(row).status.getName();
                 case 5:
@@ -75,20 +75,20 @@ public class TradersTableModel extends AbstractTableModel {
                 case 8:
                     return traderList.get(row).planet.getName();
                 case 9:
-                    if (traderList.get(row).sourcePlanet != null) {
-                        return traderList.get(row).sourcePlanet.getName();
+                    if (traderList.get(row).navigator.sourcePlanet != null) {
+                        return traderList.get(row).navigator.sourcePlanet.getName();
                     } else {
                         return "-";
                     }
                 case 10:
-                    if (traderList.get(row).targetWaypoint != null && traderList.get(row).targetWaypoint.city != null) {
-                        return traderList.get(row).targetWaypoint.city.getName();
+                    if (traderList.get(row).navigator.nextWaypoint != null && traderList.get(row).navigator.nextWaypoint.city != null) {
+                        return traderList.get(row).navigator.nextWaypoint.city.getName();
                     } else {
                         return "-";
                     }
                 case 11:
-                    if (traderList.get(row).sourcePlanet != null && traderList.get(row).destinationPlanet != null && traderList.get(row).sourcePlanet != traderList.get(row).destinationPlanet) {
-                        return traderList.get(row).destinationPlanet.getName();
+                    if (traderList.get(row).navigator.sourcePlanet != null && traderList.get(row).navigator.destinationPlanet != null && traderList.get(row).navigator.sourcePlanet != traderList.get(row).navigator.destinationPlanet) {
+                        return traderList.get(row).navigator.destinationPlanet.getName();
                     } else {
                         return "-";
                     }

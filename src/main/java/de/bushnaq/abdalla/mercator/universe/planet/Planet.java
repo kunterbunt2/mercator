@@ -17,8 +17,10 @@
 package de.bushnaq.abdalla.mercator.universe.planet;
 
 import de.bushnaq.abdalla.engine.IGameEngine;
+import de.bushnaq.abdalla.engine.audio.CommunicationPartner;
 import de.bushnaq.abdalla.engine.audio.OpenAlException;
 import de.bushnaq.abdalla.mercator.universe.Universe;
+import de.bushnaq.abdalla.mercator.universe.event.EventLevel;
 import de.bushnaq.abdalla.mercator.universe.factory.Factory;
 import de.bushnaq.abdalla.mercator.universe.factory.ProductionFacility;
 import de.bushnaq.abdalla.mercator.universe.factory.ProductionFacilityList;
@@ -30,8 +32,11 @@ import de.bushnaq.abdalla.mercator.universe.path.Waypoint;
 import de.bushnaq.abdalla.mercator.universe.path.WaypointList;
 import de.bushnaq.abdalla.mercator.universe.sim.Sim;
 import de.bushnaq.abdalla.mercator.universe.sim.SimList;
+import de.bushnaq.abdalla.mercator.universe.sim.trader.TraderCommunicationPartner;
 import de.bushnaq.abdalla.mercator.universe.sim.trader.TraderList;
 import de.bushnaq.abdalla.mercator.util.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author bushnaq Created 13.02.2005
@@ -51,7 +56,9 @@ public class Planet extends Waypoint implements TradingPartner {
     private             GoodList                   goodList               = new GoodList();
     private             HistoryManager             historyManager;
     private final       int                        id;
+    public              CommunicationPartner       inDock                 = null;// the trader that is currently in the dock, or null if no trader is in the dock
     public              long                       lastTransaction        = 0;
+    private final       Logger                     logger                 = LoggerFactory.getLogger(this.getClass());
     public              float                      orbitAngle             = 0.0f;
     public              PathSeeker                 pathSeeker             = new PathSeeker();
     public              ProductionFacilityList     productionFacilityList = new ProductionFacilityList();
@@ -70,7 +77,7 @@ public class Planet extends Waypoint implements TradingPartner {
         this.universe = universe;
         set2DRenderer(new Planet2DRenderer(this));
         set3DRenderer(new Planet3DRenderer(this));
-        eventManager = new PlanetEventManager(this);
+        eventManager = new PlanetEventManager(this, EventLevel.all, null);
         city         = this;
     }
 
@@ -226,6 +233,23 @@ public class Planet extends Waypoint implements TradingPartner {
         this.credits += credits;
     }
 
+    public void freeDock(TraderCommunicationPartner cp) {
+        if (inDock == cp) {
+            if (Debug.isFilterPlanet(getName()))
+                eventManager.add(EventLevel.trace, currentTime, this, String.format("'%s' cleared the dock", inDock.getName()));
+//                logger.info(String.format("**** '%s' cleared the dock", inDock.getName()));
+            inDock = null;
+            communicationPartner.handleRadioMessage(null);
+        } else if (inDock == null) {
+            if (Debug.isFilterPlanet(getName()))
+                eventManager.add(EventLevel.warning, currentTime, this, String.format("'%s' tried to clear the dock, but it was already clear.", inDock.getName()));
+//                logger.warn(String.format("**** '%s' tried to clear the dock, but it was already clear.", inDock.getName()));
+        } else {
+            eventManager.add(EventLevel.warning, currentTime, this, String.format("'%s' tried to clear the dock, but it is occupied by '%s'", cp.getName(), inDock.getName()));
+//            logger.warn(String.format("**** PLanet '%s' - '%s' tried to clear the dock, but it is occupied by '%s'",getName(), cp.getName(), inDock.getName()));
+        }
+    }
+
     @Override
     public float getCredits() {
         return credits;
@@ -274,6 +298,19 @@ public class Planet extends Waypoint implements TradingPartner {
 
     public boolean isSelected() {
         return selected;
+    }
+
+    public void occupyDock(CommunicationPartner ship) {
+        if (inDock == null) {
+            inDock = ship;
+            if (Debug.isFilterPlanet(getName()))
+                eventManager.add(EventLevel.trace, currentTime, this, String.format("'%s' is occupying the dock", ship.getName()));
+//                logger.info(String.format("**** '%s' is occupying the dock", ship.getName()));
+        } else {
+            if (Debug.isFilterPlanet(getName()))
+                eventManager.add(EventLevel.warning, currentTime, this, String.format("'%s' tried to occupying the dock, but it was already occupied by '%s'", ship.getName(), inDock.getName()));
+//                logger.warn(String.format("**** '%s' tried to occupying the dock,but it was already occupied by '%s'", inDock.getName()));
+        }
     }
 
     public float queryAverageFoodPrice() {

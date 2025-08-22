@@ -38,7 +38,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class UniverseStabilityTest {
     private static final int UNIVERSE_GENERATION_RANDOM_SEED = 5;
     private static final int UNIVERSE_SIZE                   = 10;
-    EventManager            eventManager2 = new EventManager(EventLevel.all, null);
+    EventManager            eventManager2 = new EventManager(EventLevel.all, null, "debug/events/universe.txt");
     MercatorRandomGenerator g2            = new MercatorRandomGenerator(UNIVERSE_GENERATION_RANDOM_SEED, eventManager2);
 
     @Test
@@ -70,7 +70,7 @@ public class UniverseStabilityTest {
                         System.out.printf("%s %s %s %s\n", universeList[1].getName(), TimeUnit.toString(event1.when), event1.getWhosName(), event1.what);
                         for (final StackTraceElement trace : event1.stackTrace)
                             System.out.println("\t" + trace);
-                        System.out.printf("-\n");
+                        System.out.print("-\n");
                     }
                 }
                 // compareToStandard( eventList0, eventList1 );
@@ -89,7 +89,7 @@ public class UniverseStabilityTest {
                     for (final StackTraceElement trace : event.stackTrace)
                         System.out.println("\t" + trace);
                     // compareToStandard( eventList0, eventList1 );
-                    System.out.printf("-\n");
+                    System.out.print("-\n");
                 }
                 assertEquals(eventList0.size(), eventList1.size(), String.format("in year %.2f in universe [size %d] event size is different", universeList[0].currentTime / 100f, UNIVERSE_SIZE));
                 for (final Universe universe : universeList) {

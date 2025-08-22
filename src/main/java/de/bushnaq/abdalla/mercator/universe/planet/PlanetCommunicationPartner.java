@@ -22,15 +22,19 @@ import de.bushnaq.abdalla.engine.audio.*;
 import de.bushnaq.abdalla.mercator.engine.ai.LLMTTS;
 import de.bushnaq.abdalla.mercator.engine.ai.MerkatorPromptTags;
 import de.bushnaq.abdalla.mercator.engine.ai.RadioMessageId;
+import de.bushnaq.abdalla.mercator.universe.event.EventLevel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class PlanetCommunicationPartner implements CommunicationPartner {
-    private final AudioEngine audioEngine;
-    private final IGameEngine gameEngine;
-    private final Logger      logger = LoggerFactory.getLogger(this.getClass());
-    private final Planet      planet;
-//    private final List<RadioMessage> radioMessages = new ArrayList<>();
+    private final AudioEngine        audioEngine;
+    private final IGameEngine        gameEngine;
+    private final Logger             logger            = LoggerFactory.getLogger(this.getClass());
+    private final Planet             planet;
+    private final List<RadioMessage> radioMessageQueue = new ArrayList<>();
 
     public PlanetCommunicationPartner(IGameEngine gameEngine, Planet planet) throws OpenAlException {
         this.gameEngine  = gameEngine;
@@ -59,14 +63,35 @@ public class PlanetCommunicationPartner implements CommunicationPartner {
         return planet.getName();
     }
 
+    /**
+     * Handle incoming RadioMessage or the message queue when a trader leaves the dock.
+     *
+     * @param rm
+     */
     void handleRadioMessage(RadioMessage rm) {
-        boolean silent = !isSelected();
+        if (planet.inDock != null) {
+            if (rm != null) {
+                planet.eventManager.add(EventLevel.trace, planet.currentTime, planet, String.format("Queuing request from '%s' because dock is occupied by '%s'.", rm.from.getName(), planet.inDock.getName()));
+                radioMessageQueue.add(rm);
+            }
+            return;
+        }
+        if (rm == null) {
+            //dock just got free
+            if (!radioMessageQueue.isEmpty()) {
+                rm = radioMessageQueue.removeFirst();
+                planet.eventManager.add(EventLevel.trace, planet.currentTime, planet, String.format("Handling queued request from '%s' because dock got freed.", rm.from.getName()));
+            }
+        }
+        if (rm != null) {
+            boolean silent = !isSelected();
 //        if (!silent)
 //            logger.info("handleRadioMessage " + planet.getName() + " selected=" + isSelected() + " id=" + rm.id.name());
-        PromptTags tags = new MerkatorPromptTags(planet, rm.from);
-        switch (RadioMessageId.valueOf(rm.radioMessageId)) {
-            case REQUEST_TO_DOCK -> {
-                audioEngine.radio.queueRadioMessageGeneration(new RadioRequest(!planet.isSelected(), this, rm.from, RadioMessageId.APPROVE_TO_DOCK.name(), LLMTTS.APPROVE_DOCKING, tags));
+            PromptTags tags = new MerkatorPromptTags(planet, rm.from);
+            switch (RadioMessageId.valueOf(rm.radioMessageId)) {
+                case REQUEST_TO_DOCK -> {
+                    planet.occupyDock(rm.from);//occupy dock before informing the trader
+                    audioEngine.radio.queueRadioMessageGeneration(new RadioRequest(!planet.isSelected(), this, rm.from, RadioMessageId.APPROVE_TO_DOCK.name(), LLMTTS.APPROVE_DOCKING, tags));
 //                            if (Debug.isFilterPlanet(planet.getName()))
 //                                logger.info(String.format("answering %s message", rm.id.name()));
 //                String string = RadioMessage.createMessage(audioEngine.radio.resolveString(LLMTTS.APPROVE_DOCKING, tags, silent), tags);
@@ -75,9 +100,10 @@ public class PlanetCommunicationPartner implements CommunicationPartner {
 //                RadioMessage replyMessage = new RadioMessage(planet.currentTime, this, rm.from, RadioMessageId.APPROVE_TO_DOCK, tags.replaceAllPostTags(string), silent);
 ////                        logger.info("replyMessage" + replyMessage.message);
 //                gameEngine.getRadio().radio(replyMessage);// send to partner
-            }
-            case REQUEST_TO_UNDOCK -> {
-                audioEngine.radio.queueRadioMessageGeneration(new RadioRequest(!planet.isSelected(), this, rm.from, RadioMessageId.APPROVE_TO_UNDOCK.name(), LLMTTS.APPROVE_UNDOCKING, tags));
+                }
+                case REQUEST_TO_UNDOCK -> {
+                    planet.occupyDock(rm.from);//occupy dock before informing the trader
+                    audioEngine.radio.queueRadioMessageGeneration(new RadioRequest(!planet.isSelected(), this, rm.from, RadioMessageId.APPROVE_TO_UNDOCK.name(), LLMTTS.APPROVE_UNDOCKING, tags));
 //                            if (Debug.isFilterPlanet(planet.getName()))
 //                                logger.info(String.format("answering %s message", rm.id.name()));
 //                String string = RadioMessage.createMessage(audioEngine.radio.resolveString(LLMTTS.APPROVE_UNDOCKING, tags, silent), tags);
@@ -86,6 +112,7 @@ public class PlanetCommunicationPartner implements CommunicationPartner {
 //                RadioMessage replyMessage = new RadioMessage(planet.currentTime, this, rm.from, RadioMessageId.APPROVE_TO_UNDOCK, tags.replaceAllPostTags(string), silent);
 ////                        logger.info("replyMessage" + replyMessage.message);
 //                gameEngine.getRadio().radio(replyMessage);// send to partner
+                }
             }
         }
     }

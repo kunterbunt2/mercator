@@ -36,7 +36,7 @@ public enum TraderSubStatus {
     TRADER_STATUS_UNDOCKING_DEC("undocking Dec.", false),
     TRADER_STATUS_REQUESTING_UNDOCKING("Req. undock", false),
     TRADER_STATUS_REQUESTING_DOCKING("Req. dock", true);
-    private       String  name;
+    private       String  displayName;
     private final boolean traveling;
 
     TraderSubStatus(final String name, boolean traveling) {
@@ -44,15 +44,15 @@ public enum TraderSubStatus {
         this.traveling = traveling;
     }
 
-    public String getName() {
-        return name;
+    public String getDisplayName() {
+        return displayName;
     }
 
     public boolean isTraveling() {
         return traveling;
     }
 
-    public void setName(final String name) {
-        this.name = name;
+    public void setName(final String displayName) {
+        this.displayName = displayName;
     }
 }

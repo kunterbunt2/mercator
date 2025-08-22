@@ -23,6 +23,7 @@ import de.bushnaq.abdalla.mercator.engine.ai.LLMTTS;
 import de.bushnaq.abdalla.mercator.engine.ai.MerkatorPromptTags;
 import de.bushnaq.abdalla.mercator.engine.ai.RadioMessageId;
 import de.bushnaq.abdalla.mercator.universe.event.EventLevel;
+import de.bushnaq.abdalla.mercator.universe.planet.Planet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,12 +67,16 @@ public class TraderCommunicationPartner implements CommunicationPartner {
     private void handleRadioMessages(RadioMessage rm) {
         switch (RadioMessageId.valueOf(rm.radioMessageId)) {
             case APPROVE_TO_DOCK -> {
+                trader.eventManager.add(EventLevel.trace, trader.currentTime, trader, String.format("docking request was approved by  '%s'", rm.from.getName()));
+//                trader.occupyDock(trader.destinationPlanet);
                 trader.setTraderSubStatus(TraderSubStatus.TRADER_STATUS_WAITING_FOR_WAYPOINT);
             }
             case APPROVE_TO_UNDOCK -> {
+                trader.eventManager.add(EventLevel.trace, trader.currentTime, trader, String.format("undocking request was approved by  '%s'", rm.from.getName()));
+//                trader.occupyDock(trader.navigator.sourcePlanet);
                 trader.setTraderSubStatus(TraderSubStatus.TRADER_STATUS_UNDOCKING_ACC);
-                trader.sourcePlanet.dockingDoors.setDockingDoorStatus(LOWERING);
-                trader.planet.universe.eventManager.add(EventLevel.trace, trader.currentTime, this, String.format("departing %s to reach %s", trader.planet.getName(), trader.destinationPlanet.city.getName()));
+                trader.planet.dockingDoors.setDockingDoorStatus(LOWERING);
+                trader.eventManager.add(EventLevel.trace, trader.currentTime, trader, String.format("departing '%s' to reach '%s'", trader.planet.getName(), trader.navigator.destinationPlanet.city.getName()));
             }
         }
     }
@@ -102,9 +107,10 @@ public class TraderCommunicationPartner implements CommunicationPartner {
 //        say(message.message);
     }
 
-    public void requestDocking() {
-        PromptTags tags = new MerkatorPromptTags(trader, trader.destinationPlanet);
-        audioEngine.radio.queueRadioMessageGeneration(new RadioRequest(!trader.destinationPlanet.isSelected(), this, trader.destinationPlanet.communicationPartner, RadioMessageId.REQUEST_TO_DOCK.name(), LLMTTS.REQUEST_DOCKING, tags));
+    public void requestDocking(Planet planet) {
+        trader.eventManager.add(EventLevel.trace, trader.currentTime, trader, String.format("requesting docking approval to '%s'", planet.getName()));
+        PromptTags tags = new MerkatorPromptTags(trader, planet);
+        audioEngine.radio.queueRadioMessageGeneration(new RadioRequest(!planet.isSelected(), this, planet.communicationPartner, RadioMessageId.REQUEST_TO_DOCK.name(), LLMTTS.REQUEST_DOCKING, tags));
 //        boolean    silent = !trader.destinationPlanet.isSelected();
 //        String     string = RadioMessage.createMessage(audioEngine.radio.resolveString(LLMTTS.REQUEST_DOCKING, tags, silent), tags);
 //        if (!silent)
@@ -113,9 +119,10 @@ public class TraderCommunicationPartner implements CommunicationPartner {
 //        gameEngine.getRadio().radio(rm);// send to partner
     }
 
-    public void requestUndocking() {
-        PromptTags tags = new MerkatorPromptTags(trader, trader.sourcePlanet);
-        audioEngine.radio.queueRadioMessageGeneration(new RadioRequest(!trader.sourcePlanet.isSelected(), this, trader.sourcePlanet.communicationPartner, RadioMessageId.REQUEST_TO_UNDOCK.name(), LLMTTS.REQUEST_UNDOCKING, tags));
+    public void requestUndocking(Planet planet) {
+        trader.eventManager.add(EventLevel.trace, trader.currentTime, trader, String.format("requesting undocking approval to '%s'", planet.getName()));
+        PromptTags tags = new MerkatorPromptTags(trader, planet);
+        audioEngine.radio.queueRadioMessageGeneration(new RadioRequest(!planet.isSelected(), this, planet.communicationPartner, RadioMessageId.REQUEST_TO_UNDOCK.name(), LLMTTS.REQUEST_UNDOCKING, tags));
 //        String string = RadioMessage.createMessage(audioEngine.radio.resolveString(LLMTTS.REQUEST_UNDOCKING, tags, isSilent()), tags);
 //        if (!isSilent())
 //            addSubtitle(string, tags);

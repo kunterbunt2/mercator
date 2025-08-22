@@ -26,16 +26,16 @@ public enum TraderStatus {
     TRADER_STATUS_WAITING_FOR_GOOD_PRICE_TO_BUY("Waiting for a good price to buy...", true),//
     TRADER_STATUS_WAITING_TO_SELL("Waiting to sell...", true);
 
+    private String  displayName;
     private boolean good;
-    private String  name;
 
-    TraderStatus(final String name, final boolean good) {
-        this.setName(name);
+    TraderStatus(final String displayName, final boolean good) {
+        this.setDisplayName(displayName);
         this.setGood(good);
     }
 
-    public String getName() {
-        return name;
+    public String getDisplayName() {
+        return displayName;
     }
 
 
@@ -43,12 +43,12 @@ public enum TraderStatus {
         return good;
     }
 
-    public void setGood(final boolean good) {
-        this.good = good;
+    public void setDisplayName(final String displayName) {
+        this.displayName = displayName;
     }
 
-    public void setName(final String name) {
-        this.name = name;
+    public void setGood(final boolean good) {
+        this.good = good;
     }
 
 }

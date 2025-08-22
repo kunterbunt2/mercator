@@ -103,7 +103,7 @@ public class Universe {
     public Universe(final String name, final GraphicsDimentions graphicsDimentions, final EventLevel level, final Class<?> eventFilter) {
         setName(name);
         this.graphicsDimentions = graphicsDimentions;
-        eventManager            = new EventManager(level, eventFilter);
+        eventManager            = new EventManager(level, eventFilter, "debug/events/universe.txt");
         setHistoryManager(new HistoryManager());
 
     }

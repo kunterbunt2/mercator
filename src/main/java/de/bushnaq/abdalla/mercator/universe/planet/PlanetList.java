@@ -118,13 +118,13 @@ public class PlanetList extends Vector<Planet> {
                 }
             }
             int waypointIndex = 0;
-            while (waypointIndex < aTrader.waypointList.size()) {
-                final WaypointProxy waypoint = aTrader.waypointList.get(waypointIndex);
+            while (waypointIndex < aTrader.navigator.waypointList.size()) {
+                final WaypointProxy waypoint = aTrader.navigator.waypointList.get(waypointIndex);
                 // ---For each waypoint, mark the jumppoint to the next one
                 for (final Path jumpGate : waypoint.waypoint.pathList) {
-                    if ((waypointIndex + 1 < aTrader.waypointList.size()) && (jumpGate.target == aTrader.waypointList.get(waypointIndex + 1).waypoint)) {
+                    if ((waypointIndex + 1 < aTrader.navigator.waypointList.size()) && (jumpGate.target == aTrader.navigator.waypointList.get(waypointIndex + 1).waypoint)) {
                         jumpGate.selected = true;
-                    } else if ((waypointIndex > 0) && (jumpGate.target == aTrader.waypointList.get(waypointIndex - 1).waypoint)) {
+                    } else if ((waypointIndex > 0) && (jumpGate.target == aTrader.navigator.waypointList.get(waypointIndex - 1).waypoint)) {
                         jumpGate.selected = true;
                     } else {
                     }

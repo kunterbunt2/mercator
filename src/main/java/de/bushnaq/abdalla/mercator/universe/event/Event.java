@@ -25,6 +25,7 @@ import de.bushnaq.abdalla.mercator.universe.sim.trader.Trader;
 import de.bushnaq.abdalla.mercator.util.MercatorRandomGenerator;
 
 public class Event {
+    static boolean             enableStackTrace = false;
     public EventLevel          level;
     public StackTraceElement[] stackTrace;
     public String              what;
@@ -36,23 +37,24 @@ public class Event {
         this.when  = when;
         this.who   = who;
         this.what  = what;
-        stackTrace = Thread.currentThread().getStackTrace();
+        if (enableStackTrace)
+            stackTrace = Thread.currentThread().getStackTrace();
     }
 
     public String getWhosName() {
-        if (Planet.class.isInstance(who)) {
+        if (who instanceof Planet) {
             return ((Planet) who).getName();
-        } else if (Trader.class.isInstance(who)) {
+        } else if (who instanceof Trader) {
             return ((Sim) who).getName();
-        } else if (Sim.class.isInstance(who)) {
+        } else if (who instanceof Sim) {
             return ((Sim) who).getName();
-        } else if (ProductionFacility.class.isInstance(who)) {
+        } else if (who instanceof ProductionFacility) {
             return ((ProductionFacility) who).getName();
-        } else if (Good.class.isInstance(who)) {
+        } else if (who instanceof Good) {
             return ((Good) who).type.getName();
-        } else if (MercatorRandomGenerator.class.isInstance(who)) {
+        } else if (who instanceof MercatorRandomGenerator) {
             return "MercatorRandomGenerator";
-        } else if (UniverseGenerator.class.isInstance(who)) {
+        } else if (who instanceof UniverseGenerator) {
             return "UniverseGenerator";
         }
         return null;

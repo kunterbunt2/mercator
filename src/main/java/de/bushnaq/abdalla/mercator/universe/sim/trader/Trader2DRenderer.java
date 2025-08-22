@@ -27,29 +27,29 @@ import de.bushnaq.abdalla.mercator.universe.planet.Planet2DRenderer;
 import de.bushnaq.abdalla.mercator.universe.planet.Planet3DRenderer;
 
 public class Trader2DRenderer extends ObjectRenderer<GameEngine2D> {
+    private static final float RADIUS                  = Planet2DRenderer.PLANET_SIZE * 2.0f;
     // static final Color SELECTED_TRADER_COLOR = Color.ORANGE; //0xffff0000;
-    public static final  Color   TADER_COLOR_IS_GOOD     = Color.LIGHT_GRAY; // 0xaaaaaa
-    public static final  Color   TRADER_COLOR            = new Color(.7f, .7f, .7f, 0.45f); // 0xffcc5555;
-    public static final  float   TRADER_HEIGHT           = 17;
-    public static final  float   TRADER_SIZE_Z           = 32 * 2 / Universe.WORLD_SCALE;
-    public static final  float   TRADER_WIDTH            = 17f;
-    private static final float   RADIUS                  = Planet2DRenderer.PLANET_SIZE * 2.0f;
-    private static final float   TRADER_SIZE_X           = 16 * 2 / Universe.WORLD_SCALE;
-    private static final float   TRADER_SIZE_Y           = 8 * 2 / Universe.WORLD_SCALE;
-    private static final float   TRADER_TRAVELING_HEIGHT = -TRADER_SIZE_Y / 2 + Planet3DRenderer.WATER_Y;
-    private final        Vector3 direction               = new Vector3();//intermediate value
-    private final        Vector3 scaling                 = new Vector3();//intermediate value
-    private final        Vector3 target                  = new Vector3();//intermediate value
-    private final        Trader  trader;
-    //	public static final Color TRADER_OF_SELECTED_PLANET_COLOR1 = Color.RED; // 0xffff0000;
-//	public static final Color TRADER_OF_SELECTED_PLANET_COLOR2 = new Color(1f, .5f, 0f, 1f); // 0xffff8800;
-    private final        Vector3 translation             = new Vector3();//intermediate value
-    Circle  circle;
+    public static final  Color TADER_COLOR_IS_GOOD     = Color.LIGHT_GRAY; // 0xaaaaaa
+    public static final  Color TRADER_COLOR            = new Color(.7f, .7f, .7f, 0.45f); // 0xffcc5555;
+    public static final  float TRADER_HEIGHT           = 17;
+    private static final float TRADER_SIZE_X           = 16 * 2 / Universe.WORLD_SCALE;
+    private static final float TRADER_SIZE_Y           = 8 * 2 / Universe.WORLD_SCALE;
+    public static final  float TRADER_SIZE_Z           = 32 * 2 / Universe.WORLD_SCALE;
+    private static final float TRADER_TRAVELING_HEIGHT = -TRADER_SIZE_Y / 2 + Planet3DRenderer.WATER_Y;
+    public static final  float TRADER_WIDTH            = 17f;
+    Circle circle;
+    private final Vector3 direction    = new Vector3();//intermediate value
+    private       boolean lastSelected = false;
     float[] lastVelocity = new float[3];
     float[] position     = new float[3];
-    Vector3 speed        = new Vector3(0, 0, 0);
-    float[] velocity     = new float[3];
-    private boolean lastSelected = false;
+    private final Vector3 scaling = new Vector3();//intermediate value
+    Vector3 speed = new Vector3(0, 0, 0);
+    private final Vector3 target      = new Vector3();//intermediate value
+    private final Trader  trader;
+    //	public static final Color TRADER_OF_SELECTED_PLANET_COLOR1 = Color.RED; // 0xffff0000;
+//	public static final Color TRADER_OF_SELECTED_PLANET_COLOR2 = new Color(1f, .5f, 0f, 1f); // 0xffff8800;
+    private final Vector3 translation = new Vector3();//intermediate value
+    float[] velocity = new float[3];
 
     public Trader2DRenderer(final Trader trader) {
         this.trader = trader;
@@ -91,14 +91,14 @@ public class Trader2DRenderer extends ObjectRenderer<GameEngine2D> {
 //			renderMaster.lable(x - hps, y - hps, TRADER_WIDTH * 1, TRADER_WIDTH * 3, renderMaster.atlasManager.defaultFont, color, trader.getName(), color, String.format("%.0f", trader.getCredits()), renderMaster.queryCreditColor(trader.getCredits(), Trader.TRADER_START_CREDITS));
 //		}
 //		circle.setPosition(x, y);
-        if (trader.targetWaypoint != null) {
+        if (trader.navigator.nextWaypoint != null) {
 
             position[0] = translation.x;
             position[1] = translation.y;
             position[2] = translation.z;
 //            trader.getEngine().calculateEngineSpeed();
-            if (trader.sourceWaypoint != null)
-                speed.set(trader.targetWaypoint.x - trader.sourceWaypoint.x, 0, trader.targetWaypoint.z - trader.sourceWaypoint.z);
+            if (trader.navigator.previousWaypoint != null)
+                speed.set(trader.navigator.nextWaypoint.x - trader.navigator.previousWaypoint.x, 0, trader.navigator.nextWaypoint.z - trader.navigator.previousWaypoint.z);
             else
                 speed.set(1, 0, 1);
 
@@ -113,30 +113,30 @@ public class Trader2DRenderer extends ObjectRenderer<GameEngine2D> {
             for (int i = 0; i < 3; i++) {
                 if (Math.abs(lastVelocity[i] - velocity[i]) > 0.001f) {
                     update = true;
+                    break;
                 }
             }
             if (update) {
 //			synth.setPositionAndVelocity(position, velocity);
                 //				if (Debug.isFilter(trader.getName()))
                 //					logger.info(String.format("%f %f  %f %f  %f %f", lastVelocity[0], velocity[0], lastVelocity[1], velocity[1], lastVelocity[2], velocity[2]));
-                for (int i = 0; i < 3; i++)
-                     lastVelocity[i] = velocity[i];
+                System.arraycopy(velocity, 0, lastVelocity, 0, 3);
             }
 
             //			if (Debug.isFilter(trader.getName()))
 //		synth.play();
             // ---Traveling
-            if (trader.destinationWaypointDistance != 0) {
-                final float scalex = (trader.targetWaypoint.x - trader.sourceWaypoint.x);
-                final float scaley = (trader.targetWaypoint.y - trader.sourceWaypoint.y);
-                final float scalez = (trader.targetWaypoint.z - trader.sourceWaypoint.z);
+            if (trader.navigator.destinationWaypointDistance != 0) {
+                final float scalex = (trader.navigator.nextWaypoint.x - trader.navigator.previousWaypoint.x);
+                final float scaley = (trader.navigator.nextWaypoint.y - trader.navigator.previousWaypoint.y);
+                final float scalez = (trader.navigator.nextWaypoint.z - trader.navigator.previousWaypoint.z);
                 direction.set(scalex, scaley, scalez);
                 //				shift.set(-direction.z, direction.y, direction.x);
                 //				shift.nor();
                 //				shift.scl(Planet.CHANNEL_SIZE / 2);
-                translation.x = (trader.sourceWaypoint.x + (trader.targetWaypoint.x - trader.sourceWaypoint.x) * trader.destinationWaypointDistanceProgress / trader.destinationWaypointDistance) /*+ shift.x*/;
-                translation.y = (trader.sourceWaypoint.y + (trader.targetWaypoint.y - trader.sourceWaypoint.y) * trader.destinationWaypointDistanceProgress / trader.destinationWaypointDistance) /*+ shift.y*/ + TRADER_TRAVELING_HEIGHT;
-                translation.z = (trader.sourceWaypoint.z + (trader.targetWaypoint.z - trader.sourceWaypoint.z) * trader.destinationWaypointDistanceProgress / trader.destinationWaypointDistance) /*+ shift.z*/;
+                translation.x = (trader.navigator.previousWaypoint.x + (trader.navigator.nextWaypoint.x - trader.navigator.previousWaypoint.x) * trader.navigator.destinationWaypointDistanceProgress / trader.navigator.destinationWaypointDistance) /*+ shift.x*/;
+                translation.y = (trader.navigator.previousWaypoint.y + (trader.navigator.nextWaypoint.y - trader.navigator.previousWaypoint.y) * trader.navigator.destinationWaypointDistanceProgress / trader.navigator.destinationWaypointDistance) /*+ shift.y*/ + TRADER_TRAVELING_HEIGHT;
+                translation.z = (trader.navigator.previousWaypoint.z + (trader.navigator.nextWaypoint.z - trader.navigator.previousWaypoint.z) * trader.navigator.destinationWaypointDistanceProgress / trader.navigator.destinationWaypointDistance) /*+ shift.z*/;
             } else {
                 translation.x = trader.planet.x /*- Planet3DRenderer.PLANET_ATMOSPHARE_SIZE / 2*/;
                 translation.y = trader.planet.y + TRADER_TRAVELING_HEIGHT;
@@ -155,8 +155,8 @@ public class Trader2DRenderer extends ObjectRenderer<GameEngine2D> {
 
         //		pole.instance.transform.setToTranslation(translation);
 
-        if (trader.targetWaypoint != null) {
-            target.set(trader.targetWaypoint.x/* + shift.x*/, Planet3DRenderer.WATER_Y, trader.targetWaypoint.z/* + shift.z*/);
+        if (trader.navigator.nextWaypoint != null) {
+            target.set(trader.navigator.nextWaypoint.x/* + shift.x*/, Planet3DRenderer.WATER_Y, trader.navigator.nextWaypoint.z/* + shift.z*/);
             //			instance.instance.transform.rotateTowardTarget(target, Vector3.Y);
 //		instance.instance.transform.rotateTowardDirection(direction, Vector3.Y);
 //		instance.instance.transform.scale(scaling.x, scaling.y, scaling.z);

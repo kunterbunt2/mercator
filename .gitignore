@@ -25,3 +25,4 @@ buildNumber.properties
 /app/assets/raw
 /app/assets/atlas
 /app/assets/textures/space
+/debug

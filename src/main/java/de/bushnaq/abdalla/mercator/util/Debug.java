@@ -20,11 +20,13 @@ import de.bushnaq.abdalla.mercator.universe.planet.Planet;
 import de.bushnaq.abdalla.mercator.universe.sim.trader.Trader;
 
 public class Debug {
-    private static final boolean enablePlanetFilter = false;
+    private static final boolean enablePlanetFilter = true;
     private static final boolean enableTraderFilter = true;
-    private static final String  filterPlanet       = "P-95";
+    //    private static final String  filterPlanet       = "Leo Minor Port";
+    private static final String  filterPlanet       = "Pollux Hub";
     //    private static final String  filterTrader       = "Starpath";
-    private static final String  filterTrader       = "Frontier Star";
+//    private static final String  filterTrader       = "Frontier Star";
+    private static final String  filterTrader       = "Damocles";
 
     public static String getFilterPlanet() {
         return filterPlanet;
@@ -46,7 +48,7 @@ public class Debug {
         if (object instanceof Trader) {
             return isFilterTrader(((Trader) object).getName());
         } else if (object instanceof Planet) {
-            return isFilterTrader(((Planet) object).getName());
+            return isFilterPlanet(((Planet) object).getName());
         }
         return false;
     }

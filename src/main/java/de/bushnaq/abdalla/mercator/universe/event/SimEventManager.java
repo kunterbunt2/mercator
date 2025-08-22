@@ -23,19 +23,18 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SimEventManager {
-    public boolean        enabled   = false;
+public class SimEventManager extends EventManager {
     public List<SimEvent> eventList = new ArrayList<SimEvent>();
     Sim sim;
 
-    public SimEventManager(final Sim sim, final boolean enabled) {
-        this.sim     = sim;
-        this.enabled = enabled;
+    public SimEventManager(final Sim sim, final EventLevel level, final Class<?> filter) {
+        super(level, filter, "debug/events/" + sim.getName() + ".txt");
+        this.sim = sim;
     }
 
     public void add(final long when, final int volume, final SimEventType eventType, final float credits, final String what) {
-        if (enabled)
-            eventList.add(new SimEvent(when, volume, eventType, credits, what));
+//        if (enabled)
+        eventList.add(new SimEvent(when, sim, volume, eventType, credits, what));
     }
 
     //		public void print() {

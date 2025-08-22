@@ -262,19 +262,19 @@ public class Trader3DRenderer extends ObjectRenderer<GameEngine3D> {
             renderEngine.renderEngine25D.circle(renderEngine.getGameEngine().getAtlasManager().patternCircle24, 0, 0, TRADER_SIZE_Z - .5f, 1f, new Color(.9f, .9f, .9f, .5f), 128);
             if (renderEngine.getGameEngine().getCameraZoomIndex() < 3) renderEngine.renderEngine25D.renderRose(systemTextureRegion, renderEngine.getGameEngine().getAtlasManager().modelFont, translation, TRADER_SIZE_Z / 2, -TRADER_SIZE_Y);
             BitmapFont modelFont = renderEngine.getGameEngine().getAtlasManager().modelFont;
-            if (trader.destinationPlanet != null) {
+            if (trader.navigator.destinationPlanet != null) {
                 String name  = trader.getName();
                 String value = String.format("%.0f credits", trader.getCredits());
                 renderEngine.renderEngine25D.label(translation, rotation, systemTextureRegion, 0, TRADER_EXTERNAL_SIZE_Y / 2, -TRADER_SIZE_Z / 2, TRADER_SIZE_Z * .75f, HAlignment.RIGHT, VAlignment.TOP, 0.2f, modelFont, Color.WHITE, name, TRADER_NAME_COLOR, value, Color.YELLOW);
             }
-            if (trader.destinationPlanet != null) {
+            if (trader.navigator.destinationPlanet != null) {
                 if (trader.getTraderStatus() == TraderStatus.TRADER_STATUS_SELLING) {
                     String name  = "Selling";
-                    String value = String.format("from %s to %s", trader.planet.getName(), trader.destinationPlanet.getName());
+                    String value = String.format("from %s to %s", trader.planet.getName(), trader.navigator.destinationPlanet.getName());
                     renderEngine.renderEngine25D.label(translation, rotation, systemTextureRegion, 0, TRADER_EXTERNAL_SIZE_Y / 2, -TRADER_SIZE_Z / 2, TRADER_SIZE_Z * .75f, HAlignment.LEFT, VAlignment.TOP, 0.2f, modelFont, Color.WHITE, name, TRADER_NAME_COLOR, value, Color.YELLOW);
                 } else if (trader.getTraderStatus() == TraderStatus.TRADER_STATUS_BUYING) {
                     String name  = "Buying";
-                    String value = String.format("from %s", trader.destinationPlanet.getName());
+                    String value = String.format("from %s", trader.navigator.destinationPlanet.getName());
                     renderEngine.renderEngine25D.label(translation, rotation, systemTextureRegion, 0, TRADER_EXTERNAL_SIZE_Y / 2, -TRADER_SIZE_Z / 2, TRADER_SIZE_Z * .75f, HAlignment.RIGHT, VAlignment.TOP, 0.2f, modelFont, Color.WHITE, name, TRADER_NAME_COLOR, value, Color.YELLOW);
                 }
             }
@@ -316,7 +316,7 @@ public class Trader3DRenderer extends ObjectRenderer<GameEngine3D> {
         renderTextOnTop(renderEngine, -6, 6.5f, String.format("%.1f°", trader.getManeuveringSystem().rotationSpeed), 3);
         renderTextOnTop(renderEngine, 6, 6.5f, String.format("%.1f", trader.getEngine().getEngineSpeed()), 3);
         renderTextOnTop(renderEngine, 0, 6.5f, String.format("%.1f", trader.getCredits()), 3);
-        renderTextOnTop(renderEngine, 0, -6.5f, trader.getTraderSubStatus().getName(), 3);
+        renderTextOnTop(renderEngine, 0, -6.5f, trader.getTraderSubStatus().getDisplayName(), 3);
         if (trader.selected) {
             renderDetails(renderEngine);
         }
@@ -464,7 +464,7 @@ public class Trader3DRenderer extends ObjectRenderer<GameEngine3D> {
             position[0] = translation.x;
             position[1] = translation.y;
             position[2] = translation.z;
-            if (trader.sourceWaypoint != null) trader.speed.set(trader.targetWaypoint.x - trader.sourceWaypoint.x, 0, trader.targetWaypoint.z - trader.sourceWaypoint.z);
+            if (trader.navigator.previousWaypoint != null) trader.speed.set(trader.navigator.nextWaypoint.x - trader.navigator.previousWaypoint.x, 0, trader.navigator.nextWaypoint.z - trader.navigator.previousWaypoint.z);
             else {
                 trader.speed.set(0, 0, 1);
             }
@@ -491,16 +491,16 @@ public class Trader3DRenderer extends ObjectRenderer<GameEngine3D> {
 //            trader.communicationPartner.ttsPlayer.play();
             translation.y = TRADER_FLIGHT_HEIGHT;
             // ---Traveling to next waypoint
-            if (trader.destinationWaypointDistance != 0) {
-                final float scalex = (trader.targetWaypoint.x - trader.sourceWaypoint.x);
-                final float scaley = (trader.targetWaypoint.y - trader.sourceWaypoint.y);
-                final float scalez = (trader.targetWaypoint.z - trader.sourceWaypoint.z);
+            if (trader.navigator.destinationWaypointDistance != 0) {
+                final float scalex = (trader.navigator.nextWaypoint.x - trader.navigator.previousWaypoint.x);
+                final float scaley = (trader.navigator.nextWaypoint.y - trader.navigator.previousWaypoint.y);
+                final float scalez = (trader.navigator.nextWaypoint.z - trader.navigator.previousWaypoint.z);
                 direction.set(scalex, scaley, scalez);
-                translation.x = (trader.sourceWaypoint.x + (trader.targetWaypoint.x - trader.sourceWaypoint.x) * trader.destinationWaypointDistanceProgress / trader.destinationWaypointDistance) /*+ shift.x*/;
-                translation.z = (trader.sourceWaypoint.z + (trader.targetWaypoint.z - trader.sourceWaypoint.z) * trader.destinationWaypointDistanceProgress / trader.destinationWaypointDistance) /*+ shift.z*/;
+                translation.x = (trader.navigator.previousWaypoint.x + (trader.navigator.nextWaypoint.x - trader.navigator.previousWaypoint.x) * trader.navigator.destinationWaypointDistanceProgress / trader.navigator.destinationWaypointDistance) /*+ shift.x*/;
+                translation.z = (trader.navigator.previousWaypoint.z + (trader.navigator.nextWaypoint.z - trader.navigator.previousWaypoint.z) * trader.navigator.destinationWaypointDistanceProgress / trader.navigator.destinationWaypointDistance) /*+ shift.z*/;
             } else {
-                translation.x = trader.sourceWaypoint.x;
-                translation.z = trader.sourceWaypoint.z;
+                translation.x = trader.navigator.previousWaypoint.x;
+                translation.z = trader.navigator.previousWaypoint.z;
             }
         } else if (trader.getTraderSubStatus() == TraderSubStatus.TRADER_STATUS_DOCKING_ACC || trader.getTraderSubStatus() == TraderSubStatus.TRADER_STATUS_DOCKING_DEC || trader.getTraderSubStatus() == TraderSubStatus.TRADER_STATUS_UNDOCKING_ACC || trader.getTraderSubStatus() == TraderSubStatus.TRADER_STATUS_UNDOCKING_DEC) {
             synth.play();
@@ -527,8 +527,8 @@ public class Trader3DRenderer extends ObjectRenderer<GameEngine3D> {
 
         //		pole.instance.transform.setToTranslation(translation);
 
-        if (trader.targetWaypoint != null) {
-            target.set(trader.targetWaypoint.x, Planet3DRenderer.WATER_Y, trader.targetWaypoint.z);
+        if (trader.navigator.nextWaypoint != null) {
+            target.set(trader.navigator.nextWaypoint.x, Planet3DRenderer.WATER_Y, trader.navigator.nextWaypoint.z);
             //			instance.instance.transform.rotateTowardTarget(target, Vector3.Y);
             traderGameObject.instance.transform.rotate(Vector3.Y, trader.getManeuveringSystem().rotation);
 //            traderGameObject.instance.transform.scale(scaling.x, scaling.y, scaling.z);

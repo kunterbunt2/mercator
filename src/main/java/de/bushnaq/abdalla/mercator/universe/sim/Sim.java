@@ -17,6 +17,7 @@
 package de.bushnaq.abdalla.mercator.universe.sim;
 
 import de.bushnaq.abdalla.mercator.renderer.Renderable;
+import de.bushnaq.abdalla.mercator.universe.event.EventLevel;
 import de.bushnaq.abdalla.mercator.universe.event.SimEventManager;
 import de.bushnaq.abdalla.mercator.universe.event.SimEventType;
 import de.bushnaq.abdalla.mercator.universe.factory.ProductionFacility;
@@ -37,21 +38,21 @@ public class Sim extends Renderable implements TradingPartner {
     // static final long NEEDS_GOODS_EVERY = 100 * TimeUnit.TICKS_PER_DAY;
     public static final float              SIM_START_CREDITS           = 1000f;
     public              float              cost                        = 1.0f;
+    private             float              credits                     = 0;
     public              float              creditsToSave               = SIM_START_CREDITS;
+    private             int                currentConsumedAmount;
     public              SimEventManager    eventManager;
+    private             GoodList           goodList                    = new GoodList();
+    private             HistoryManager     historyManager;
     public              long               lastTimeAdvancement         = 0;
     public              long               lastTransaction             = 0;
     public              int                lastYearConsumedAmount;
-    public              Planet             planet                      = null;
+    private             String             name                        = null;
+    public              Planet             planet                      = null;//last planet we reached on our trip as a trader
     public              ProductionFacility productionFacility          = null;
     public              SimProfession      profession                  = SimProfession.UNIMPLOYED;
     public              SimNeedList        simNeedsList                = new SimNeedList();
     public              SimStatus          status                      = SimStatus.LIVING;
-    private             float              credits                     = 0;
-    private             int                currentConsumedAmount;
-    private             GoodList           goodList                    = new GoodList();
-    private             HistoryManager     historyManager;
-    private             String             name                        = null;
     private             long               timeDelta                   = 0;
 
     public Sim(final Planet planet, final String name, final float credits) {
@@ -61,7 +62,7 @@ public class Sim extends Renderable implements TradingPartner {
         getGoodList().createEmptyGoodList();
         setHistoryManager(new HistoryManager());
         simNeedsList.createGoodList();
-        eventManager = new SimEventManager(this, planet.universe.eventManager.isEnabled());
+        eventManager = new SimEventManager(this, EventLevel.all, null);
         set2DRenderer(new Sim2DRenderer(this));
         set3DRenderer(new Sim3DRenderer(this));
     }
@@ -91,7 +92,7 @@ public class Sim extends Renderable implements TradingPartner {
                 status = SimStatus.LIVING;
             }
             if (calculateStatus(currentTime)) {
-                if (eventManager.enabled) eventManager.add(currentTime, getVolume(), SimEventType.die, credits, String.format("because no food."));
+                if (eventManager.enabled) eventManager.add(currentTime, getVolume(), SimEventType.die, credits, "because no food.");
                 //				planet.universe.eventManager.add(EventLevel.error, currentTime, this, String.format("%s: died because no '%s' available at '%s'.", getName(), good.type.getName(), planet.getName()));
                 return true;
             }
@@ -237,19 +238,22 @@ public class Sim extends Renderable implements TradingPartner {
         return planet;
     }
 
-    // private boolean queryReproductionReady()
+    // @Override
+    // public void sell( long currentTime, GoodType goodType, float price, float
+    // transactionAmount, Transaction to )
     // {
-    // return ( credits > CREDITS_NEEDED_TO_REPRODUCE ) && (
-    // Universe.randomGenerator.nextInt( CAN_REPRODUCE_UP_TO ) == 1 );
+    // Good ownGood = goodList.getByType( goodType );
+    // ownGood.sell( transactionAmount );
+    // setCredits( getCredits() + transactionAmount * price );
+    // planet.universe.eventManager.add( currentTime, this, String.format( "%s sells
+    // %s to %s", getName(), goodType.getName(), to.getName() ) );
     // }
-    // private void reproduce( SimList simList )
-    // {
-    // simList.create( planet, getCredits() / 2, 1 );
-    // setCredits( getCredits() - getCredits() / 2 );
-    // }
-    @Override
-    public void setCredits(final float credits) {
-        this.credits = credits;
+    public float getSatisfactionFactor(final long currentTime) {
+        float satisfaction = 0;
+        for (final SimNeed needs : simNeedsList) {
+            if (currentTime - needs.lastConsumed < needs.consumeEvery) satisfaction += 100 / simNeedsList.size();
+        }
+        return satisfaction;
     }
 
     // public String getProfessionName()
@@ -271,29 +275,6 @@ public class Sim extends Renderable implements TradingPartner {
     //	public ObjectRenderer getRenderer() {
     //		return renderer;
     //	}
-
-    @Override
-    public void setLastTransaction(final long currentTime) {
-        lastTransaction = currentTime;
-    }
-
-    // @Override
-    // public void sell( long currentTime, GoodType goodType, float price, float
-    // transactionAmount, Transaction to )
-    // {
-    // Good ownGood = goodList.getByType( goodType );
-    // ownGood.sell( transactionAmount );
-    // setCredits( getCredits() + transactionAmount * price );
-    // planet.universe.eventManager.add( currentTime, this, String.format( "%s sells
-    // %s to %s", getName(), goodType.getName(), to.getName() ) );
-    // }
-    public float getSatisfactionFactor(final long currentTime) {
-        float satisfaction = 0;
-        for (final SimNeed needs : simNeedsList) {
-            if (currentTime - needs.lastConsumed < needs.consumeEvery) satisfaction += 100 / simNeedsList.size();
-        }
-        return satisfaction;
-    }
 
     protected int getVolume() {
         int volume = 0;
@@ -340,12 +321,32 @@ public class Sim extends Renderable implements TradingPartner {
         return planetTime / simNeedsList.getByType(GoodType.FOOD).dieIfNotConsumedWithin;
     }
 
+    // private boolean queryReproductionReady()
+    // {
+    // return ( credits > CREDITS_NEEDED_TO_REPRODUCE ) && (
+    // Universe.randomGenerator.nextInt( CAN_REPRODUCE_UP_TO ) == 1 );
+    // }
+    // private void reproduce( SimList simList )
+    // {
+    // simList.create( planet, getCredits() / 2, 1 );
+    // setCredits( getCredits() - getCredits() / 2 );
+    // }
+    @Override
+    public void setCredits(final float credits) {
+        this.credits = credits;
+    }
+
     public void setGoodList(final GoodList goodList) {
         this.goodList = goodList;
     }
 
     public void setHistoryManager(final HistoryManager historyManager) {
         this.historyManager = historyManager;
+    }
+
+    @Override
+    public void setLastTransaction(final long currentTime) {
+        lastTransaction = currentTime;
     }
 
     public void setName(final String name) {

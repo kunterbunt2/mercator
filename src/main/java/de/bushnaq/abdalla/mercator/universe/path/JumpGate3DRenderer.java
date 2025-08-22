@@ -33,8 +33,6 @@ import de.bushnaq.abdalla.mercator.universe.sim.trader.Trader;
 import de.bushnaq.abdalla.mercator.universe.sim.trader.Trader3DRenderer;
 import net.mgsx.gltf.scene3d.model.ModelInstanceHack;
 
-import static de.bushnaq.abdalla.mercator.universe.sim.trader.Trader3DRenderer.TRADER_FLIGHT_HEIGHT;
-
 public class JumpGate3DRenderer extends ObjectRenderer<GameEngine3D> {
     static final         Color JUMPGATE_COLOR   = new Color(0.275f, 0.314f, 0.314f, 1.0f);
     private static final float JUMP_GATE_DEPTH  = 0 / Universe.WORLD_SCALE /*+ Planet3DRenderer.WATER_Y*/;
@@ -44,7 +42,7 @@ public class JumpGate3DRenderer extends ObjectRenderer<GameEngine3D> {
     private static final float PATH_HEIGHT      = 1 / Universe.WORLD_SCALE;
     private static final Color PATH_NAME_COLOR  = Color.BLUE;
     public static final  float PATH_WIDTH       = 1 / Universe.WORLD_SCALE;
-    float   directionLength;
+    float directionLength;
     private GameObject<GameEngine3D> gateGameObject;
     //	private static final Color SELECTED_JUMPGATE_COLOR = Color.WHITE;
     //	private static final Color JUMPGATE_COLOR = new Color(0.3f, 0.3f, 0.3f, 1.0f); // 0xff5555cc
@@ -80,13 +78,13 @@ public class JumpGate3DRenderer extends ObjectRenderer<GameEngine3D> {
     //		}
     //	}
     boolean instance2AddedToEngine = false;
-    private GameObject<GameEngine3D> instanceOfSelected;//visible if path is selected
-    private final        Path  jumpGate;
+    private       GameObject<GameEngine3D> instanceOfSelected;//visible if path is selected
+    private final Path                     jumpGate;
     //	Matrix4 rotationMatrix = new Matrix4();
     //	protected Quaternion rotation = new Quaternion();
-    boolean lastSelected           = false;
-    private Trader                   lastTrader;
-    float   r                      = 45;
+    boolean lastSelected = false;
+    private Trader lastTrader;
+    float   r = 45;
     Vector3 targetVector;
 
     public JumpGate3DRenderer(final Path jumpGate) {
@@ -126,16 +124,16 @@ public class JumpGate3DRenderer extends ObjectRenderer<GameEngine3D> {
         instanceOfSelected.instance.transform.scale(PATH_WIDTH / 8, .2f, directionLength);
         instanceOfSelected.update();
 //        renderEngine.addStatic(instance2);
-        if (jumpGate.source.city == null) {
-            gateGameObject = new GameObject<>(new ModelInstanceHack(renderEngine.getGameEngine().assetManager.gate.scene.model), this, this);
-            gateGameObject.instance.transform.setToTranslation(x, TRADER_FLIGHT_HEIGHT, z);
-            gateGameObject.instance.transform.rotateTowardTarget(targetVector, Vector3.Y);
-//        gateGameObject.instance.transform.translate(0, 0, 0);
-            gateGameObject.instance.transform.scale(JUMP_GATE_SIZE_X, JUMP_GATE_SIZE_Y, JUMP_GATE_SIZE_Z);
-            gateGameObject.update();
-//            renderEngine.addStatic(gateGameObject);
-
-        }
+//        if (jumpGate.source.city == null) {
+//            gateGameObject = new GameObject<>(new ModelInstanceHack(renderEngine.getGameEngine().assetManager.gate.scene.model), this, this);
+//            gateGameObject.instance.transform.setToTranslation(x, TRADER_FLIGHT_HEIGHT, z);
+//            gateGameObject.instance.transform.rotateTowardTarget(targetVector, Vector3.Y);
+////        gateGameObject.instance.transform.translate(0, 0, 0);
+//            gateGameObject.instance.transform.scale(JUMP_GATE_SIZE_X, JUMP_GATE_SIZE_Y, JUMP_GATE_SIZE_Z);
+//            gateGameObject.update();
+////            renderEngine.addStatic(gateGameObject);
+//
+//        }
     }
 
     private void drawJumpGate(final float x, final float y, final float z, final RenderEngine3D<GameEngine3D> renderEngine, final long currentTime, final boolean selected) {

@@ -50,7 +50,6 @@ import de.bushnaq.abdalla.mercator.universe.good.Good;
 import de.bushnaq.abdalla.mercator.universe.land.Land;
 import de.bushnaq.abdalla.mercator.universe.path.Path;
 import de.bushnaq.abdalla.mercator.universe.planet.Planet;
-import de.bushnaq.abdalla.mercator.universe.planet.Planet3DRenderer;
 import de.bushnaq.abdalla.mercator.universe.sim.Sim;
 import de.bushnaq.abdalla.mercator.universe.sim.trader.Trader;
 import de.bushnaq.abdalla.mercator.util.TimeAccuracy;
@@ -219,8 +218,8 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
             renderEngine.getFog().setFullDistance(3000f);
 
             renderEngine.setSkyBox(true);
-            renderEngine.setDayAmbientLight(.0f, .0f, .0f, 1f);
-            renderEngine.setNightAmbientLight(.0f, .0f, .0f, 1f);
+            renderEngine.setDayAmbientLight(.8f, .8f, .8f, 1f);
+            renderEngine.setNightAmbientLight(.2f, .2f, .2f, 1f);
             renderEngine.setAlwaysDay(true);
             renderEngine.setDynamicDayTime(true);
             renderEngine.setShadowEnabled(true);
@@ -521,32 +520,32 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
         }
     }
 
-    private void createWater() {
-        final float delta = (universe.size + 1) * Planet.PLANET_DISTANCE * 2;
-        //water
-        if (renderEngine.getWater().isPresent()) {
-            //bottom
-            {
-                final GameObject<GameEngine3D> sectorInstance = new GameObject<>(new ModelInstanceHack(assetManager.sector), null);
-                sectorInstance.instance.transform.setToTranslationAndScaling(0, Planet3DRenderer.SECTOR_Y, 0, delta, 8, delta);
-                sectorInstance.update();
-                renderEngine.addStatic(sectorInstance);
-
-            }
-            {
-                final GameObject<GameEngine3D> sectorInstance = new GameObject<>(new ModelInstanceHack(assetManager.waterModel), null);
-                sectorInstance.instance.transform.setToTranslationAndScaling(0, Planet3DRenderer.WATER_Y, 0, delta, 1, delta);
-                sectorInstance.update();
-                renderEngine.addStatic(sectorInstance);
-            }
-        }
-        if (renderEngine.getMirror().isPresent()) {
-            final GameObject<GameEngine3D> sectorInstance = new GameObject<>(new ModelInstanceHack(assetManager.mirrorModel), null);
-            sectorInstance.instance.transform.setToTranslationAndScaling(0, Planet3DRenderer.MIRROR_Y, 0, delta, 1, delta);
-            sectorInstance.update();
-            renderEngine.addStatic(sectorInstance);
-        }
-    }
+//    private void createWater() {
+//        final float delta = (universe.size + 1) * Planet.PLANET_DISTANCE * 2;
+//        //water
+//        if (renderEngine.getWater().isPresent()) {
+//            //bottom
+//            {
+//                final GameObject<GameEngine3D> sectorInstance = new GameObject<>(new ModelInstanceHack(assetManager.sector), null);
+//                sectorInstance.instance.transform.setToTranslationAndScaling(0, Planet3DRenderer.SECTOR_Y, 0, delta, 8, delta);
+//                sectorInstance.update();
+//                renderEngine.addStatic(sectorInstance);
+//
+//            }
+//            {
+//                final GameObject<GameEngine3D> sectorInstance = new GameObject<>(new ModelInstanceHack(assetManager.waterModel), null);
+//                sectorInstance.instance.transform.setToTranslationAndScaling(0, Planet3DRenderer.WATER_Y, 0, delta, 1, delta);
+//                sectorInstance.update();
+//                renderEngine.addStatic(sectorInstance);
+//            }
+//        }
+//        if (renderEngine.getMirror().isPresent()) {
+//            final GameObject<GameEngine3D> sectorInstance = new GameObject<>(new ModelInstanceHack(assetManager.mirrorModel), null);
+//            sectorInstance.instance.transform.setToTranslationAndScaling(0, Planet3DRenderer.MIRROR_Y, 0, delta, 1, delta);
+//            sectorInstance.update();
+//            renderEngine.addStatic(sectorInstance);
+//        }
+//    }
 
     @Override
     public void dispose() {

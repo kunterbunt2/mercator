@@ -782,19 +782,19 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
         switch (keycode) {
             case Input.Keys.A:
             case Input.Keys.LEFT:
-                centerXD = -SCROLL_SPEED;
+                centerXD = -SCROLL_SPEED * camera.position.y / 1000f; // reduce speed with distance to center
                 return true;
             case Input.Keys.D:
             case Input.Keys.RIGHT:
-                centerXD = SCROLL_SPEED;
+                centerXD = SCROLL_SPEED * camera.position.y / 1000f;
                 return true;
             case Input.Keys.W:
             case Input.Keys.UP:
-                centerZD = SCROLL_SPEED;
+                centerZD = SCROLL_SPEED * camera.position.y / 1000f;
                 return true;
             case Input.Keys.S:
             case Input.Keys.DOWN:
-                centerZD = -SCROLL_SPEED;
+                centerZD = -SCROLL_SPEED * camera.position.y / 1000f;
                 return true;
             case Input.Keys.Q:
                 centerRD = ROTATION_SPEED;
@@ -1355,8 +1355,10 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
         if (camera.isDirty()) {
             CameraProperties zoomFactor = camController.zoomFactors[camController.zoomIndex];
             if (zoomFactor.focalDistance != 0) {
+                //camera has fixed focal distance
                 renderEngine.getDepthOfFieldEffect().setFocalDepth(zoomFactor.focalDistance);
             } else {
+                //calculate focal distance as the distance of the camera to the xz plane that we are looking at
                 Ray     pickRay      = camera.getPickRay(Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2);
                 Plane   plane        = new Plane(new Vector3(0, 1, 0), Vector3.Zero);
                 Vector3 intersection = new Vector3();

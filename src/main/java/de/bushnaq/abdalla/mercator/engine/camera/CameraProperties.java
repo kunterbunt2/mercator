@@ -23,20 +23,23 @@ public class CameraProperties {
     public final float distanceXZ;//distance to look-at point
     public final float distanceY;//height of look-at point
     public final float far;//the far clipping plane distance, has to be positive
+    public final float fieldOfView;
     public final float focalDistance;
     public final float y;//height of camera
 
-    public CameraProperties(float y, float distanceXZ, float distanceY, float far, float focalDistance) {
+    public CameraProperties(float y, float distanceXZ, float fieldOfView, float distanceY, float far, float focalDistance) {
         this.y             = y;
         this.distanceXZ    = distanceXZ;
+        this.fieldOfView   = fieldOfView;
         this.distanceY     = distanceY;
         this.far           = far;
         this.focalDistance = focalDistance;
     }
 
-    public CameraProperties(float y, float distanceXZ, float distanceY, float far) {
+    public CameraProperties(float y, float distanceXZ, float fieldOfView, float distanceY, float far) {
         this.y             = y;
         this.distanceXZ    = distanceXZ;
+        this.fieldOfView   = fieldOfView;
         this.distanceY     = distanceY;
         this.far           = far;
         this.focalDistance = 0;

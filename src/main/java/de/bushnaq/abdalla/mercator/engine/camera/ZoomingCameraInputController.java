@@ -36,18 +36,18 @@ public class ZoomingCameraInputController extends CameraInputController {
     private final Vector3            tmpV1           = new Vector3();
     private final Vector3            tmpV2           = new Vector3();
     public        CameraProperties[] zoomFactors     = {//
-            new CameraProperties(75, 75, 0, 1000f),//
-            new CameraProperties(150, 200, 0, 2000f),//
-            new CameraProperties(150, 300, 100, 8000f, 600f),//
-            new CameraProperties(400, 500, 0, 8000f),//
-            new CameraProperties(1000, 700, 0, 8000f),//
+            new CameraProperties(100, 100, 30f, 0, 1000f),//
+            new CameraProperties(150, 200, 40f, 0, 2000f),//
+            new CameraProperties(150, 300, 46f, 100, 8000f, 600f),//
+            new CameraProperties(400, 500, 60f, 0, 8000f),//
+            new CameraProperties(1000, 700, 46f, 0, 8000f),//
 //            new CameraProperties(1500, 100, 8000f),//
-            new CameraProperties(2000, 1000, 0, 8000f),//
+            new CameraProperties(2000, 1000, 46f, 0, 8000f),//
 //            new CameraProperties(2500, 10, 8000f),//
 //            new CameraProperties(3000, 0, 8000f),//
-            new CameraProperties(4000, 0, 0, 8000f),//
+            new CameraProperties(4000, 0, 46f, 0, 8000f),//
 //            new CameraProperties(6000, 0, 8000f),//
-            new CameraProperties(10000, 0, 0, 10000f),//
+            new CameraProperties(10000, 0, 46f, 0, 10000f),//
     };
     public        int                zoomIndex       = 5;
 
@@ -143,11 +143,12 @@ public class ZoomingCameraInputController extends CameraInputController {
 
 //                logger.info(String.format("%f %f ", distanceXZ.x, distanceXZ.y));
 //                logger.info(String.format("%f %f ", movingCamera.lookat.x + distanceXZ.x, movingCamera.lookat.z + distanceXZ.y));
-                float cameraY = zoomFactors[zoomIndex].y + (zoomFactors[targetZoomIndex].y - zoomFactors[zoomIndex].y) * progress;
-                float cameraX = distanceXZ.x + (targetDistanceXZ.x - distanceXZ.x) * progress;
-                float cameraZ = distanceXZ.y + (targetDistanceXZ.y - distanceXZ.y) * progress;
-                float farY    = zoomFactors[zoomIndex].far + (zoomFactors[targetZoomIndex].far - zoomFactors[zoomIndex].far) * progress;
-                float lookatY = distanceY + (targetDistanceY - distanceY) * progress;
+                float cameraY     = zoomFactors[zoomIndex].y + (zoomFactors[targetZoomIndex].y - zoomFactors[zoomIndex].y) * progress;
+                float cameraX     = distanceXZ.x + (targetDistanceXZ.x - distanceXZ.x) * progress;
+                float cameraZ     = distanceXZ.y + (targetDistanceXZ.y - distanceXZ.y) * progress;
+                float farY        = zoomFactors[zoomIndex].far + (zoomFactors[targetZoomIndex].far - zoomFactors[zoomIndex].far) * progress;
+                float lookatY     = distanceY + (targetDistanceY - distanceY) * progress;
+                float fieldOfView = zoomFactors[zoomIndex].fieldOfView + (zoomFactors[targetZoomIndex].fieldOfView - zoomFactors[zoomIndex].fieldOfView) * progress;
 
                 float x = cameraX - (camera.position.x - movingCamera.lookat.x);
                 float y = cameraY - camera.position.y;
@@ -156,6 +157,7 @@ public class ZoomingCameraInputController extends CameraInputController {
                 camera.translate(x, y, z);
                 camera.far = farY;
                 movingCamera.lookAt(movingCamera.lookat.x, lookatY, movingCamera.lookat.z);
+                movingCamera.fieldOfView = fieldOfView;
                 camera.update();
                 movingCamera.setDirty(true);
 //                logger.info(String.format("%f %f %f  %f %f %f", movingCamera.position.x, movingCamera.position.y, movingCamera.position.z, movingCamera.lookat.x, movingCamera.lookat.y, movingCamera.lookat.z));

@@ -40,9 +40,9 @@ public class ZoomingCameraInputController extends CameraInputController {
             new CameraProperties(150, 200, 0, 2000f),//
             new CameraProperties(150, 300, 100, 8000f, 600f),//
             new CameraProperties(400, 500, 0, 8000f),//
-            new CameraProperties(1000, 200, 0, 8000f),//
+            new CameraProperties(1000, 700, 0, 8000f),//
 //            new CameraProperties(1500, 100, 8000f),//
-            new CameraProperties(2000, 50, 0, 8000f),//
+            new CameraProperties(2000, 1000, 0, 8000f),//
 //            new CameraProperties(2500, 10, 8000f),//
 //            new CameraProperties(3000, 0, 8000f),//
             new CameraProperties(4000, 0, 0, 8000f),//

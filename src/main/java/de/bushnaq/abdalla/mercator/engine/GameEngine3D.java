@@ -88,6 +88,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
     // private static final float MAX_VOXEL_DIMENSION = 20;
 //    public static final  Color                        NOT_PRODUCING_FACTORY_COLOR   = Color.RED; // 0xffFF0000;
     public static final  int                          NUMBER_OF_CELESTIAL_BODIES    = 10000;//TODO should be 10000
+    private static final float                        ROTATION_SPEED                = 1f;//degrees
     //    public static final  int                          RAYS_NUM                      = 128;
 //    private static final float                        RENDER_2D_UNTIL               = 1500;
 //    private static final float                        RENDER_3D_UNTIL               = 2000;
@@ -117,8 +118,9 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
     private              MovingCamera                 camera;
     private              OrthographicCamera           camera2D;
     List<CelestialBody> celestialBodyList = new ArrayList<>();
+    private       float           centerRD;//camera rotation
     private       float           centerXD;
-    private       float           centerYD;
+    private       float           centerZD;
     private       Context         context;
     private final IContextFactory contextFactory;
     private       Demo            demo;
@@ -782,24 +784,25 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
             case Input.Keys.A:
             case Input.Keys.LEFT:
                 centerXD = -SCROLL_SPEED;
-                universe.updateSelectedPlanet();
                 return true;
             case Input.Keys.D:
             case Input.Keys.RIGHT:
                 centerXD = SCROLL_SPEED;
-                universe.updateSelectedPlanet();
                 return true;
             case Input.Keys.W:
             case Input.Keys.UP:
-                centerYD = -SCROLL_SPEED;
-                universe.updateSelectedPlanet();
+                centerZD = SCROLL_SPEED;
                 return true;
             case Input.Keys.S:
             case Input.Keys.DOWN:
-                centerYD = SCROLL_SPEED;
-                universe.updateSelectedPlanet();
+                centerZD = -SCROLL_SPEED;
                 return true;
-
+            case Input.Keys.Q:
+                centerRD = ROTATION_SPEED;
+                return true;
+            case Input.Keys.E:
+                centerRD = -ROTATION_SPEED;
+                return true;
             case Input.Keys.ESCAPE:
                 exit();
                 return true;
@@ -904,12 +907,18 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
             case Input.Keys.LEFT:
             case Input.Keys.RIGHT:
                 centerXD = 0;
+                universe.updateSelectedPlanet();
                 return true;
             case Input.Keys.W:
             case Input.Keys.S:
             case Input.Keys.UP:
             case Input.Keys.DOWN:
-                centerYD = 0;
+                centerZD = 0;
+                universe.updateSelectedPlanet();
+                return true;
+            case Input.Keys.Q:
+            case Input.Keys.E:
+                centerRD = 0;
                 return true;
         }
         return false;
@@ -977,7 +986,8 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
         }
         // must be called after moving the camera
         camController.update();
-        renderEngine.updateCamera(centerXD, 0f, centerYD);
+        renderEngine.updateCameraXZ(centerXD, 0f, centerZD);
+        renderEngine.updateCameraRotationY(centerRD);
         updateDepthOfFieldFocusDistance();
 //        if (camera.position.y > 1000) {
 //            renderEngine.getFog().setBeginDistance(camera.position.y + 100);

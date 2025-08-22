@@ -555,8 +555,8 @@ public class Universe {
                 }
                 selectedPlanet = planet;
                 selectedPlanet.select();
-                if (ScreenListener != null)
-                    ScreenListener.setCamera(selectedPlanet.x, selectedPlanet.z, true);
+//                if (ScreenListener != null)
+//                    ScreenListener.setCamera(selectedPlanet.x, selectedPlanet.z, true);
             }
         } catch (final Exception e) {
             logger.error(e.getMessage(), e);

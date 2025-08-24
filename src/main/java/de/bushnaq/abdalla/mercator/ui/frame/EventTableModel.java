@@ -16,8 +16,8 @@
 
 package de.bushnaq.abdalla.mercator.ui.frame;
 
+import de.bushnaq.abdalla.engine.event.IEvent;
 import de.bushnaq.abdalla.mercator.universe.Universe;
-import de.bushnaq.abdalla.mercator.universe.event.Event;
 import de.bushnaq.abdalla.mercator.util.TimeUnit;
 
 import javax.swing.table.AbstractTableModel;
@@ -25,20 +25,15 @@ import java.util.List;
 
 public class EventTableModel extends AbstractTableModel {
 
-    private static final String[]    columnNames       = {"#", "Time", "Event", "Who"};
-    private static final long        serialVersionUID  = 4803847753013026463L;
-    private final        Universe    universe;
-    private              List<Event> filteredEventList = null;
-    private              Object      lastFiltered      = null;
+    private static final String[]     columnNames       = {"#", "Time", "Event", "Who"};
+    private static final long         serialVersionUID  = 4803847753013026463L;
+    private              List<IEvent> filteredEventList = null;
+    private              Object       lastFiltered      = null;
+    private final        Universe     universe;
 
     public EventTableModel(final Universe universe) {
         this.universe     = universe;
         filteredEventList = universe.eventManager.eventList;
-    }
-
-    @Override
-    public String getColumnName(final int col) {
-        return columnNames[col];
     }
 
     @Override
@@ -47,13 +42,18 @@ public class EventTableModel extends AbstractTableModel {
     }
 
     @Override
-    public int getRowCount() {
-        return filteredEventList.size();
+    public int getColumnCount() {
+        return columnNames.length;
     }
 
     @Override
-    public int getColumnCount() {
-        return columnNames.length;
+    public String getColumnName(final int col) {
+        return columnNames[col];
+    }
+
+    @Override
+    public int getRowCount() {
+        return filteredEventList.size();
     }
 
     @Override
@@ -71,11 +71,11 @@ public class EventTableModel extends AbstractTableModel {
                 case 0:
                     return index;
                 case 1:
-                    return TimeUnit.toString(filteredEventList.get(index).when);
+                    return TimeUnit.toString(filteredEventList.get(index).getWhen());
                 case 2:
-                    return filteredEventList.get(index).what;
+                    return filteredEventList.get(index).getWhat();
                 case 3:
-                    return filteredEventList.get(index).who;
+                    return filteredEventList.get(index).getWho();
             }
         } else {
             return "-";

@@ -27,7 +27,7 @@ import de.bushnaq.abdalla.engine.audio.OggPlayer;
 import de.bushnaq.abdalla.engine.audio.OpenAlException;
 import de.bushnaq.abdalla.mercator.engine.AtlasManager;
 import de.bushnaq.abdalla.mercator.engine.GameEngine3D;
-import de.bushnaq.abdalla.mercator.universe.event.EventLevel;
+import de.bushnaq.abdalla.engine.event.EventLevel;
 import de.bushnaq.abdalla.mercator.universe.good.Good;
 import de.bushnaq.abdalla.mercator.util.Debug;
 import net.mgsx.gltf.scene3d.attributes.PBRColorAttribute;
@@ -199,7 +199,7 @@ public class Engine {
                 engineSpeed = Math.max(engineSpeed - acceleration * timeDelta * 10, MIN_ENGINE_SPEED);
 //                if (Debug.isFilterTrader(trader.getName())) logger.info(String.format("engine deceleration engineSpeed=%f height=%f", engineSpeed, trader.y));
             } else {
-                trader.freeDock(trader.navigator.destinationPlanet);//finished docking
+                trader.clearDock(trader.navigator.destinationPlanet);//finished docking
                 trader.setTraderSubStatus(TraderSubStatus.TRADER_STATUS_DOCKED);
                 trader.eventManager.add(EventLevel.trace, trader.currentTime, trader, String.format("Docked at '%s'", trader.navigator.nextWaypoint.city.getName()));
             }
@@ -224,7 +224,7 @@ public class Engine {
 //                if (Debug.isFilterTrader(trader.getName())) logger.info(String.format("undocking engine deceleration=%f timeDelta0%f engineSpeed=%f progress=%f height=%f", acceleration, timeDelta, engineSpeed, progress, trader.y));
             } else {
                 //after undocking
-                trader.navigator.destinationPlanet.dockingDoors.setDockingDoorStatus(CLOSING);
+                trader.planet.dockingDoors.setDockingDoorStatus(CLOSING);
                 trader.setTraderSubStatus(TraderSubStatus.TRADER_STATUS_ALIGNING);
                 trader.getThrusters().startRotation();
 //                trader.communicationPartner.requestUndocking();

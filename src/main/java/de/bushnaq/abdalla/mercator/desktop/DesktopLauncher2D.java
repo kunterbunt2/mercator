@@ -26,7 +26,7 @@ import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration.GLEmulati
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import de.bushnaq.abdalla.mercator.engine.GameEngine2D;
 import de.bushnaq.abdalla.mercator.universe.Universe;
-import de.bushnaq.abdalla.mercator.universe.event.EventLevel;
+import de.bushnaq.abdalla.engine.event.EventLevel;
 import de.bushnaq.abdalla.mercator.universe.sim.Sim;
 import de.bushnaq.abdalla.mercator.util.MavenPropertiesProvider;
 import de.bushnaq.abdalla.mercator.util.TimeUnit;
@@ -42,8 +42,8 @@ public class DesktopLauncher2D implements ApplicationListener {
     //    private final Universe universe;
     DesktopContextFactory contextFactory = new DesktopContextFactory();
     LaunchMode            launchMode     = LaunchMode.normal;
-    boolean               useOGL3        = true;
     private Logger logger = LoggerFactory.getLogger(this.getClass());
+    boolean               useOGL3        = true;
 
     /**
      * called by GameEngine to create Lwjgl3Application
@@ -62,35 +62,10 @@ public class DesktopLauncher2D implements ApplicationListener {
 //		System.exit(0);
     }
 
-    public static void main(final String[] args) throws Exception {
-        DesktopLauncher2D desktopLauncher3D = new DesktopLauncher2D();
-        desktopLauncher3D.start();
-    }
-
     @Override
     public void create() {
         contextFactory.create();
         Gdx.app.exit();// exit the gdx environment that we created just to read the options
-    }
-
-    @Override
-    public void resize(int width, int height) {
-    }
-
-    @Override
-    public void render() {
-    }
-
-    @Override
-    public void pause() {
-    }
-
-    @Override
-    public void resume() {
-    }
-
-    @Override
-    public void dispose() {
     }
 
     private Lwjgl3ApplicationConfiguration createConfig(Context context) {
@@ -135,6 +110,10 @@ public class DesktopLauncher2D implements ApplicationListener {
         return config;
     }
 
+    @Override
+    public void dispose() {
+    }
+
     private void loop() throws Exception, InterruptedException {
         boolean restart = false;
         do {
@@ -161,6 +140,27 @@ public class DesktopLauncher2D implements ApplicationListener {
             contextFactory.getContext().dispose();
             restart = contextFactory.getContext().restart;
         } while (restart);
+    }
+
+    public static void main(final String[] args) throws Exception {
+        DesktopLauncher2D desktopLauncher3D = new DesktopLauncher2D();
+        desktopLauncher3D.start();
+    }
+
+    @Override
+    public void pause() {
+    }
+
+    @Override
+    public void render() {
+    }
+
+    @Override
+    public void resize(int width, int height) {
+    }
+
+    @Override
+    public void resume() {
     }
 
     private void start() throws InterruptedException, Exception {

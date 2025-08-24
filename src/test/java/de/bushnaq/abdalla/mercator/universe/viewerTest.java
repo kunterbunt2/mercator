@@ -33,7 +33,7 @@ import de.bushnaq.abdalla.mercator.desktop.GraphicsDimentions;
 import de.bushnaq.abdalla.mercator.desktop.LaunchMode;
 import de.bushnaq.abdalla.mercator.engine.AtlasManager;
 import de.bushnaq.abdalla.mercator.engine.GameEngine3D;
-import de.bushnaq.abdalla.mercator.universe.event.EventLevel;
+import de.bushnaq.abdalla.engine.event.EventLevel;
 import de.bushnaq.abdalla.mercator.universe.sim.Sim;
 import net.mgsx.gltf.loaders.gltf.GLTFLoader;
 import net.mgsx.gltf.scene3d.attributes.PBRColorAttribute;
@@ -44,9 +44,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class viewerTest implements ApplicationListener {
-    private final Logger logger = LoggerFactory.getLogger(this.getClass());
     DesktopContextFactory contextFactory = new DesktopContextFactory();
     GameEngine3D          gameEngine;
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Override
     public void create() {
@@ -100,14 +100,9 @@ public class viewerTest implements ApplicationListener {
     // clearcoat roughness 0.03
 
     @Override
-    public void resize(final int width, final int height) {
-        gameEngine.resize(width, height);
+    public void dispose() {
+        gameEngine.dispose();
 
-    }
-
-    @Override
-    public void render() {
-        gameEngine.render();
     }
 
     @Override
@@ -117,14 +112,19 @@ public class viewerTest implements ApplicationListener {
     }
 
     @Override
-    public void resume() {
-        gameEngine.resume();
+    public void render() {
+        gameEngine.render();
+    }
+
+    @Override
+    public void resize(final int width, final int height) {
+        gameEngine.resize(width, height);
 
     }
 
     @Override
-    public void dispose() {
-        gameEngine.dispose();
+    public void resume() {
+        gameEngine.resume();
 
     }
 

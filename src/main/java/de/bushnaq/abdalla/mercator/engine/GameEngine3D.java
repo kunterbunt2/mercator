@@ -37,7 +37,7 @@ import de.bushnaq.abdalla.engine.audio.Radio;
 import de.bushnaq.abdalla.engine.camera.MovingCamera;
 import de.bushnaq.abdalla.mercator.desktop.Context;
 import de.bushnaq.abdalla.mercator.desktop.LaunchMode;
-import de.bushnaq.abdalla.mercator.engine.ai.LLMTTS;
+import de.bushnaq.abdalla.mercator.engine.ai.MercatorSystemPrompts;
 import de.bushnaq.abdalla.mercator.engine.audio.synthesis.MercatorAudioEngine;
 import de.bushnaq.abdalla.mercator.engine.camera.CameraProperties;
 import de.bushnaq.abdalla.mercator.engine.camera.ZoomingCameraInputController;
@@ -52,6 +52,7 @@ import de.bushnaq.abdalla.mercator.universe.path.Path;
 import de.bushnaq.abdalla.mercator.universe.planet.Planet;
 import de.bushnaq.abdalla.mercator.universe.sim.Sim;
 import de.bushnaq.abdalla.mercator.universe.sim.trader.Trader;
+import de.bushnaq.abdalla.mercator.util.Debug;
 import de.bushnaq.abdalla.mercator.util.TimeAccuracy;
 import de.bushnaq.abdalla.mercator.util.TimeUnit;
 import de.bushnaq.abdalla.mercator.util.TimeUtil;
@@ -271,7 +272,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
             audioEngine.create(AtlasManager.getAssetsFolderName());
             audioEngine.enableHrtf(0);
             audioEngine.radio.loadResource(this.getClass());
-            LLMTTS.register(getRadio());//register all ai prompts to the radioTTS
+            MercatorSystemPrompts.register(getRadio());//register all ai prompts to the radioTTS
 //            renderAllTTSStrings();
 //            audioEngine.radioTTS.loadAudio();
 //            audioEngine.radioTTS.test();
@@ -301,7 +302,10 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
 
     private void createCamera() throws Exception {
         camera = new MovingCamera(FIELD_OF_VIEW_Y, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-        Planet planet = universe.planetList.findBusyCenterPlanet();
+//        Planet planet = universe.planetList.findBusyCenterPlanet();
+
+        Planet planet = universe.planetList.findByName(Debug.getFilterPlanet());
+
 //        Planet planet = universe.traderList.findByName(Debug.getFilterTrader()).planet;
 //        Planet planet = universe.planetList.findByName(Debug.getFilterPlanet());
         if (planet == null && !universe.planetList.isEmpty()) planet = universe.planetList.get(0);

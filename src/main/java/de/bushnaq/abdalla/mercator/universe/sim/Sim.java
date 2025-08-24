@@ -17,7 +17,7 @@
 package de.bushnaq.abdalla.mercator.universe.sim;
 
 import de.bushnaq.abdalla.mercator.renderer.Renderable;
-import de.bushnaq.abdalla.mercator.universe.event.EventLevel;
+import de.bushnaq.abdalla.engine.event.EventLevel;
 import de.bushnaq.abdalla.mercator.universe.event.SimEventManager;
 import de.bushnaq.abdalla.mercator.universe.event.SimEventType;
 import de.bushnaq.abdalla.mercator.universe.factory.ProductionFacility;

@@ -20,7 +20,7 @@ import de.bushnaq.abdalla.mercator.desktop.DesktopContextFactory;
 import de.bushnaq.abdalla.mercator.desktop.GraphicsDimentions;
 import de.bushnaq.abdalla.mercator.desktop.LaunchMode;
 import de.bushnaq.abdalla.mercator.engine.GameEngine3D;
-import de.bushnaq.abdalla.mercator.universe.event.EventLevel;
+import de.bushnaq.abdalla.engine.event.EventLevel;
 import de.bushnaq.abdalla.mercator.universe.planet.Planet;
 import de.bushnaq.abdalla.mercator.universe.sim.Sim;
 import de.bushnaq.abdalla.mercator.universe.sim.SimStatus;

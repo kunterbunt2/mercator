@@ -24,7 +24,7 @@ import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import de.bushnaq.abdalla.mercator.engine.GameEngine3D;
 import de.bushnaq.abdalla.mercator.universe.Universe;
-import de.bushnaq.abdalla.mercator.universe.event.EventLevel;
+import de.bushnaq.abdalla.engine.event.EventLevel;
 import de.bushnaq.abdalla.mercator.universe.sim.Sim;
 import de.bushnaq.abdalla.mercator.util.MavenPropertiesProvider;
 import de.bushnaq.abdalla.mercator.util.TimeUnit;
@@ -40,11 +40,6 @@ public class Launcher3DDemo implements ApplicationListener {
     DesktopContextFactory contextFactory = new DesktopContextFactory();
     LaunchMode            launchMode     = LaunchMode.demo;
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
-
-    public static void main(final String[] args) throws Exception {
-        Launcher3DDemo desktopLauncher3D = new Launcher3DDemo();
-        desktopLauncher3D.start();
-    }
 
     @Override
     public void create() {
@@ -121,6 +116,11 @@ public class Launcher3DDemo implements ApplicationListener {
             contextFactory.getContext().dispose();
             restart = contextFactory.getContext().restart;
         } while (restart);
+    }
+
+    public static void main(final String[] args) throws Exception {
+        Launcher3DDemo desktopLauncher3D = new Launcher3DDemo();
+        desktopLauncher3D.start();
     }
 
     @Override

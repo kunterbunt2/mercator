@@ -16,7 +16,7 @@
 
 package de.bushnaq.abdalla.mercator.util;
 
-import de.bushnaq.abdalla.mercator.universe.event.EventLevel;
+import de.bushnaq.abdalla.engine.event.EventLevel;
 import de.bushnaq.abdalla.mercator.universe.good.Good;
 import de.bushnaq.abdalla.mercator.universe.good.GoodType;
 

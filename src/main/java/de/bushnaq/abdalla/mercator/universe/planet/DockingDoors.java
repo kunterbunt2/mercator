@@ -22,14 +22,17 @@ import de.bushnaq.abdalla.engine.audio.OggPlayer;
 import de.bushnaq.abdalla.engine.audio.OpenAlException;
 import de.bushnaq.abdalla.mercator.engine.AtlasManager;
 import de.bushnaq.abdalla.mercator.engine.GameEngine3D;
+import de.bushnaq.abdalla.engine.event.EventLevel;
 
 import java.util.ArrayList;
 
 public class DockingDoors extends ArrayList<DockingDoor> {
     private       OggPlayer oggPlayer;
+    private final Planet    planet;
     private final float[]   position = new float[3];
 
     public DockingDoors(Planet planet) {
+        this.planet = planet;
         add(new DockingDoor(planet, planet.getName().substring(0, planet.getName().length() / 2), -32f, 0));
         add(new DockingDoor(planet, planet.getName().substring(planet.getName().length() / 2), 32f, 0));
         position[0] = planet.x;
@@ -85,6 +88,14 @@ public class DockingDoors extends ArrayList<DockingDoor> {
     }
 
     public void setDockingDoorStatus(DockingDoor.DockingDoorState dockingDoorState) {
+        switch (dockingDoorState) {
+            case CLOSING -> {
+                planet.eventManager.add(EventLevel.trace, planet.currentTime, planet, "Closing docking doors.");
+            }
+            case LOWERING -> {
+                planet.eventManager.add(EventLevel.trace, planet.currentTime, planet, "Opening docking doors.");
+            }
+        }
         for (DockingDoor dockingDoor : this) {
             dockingDoor.setDockingDoorState(dockingDoorState);
         }

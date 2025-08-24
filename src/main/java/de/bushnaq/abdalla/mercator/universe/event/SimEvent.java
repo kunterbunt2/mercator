@@ -16,6 +16,8 @@
 
 package de.bushnaq.abdalla.mercator.universe.event;
 
+import de.bushnaq.abdalla.engine.event.EventLevel;
+
 public class SimEvent extends Event {
     public float        credits;
     public SimEventType eventType;

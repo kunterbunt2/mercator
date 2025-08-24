@@ -19,10 +19,10 @@ package de.bushnaq.abdalla.mercator.universe.planet;
 import de.bushnaq.abdalla.engine.IGameEngine;
 import de.bushnaq.abdalla.engine.ai.PromptTags;
 import de.bushnaq.abdalla.engine.audio.*;
-import de.bushnaq.abdalla.mercator.engine.ai.LLMTTS;
+import de.bushnaq.abdalla.engine.event.EventLevel;
+import de.bushnaq.abdalla.engine.event.IEventManager;
 import de.bushnaq.abdalla.mercator.engine.ai.MerkatorPromptTags;
 import de.bushnaq.abdalla.mercator.engine.ai.RadioMessageId;
-import de.bushnaq.abdalla.mercator.universe.event.EventLevel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,6 +51,11 @@ public class PlanetCommunicationPartner implements CommunicationPartner {
      */
     private void addSubtitle(String string, PromptTags tags) {
         gameEngine.getSubtitles().add(tags.removeAllPostTags(string));
+    }
+
+    @Override
+    public IEventManager getEventManager() {
+        return planet.eventManager;
     }
 
     @Override
@@ -89,48 +94,47 @@ public class PlanetCommunicationPartner implements CommunicationPartner {
 //            logger.info("handleRadioMessage " + planet.getName() + " selected=" + isSelected() + " id=" + rm.id.name());
             PromptTags tags = new MerkatorPromptTags(planet, rm.from);
             switch (RadioMessageId.valueOf(rm.radioMessageId)) {
-                case REQUEST_TO_DOCK -> {
+                case REQUEST_DOCKING -> {
                     planet.occupyDock(rm.from);//occupy dock before informing the trader
-                    audioEngine.radio.queueRadioMessageGeneration(new RadioRequest(!planet.isSelected(), this, rm.from, RadioMessageId.APPROVE_TO_DOCK.name(), LLMTTS.APPROVE_DOCKING, tags));
+                    audioEngine.radio.queueRadioMessageGeneration(new RadioRequest(!planet.isSelected(), this, rm.from, RadioMessageId.APPROVE_DOCKING.name(), tags));
 //                            if (Debug.isFilterPlanet(planet.getName()))
 //                                logger.info(String.format("answering %s message", rm.id.name()));
-//                String string = RadioMessage.createMessage(audioEngine.radio.resolveString(LLMTTS.APPROVE_DOCKING, tags, silent), tags);
+//                String string = RadioMessage.createMessage(audioEngine.radio.resolveString(MercatorSystemPrompts.APPROVE_DOCKING, tags, silent), tags);
 //                if (!silent)
 //                    addSubtitle(string, tags);
 //                RadioMessage replyMessage = new RadioMessage(planet.currentTime, this, rm.from, RadioMessageId.APPROVE_TO_DOCK, tags.replaceAllPostTags(string), silent);
 ////                        logger.info("replyMessage" + replyMessage.message);
 //                gameEngine.getRadio().radio(replyMessage);// send to partner
                 }
-                case REQUEST_TO_UNDOCK -> {
+                case REQUEST_UNDOCKING -> {
                     planet.occupyDock(rm.from);//occupy dock before informing the trader
-                    audioEngine.radio.queueRadioMessageGeneration(new RadioRequest(!planet.isSelected(), this, rm.from, RadioMessageId.APPROVE_TO_UNDOCK.name(), LLMTTS.APPROVE_UNDOCKING, tags));
+                    audioEngine.radio.queueRadioMessageGeneration(new RadioRequest(!planet.isSelected(), this, rm.from, RadioMessageId.APPROVE_UNDOCKING.name(), tags));
 //                            if (Debug.isFilterPlanet(planet.getName()))
 //                                logger.info(String.format("answering %s message", rm.id.name()));
-//                String string = RadioMessage.createMessage(audioEngine.radio.resolveString(LLMTTS.APPROVE_UNDOCKING, tags, silent), tags);
+//                String string = RadioMessage.createMessage(audioEngine.radio.resolveString(MercatorSystemPrompts.APPROVE_UNDOCKING, tags, silent), tags);
 //                if (!silent)
 //                    addSubtitle(string, tags);
 //                RadioMessage replyMessage = new RadioMessage(planet.currentTime, this, rm.from, RadioMessageId.APPROVE_TO_UNDOCK, tags.replaceAllPostTags(string), silent);
 ////                        logger.info("replyMessage" + replyMessage.message);
 //                gameEngine.getRadio().radio(replyMessage);// send to partner
                 }
+                case REQUEST_TRANSITION -> {
+                    planet.occupyDock(rm.from);//occupy dock before informing the trader
+                    audioEngine.radio.queueRadioMessageGeneration(new RadioRequest(!planet.isSelected(), this, rm.from, RadioMessageId.APPROVE_TRANSITION.name(), tags));
+                }
             }
         }
     }
 
     @Override
-    public void handleRadioRequest(RadioRequest rr) {
-//                            if (Debug.isFilterPlanet(planet.getName()))
-//                                logger.info(String.format("answering %s message", rm.id.name()));
-        String string = RadioMessage.createMessage(audioEngine.radio.resolveString(rr.getMessageId(), rr.getTags(), rr.isSilent()), rr.getTags());
-        if (!rr.isSilent())
-            addSubtitle(string, rr.getTags());
-        RadioMessage rm = new RadioMessage(planet.currentTime, rr.getFrom(), rr.getTo(), rr.getRadioMessageId(), rr.getTags().replaceAllPostTags(string), rr.isSilent());
-        gameEngine.getRadio().radio(rm);// send to partner
+    public boolean isSelected() {
+        return planet.selected;
     }
 
     @Override
-    public boolean isSelected() {
-        return planet.selected;
+    public void notifyFinishedTalking(RadioMessage rm) {
+//        System.out.println("PlanetCommunicationPartner.notifyFinishedTalking");
+        handleRadioMessage(rm);
     }
 
 //    @Override
@@ -139,15 +143,20 @@ public class PlanetCommunicationPartner implements CommunicationPartner {
 //    }
 
     @Override
-    public void notifyFinishedTalking(RadioMessage rm) {
-//        System.out.println("PlanetCommunicationPartner.notifyFinishedTalking");
-        handleRadioMessage(rm);
+    public void notifyStartedTalking(RadioMessage message) {
     }
 
     @Override
-    public void radio(RadioMessage message) {
-//        radioMessages.add(message);
-//        say(message);
+    public void processRadioMessage(RadioRequest rr) {
+//                            if (Debug.isFilterPlanet(planet.getName()))
+//                                logger.info(String.format("answering %s message", rm.id.name()));
+        String string = RadioMessage.createMessage(audioEngine.radio.resolveString(rr.getMessageId(), rr.getTags(), rr.isSilent()), rr.getTags());
+        if (!rr.isSilent()) {
+            addSubtitle(string, rr.getTags());
+            planet.eventManager.add(EventLevel.trace, planet.currentTime, planet, rr.getTags().removeAllPostTags(string));
+        }
+        RadioMessage rm = new RadioMessage(planet.currentTime, rr.getFrom(), rr.getTo(), rr.getMessageId(), rr.getTags().replaceAllPostTags(string), rr.isSilent());
+        gameEngine.getRadio().radio(rm);// send to partner
     }
 
     /**

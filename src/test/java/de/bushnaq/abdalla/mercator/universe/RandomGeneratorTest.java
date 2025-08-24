@@ -16,8 +16,8 @@
 
 package de.bushnaq.abdalla.mercator.universe;
 
-import de.bushnaq.abdalla.mercator.universe.event.Event;
-import de.bushnaq.abdalla.mercator.universe.event.EventLevel;
+import de.bushnaq.abdalla.engine.event.EventLevel;
+import de.bushnaq.abdalla.engine.event.IEvent;
 import de.bushnaq.abdalla.mercator.universe.event.EventManager;
 import de.bushnaq.abdalla.mercator.util.MercatorRandomGenerator;
 import de.bushnaq.abdalla.mercator.util.TimeUnit;
@@ -49,17 +49,17 @@ public class RandomGeneratorTest {
             results1[i] = g1.nextInt(i, this, 3);
             empty       = (float) Math.random();
             if (results0[i] != results1[i]) {
-                final List<Event> eventList0 = eventManager0.eventList;
-                final List<Event> eventList1 = eventManager1.eventList;
+                final List<IEvent> eventList0 = eventManager0.eventList;
+                final List<IEvent> eventList1 = eventManager1.eventList;
                 for (int e = 0; e < Math.min(eventList0.size(), eventList1.size()); e++) {
-                    final Event event0 = eventList0.get(e);
-                    final Event event1 = eventList1.get(e);
-                    if (event0.when != event1.when || !event0.what.equals(event1.what)) {
-                        System.out.printf("%s %s %s %s\n", "g0", TimeUnit.toString(event0.when), event0.getWhosName(), event0.what);
-                        for (final StackTraceElement trace : event0.stackTrace)
+                    final IEvent event0 = eventList0.get(e);
+                    final IEvent event1 = eventList1.get(e);
+                    if (event0.getWhen() != event1.getWhen() || !event0.getWhat().equals(event1.getWhat())) {
+                        System.out.printf("%s %s %s %s\n", "g0", TimeUnit.toString(event0.getWhen()), event0.getWhosName(), event0.getWhat());
+                        for (final StackTraceElement trace : event0.getStackTrace())
                             System.out.println("\t" + trace);
-                        System.out.printf("%s %s %s %s\n", "g1", TimeUnit.toString(event1.when), event1.getWhosName(), event1.what);
-                        for (final StackTraceElement trace : event1.stackTrace)
+                        System.out.printf("%s %s %s %s\n", "g1", TimeUnit.toString(event1.getWhen()), event1.getWhosName(), event1.getWhat());
+                        for (final StackTraceElement trace : event1.getStackTrace())
                             System.out.println("\t" + trace);
                         System.out.print("-\n");
                     }
@@ -88,17 +88,17 @@ public class RandomGeneratorTest {
         //		System.out.println(results0[1818]);
         for (int i = 0; i < MAX_TEXT_LENGTH; i++) {
             if (results0[i] != results1[i]) {
-                final List<Event> eventList0 = eventManager0.eventList;
-                final List<Event> eventList1 = eventManager1.eventList;
+                final List<IEvent> eventList0 = eventManager0.eventList;
+                final List<IEvent> eventList1 = eventManager1.eventList;
                 for (int e = 0; e < Math.min(eventList0.size(), eventList1.size()); e++) {
-                    final Event event0 = eventList0.get(e);
-                    final Event event1 = eventList1.get(e);
-                    if (event0.when != event1.when || !event0.what.equals(event1.what)) {
-                        System.out.printf("%s %s %s %s\n", "g0", TimeUnit.toString(event0.when), event0.getWhosName(), event0.what);
-                        for (final StackTraceElement trace : event0.stackTrace)
+                    final IEvent event0 = eventList0.get(e);
+                    final IEvent event1 = eventList1.get(e);
+                    if (event0.getWhen() != event1.getWhen() || !event0.getWhat().equals(event1.getWhat())) {
+                        System.out.printf("%s %s %s %s\n", "g0", TimeUnit.toString(event0.getWhen()), event0.getWhosName(), event0.getWhat());
+                        for (final StackTraceElement trace : event0.getStackTrace())
                             System.out.println("\t" + trace);
-                        System.out.printf("%s %s %s %s\n", "g1", TimeUnit.toString(event1.when), event1.getWhosName(), event1.what);
-                        for (final StackTraceElement trace : event1.stackTrace)
+                        System.out.printf("%s %s %s %s\n", "g1", TimeUnit.toString(event1.getWhen()), event1.getWhosName(), event1.getWhat());
+                        for (final StackTraceElement trace : event1.getStackTrace())
                             System.out.println("\t" + trace);
                         System.out.print("-\n");
                     }

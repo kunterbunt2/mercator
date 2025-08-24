@@ -17,5 +17,10 @@
 package de.bushnaq.abdalla.mercator.engine.ai;
 
 public enum RadioMessageId {
-    REQUEST_TO_DOCK, APPROVE_TO_DOCK, REQUEST_TO_UNDOCK, APPROVE_TO_UNDOCK
+    REQUEST_DOCKING,//
+    APPROVE_DOCKING,//
+    REQUEST_UNDOCKING,//
+    APPROVE_UNDOCKING,
+    REQUEST_TRANSITION,//
+    APPROVE_TRANSITION//
 }

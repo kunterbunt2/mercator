@@ -25,7 +25,7 @@ import de.bushnaq.abdalla.mercator.desktop.DesktopContextFactory;
 import de.bushnaq.abdalla.mercator.desktop.GraphicsDimentions;
 import de.bushnaq.abdalla.mercator.desktop.LaunchMode;
 import de.bushnaq.abdalla.mercator.engine.GameEngine3D;
-import de.bushnaq.abdalla.mercator.universe.event.EventLevel;
+import de.bushnaq.abdalla.engine.event.EventLevel;
 import de.bushnaq.abdalla.mercator.util.TimeUnit;
 import org.junit.jupiter.api.Test;
 
@@ -38,11 +38,6 @@ public class UniversePerformance {
     private static final int MAX_CREATE_TIME                 = 1000;
     private static final int MAX_MILLINIUM_TIME              = 1000;
     private static final int UNIVERSE_GENERATION_RANDOM_SEED = 5;
-
-    public static void main(final String[] args) throws Exception {
-        final UniversePerformance testObject = new UniversePerformance();
-        testObject.advanceInTime();
-    }
 
     @Test
     public void advanceInTime() throws Exception {
@@ -86,5 +81,10 @@ public class UniversePerformance {
                 assertTrue(duration < MAX_CREATE_TIME, String.format("Creading universe [seed %d and size %d] is taking too long (> 1000ms) %dms", universeIndex, i, duration));
             }
         }
+    }
+
+    public static void main(final String[] args) throws Exception {
+        final UniversePerformance testObject = new UniversePerformance();
+        testObject.advanceInTime();
     }
 }

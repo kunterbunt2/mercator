@@ -16,7 +16,7 @@
 
 package de.bushnaq.abdalla.mercator.universe.factory;
 
-import de.bushnaq.abdalla.mercator.universe.event.EventLevel;
+import de.bushnaq.abdalla.engine.event.EventLevel;
 import de.bushnaq.abdalla.mercator.universe.event.SimEventType;
 import de.bushnaq.abdalla.mercator.universe.good.Good;
 import de.bushnaq.abdalla.mercator.universe.good.GoodList;
@@ -41,8 +41,8 @@ import org.slf4j.LoggerFactory;
  * @author abdalla bushnaq
  */
 public class Factory extends ProductionFacility {
-    private final Logger   logger = LoggerFactory.getLogger(this.getClass());
     public        GoodList inputGood;
+    private final Logger   logger = LoggerFactory.getLogger(this.getClass());
 
     public Factory(final Planet planet, final GoodList inputGood, final Good producedGood) {
         super(planet, producedGood);
@@ -139,11 +139,6 @@ public class Factory extends ProductionFacility {
         return queryAverageRevenue() - queryCost();
     }
 
-    @Override
-    public float queryProfit() {
-        return queryRevenue() - queryCost();
-    }
-
     public float queryAverageRevenue() {
         return producedGood.getAveragePrice();
     }
@@ -164,6 +159,11 @@ public class Factory extends ProductionFacility {
      */
     public int queryEngineersNeeded() {
         return producedGood.type.getTechnicalLevel() * 10 + 2;
+    }
+
+    @Override
+    public float queryProfit() {
+        return queryRevenue() - queryCost();
     }
 
     public float queryRevenue() {

@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-package de.bushnaq.abdalla.mercator.util;
+package de.bushnaq.abdalla.mercator.universe.event;
 
-import de.bushnaq.abdalla.mercator.universe.event.*;
+import de.bushnaq.abdalla.engine.event.EventLevel;
+import de.bushnaq.abdalla.engine.event.IEvent;
 import de.bushnaq.abdalla.mercator.universe.planet.Planet;
+import de.bushnaq.abdalla.mercator.util.TimeUnit;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -49,9 +51,9 @@ public class PlanetEventManager extends EventManager {
     public void print(final PrintStream out) {
         out.printf("%s\n", planet.getName());
         out.printf("%3s %4s %4s %7s %8s %s\n", "-ID", "TIME", "-VOL", "CREDITS", "---EVENT", "DESCRIPTION");
-        for (final Event event : eventList) {
+        for (final IEvent event : eventList) {
             if (event instanceof SimEvent simEvent) {
-                out.printf("%s %s %4d %7.2f %8s %s\n", planet.getName(), TimeUnit.toString(simEvent.when), simEvent.volume, simEvent.credits, simEvent.eventType.name, simEvent.what);
+                out.printf("%s %s %4d %7.2f %8s %s\n", planet.getName(), TimeUnit.toString(simEvent.getWhen()), simEvent.volume, simEvent.credits, simEvent.eventType.name, simEvent.getWhat());
             } else {
 
             }

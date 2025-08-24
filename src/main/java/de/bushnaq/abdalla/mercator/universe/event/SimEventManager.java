@@ -16,7 +16,9 @@
 
 package de.bushnaq.abdalla.mercator.universe.event;
 
+import de.bushnaq.abdalla.engine.event.EventLevel;
 import de.bushnaq.abdalla.mercator.universe.sim.Sim;
+import de.bushnaq.abdalla.mercator.util.Debug;
 import de.bushnaq.abdalla.mercator.util.TimeUnit;
 
 import java.io.PrintStream;
@@ -33,8 +35,20 @@ public class SimEventManager extends EventManager {
     }
 
     public void add(final long when, final int volume, final SimEventType eventType, final float credits, final String what) {
-//        if (enabled)
-        eventList.add(new SimEvent(when, sim, volume, eventType, credits, what));
+        if (EventLevel.info.ordinal() >= this.level.ordinal() && (classFilter == null || classFilter.isAssignableFrom(sim.getClass()))) {
+            SimEvent se = new SimEvent(when, sim, volume, eventType, credits, what);
+            eventList.add(se);
+        }
+        {
+            SimEvent se             = new SimEvent(when, sim, volume, eventType, credits, what);
+            String   formattedEvent = formatEventForObject(se);
+            if (Debug.isFiltered(sim.getName())) {
+                logger.info(formattedEvent);
+                writeEventToFile(se);
+            } else if (writeAllEventsToFile) {
+                writeEventToFile(se);
+            }
+        }
     }
 
     //		public void print() {
@@ -51,7 +65,7 @@ public class SimEventManager extends EventManager {
         out.printf("%s on %s\n", sim.getName(), sim.planet.getName());
         out.printf("%3s %4s %4s %7s %8s %s\n", "-ID", "TIME", "-VOL", "CREDITS", "---EVENT", "DESCRIPTION");
         for (final SimEvent simEvent : eventList) {
-            out.printf("%s %s %4d %7.2f %8s %s\n", sim.getName(), TimeUnit.toString(simEvent.when), simEvent.volume, simEvent.credits, simEvent.eventType.name, simEvent.what);
+            out.printf("%s %s %4d %7.2f %8s %s\n", sim.getName(), TimeUnit.toString(simEvent.getWhen()), simEvent.volume, simEvent.credits, simEvent.eventType.name, simEvent.getWhat());
         }
     }
 }

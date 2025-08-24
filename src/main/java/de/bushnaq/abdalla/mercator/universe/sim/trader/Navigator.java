@@ -8,6 +8,17 @@ import de.bushnaq.abdalla.mercator.universe.planet.Planet;
  * Navigator class is responsible for managing the navigation of a trader
  * through a series of waypoints towards a destination planet.
  * It keeps track of the current and next waypoints, as well as the source and destination planets.
+ * <p>
+ * waypoint          1---2---3---4---5---6---7---8---9
+ * port              1               2               3
+ * sourcePlanet      X
+ * destinationPlanet                                 X
+ * undock            X
+ * transit                           x
+ * dock                                              x
+ * freeDock                                          x
+ * case              1               2               3
+ * docking doors     lowering                        closing
  */
 public class Navigator {
     public        Planet       destinationPlanet                   = null; // ---The planet we want to reach ultimately
@@ -25,6 +36,19 @@ public class Navigator {
 
     Navigator(Trader trader) {
         this.trader = trader;
+    }
+
+    public String WaypointPortsAsString() {
+        StringBuilder ports = new StringBuilder();
+        for (int i = destinationWaypointIndex; i < waypointList.size(); i++) {
+            if (waypointList.get(i).waypoint.city != null && waypointList.get(i).waypoint.city != destinationPlanet) {
+                ports.append(String.format("%s '%s'", (ports.isEmpty()) ? "" : ", ", waypointList.get(i).waypoint.city.getName()));
+            }
+        }
+        if (ports.isEmpty())
+            return ports.toString();
+        else
+            return " via " + ports;
     }
 
     public void extractWaypointList() {
@@ -60,6 +84,14 @@ public class Navigator {
                 return false;
         }
         return true;
+    }
+
+    public boolean reachedDestination() {
+        return trader.navigator.nextWaypoint.city == trader.navigator.destinationPlanet;
+    }
+
+    public boolean reachedTransit() {
+        return trader.navigator.nextWaypoint.city != null && trader.navigator.nextWaypoint.city != trader.navigator.destinationPlanet;
     }
 
     public void reserveNextWaypoints() {

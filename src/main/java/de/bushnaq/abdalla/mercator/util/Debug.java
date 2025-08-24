@@ -23,6 +23,7 @@ public class Debug {
     private static final boolean enablePlanetFilter = true;
     private static final boolean enableTraderFilter = true;
     //    private static final String  filterPlanet       = "Leo Minor Port";
+//    private static final String  filterPlanet       = "Pollux Hub";
     private static final String  filterPlanet       = "Pollux Hub";
     //    private static final String  filterTrader       = "Starpath";
 //    private static final String  filterTrader       = "Frontier Star";

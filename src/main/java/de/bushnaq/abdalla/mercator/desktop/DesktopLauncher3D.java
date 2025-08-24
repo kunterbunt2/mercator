@@ -26,7 +26,7 @@ import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration.GLEmulati
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import de.bushnaq.abdalla.mercator.engine.GameEngine3D;
 import de.bushnaq.abdalla.mercator.universe.Universe;
-import de.bushnaq.abdalla.mercator.universe.event.EventLevel;
+import de.bushnaq.abdalla.engine.event.EventLevel;
 import de.bushnaq.abdalla.mercator.universe.sim.Sim;
 import de.bushnaq.abdalla.mercator.util.MavenPropertiesProvider;
 import de.bushnaq.abdalla.mercator.util.TimeUnit;
@@ -42,11 +42,6 @@ public class DesktopLauncher3D implements ApplicationListener {
     DesktopContextFactory contextFactory = new DesktopContextFactory();
     LaunchMode            launchMode     = LaunchMode.normal;
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
-
-    public static void main(final String[] args) throws Exception {
-        DesktopLauncher3D desktopLauncher3D = new DesktopLauncher3D();
-        desktopLauncher3D.start();
-    }
 
     @Override
     public void create() {
@@ -123,6 +118,11 @@ public class DesktopLauncher3D implements ApplicationListener {
             restart = contextFactory.getContext().restart;
             universe.dispose();
         } while (restart);
+    }
+
+    public static void main(final String[] args) throws Exception {
+        DesktopLauncher3D desktopLauncher3D = new DesktopLauncher3D();
+        desktopLauncher3D.start();
     }
 
     @Override

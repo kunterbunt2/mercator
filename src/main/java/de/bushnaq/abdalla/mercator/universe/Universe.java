@@ -18,12 +18,12 @@ package de.bushnaq.abdalla.mercator.universe;
 
 import com.badlogic.gdx.graphics.Color;
 import de.bushnaq.abdalla.engine.IGameEngine;
+import de.bushnaq.abdalla.engine.event.EventLevel;
+import de.bushnaq.abdalla.engine.event.IEvent;
 import de.bushnaq.abdalla.mercator.desktop.GraphicsDimentions;
 import de.bushnaq.abdalla.mercator.renderer.ScreenListener;
 import de.bushnaq.abdalla.mercator.ui.GraphChartData;
 import de.bushnaq.abdalla.mercator.ui.PieChartData;
-import de.bushnaq.abdalla.mercator.universe.event.Event;
-import de.bushnaq.abdalla.mercator.universe.event.EventLevel;
 import de.bushnaq.abdalla.mercator.universe.event.EventManager;
 import de.bushnaq.abdalla.mercator.universe.factory.ProductionFacility;
 import de.bushnaq.abdalla.mercator.universe.good.Good;
@@ -78,7 +78,7 @@ public class Universe {
     public               PieChartData            satisfactionPieChart              = new PieChartData("satisfaction");
     public               SectorList              sectorList                        = new SectorList();
     public               Object                  selected                          = null;
-    private              Event                   selectedEvent;
+    private              IEvent                  selectedEvent;
     public               Good                    selectedGood                      = null;
     private              int                     selectedGoodIndex;
     public               Planet                  selectedPlanet                    = null;
@@ -478,7 +478,7 @@ public class Universe {
         }
     }
 
-    public void selectEvent(final Event event) {
+    public void selectEvent(final IEvent event) {
         selectedEvent = event;
     }
 

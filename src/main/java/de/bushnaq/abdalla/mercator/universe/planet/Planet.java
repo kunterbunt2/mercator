@@ -19,8 +19,9 @@ package de.bushnaq.abdalla.mercator.universe.planet;
 import de.bushnaq.abdalla.engine.IGameEngine;
 import de.bushnaq.abdalla.engine.audio.CommunicationPartner;
 import de.bushnaq.abdalla.engine.audio.OpenAlException;
+import de.bushnaq.abdalla.engine.event.EventLevel;
 import de.bushnaq.abdalla.mercator.universe.Universe;
-import de.bushnaq.abdalla.mercator.universe.event.EventLevel;
+import de.bushnaq.abdalla.mercator.universe.event.PlanetEventManager;
 import de.bushnaq.abdalla.mercator.universe.factory.Factory;
 import de.bushnaq.abdalla.mercator.universe.factory.ProductionFacility;
 import de.bushnaq.abdalla.mercator.universe.factory.ProductionFacilityList;
@@ -108,6 +109,29 @@ public class Planet extends Waypoint implements TradingPartner {
             }
             // ---Ensure that this time is recorded in the history master
             getHistoryManager().get(currentTime);
+        }
+    }
+
+    public void clearDock(TraderCommunicationPartner cp) {
+        if (inDock == cp) {
+            if (Debug.isFilterPlanet(getName())) {
+                cp.getEventManager().add(EventLevel.trace, currentTime, cp, String.format("'%s' cleared the dock", inDock.getName()));
+                eventManager.add(EventLevel.trace, currentTime, this, String.format("'%s' cleared the dock", inDock.getName()));
+
+//                logger.info(String.format("**** '%s' cleared the dock", inDock.getName()));
+            }
+            inDock = null;
+            communicationPartner.handleRadioMessage(null);
+        } else if (inDock == null) {
+            if (Debug.isFilterPlanet(getName())) {
+                cp.getEventManager().add(EventLevel.warning, currentTime, cp, String.format("'%s' tried to clear the dock, but it was already clear.", cp.getName()));
+                eventManager.add(EventLevel.warning, currentTime, this, String.format("'%s' tried to clear the dock, but it was already clear.", cp.getName()));
+//                logger.warn(String.format("**** '%s' tried to clear the dock, but it was already clear.", inDock.getName()));
+            }
+        } else {
+            cp.getEventManager().add(EventLevel.warning, currentTime, cp, String.format("'%s' tried to clear the dock, but it is occupied by '%s'", cp.getName(), inDock.getName()));
+            eventManager.add(EventLevel.warning, currentTime, this, String.format("'%s' tried to clear the dock, but it is occupied by '%s'", cp.getName(), inDock.getName()));
+//            logger.warn(String.format("**** PLanet '%s' - '%s' tried to clear the dock, but it is occupied by '%s'",getName(), cp.getName(), inDock.getName()));
         }
     }
 
@@ -233,23 +257,6 @@ public class Planet extends Waypoint implements TradingPartner {
         this.credits += credits;
     }
 
-    public void freeDock(TraderCommunicationPartner cp) {
-        if (inDock == cp) {
-            if (Debug.isFilterPlanet(getName()))
-                eventManager.add(EventLevel.trace, currentTime, this, String.format("'%s' cleared the dock", inDock.getName()));
-//                logger.info(String.format("**** '%s' cleared the dock", inDock.getName()));
-            inDock = null;
-            communicationPartner.handleRadioMessage(null);
-        } else if (inDock == null) {
-            if (Debug.isFilterPlanet(getName()))
-                eventManager.add(EventLevel.warning, currentTime, this, String.format("'%s' tried to clear the dock, but it was already clear.", inDock.getName()));
-//                logger.warn(String.format("**** '%s' tried to clear the dock, but it was already clear.", inDock.getName()));
-        } else {
-            eventManager.add(EventLevel.warning, currentTime, this, String.format("'%s' tried to clear the dock, but it is occupied by '%s'", cp.getName(), inDock.getName()));
-//            logger.warn(String.format("**** PLanet '%s' - '%s' tried to clear the dock, but it is occupied by '%s'",getName(), cp.getName(), inDock.getName()));
-        }
-    }
-
     @Override
     public float getCredits() {
         return credits;
@@ -300,16 +307,20 @@ public class Planet extends Waypoint implements TradingPartner {
         return selected;
     }
 
-    public void occupyDock(CommunicationPartner ship) {
+    public void occupyDock(CommunicationPartner cp) {
         if (inDock == null) {
-            inDock = ship;
-            if (Debug.isFilterPlanet(getName()))
-                eventManager.add(EventLevel.trace, currentTime, this, String.format("'%s' is occupying the dock", ship.getName()));
-//                logger.info(String.format("**** '%s' is occupying the dock", ship.getName()));
+            inDock = cp;
+            if (Debug.isFilterPlanet(getName())) {
+                cp.getEventManager().add(EventLevel.trace, currentTime, cp, String.format("'%s' is occupying the dock", cp.getName()));
+                eventManager.add(EventLevel.trace, currentTime, this, String.format("'%s' is occupying the dock", cp.getName()));
+//                logger.info(String.format("**** '%s' is occupying the dock", cp.getName()));
+            }
         } else {
-            if (Debug.isFilterPlanet(getName()))
-                eventManager.add(EventLevel.warning, currentTime, this, String.format("'%s' tried to occupying the dock, but it was already occupied by '%s'", ship.getName(), inDock.getName()));
+            if (Debug.isFilterPlanet(getName())) {
+                cp.getEventManager().add(EventLevel.warning, currentTime, cp, String.format("'%s' tried to occupying the dock, but it was already occupied by '%s'", cp.getName(), inDock.getName()));
+                eventManager.add(EventLevel.warning, currentTime, this, String.format("'%s' tried to occupying the dock, but it was already occupied by '%s'", cp.getName(), inDock.getName()));
 //                logger.warn(String.format("**** '%s' tried to occupying the dock,but it was already occupied by '%s'", inDock.getName()));
+            }
         }
     }
 

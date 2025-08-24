@@ -16,39 +16,41 @@
 
 package de.bushnaq.abdalla.mercator.universe.event;
 
+import de.bushnaq.abdalla.engine.event.EventLevel;
+import de.bushnaq.abdalla.engine.event.IEvent;
+import de.bushnaq.abdalla.engine.event.IEventManager;
 import de.bushnaq.abdalla.mercator.universe.planet.Planet;
+import de.bushnaq.abdalla.mercator.universe.planet.PlanetCommunicationPartner;
 import de.bushnaq.abdalla.mercator.universe.sim.Sim;
 import de.bushnaq.abdalla.mercator.universe.sim.trader.Trader;
+import de.bushnaq.abdalla.mercator.universe.sim.trader.TraderCommunicationPartner;
 import de.bushnaq.abdalla.mercator.util.Debug;
 import de.bushnaq.abdalla.mercator.util.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class EventManager {
+public class EventManager implements IEventManager {
     protected final Class<?>        classFilter;
     private         boolean         enablePrintEvent     = true;
     public          boolean         enabled              = false;
-    public          List<Event>     eventList            = new ArrayList<Event>();
+    public          List<IEvent>    eventList            = new ArrayList<>();
     private final   String          fileName;
     private final   ExecutorService fileWriterExecutor   = Executors.newSingleThreadExecutor(r -> {
         Thread t = new Thread(r, "EventFileWriter");
         t.setDaemon(true);
         return t;
     });
-    private final   List<Event>     filteredList         = new ArrayList<Event>();
+    private final   List<IEvent>    filteredList         = new ArrayList<>();
     protected final EventLevel      level;
-    private final   Logger          logger               = LoggerFactory.getLogger(this.getClass());
+    protected final Logger          logger               = LoggerFactory.getLogger(this.getClass());
     private         Object          objectFilter;
-    private final   boolean         writeAllEventsToFile = false; // Write all events to file, not just filtered ones
+    protected final boolean         writeAllEventsToFile = false; // Write all events to file, not just filtered ones
 
     public EventManager(final EventLevel level, final Class<?> filter, String fileName) {
         this.level       = level;
@@ -57,11 +59,12 @@ public class EventManager {
         new File(fileName).delete();
     }
 
+    @Override
     public void add(final EventLevel level, final long when, final Object who, final String what) {
         if (level.ordinal() >= this.level.ordinal() && (classFilter == null || classFilter.isAssignableFrom(who.getClass()))) {
             final Event e = new Event(level, when, who, what);
             eventList.add(e);
-            if (e.who == objectFilter) {
+            if (e.getWho() == objectFilter) {
                 filteredList.add(e);
                 if (enablePrintEvent) {
                     logger.info(formatEventForObject(e));
@@ -80,10 +83,11 @@ public class EventManager {
         }
     }
 
-    public List<Event> filter(final Object objectFilter) {
+    @Override
+    public List<IEvent> filter(final Object objectFilter) {
         filteredList.clear();
-        for (final Event e : eventList) {
-            if (e.who == objectFilter) {
+        for (final IEvent e : eventList) {
+            if (e.getWho() == objectFilter) {
                 filteredList.add(e);
             }
         }
@@ -91,35 +95,46 @@ public class EventManager {
         return filteredList;
     }
 
-    private String formatEventForObject(Event event) {
-        String timeStr  = TimeUnit.toString(event.when);
-        String levelStr = event.level.name();
+    @Override
+    public String formatEventForObject(IEvent event) {
+        String timeStr  = TimeUnit.toString(event.getWhen());
+        String levelStr = event.getLevel().name();
 
-        return switch (event.who) {
-            case Trader trader -> String.format("[TRADER ] %10s | %s | %15s | %s", timeStr, levelStr, trader.getName(), event.what);
-            case Sim sim -> String.format("[SIM    ] %10s | %s | %15s | %s", timeStr, levelStr, sim.getName(), event.what);
-            case Planet planet -> String.format("[PLANET ] %10s | %s | %15s | %s", timeStr, levelStr, planet.getName(), event.what);
-            default -> String.format("[UNKNOWN] %10s | %s | %s | %s", timeStr, levelStr, event.who.getClass().getSimpleName(), event.what);
+        return switch (event.getWho()) {
+            case Trader trader -> String.format("[TRADER ] %10s | %s | %15s | %s", timeStr, levelStr, trader.getName(), event.getWhat());
+            case TraderCommunicationPartner tcp -> String.format("[TRADER ] %10s | %s | %15s | %s", timeStr, levelStr, tcp.getName(), event.getWhat());
+            case Sim sim -> String.format("[SIM    ] %10s | %s | %15s | %s", timeStr, levelStr, sim.getName(), event.getWhat());
+            case Planet planet -> String.format("[PLANET ] %10s | %s | %15s | %s", timeStr, levelStr, planet.getName(), event.getWhat());
+            case PlanetCommunicationPartner pcp -> String.format("[PLANET ] %10s | %s | %15s | %s", timeStr, levelStr, pcp.getName(), event.getWhat());
+            default -> String.format("[UNKNOWN] %10s | %s | %s | %s", timeStr, levelStr, event.getWho().getClass().getSimpleName(), event.getWhat());
         };
     }
 
-    private String getWhoName(Event event) {
-        return switch (event.who) {
+    @Override
+    public String getWhoName(IEvent event) {
+        return switch (event.getWho()) {
             case Trader trader -> trader.getName();
             case Sim sim -> sim.getName();
             case Planet planet -> planet.getName();
-            default -> event.who.getClass().getSimpleName();
+            default -> event.getWho().getClass().getSimpleName();
         };
     }
 
+    @Override
     public boolean isEnabled() {
         return !level.equals(EventLevel.none);
     }
 
+    @Override
+    public void print(final PrintStream out) {
+    }
+
+    @Override
     public void setEnablePrintEvent(final boolean enablePrintEvent) {
         this.enablePrintEvent = enablePrintEvent;
     }
 
+    @Override
     public void setObjectFilter(final Object objectFilter) {
         this.objectFilter = objectFilter;
     }
@@ -127,6 +142,7 @@ public class EventManager {
     /**
      * Shutdown the event manager and wait for pending file writes to complete
      */
+    @Override
     public void shutdown() {
         fileWriterExecutor.shutdown();
         try {
@@ -140,7 +156,8 @@ public class EventManager {
         }
     }
 
-    private void writeEventToFile(Event event) {
+    @Override
+    public void writeEventToFile(IEvent event) {
         fileWriterExecutor.submit(() -> {
             try {
                 // Create directory if it doesn't exist

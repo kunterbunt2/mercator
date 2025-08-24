@@ -16,6 +16,8 @@
 
 package de.bushnaq.abdalla.mercator.universe.event;
 
+import de.bushnaq.abdalla.engine.event.EventLevel;
+import de.bushnaq.abdalla.engine.event.IEvent;
 import de.bushnaq.abdalla.mercator.universe.UniverseGenerator;
 import de.bushnaq.abdalla.mercator.universe.factory.ProductionFacility;
 import de.bushnaq.abdalla.mercator.universe.good.Good;
@@ -23,14 +25,16 @@ import de.bushnaq.abdalla.mercator.universe.planet.Planet;
 import de.bushnaq.abdalla.mercator.universe.sim.Sim;
 import de.bushnaq.abdalla.mercator.universe.sim.trader.Trader;
 import de.bushnaq.abdalla.mercator.util.MercatorRandomGenerator;
+import lombok.Getter;
 
-public class Event {
-    static boolean             enableStackTrace = false;
-    public EventLevel          level;
-    public StackTraceElement[] stackTrace;
-    public String              what;
-    public long                when;
-    public Object              who;
+@Getter
+public class Event implements IEvent {
+    static        boolean             enableStackTrace = false;
+    private final EventLevel          level;
+    private       StackTraceElement[] stackTrace;
+    private final String              what;
+    private final long                when;
+    private final Object              who;
 
     public Event(final EventLevel level, final long when, final Object who, final String what) {
         this.level = level;
@@ -41,6 +45,7 @@ public class Event {
             stackTrace = Thread.currentThread().getStackTrace();
     }
 
+    @Override
     public String getWhosName() {
         if (who instanceof Planet) {
             return ((Planet) who).getName();

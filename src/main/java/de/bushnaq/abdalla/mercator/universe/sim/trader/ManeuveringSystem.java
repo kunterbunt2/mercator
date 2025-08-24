@@ -27,6 +27,7 @@ import de.bushnaq.abdalla.mercator.engine.AtlasManager;
 import de.bushnaq.abdalla.mercator.engine.GameEngine3D;
 import de.bushnaq.abdalla.mercator.universe.good.Good;
 import de.bushnaq.abdalla.mercator.universe.path.Waypoint;
+import de.bushnaq.abdalla.mercator.util.Debug;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -177,12 +178,40 @@ public class ManeuveringSystem {
             rotation = endRotation;
 //            if (Debug.isFilter(trader.getName()))
 //                logger.info("end");
-            if (trader.navigator.nextWaypoint.city != null) {
+            //TODO move to Navigator.reachedWaypoint?
+            if (trader.navigator.reachedDestination()) {
+                //case 3
+                if (Debug.isFilterTrader(trader.getName()))
+                    System.out.printf("reached destination %s port %s\n", trader.navigator.nextWaypoint.city.getName(), trader.navigator.destinationPlanet.getName());
+                //dock
                 trader.setTraderSubStatus(TraderSubStatus.TRADER_STATUS_REQUESTING_DOCKING);
                 trader.communicationPartner.requestDocking(trader.navigator.nextWaypoint.city);
+            } else if (trader.navigator.reachedTransit()) {
+                //case 2
+                if (Debug.isFilterTrader(trader.getName()))
+                    System.out.printf("reached transit %s port %s\n", trader.navigator.nextWaypoint.city.getName(), trader.navigator.destinationPlanet.getName());
+                //transition
+                trader.setTraderSubStatus(TraderSubStatus.TRADER_STATUS_REQUESTING_TRANSITION);
+                trader.communicationPartner.requestTransition(trader.navigator.nextWaypoint.city);
             } else {
+                //wait
+                if (Debug.isFilterTrader(trader.getName()))
+                    System.out.printf("reached waypoint %s port %s\n", trader.navigator.nextWaypoint.getName(), trader.navigator.destinationPlanet.getName());
                 trader.setTraderSubStatus(TraderSubStatus.TRADER_STATUS_WAITING_FOR_WAYPOINT);
             }
+//            if (trader.navigator.nextWaypoint.city != null) {
+//                if (trader.navigator.reachedDestination()) {
+//                    //dock
+//                    trader.setTraderSubStatus(TraderSubStatus.TRADER_STATUS_REQUESTING_DOCKING);
+//                    trader.communicationPartner.requestDocking(trader.navigator.nextWaypoint.city);
+//                } else if (trader.navigator.reachedTransit()) {
+//                    //transition
+//                    trader.setTraderSubStatus(TraderSubStatus.TRADER_STATUS_REQUESTING_TRANSITION);
+//                    trader.communicationPartner.requestTransition(trader.navigator.nextWaypoint.city);
+//                }
+//            } else {
+//                trader.setTraderSubStatus(TraderSubStatus.TRADER_STATUS_WAITING_FOR_WAYPOINT);
+//            }
         } else {
 //            if (Debug.isFilter(trader.getName()))
 //                logger.info("not-end");

@@ -16,12 +16,12 @@
 
 package de.bushnaq.abdalla.mercator.universe;
 
+import de.bushnaq.abdalla.engine.event.EventLevel;
+import de.bushnaq.abdalla.engine.event.IEvent;
 import de.bushnaq.abdalla.mercator.desktop.DesktopContextFactory;
 import de.bushnaq.abdalla.mercator.desktop.GraphicsDimentions;
 import de.bushnaq.abdalla.mercator.desktop.LaunchMode;
 import de.bushnaq.abdalla.mercator.engine.GameEngine3D;
-import de.bushnaq.abdalla.mercator.universe.event.Event;
-import de.bushnaq.abdalla.mercator.universe.event.EventLevel;
 import de.bushnaq.abdalla.mercator.universe.event.EventManager;
 import de.bushnaq.abdalla.mercator.util.MercatorRandomGenerator;
 import de.bushnaq.abdalla.mercator.util.TimeUnit;
@@ -58,17 +58,17 @@ public class UniverseStabilityTest {
                 universe.advanceInTime(100 * TimeUnit.TICKS_PER_DAY);
             }
             if (enableEventLog) {
-                final List<Event> eventList0 = universeList[0].eventManager.eventList;
-                final List<Event> eventList1 = universeList[1].eventManager.eventList;
+                final List<IEvent> eventList0 = universeList[0].eventManager.eventList;
+                final List<IEvent> eventList1 = universeList[1].eventManager.eventList;
                 for (int e = 0; e < Math.min(eventList0.size(), eventList1.size()); e++) {
-                    final Event event0 = eventList0.get(e);
-                    final Event event1 = eventList1.get(e);
-                    if (event0.when != event1.when || !event0.what.equals(event1.what)) {
-                        System.out.printf("%s %s %s %s\n", universeList[0].getName(), TimeUnit.toString(event0.when), event0.getWhosName(), event0.what);
-                        for (final StackTraceElement trace : event0.stackTrace)
+                    final IEvent event0 = eventList0.get(e);
+                    final IEvent event1 = eventList1.get(e);
+                    if (event0.getWhen() != event1.getWhen() || !event0.getWhat().equals(event1.getWhat())) {
+                        System.out.printf("%s %s %s %s\n", universeList[0].getName(), TimeUnit.toString(event0.getWhen()), event0.getWhosName(), event0.getWhat());
+                        for (final StackTraceElement trace : event0.getStackTrace())
                             System.out.println("\t" + trace);
-                        System.out.printf("%s %s %s %s\n", universeList[1].getName(), TimeUnit.toString(event1.when), event1.getWhosName(), event1.what);
-                        for (final StackTraceElement trace : event1.stackTrace)
+                        System.out.printf("%s %s %s %s\n", universeList[1].getName(), TimeUnit.toString(event1.getWhen()), event1.getWhosName(), event1.getWhat());
+                        for (final StackTraceElement trace : event1.getStackTrace())
                             System.out.println("\t" + trace);
                         System.out.print("-\n");
                     }
@@ -76,7 +76,7 @@ public class UniverseStabilityTest {
                 // compareToStandard( eventList0, eventList1 );
                 // ---Print out the rest if the two lists are nto of the same size
                 for (int e = Math.min(eventList0.size(), eventList1.size()); e < Math.max(eventList0.size(), eventList1.size()); e++) {
-                    Event    event;
+                    IEvent   event;
                     Universe universe;
                     if (eventList0.size() > eventList1.size()) {
                         event    = eventList0.get(e);
@@ -85,8 +85,8 @@ public class UniverseStabilityTest {
                         event    = eventList1.get(e);
                         universe = universeList[1];
                     }
-                    System.out.printf("%s %s %s %s\n", universe.getName(), TimeUnit.toString(event.when), event.getWhosName(), event.what);
-                    for (final StackTraceElement trace : event.stackTrace)
+                    System.out.printf("%s %s %s %s\n", universe.getName(), TimeUnit.toString(event.getWhen()), event.getWhosName(), event.getWhat());
+                    for (final StackTraceElement trace : event.getStackTrace())
                         System.out.println("\t" + trace);
                     // compareToStandard( eventList0, eventList1 );
                     System.out.print("-\n");

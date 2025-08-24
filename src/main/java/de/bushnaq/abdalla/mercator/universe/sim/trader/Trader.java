@@ -19,7 +19,7 @@ package de.bushnaq.abdalla.mercator.universe.sim.trader;
 import com.badlogic.gdx.math.Vector3;
 import de.bushnaq.abdalla.engine.IGameEngine;
 import de.bushnaq.abdalla.engine.audio.OpenAlException;
-import de.bushnaq.abdalla.mercator.universe.event.EventLevel;
+import de.bushnaq.abdalla.engine.event.EventLevel;
 import de.bushnaq.abdalla.mercator.universe.event.SimEventType;
 import de.bushnaq.abdalla.mercator.universe.good.Good;
 import de.bushnaq.abdalla.mercator.universe.good.GoodType;
@@ -267,11 +267,19 @@ public class Trader extends Sim {
                             //						destinationWaypointIndex++;
                             navigator.previousWaypoint = navigator.nextWaypoint;
                             //						destinationWaypointIndex++;
-                            navigator.nextWaypoint = navigator.waypointList.get(navigator.destinationWaypointIndex).waypoint;
+//                            if (Debug.isFilterTrader(getName()))
+//                                System.out.printf("nextWaypoint = %s\n", navigator.nextWaypoint.name);
                             navigator.destinationWaypointIndex++;
+                            navigator.nextWaypoint = navigator.waypointList.get(navigator.destinationWaypointIndex).waypoint;
+//                            if (Debug.isFilterTrader(getName()))
+//                                System.out.printf("nextWaypoint = %s\n", navigator.nextWaypoint.name);
                             navigator.reserveNextWaypoints();
                             navigator.destinationWaypointDistance = navigator.previousWaypoint.queryDistance(navigator.nextWaypoint);
                             if (navigator.pathIsClear()) {
+                                setTraderSubStatus(TraderSubStatus.TRADER_STATUS_ALIGNING);
+                                if (Debug.isFilterTrader(getName()))
+                                    logger.info("startRotation");
+                                maneuveringSystem.startRotation();
                                 //							if (sourceWaypoint.getName().equals(targetWaypoint.getName())) {
                                 //								System.out.println(sourceWaypoint.getName());
                                 //							}
@@ -332,8 +340,8 @@ public class Trader extends Sim {
                         if (Debug.isFilterTrader(getName()))
                             eventManager.add(EventLevel.trace, currentTime, this, String.format("we are cleared for next waypoint %s", navigator.nextWaypoint.name));
 //                            logger.info(String.format("**** we are cleared for next waypoint %s", navigator.nextWaypoint.name));
-                        if (navigator.destinationWaypointIndex == 2) {//TODO we only release the first dock
-                            freeDock(navigator.sourcePlanet);//finished undocking
+                        if (navigator.destinationWaypointIndex >= 2 && navigator.waypointList.get(navigator.destinationWaypointIndex - 2).waypoint.city != null) {//TODO we only release the first dock
+                            clearDock(navigator.sourcePlanet);//finished undocking
                         }
                         setTraderSubStatus(TraderSubStatus.TRADER_STATUS_ACCELERATING);
                     }
@@ -381,16 +389,6 @@ public class Trader extends Sim {
         return value;
     }
 
-    public float costOfDistance(final float distance) {
-        return JUMP_UNIT_COST * distance;
-    }
-
-    public void create(IGameEngine gameEngine, final MercatorRandomGenerator randomGenerator) throws OpenAlException {
-        goodSpace            = Trader.MIN_GOOD_SPACE + randomGenerator.nextInt(0, this, Trader.MAX_GOOD_SPACE - Trader.MIN_GOOD_SPACE);
-        portRestingTime      = randomGenerator.nextInt(0, this, Trader.TRADER_MAX_PORT_REST_TIME) * TimeUnit.TICKS_PER_DAY;
-        communicationPartner = new TraderCommunicationPartner(gameEngine, this);
-    }
-
     /// /            else {
     /// /            }
     /// /            float accelleration = calculateAcceleration();
@@ -420,9 +418,21 @@ public class Trader extends Sim {
 //        //max engine speed depends on how much goods we are carrying.
 //        return engineSpeed;
 //    }
-    public void freeDock(Planet planet) {
+    public void clearDock(Planet planet) {
         //we are free of the dock
-        planet.freeDock(communicationPartner);
+//        eventManager.add(EventLevel.trace, currentTime, this, String.format("we cleared the dock of '%s'", planet.getName()));//for planet logs
+//        planet.eventManager.add(EventLevel.trace, currentTime, this, String.format("we cleared the dock of '%s'", planet.getName()));//for planet logs
+        planet.clearDock(communicationPartner);
+    }
+
+    public float costOfDistance(final float distance) {
+        return JUMP_UNIT_COST * distance;
+    }
+
+    public void create(IGameEngine gameEngine, final MercatorRandomGenerator randomGenerator) throws OpenAlException {
+        goodSpace            = Trader.MIN_GOOD_SPACE + randomGenerator.nextInt(0, this, Trader.MAX_GOOD_SPACE - Trader.MIN_GOOD_SPACE);
+        portRestingTime      = randomGenerator.nextInt(0, this, Trader.TRADER_MAX_PORT_REST_TIME) * TimeUnit.TICKS_PER_DAY;
+        communicationPartner = new TraderCommunicationPartner(gameEngine, this);
     }
 
     /// /            if (Debug.isFilter(getName())) logger.info("rotation deceleration");
@@ -480,9 +490,11 @@ public class Trader extends Sim {
         }
     }
 
-    public void occupyDock(Planet planet) {
-        planet.occupyDock(communicationPartner);
-    }
+//    public void occupyDock(Planet planet) {
+//        eventManager.add(EventLevel.trace, currentTime, this, String.format("we occupy the dock of '%s'", planet.getName()));//for planet logs
+//        planet.eventManager.add(EventLevel.trace, currentTime, this, String.format("we occupy the dock of '%s'", planet.getName()));//for planet logs
+//        planet.occupyDock(communicationPartner);
+//    }
 
     private boolean planJourney(long currentTime, MercatorRandomGenerator randomGenerator, PlanetList planetList) throws Exception {
         if (traderSubStatus == TraderSubStatus.TRADER_STATUS_DOCKED && TimeUnit.isInt(currentTime)) {
@@ -584,7 +596,7 @@ public class Trader extends Sim {
                     navigator.destinationPlanetDistance   = planet.queryDistance(navigator.waypointList);
                     setTraderSubStatus(TraderSubStatus.TRADER_STATUS_ALIGNING);
                     maneuveringSystem.startRotation();
-                    eventManager.add(EventLevel.trace, currentTime, this, String.format("departing '%s' to reach '%s'", planet.getName(), navigator.destinationPlanet.city.getName()));//for trader logs
+                    eventManager.add(EventLevel.trace, currentTime, this, String.format("departing '%s' to reach '%s' %s", planet.getName(), navigator.destinationPlanet.city.getName(), navigator.WaypointPortsAsString()));
                     planet.eventManager.add(EventLevel.trace, currentTime, this, String.format("'%s' undocking", getName()));//for planet logs
                     //						if (pathIsClear()) {
                     //							sourceWaypoint.trader = this;

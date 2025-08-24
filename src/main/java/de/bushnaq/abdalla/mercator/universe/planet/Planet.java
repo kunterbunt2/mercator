@@ -114,24 +114,28 @@ public class Planet extends Waypoint implements TradingPartner {
 
     public void clearDock(TraderCommunicationPartner cp) {
         if (inDock == cp) {
-            if (Debug.isFilterPlanet(getName())) {
+            if (Debug.isFilterTrader(cp.getName())) {
                 cp.getEventManager().add(EventLevel.trace, currentTime, cp, String.format("'%s' cleared the dock", inDock.getName()));
+            }
+            if (Debug.isFilterPlanet(getName())) {
                 eventManager.add(EventLevel.trace, currentTime, this, String.format("'%s' cleared the dock", inDock.getName()));
-
-//                logger.info(String.format("**** '%s' cleared the dock", inDock.getName()));
             }
             inDock = null;
             communicationPartner.handleRadioMessage(null);
         } else if (inDock == null) {
-            if (Debug.isFilterPlanet(getName())) {
+            if (Debug.isFilterTrader(cp.getName())) {
                 cp.getEventManager().add(EventLevel.warning, currentTime, cp, String.format("'%s' tried to clear the dock, but it was already clear.", cp.getName()));
+            }
+            if (Debug.isFilterPlanet(getName())) {
                 eventManager.add(EventLevel.warning, currentTime, this, String.format("'%s' tried to clear the dock, but it was already clear.", cp.getName()));
-//                logger.warn(String.format("**** '%s' tried to clear the dock, but it was already clear.", inDock.getName()));
             }
         } else {
-            cp.getEventManager().add(EventLevel.warning, currentTime, cp, String.format("'%s' tried to clear the dock, but it is occupied by '%s'", cp.getName(), inDock.getName()));
-            eventManager.add(EventLevel.warning, currentTime, this, String.format("'%s' tried to clear the dock, but it is occupied by '%s'", cp.getName(), inDock.getName()));
-//            logger.warn(String.format("**** PLanet '%s' - '%s' tried to clear the dock, but it is occupied by '%s'",getName(), cp.getName(), inDock.getName()));
+            if (Debug.isFilterTrader(cp.getName())) {
+                cp.getEventManager().add(EventLevel.warning, currentTime, cp, String.format("'%s' tried to clear the dock, but it is occupied by '%s'", cp.getName(), inDock.getName()));
+            }
+            if (Debug.isFilterPlanet(getName())) {
+                eventManager.add(EventLevel.warning, currentTime, this, String.format("'%s' tried to clear the dock, but it is occupied by '%s'", cp.getName(), inDock.getName()));
+            }
         }
     }
 
@@ -310,16 +314,18 @@ public class Planet extends Waypoint implements TradingPartner {
     public void occupyDock(CommunicationPartner cp) {
         if (inDock == null) {
             inDock = cp;
-            if (Debug.isFilterPlanet(getName())) {
+            if (Debug.isFilterTrader(cp.getName())) {
                 cp.getEventManager().add(EventLevel.trace, currentTime, cp, String.format("'%s' is occupying the dock", cp.getName()));
+            }
+            if (Debug.isFilterPlanet(getName())) {
                 eventManager.add(EventLevel.trace, currentTime, this, String.format("'%s' is occupying the dock", cp.getName()));
-//                logger.info(String.format("**** '%s' is occupying the dock", cp.getName()));
             }
         } else {
-            if (Debug.isFilterPlanet(getName())) {
+            if (Debug.isFilterTrader(cp.getName())) {
                 cp.getEventManager().add(EventLevel.warning, currentTime, cp, String.format("'%s' tried to occupying the dock, but it was already occupied by '%s'", cp.getName(), inDock.getName()));
+            }
+            if (Debug.isFilterPlanet(getName())) {
                 eventManager.add(EventLevel.warning, currentTime, this, String.format("'%s' tried to occupying the dock, but it was already occupied by '%s'", cp.getName(), inDock.getName()));
-//                logger.warn(String.format("**** '%s' tried to occupying the dock,but it was already occupied by '%s'", inDock.getName()));
             }
         }
     }

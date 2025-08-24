@@ -546,9 +546,7 @@ public class Universe {
     public void updateSelectedPlanet() {
         try {
             Planet planet = planetList.findNearestPlanet(gameEngine.getCamera().lookat.x, gameEngine.getCamera().lookat.y, gameEngine.getCamera().lookat.z);
-            System.out.println("updateSelectedPlanet: " + planet);
             if (planet != selectedPlanet) {
-                System.out.println("updateSelectedPlanet: " + planet + " is not the same as " + selectedPlanet);
 //                selected       = planet;
                 if (selectedPlanet != null) {
                     selectedPlanet.unselect();

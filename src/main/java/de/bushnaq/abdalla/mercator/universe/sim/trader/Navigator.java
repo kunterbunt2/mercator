@@ -9,6 +9,7 @@ import de.bushnaq.abdalla.mercator.universe.planet.Planet;
  * through a series of waypoints towards a destination planet.
  * It keeps track of the current and next waypoints, as well as the source and destination planets.
  * <p>
+ * index             0   1   2   3   4   5   6   7   8
  * waypoint          1---2---3---4---5---6---7---8---9
  * port              1               2               3
  * sourcePlanet      X

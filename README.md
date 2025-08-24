@@ -53,10 +53,13 @@ Then you can start mercator by one of its starting classes
 
 ## Issues
 
-1. Starpath requests Triangulum Station to undock, although it is docked at Pollux Hub? Maybe an llm issue?
+1. Starpath is blocking Pollux Hub?
 2. Damocles, never clear the dock of Pollux Hub.
-3. Leo Minor Port approves Damocles to dock, but it has nto asked to dock yet. The dock is also actually busy with
+3. Leo Minor Port approves Damocles to dock, but it has not asked to dock yet. The dock is also actually busy with
    oraon.
+4. stations are too shallow, we can see the traders inside the station.
+5. ship thrusters not really looking like metal.
+6. there should be the possibility to select a ship but still hear teh station shat
 100. Form selecting an item does not show info in the lower pane.
 101. Economy is not stable, all sims eventually die of hunger.
 102. simulation advanceintime is triggered every frame.
@@ -70,13 +73,8 @@ Then you can start mercator by one of its starting classes
 3. remove quotation marks around subtitles.
 2. add back background under subtitle
 3. break down subtitle if too long.
-2. traders also need to document the event of occupying/freeing the dock
-3. traders need to document the event of requesting docking/undocking
-4. should trader rather use sim eventmanager?
-5. should planet rather use sim eventmanager?
 1. remove "" from tts subtitles
-1. add more light
-2. reduce blur
+2. stations should be further apart.
 3. add demo scheduled effect to blend in, maybe camera to follow nearest trader?
 2. fix ships will collide while navigating from planet to planet.
 3. add SSAO

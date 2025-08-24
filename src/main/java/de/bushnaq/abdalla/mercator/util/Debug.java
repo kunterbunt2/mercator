@@ -17,7 +17,9 @@
 package de.bushnaq.abdalla.mercator.util;
 
 import de.bushnaq.abdalla.mercator.universe.planet.Planet;
+import de.bushnaq.abdalla.mercator.universe.planet.PlanetCommunicationPartner;
 import de.bushnaq.abdalla.mercator.universe.sim.trader.Trader;
+import de.bushnaq.abdalla.mercator.universe.sim.trader.TraderCommunicationPartner;
 
 public class Debug {
     private static final boolean enablePlanetFilter = true;
@@ -48,8 +50,12 @@ public class Debug {
     public static boolean isFiltered(Object object) {
         if (object instanceof Trader) {
             return isFilterTrader(((Trader) object).getName());
+        } else if (object instanceof TraderCommunicationPartner) {
+            return isFilterTrader(((TraderCommunicationPartner) object).getName());
         } else if (object instanceof Planet) {
             return isFilterPlanet(((Planet) object).getName());
+        } else if (object instanceof PlanetCommunicationPartner) {
+            return isFilterTrader(((PlanetCommunicationPartner) object).getName());
         }
         return false;
     }

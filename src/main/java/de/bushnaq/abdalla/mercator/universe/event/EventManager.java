@@ -72,9 +72,9 @@ public class EventManager implements IEventManager {
             }
         }
         {
-            final Event e              = new Event(level, when, who, what);
-            String      formattedEvent = formatEventForObject(e);
+            final Event e = new Event(level, when, who, what);
             if (Debug.isFiltered(who)) {
+                String formattedEvent = formatEventForObject(e);
                 logger.info(formattedEvent);
                 writeEventToFile(e);
             } else if (writeAllEventsToFile) {
@@ -97,7 +97,7 @@ public class EventManager implements IEventManager {
 
     @Override
     public String formatEventForObject(IEvent event) {
-        String timeStr  = TimeUnit.toString(event.getWhen());
+        String timeStr  = TimeUnit.toString(event.getWhen(), false);
         String levelStr = event.getLevel().name();
 
         return switch (event.getWho()) {

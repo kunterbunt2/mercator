@@ -33,15 +33,23 @@ public class TimeUnit {
     }
 
     public static String toString(final long time) {
-        return toString(time, TimeAccuracy.HOUR_ACCURACY);
+        return toString(time, TimeAccuracy.HOUR_ACCURACY, true);
+    }
+
+    public static String toString(final long time, boolean trim) {
+        return toString(time, TimeAccuracy.HOUR_ACCURACY, trim);
     }
 
     public static String toString(final long time, final TimeAccuracy dayAccuracy) {
+        return toString(time, dayAccuracy, true);
+    }
+
+    public static String toString(final long time, final TimeAccuracy dayAccuracy, boolean trim) {
         final long h = time - (time / TimeUnit.TICKS_PER_DAY) * TimeUnit.TICKS_PER_DAY;
         final long d = (time / TimeUnit.TICKS_PER_DAY) - ((time / (TimeUnit.TICKS_PER_DAY * TimeUnit.DAYS_PER_YEAR)) * TimeUnit.DAYS_PER_YEAR);
         final long y = time / (TimeUnit.TICKS_PER_DAY * TimeUnit.DAYS_PER_YEAR);
-        if (h != 0 && dayAccuracy == TimeAccuracy.HOUR_ACCURACY) {
-            return String.format("%d.%02d.%d", y, d, h);
+        if ((h != 0 || !trim) && dayAccuracy == TimeAccuracy.HOUR_ACCURACY) {
+            return String.format("%03d.%02d.%02d", y, d, h);
         } else if (d == 0 && dayAccuracy == TimeAccuracy.YEAR_ACCURACY) {
             return String.format("%d.", y);
         } else {

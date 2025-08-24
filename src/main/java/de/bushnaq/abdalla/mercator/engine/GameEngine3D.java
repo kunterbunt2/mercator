@@ -219,7 +219,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
             renderEngine.getFog().setFullDistance(3000f);
 
             renderEngine.setSkyBox(true);
-            renderEngine.setDayAmbientLight(.8f, .8f, .8f, 1f);
+            renderEngine.setDayAmbientLight(.4f, .4f, .4f, 1f);
             renderEngine.setNightAmbientLight(.2f, .2f, .2f, 1f);
             renderEngine.setAlwaysDay(true);
             renderEngine.setDynamicDayTime(true);

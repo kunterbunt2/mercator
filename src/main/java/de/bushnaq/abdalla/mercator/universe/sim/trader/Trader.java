@@ -341,7 +341,7 @@ public class Trader extends Sim {
                             eventManager.add(EventLevel.trace, currentTime, this, String.format("we are cleared for next waypoint %s", navigator.nextWaypoint.name));
 //                            logger.info(String.format("**** we are cleared for next waypoint %s", navigator.nextWaypoint.name));
                         if (navigator.destinationWaypointIndex >= 2 && navigator.waypointList.get(navigator.destinationWaypointIndex - 2).waypoint.city != null) {//TODO we only release the first dock
-                            clearDock(navigator.sourcePlanet);//finished undocking
+                            clearDock(navigator.waypointList.get(navigator.destinationWaypointIndex - 2).waypoint.city);//finished undocking
                         }
                         setTraderSubStatus(TraderSubStatus.TRADER_STATUS_ACCELERATING);
                     }

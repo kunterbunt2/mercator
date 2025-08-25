@@ -22,13 +22,13 @@ import de.bushnaq.abdalla.mercator.universe.event.SimEvent;
 
 import javax.swing.table.AbstractTableModel;
 
-public class SelectedPlanetEventsTableModel extends AbstractTableModel {
+public class TraderEventsTableModel extends AbstractTableModel {
 
     private static final long     serialVersionUID = 4803847753013026464L;
     private final        String[] columnNames      = {"Time", "Type", "Volume", "Credits", "Description"};
     private final        Universe universe;
 
-    public SelectedPlanetEventsTableModel(final Universe universe) {
+    public TraderEventsTableModel(final Universe universe) {
         this.universe = universe;
     }
 
@@ -52,10 +52,10 @@ public class SelectedPlanetEventsTableModel extends AbstractTableModel {
 
     @Override
     public int getRowCount() {
-        if (universe.selectedPlanet != null && universe.selectedPlanet.eventManager != null) {
+        if (universe.selectedTrader != null && universe.selectedTrader.eventManager != null) {
             // Count only non-SimEvents
             int nonSimEventCount = 0;
-            for (IEvent event : universe.selectedPlanet.eventManager.eventList) {
+            for (IEvent event : universe.selectedTrader.eventManager.eventList) {
                 if (!(event instanceof SimEvent)) {
                     nonSimEventCount++;
                 }
@@ -67,10 +67,10 @@ public class SelectedPlanetEventsTableModel extends AbstractTableModel {
 
     @Override
     public Object getValueAt(final int rowIndex, final int columnIndex) {
-        if (universe.selectedPlanet != null && universe.selectedPlanet.eventManager != null) {
+        if (universe.selectedTrader != null && universe.selectedTrader.eventManager != null) {
             // Find all non-SimEvents and reverse the order so newest are on top
             java.util.List<IEvent> nonSimEvents = new java.util.ArrayList<>();
-            for (IEvent event : universe.selectedPlanet.eventManager.eventList) {
+            for (IEvent event : universe.selectedTrader.eventManager.eventList) {
                 if (!(event instanceof SimEvent)) {
                     nonSimEvents.add(event);
                 }
@@ -85,7 +85,7 @@ public class SelectedPlanetEventsTableModel extends AbstractTableModel {
                     case 0:
                         return event.getWhen();
                     case 1:
-                        return "PLANET";
+                        return "TRADER";
                     case 2:
                         return "";
                     case 3:

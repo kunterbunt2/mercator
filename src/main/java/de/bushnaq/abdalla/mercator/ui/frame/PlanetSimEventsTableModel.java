@@ -22,13 +22,13 @@ import de.bushnaq.abdalla.mercator.universe.event.SimEvent;
 
 import javax.swing.table.AbstractTableModel;
 
-public class SelectedTraderSimEventsTableModel extends AbstractTableModel {
+public class PlanetSimEventsTableModel extends AbstractTableModel {
 
     private static final long     serialVersionUID = 4803847753013026464L;
     private final        String[] columnNames      = {"Time", "Type", "Volume", "Credits", "Description"};
     private final        Universe universe;
 
-    public SelectedTraderSimEventsTableModel(final Universe universe) {
+    public PlanetSimEventsTableModel(final Universe universe) {
         this.universe = universe;
     }
 
@@ -52,10 +52,10 @@ public class SelectedTraderSimEventsTableModel extends AbstractTableModel {
 
     @Override
     public int getRowCount() {
-        if (universe.selectedTrader != null && universe.selectedTrader.eventManager != null) {
+        if (universe.selectedPlanet != null && universe.selectedPlanet.eventManager != null) {
             // Count only SimEvents
             int simEventCount = 0;
-            for (IEvent event : universe.selectedTrader.eventManager.eventList) {
+            for (IEvent event : universe.selectedPlanet.eventManager.eventList) {
                 if (event instanceof SimEvent) {
                     simEventCount++;
                 }
@@ -67,10 +67,10 @@ public class SelectedTraderSimEventsTableModel extends AbstractTableModel {
 
     @Override
     public Object getValueAt(final int rowIndex, final int columnIndex) {
-        if (universe.selectedTrader != null && universe.selectedTrader.eventManager != null) {
+        if (universe.selectedPlanet != null && universe.selectedPlanet.eventManager != null) {
             // Find all SimEvents and reverse the order so newest are on top
             java.util.List<SimEvent> simEvents = new java.util.ArrayList<>();
-            for (IEvent event : universe.selectedTrader.eventManager.eventList) {
+            for (IEvent event : universe.selectedPlanet.eventManager.eventList) {
                 if (event instanceof SimEvent) {
                     simEvents.add((SimEvent) event);
                 }

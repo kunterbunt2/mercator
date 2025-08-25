@@ -23,7 +23,7 @@ import javax.swing.table.AbstractTableModel;
 
 public class TradersTableModel extends AbstractTableModel {
     private static final long       serialVersionUID = 4257926461207710123L;
-    private final        String[]   columnNames      = {"Name", "Max load", "Credits", "Status", "Sim Status", "Satisfaction", "Waiting", "Loading", "Home port", "Bought at", "Over port", "Selling to"};
+    private final        String[]   columnNames      = {"Name", "Max load", "Credits", "Status", "Sim Status", "Satisfaction", "Waiting", "Loading", "Planet", "Bought at", "Over port", "Selling to"};
     private final        TraderList traderList;
     private final        Universe   universe;
 

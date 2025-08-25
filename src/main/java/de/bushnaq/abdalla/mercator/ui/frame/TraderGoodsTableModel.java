@@ -17,28 +17,33 @@
 package de.bushnaq.abdalla.mercator.ui.frame;
 
 import de.bushnaq.abdalla.mercator.universe.Universe;
-import de.bushnaq.abdalla.mercator.universe.sim.SimNeedList;
+import de.bushnaq.abdalla.mercator.universe.good.GoodList;
 
 import javax.swing.table.AbstractTableModel;
 
-public class SelectedTraderNeedsTableModel extends AbstractTableModel {
+public class TraderGoodsTableModel extends AbstractTableModel {
 
     private static final long     serialVersionUID = 4803847753013026463L;
-    private final        String[] columnNames      = {"Good", "consumeEvery", "lastConsumed", "dieIfNotConsumedWithin", "totalConsumed"};
+    private final        String[] columnNames      = {"Name", "Cost", "Average price", "Amount"};
     private final        Universe universe;
 
-    public SelectedTraderNeedsTableModel(final Universe universe) {
+    public TraderGoodsTableModel(final Universe universe) {
         this.universe = universe;
-    }
-
-    @Override
-    public String getColumnName(final int col) {
-        return columnNames[col];
     }
 
     @Override
     public Class getColumnClass(final int c) {
         return getValueAt(0, c).getClass();
+    }
+
+    @Override
+    public int getColumnCount() {
+        return columnNames.length;
+    }
+
+    @Override
+    public String getColumnName(final int col) {
+        return columnNames[col];
     }
 
     @Override
@@ -50,25 +55,18 @@ public class SelectedTraderNeedsTableModel extends AbstractTableModel {
     }
 
     @Override
-    public int getColumnCount() {
-        return columnNames.length;
-    }
-
-    @Override
     public Object getValueAt(final int row, final int col) {
         if (universe.selectedTrader != null) {
-            final SimNeedList simNeedList = universe.selectedTrader.simNeedsList;
+            final GoodList goodList = universe.selectedTrader.getGoodList();
             switch (col) {
                 case 0:
-                    return simNeedList.get(row).type.getName();
+                    return goodList.get(row).type.getName();
                 case 1:
-                    return simNeedList.get(row).consumeEvery;
+                    return goodList.get(row).price;
                 case 2:
-                    return simNeedList.get(row).lastConsumed;
+                    return goodList.get(row).getAveragePrice();
                 case 3:
-                    return simNeedList.get(row).lastConsumed + simNeedList.get(row).dieIfNotConsumedWithin;
-                case 4:
-                    return simNeedList.get(row).totalConsumed;
+                    return goodList.get(row).getAmount();
             }
         }
         return null;

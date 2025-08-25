@@ -22,20 +22,15 @@ import de.bushnaq.abdalla.mercator.universe.sim.Sim;
 import javax.swing.table.AbstractTableModel;
 import java.util.Vector;
 
-public class SelectedPlanetSimsTableModel extends AbstractTableModel {
+public class PlanetSimsTableModel extends AbstractTableModel {
 
     private static final long        serialVersionUID = 4803847753013026463L;
     private final        String[]    columnNames      = {"Name", "Credits", "Satisfaction", "Profession", "Factory", "Status"};
     private final        Vector<Sim> simList          = new Vector<Sim>();
     private final        Universe    universe;
 
-    public SelectedPlanetSimsTableModel(final Universe universe) {
+    public PlanetSimsTableModel(final Universe universe) {
         this.universe = universe;
-    }
-
-    @Override
-    public String getColumnName(final int col) {
-        return columnNames[col];
     }
 
     @Override
@@ -44,16 +39,21 @@ public class SelectedPlanetSimsTableModel extends AbstractTableModel {
     }
 
     @Override
+    public int getColumnCount() {
+        return columnNames.length;
+    }
+
+    @Override
+    public String getColumnName(final int col) {
+        return columnNames[col];
+    }
+
+    @Override
     public int getRowCount() {
         if (universe.selectedPlanet != null) {
             return universe.selectedPlanet.simList.size();
         }
         return 0;
-    }
-
-    @Override
-    public int getColumnCount() {
-        return columnNames.length;
     }
 
     @Override

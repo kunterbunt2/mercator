@@ -23,24 +23,29 @@ import de.bushnaq.abdalla.mercator.universe.factory.ProductionFacilityList;
 
 import javax.swing.table.AbstractTableModel;
 
-public class SelectedPlanetFactoriesTableModel extends AbstractTableModel {
+public class PlanetFactoriesTableModel extends AbstractTableModel {
 
     private static final long     serialVersionUID = 4803847753013026463L;
     private final        String[] columnNames      = {"Name", "Needs", "Produces", "Status"};
     private final        Universe universe;
 
-    public SelectedPlanetFactoriesTableModel(final Universe universe) {
+    public PlanetFactoriesTableModel(final Universe universe) {
         this.universe = universe;
-    }
-
-    @Override
-    public String getColumnName(final int col) {
-        return columnNames[col];
     }
 
     @Override
     public Class getColumnClass(final int c) {
         return getValueAt(0, c).getClass();
+    }
+
+    @Override
+    public int getColumnCount() {
+        return columnNames.length;
+    }
+
+    @Override
+    public String getColumnName(final int col) {
+        return columnNames[col];
     }
 
     @Override
@@ -52,11 +57,6 @@ public class SelectedPlanetFactoriesTableModel extends AbstractTableModel {
     }
 
     @Override
-    public int getColumnCount() {
-        return columnNames.length;
-    }
-
-    @Override
     public Object getValueAt(final int row, final int col) {
         if (universe.selectedPlanet != null) {
             final ProductionFacilityList productionFacilityList = universe.selectedPlanet.productionFacilityList;
@@ -65,7 +65,7 @@ public class SelectedPlanetFactoriesTableModel extends AbstractTableModel {
                 case 0:
                     return productionFacility.getName();
                 case 1:
-                    if (Factory.class.isInstance(productionFacility)) {
+                    if (productionFacility instanceof Factory) {
                         final Factory factory = (Factory) productionFacility;
                         if (factory.inputGood.size() != 0) {
                             return factory.inputGood.get(0).type.getName();

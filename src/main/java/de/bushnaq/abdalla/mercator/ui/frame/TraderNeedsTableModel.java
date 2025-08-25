@@ -21,19 +21,14 @@ import de.bushnaq.abdalla.mercator.universe.sim.SimNeedList;
 
 import javax.swing.table.AbstractTableModel;
 
-public class SelectedPlanetSimNeedsTableModel extends AbstractTableModel {
+public class TraderNeedsTableModel extends AbstractTableModel {
 
     private static final long     serialVersionUID = 4803847753013026463L;
     private final        String[] columnNames      = {"Good", "consumeEvery", "lastConsumed", "dieIfNotConsumedWithin", "totalConsumed"};
     private final        Universe universe;
 
-    public SelectedPlanetSimNeedsTableModel(final Universe universe) {
+    public TraderNeedsTableModel(final Universe universe) {
         this.universe = universe;
-    }
-
-    @Override
-    public String getColumnName(final int col) {
-        return columnNames[col];
     }
 
     @Override
@@ -42,16 +37,21 @@ public class SelectedPlanetSimNeedsTableModel extends AbstractTableModel {
     }
 
     @Override
+    public int getColumnCount() {
+        return columnNames.length;
+    }
+
+    @Override
+    public String getColumnName(final int col) {
+        return columnNames[col];
+    }
+
+    @Override
     public int getRowCount() {
         if (universe.selectedTrader != null) {
             return universe.selectedTrader.getGoodList().size();
         }
         return 0;
-    }
-
-    @Override
-    public int getColumnCount() {
-        return columnNames.length;
     }
 
     @Override

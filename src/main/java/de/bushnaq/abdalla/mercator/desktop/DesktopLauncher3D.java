@@ -24,14 +24,18 @@ import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration.GLEmulation;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
-import de.bushnaq.abdalla.mercator.engine.GameEngine3D;
-import de.bushnaq.abdalla.mercator.universe.Universe;
+import com.formdev.flatlaf.FlatDarkLaf;
 import de.bushnaq.abdalla.engine.event.EventLevel;
+import de.bushnaq.abdalla.mercator.engine.GameEngine3D;
+import de.bushnaq.abdalla.mercator.ui.frame.MercatorFrame;
+import de.bushnaq.abdalla.mercator.universe.Universe;
 import de.bushnaq.abdalla.mercator.universe.sim.Sim;
 import de.bushnaq.abdalla.mercator.util.MavenPropertiesProvider;
 import de.bushnaq.abdalla.mercator.util.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.swing.*;
 
 /**
  * @author kunterbunt
@@ -107,6 +111,22 @@ public class DesktopLauncher3D implements ApplicationListener {
 
             final GameEngine3D gameEngine = new GameEngine3D(contextFactory, universe, launchMode);
             universe.create(gameEngine, UNIVERSE_GENERATION_RANDOM_SEED, UNIVERSE_SIZE, 10L * TimeUnit.DAYS_PER_YEAR);
+
+            // Initialize FlatLaf Look and Feel for better UI appearance
+            try {
+                UIManager.setLookAndFeel(new FlatDarkLaf());
+                logger.info("FlatLaf Dark theme initialized successfully");
+            } catch (UnsupportedLookAndFeelException e) {
+                logger.warn("Failed to initialize FlatLaf, falling back to system default", e);
+                try {
+                    UIManager.setLookAndFeel(UIManager.getLookAndFeel());
+                } catch (Exception ex) {
+                    logger.error("Failed to set system look and feel", ex);
+                }
+            }
+
+            final MercatorFrame frame = new MercatorFrame(universe);
+            frame.setVisible(true);
             final Lwjgl3ApplicationConfiguration config = createConfig(contextFactory.getContext());
             try {
                 contextFactory.getContext().restart = false;

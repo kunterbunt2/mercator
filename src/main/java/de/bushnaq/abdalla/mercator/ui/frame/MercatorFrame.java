@@ -31,50 +31,50 @@ import java.awt.event.*;
  * @author bushnaq Created 13.02.2005
  */
 public class MercatorFrame extends JFrame {
-    private static final int      FORM_WIDTH                      = 1400;
-    private static final int      UNIVERSE_GENERATION_RANDOM_SEED = 0;
-    private static final long     serialVersionUID                = -614297318910428464L;
-    //	private ScreenListener screen;
-    protected            Universe universe;
+    private static final int                FORM_WIDTH                      = 1400;
+    private static final int                UNIVERSE_GENERATION_RANDOM_SEED = 0;
+    private static final long               serialVersionUID                = -614297318910428464L;
+    private              boolean            enableEventFiring               = true;
+    private              JTextField         fieldSelectedPlanetCredits;
+    private              JTextField         fieldSelectedPlanetName;
+    private              JTextField         fieldSelectedTraderCredits;
+    private              JTextField         fieldSelectedTraderName;
+    private              JTextField         fieldUniverseCredits;
+    private              JTextField         fieldUniverseTime;
+    private              JButton            jButtonExit;
+    private              JButton            jButtonUniverseStart;
+    private              JButton            jButtonUniverseStep;
+    private              JButton            jButtonUniverseStop;
+    private              javax.swing.JPanel jContentPane;
+    private              JPanel             jPanelEvents;
+    private              JPanel             jPanelGui;
+    private              JPanel             jPanelGuiNoMenu;
+    private              JPanel             jPanelPlanets;
+    private              JPanel             jPanelSystems;
+    private              JPanel             jPanelTraders;
+    private              JPanel             jPanelUniverse;
+    private              JPanel             jPanelUniverseCreate;
+    private              JPanel             jPanelUniverseFrameRate;
+    private              JPanel             jPanelUniverseGuiConfig;
+    private              JPanel             jPanelUniverseProperties;
+    private              JPanel             jPanelUniverseStep;
+    private              JTabbedPane        jTabbedPane;
+    private              JTable             jTableEvents;
+    private              JTable             jTablePlanets;
+    private              JTable             jTableSelectedPlanetFactories;
+    private              JTable             jTableSelectedPlanetGoods;
+    private              JTable             jTableSelectedPlanetSims;
+    private              JTable             jTableSelectedTraderGoods;
+    private              JTable             jTableSelectedTraderNeeds;
+    private              JTable             jTableSystems;
+    private              JTable             jTableTraders;
+    private              JToolBar           jToolBarMain;
     // -------------------------------------------------------------------------
     // ---Planets
     // -------------------------------------------------------------------------
     int lastTablePlanetsRowIndex = -1;
-    private boolean            enableEventFiring = true;
-    private JTextField         fieldSelectedPlanetCredits;
-    private JTextField         fieldSelectedPlanetName;
-    private JTextField         fieldSelectedTraderCredits;
-    private JTextField         fieldSelectedTraderName;
-    private JTextField         fieldUniverseCredits;
-    private JTextField         fieldUniverseTime;
-    private JButton            jButtonExit;
-    private JButton            jButtonUniverseStart;
-    private JButton            jButtonUniverseStep;
-    private JButton            jButtonUniverseStop;
-    private javax.swing.JPanel jContentPane;
-    private JPanel             jPanelEvents;
-    private JPanel             jPanelGui;
-    private JPanel             jPanelGuiNoMenu;
-    private JPanel             jPanelPlanets;
-    private JPanel             jPanelSystems;
-    private JPanel             jPanelTraders;
-    private JPanel             jPanelUniverse;
-    private JPanel             jPanelUniverseCreate;
-    private JPanel             jPanelUniverseFrameRate;
-    private JPanel             jPanelUniverseGuiConfig;
-    private JPanel             jPanelUniverseProperties;
-    private JPanel             jPanelUniverseStep;
-    private JTabbedPane        jTabbedPane;
-    private JTable             jTableEvents;
-    private JTable             jTablePlanets;
-    private JTable             jTableSelectedPlanetFactories;
-    private JTable             jTableSelectedPlanetGoods;
-    private JTable             jTableSelectedPlanetSims;
-    private JTable             jTableSelectedTraderGoods;
-    private JTable             jTableSelectedTraderNeeds;
-    private JTable             jTableSystems;
-    private JTable             jTableTraders;
-    private JToolBar           jToolBarMain;
+    //	private ScreenListener screen;
+    protected Universe universe;
 
     public MercatorFrame(final Universe universe) throws Exception {
         super();
@@ -283,7 +283,7 @@ public class MercatorFrame extends JFrame {
                     jLabel.setText("Planets");
                     final JPanel jPanel = new JPanel();
                     jPanel.setLayout(new GridBagLayout());
-                    jPanel.setBackground(new Color(198, 242, 255));
+//                    jPanel.setBackground(new Color(198, 242, 255));
                     jPanel.add(jLabel, new GridBagConstraints());
                     jPanelGoup1.add(jPanel, BorderLayout.NORTH);
                 }
@@ -336,7 +336,7 @@ public class MercatorFrame extends JFrame {
                         jLabel.setText("Selected Planet");
                         final JPanel jPanel = new JPanel();
                         jPanel.setLayout(new GridBagLayout());
-                        jPanel.setBackground(new Color(198, 242, 255));
+//                        jPanel.setBackground(new Color(198, 242, 255));
                         jPanel.add(jLabel, new GridBagConstraints());
                         jPanelSelectedName.add(jPanel, BorderLayout.NORTH);
                     }
@@ -374,7 +374,7 @@ public class MercatorFrame extends JFrame {
                             jLabel.setText("Goods");
                             final JPanel jPanel = new JPanel();
                             jPanel.setLayout(new GridBagLayout());
-                            jPanel.setBackground(new Color(198, 242, 255));
+//                            jPanel.setBackground(new Color(198, 242, 255));
                             jPanel.add(jLabel, new GridBagConstraints());
                             jPanelGoods.add(jPanel, BorderLayout.NORTH);
                         }
@@ -396,7 +396,7 @@ public class MercatorFrame extends JFrame {
                             jLabel.setText("Factories");
                             final JPanel jPanel = new JPanel();
                             jPanel.setLayout(new GridBagLayout());
-                            jPanel.setBackground(new Color(198, 242, 255));
+//                            jPanel.setBackground(new Color(198, 242, 255));
                             jPanel.add(jLabel, new GridBagConstraints());
                             jPanelFactories.add(jPanel, BorderLayout.NORTH);
                         }
@@ -415,7 +415,7 @@ public class MercatorFrame extends JFrame {
                                 jLabel.setText("Sims");
                                 final JPanel jPanel = new JPanel();
                                 jPanel.setLayout(new GridBagLayout());
-                                jPanel.setBackground(new Color(198, 242, 255));
+//                                jPanel.setBackground(new Color(198, 242, 255));
                                 jPanel.add(jLabel, new GridBagConstraints());
                                 jPanelSims.add(jPanel, BorderLayout.NORTH);
                             }
@@ -519,7 +519,7 @@ public class MercatorFrame extends JFrame {
                         jLabel.setText("Selected Trader");
                         final JPanel jPanel = new JPanel();
                         jPanel.setLayout(new GridBagLayout());
-                        jPanel.setBackground(new Color(198, 242, 255));
+//                        jPanel.setBackground(new Color(198, 242, 255));
                         jPanel.add(jLabel, new GridBagConstraints());
                         jPanelSelectedName.add(jPanel, BorderLayout.NORTH);
                     }
@@ -559,7 +559,7 @@ public class MercatorFrame extends JFrame {
                             jLabel.setText("Needs");
                             final JPanel jPanel = new JPanel();
                             jPanel.setLayout(new GridBagLayout());
-                            jPanel.setBackground(new Color(198, 242, 255));
+//                            jPanel.setBackground(new Color(198, 242, 255));
                             jPanel.add(jLabel, new GridBagConstraints());
                             jPanelTraderNeeds.add(jPanel, BorderLayout.NORTH);
                         }
@@ -581,7 +581,7 @@ public class MercatorFrame extends JFrame {
                             jLabel.setText("Goods");
                             final JPanel jPanel = new JPanel();
                             jPanel.setLayout(new GridBagLayout());
-                            jPanel.setBackground(new Color(198, 242, 255));
+//                            jPanel.setBackground(new Color(198, 242, 255));
                             jPanel.add(jLabel, new GridBagConstraints());
                             jPanelGoods.add(jPanel, BorderLayout.NORTH);
                         }
@@ -648,7 +648,7 @@ public class MercatorFrame extends JFrame {
             final JPanel jPanelCaption = new JPanel();
             jPanelCaption.setLayout(new GridBagLayout());
             jPanelCaption.add(jLabelCaption, new GridBagConstraints());
-            jPanelCaption.setBackground(new Color(198, 242, 255));
+//            jPanelCaption.setBackground(new Color(198, 242, 255));
 
             final JButton jButtonCreate = new JButton();
             jButtonCreate.setText("Create");
@@ -704,7 +704,7 @@ public class MercatorFrame extends JFrame {
             final JPanel jPanelCaption = new JPanel();
             jPanelCaption.setLayout(new GridBagLayout());
             jPanelCaption.add(jLabelCaption, new GridBagConstraints());
-            jPanelCaption.setBackground(new Color(198, 242, 255));
+//            jPanelCaption.setBackground(new Color(198, 242, 255));
 
             final JToolBar    jToolBar    = new JToolBar();
             final ButtonGroup buttonGroup = new ButtonGroup();
@@ -770,7 +770,7 @@ public class MercatorFrame extends JFrame {
                 jLabel.setText("Universe properties");
                 final JPanel jPanel = new JPanel();
                 jPanel.setLayout(new GridBagLayout());
-                jPanel.setBackground(new Color(198, 242, 255));
+//                jPanel.setBackground(new Color(198, 242, 255));
                 jPanel.add(jLabel, new GridBagConstraints());
                 jPanelUniverseProperties.add(jPanel, BorderLayout.NORTH);
             }
@@ -813,7 +813,7 @@ public class MercatorFrame extends JFrame {
                 final JPanel jPanel = new JPanel();
                 jPanel.setLayout(new GridBagLayout());
                 jPanel.add(jLabel, new GridBagConstraints());
-                jPanel.setBackground(new Color(198, 242, 255));
+//                jPanel.setBackground(new Color(198, 242, 255));
                 jPanelUniverseStep.add(jPanel, BorderLayout.NORTH);
             }
             {

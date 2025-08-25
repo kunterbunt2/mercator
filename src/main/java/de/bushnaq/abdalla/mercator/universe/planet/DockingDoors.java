@@ -20,9 +20,9 @@ import com.badlogic.gdx.Gdx;
 import de.bushnaq.abdalla.engine.RenderEngine3D;
 import de.bushnaq.abdalla.engine.audio.OggPlayer;
 import de.bushnaq.abdalla.engine.audio.OpenAlException;
+import de.bushnaq.abdalla.engine.event.EventLevel;
 import de.bushnaq.abdalla.mercator.engine.AtlasManager;
 import de.bushnaq.abdalla.mercator.engine.GameEngine3D;
-import de.bushnaq.abdalla.engine.event.EventLevel;
 
 import java.util.ArrayList;
 
@@ -60,6 +60,10 @@ public class DockingDoors extends ArrayList<DockingDoor> {
         } catch (OpenAlException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public DockingDoor.DockingDoorState getDockingDoorStatus() {
+        return get(0).getDockingDoorState();
     }
 
     public void render(RenderEngine3D<GameEngine3D> renderEngine) throws OpenAlException {

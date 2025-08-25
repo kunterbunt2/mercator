@@ -18,12 +18,16 @@ package de.bushnaq.abdalla.mercator.ui.frame;
 
 import de.bushnaq.abdalla.mercator.universe.Universe;
 import de.bushnaq.abdalla.mercator.universe.planet.Planet;
+import de.bushnaq.abdalla.mercator.universe.sim.trader.Trader;
 
 import javax.swing.*;
 import javax.swing.border.LineBorder;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableRowSorter;
 import java.awt.*;
 import java.awt.event.*;
 
@@ -33,12 +37,7 @@ import java.awt.event.*;
 public class MercatorFrame extends JFrame {
     private static final int                FORM_WIDTH                      = 1400;
     private static final int                UNIVERSE_GENERATION_RANDOM_SEED = 0;
-    private static final long               serialVersionUID                = -614297318910428464L;
     private              boolean            enableEventFiring               = true;
-    private              JTextField         fieldSelectedPlanetCredits;
-    private              JTextField         fieldSelectedPlanetName;
-    private              JTextField         fieldSelectedTraderCredits;
-    private              JTextField         fieldSelectedTraderName;
     private              JTextField         fieldUniverseCredits;
     private              JTextField         fieldUniverseTime;
     private              JButton            jButtonExit;
@@ -61,26 +60,150 @@ public class MercatorFrame extends JFrame {
     private              JTabbedPane        jTabbedPane;
     private              JTable             jTableEvents;
     private              JTable             jTablePlanets;
+    private              JTable             jTableSelectedPlanetEvents;
     private              JTable             jTableSelectedPlanetFactories;
     private              JTable             jTableSelectedPlanetGoods;
+    private              JTable             jTableSelectedPlanetSimEvents;
     private              JTable             jTableSelectedPlanetSims;
+    private              JTable             jTableSelectedTraderEvents;
     private              JTable             jTableSelectedTraderGoods;
     private              JTable             jTableSelectedTraderNeeds;
+    private              JTable             jTableSelectedTraderSimEvents;
     private              JTable             jTableSystems;
     private              JTable             jTableTraders;
     private              JToolBar           jToolBarMain;
-    // -------------------------------------------------------------------------
-    // ---Planets
-    // -------------------------------------------------------------------------
-    int lastTablePlanetsRowIndex = -1;
+    private              int                lastTablePlanetsRowIndex        = -1;
+    private              JTextField         planetCredits;
+    private              JTextField         planetName;
+    private              JTextField         traderCredits;
+    private              JTextField         traderDestinationPlanet;
+    private              JTextField         traderFilterField;
+    private              JTextField         traderName;
+    private              JTextField         traderNextWaypoint;
+    private              JTextField         traderPreviousWaypoint;
+    private              JTextField         traderSourcePlanet;
     //	private ScreenListener screen;
-    protected Universe universe;
+    private final        Universe           universe;
 
     public MercatorFrame(final Universe universe) throws Exception {
         super();
         this.universe = universe;
         initialize();
 
+    }
+
+    private void createPlanetInfo(JTabbedPane jPlanetTabbedPane) {
+        // Info tab - move the planet details here
+        {
+            final JPanel jPanelPlanetInfo = new JPanel();
+            jPanelPlanetInfo.setLayout(new BorderLayout());
+            {
+                final JPanel jPanel = new JPanel();
+                jPanel.setLayout(new GridLayout(0, 2, 0, 0));
+                {
+                    final JLabel jLabel = new JLabel();
+                    jLabel.setText("Name");
+                    jPanel.add(jLabel);
+                }
+                {
+                    planetName = new JTextField();
+                    planetName.setColumns(10);
+                    jPanel.add(planetName);
+                }
+                {
+                    final JLabel jLabel = new JLabel();
+                    jLabel.setText("Credits");
+                    jPanel.add(jLabel);
+                }
+                {
+                    planetCredits = new JTextField();
+                    planetCredits.setColumns(10);
+                    jPanel.add(planetCredits);
+                }
+                jPanelPlanetInfo.add(jPanel, BorderLayout.NORTH);
+            }
+            jPlanetTabbedPane.addTab("Info", null, jPanelPlanetInfo, "Planet's basic information");
+        }
+    }
+
+    private void createTraderInfo(JTabbedPane jTraderTabbedPane) {
+        // Info tab - move the trader details here
+        {
+            final JPanel jPanelTraderInfo = new JPanel();
+            jPanelTraderInfo.setLayout(new BorderLayout());
+            {
+                final JPanel jPanel = new JPanel();
+                jPanel.setLayout(new GridLayout(0, 2, 5, 5)); // Added spacing between components
+                {
+                    final JLabel jLabel = new JLabel();
+                    jLabel.setText("Name");
+                    jPanel.add(jLabel);
+                }
+                {
+                    traderName = new JTextField();
+                    traderName.setColumns(10);
+                    traderName.setEditable(false);
+                    jPanel.add(traderName);
+                }
+                {
+                    final JLabel jLabel = new JLabel();
+                    jLabel.setText("Credits");
+                    jPanel.add(jLabel);
+                }
+                {
+                    traderCredits = new JTextField();
+                    traderCredits.setColumns(10);
+                    traderCredits.setEditable(false);
+                    jPanel.add(traderCredits);
+                }
+                {
+                    final JLabel jLabel = new JLabel();
+                    jLabel.setText("Destination Planet");
+                    jPanel.add(jLabel);
+                }
+                {
+                    traderDestinationPlanet = new JTextField();
+                    traderDestinationPlanet.setColumns(10);
+                    traderDestinationPlanet.setEditable(false);
+                    jPanel.add(traderDestinationPlanet);
+                }
+                {
+                    final JLabel jLabel = new JLabel();
+                    jLabel.setText("Next Waypoint");
+                    jPanel.add(jLabel);
+                }
+                {
+                    traderNextWaypoint = new JTextField();
+                    traderNextWaypoint.setColumns(10);
+                    traderNextWaypoint.setEditable(false);
+                    jPanel.add(traderNextWaypoint);
+                }
+                {
+                    final JLabel jLabel = new JLabel();
+                    jLabel.setText("Previous Waypoint");
+                    jPanel.add(jLabel);
+                }
+                {
+                    traderPreviousWaypoint = new JTextField();
+                    traderPreviousWaypoint.setColumns(10);
+                    traderPreviousWaypoint.setEditable(false);
+                    jPanel.add(traderPreviousWaypoint);
+                }
+                {
+                    final JLabel jLabel = new JLabel();
+                    jLabel.setText("Source Planet");
+                    jPanel.add(jLabel);
+                }
+                {
+                    traderSourcePlanet = new JTextField();
+                    traderSourcePlanet.setColumns(10);
+                    traderSourcePlanet.setEditable(false);
+                    jPanel.add(traderSourcePlanet);
+                }
+                jPanelTraderInfo.add(jPanel, BorderLayout.NORTH);
+            }
+            jTraderTabbedPane.addTab("Info", null, jPanelTraderInfo, "Trader's basic information");
+        }
     }
 
     protected void drawUniverse() {
@@ -96,7 +219,12 @@ public class MercatorFrame extends JFrame {
             ((AbstractTableModel) jTableTraders.getModel()).fireTableDataChanged();
             if (rowIndex > -1) {
                 // rowIndex = jTablePlanets.convertRowIndexToModel( rowIndex );
-                jTableTraders.setRowSelectionInterval(rowIndex, rowIndex);
+//                jTableTraders.setRowSelectionInterval(rowIndex, rowIndex);
+                // Convert model index to view index for filtered table
+                int viewIndex = jTableTraders.convertRowIndexToView(rowIndex);
+                if (viewIndex > -1) {
+                    jTableTraders.setRowSelectionInterval(viewIndex, viewIndex);
+                }
             }
 
         }
@@ -109,6 +237,8 @@ public class MercatorFrame extends JFrame {
         }
         ((AbstractTableModel) jTableSelectedTraderGoods.getModel()).fireTableDataChanged();
         ((AbstractTableModel) jTableSelectedTraderNeeds.getModel()).fireTableDataChanged();
+        ((AbstractTableModel) jTableSelectedTraderEvents.getModel()).fireTableDataChanged();
+        ((AbstractTableModel) jTableSelectedTraderSimEvents.getModel()).fireTableDataChanged();
         ((AbstractTableModel) jTableSystems.getModel()).fireTableDataChanged();
         {
             final int oldIndex = jTablePlanets.getSelectedRow();
@@ -138,20 +268,10 @@ public class MercatorFrame extends JFrame {
         ((AbstractTableModel) jTableSelectedPlanetGoods.getModel()).fireTableDataChanged();
         ((AbstractTableModel) jTableSelectedPlanetFactories.getModel()).fireTableDataChanged();
         ((AbstractTableModel) jTableSelectedPlanetSims.getModel()).fireTableDataChanged();
-        if (universe.selectedPlanet != null && !universe.selectedPlanet.getName().equals(fieldSelectedPlanetName.getText())) {
-            fieldSelectedPlanetName.setText(universe.selectedPlanet.getName());
-        }
-        if (universe.selectedPlanet != null && !String.valueOf(universe.selectedPlanet.getCredits()).equals(fieldSelectedPlanetCredits.getText())) {
-            fieldSelectedPlanetCredits.setText(String.valueOf(universe.selectedPlanet.getCredits()));
-        }
-        if (universe.selectedTrader != null) {
-            if (!universe.selectedTrader.getName().equals(fieldSelectedTraderName.getText())) {
-                fieldSelectedTraderName.setText(universe.selectedTrader.getName());
-            }
-            if (!String.valueOf(universe.selectedTrader.getCredits()).equals(fieldSelectedTraderCredits.getText())) {
-                fieldSelectedTraderCredits.setText(String.valueOf(universe.selectedTrader.getCredits()));
-            }
-        }
+        ((AbstractTableModel) jTableSelectedPlanetEvents.getModel()).fireTableDataChanged();
+        ((AbstractTableModel) jTableSelectedPlanetSimEvents.getModel()).fireTableDataChanged();
+        updatePlanetInfo();
+        updateTraderInfo();
         fieldUniverseTime.setText(String.valueOf(universe.currentTime));
         fieldUniverseCredits.setText(String.valueOf(universe.queryCredits(false)));
         enableEventFiring = true;
@@ -200,50 +320,12 @@ public class MercatorFrame extends JFrame {
             jContentPane.setBackground(Color.GREEN);
             jContentPane.setBorder(new LineBorder(new Color(0, 0, 0)));
             jContentPane.setLayout(new java.awt.BorderLayout());
-            jContentPane.add(getEventPanel(), BorderLayout.EAST);
+            // Remove the event panel from the east side to give tables more space
             jContentPane.add(getJPanelGui(), BorderLayout.CENTER);
         }
         return jContentPane;
     }
 
-    /**
-     * This method initializes jPanelMap
-     *
-     * @return javax.swing.JPanel
-     */
-    /*
-     * private RcImagePanel getJPanelMap() { if ( jPanelMap == null ) { jPanelMap =
-     * new RcImagePanel(); jPanelMap.setLayout( new GridBagLayout() );
-     * jPanelMap.setBackground( Color.white ); jPanelMap.setPreferredSize( new
-     * Dimension( 30, 30 ) ); jPanelMap.addComponentListener( new
-     * java.awt.event.ComponentAdapter() {
-     *
-     * @Override public void componentResized( final java.awt.event.ComponentEvent e
-     * ) { drawUniverse( jPanelMap.getImage() ); } } ); jPanelMap.addMouseListener(
-     * new java.awt.event.MouseAdapter() { public void mouseClicked(
-     * java.awt.event.MouseEvent e ) { int virtualX = screen.transformIntoVirtualX(
-     * e.getX() ); int virtualY = screen.transformIntoVirtualY( e.getY() ); if ( (
-     * e.getModifiers() & InputEvent.BUTTON1_MASK ) != 0 ) { if ( e.isShiftDown() )
-     * { screen.moveCenter( e.getX(), e.getY() ); drawUniverse( jPanelMap.getImage()
-     * ); } else { Planet planet = screen.select( virtualX, virtualY ); if ( planet
-     * != null ) { int rowIndex = universe.planetList.indexOf( planet ); rowIndex =
-     * jTablePlanets.getRowSorter().convertRowIndexToView( rowIndex );
-     * jTablePlanets.setRowSelectionInterval( rowIndex, rowIndex ); } drawUniverse(
-     * jPanelMap.getImage() ); }
-     *
-     *
-     * } else if ( ( e.getModifiers() & InputEvent.BUTTON3_MASK ) != 0 ) { if (
-     * e.isShiftDown() ) { screen.moveCenter( e.getX(), e.getY() ); drawUniverse(
-     * jPanelMap.getImage() ); } } }
-     *
-     * } );
-     *
-     * } return jPanelMap; }
-     */
-
-    // -------------------------------------------------------------------------
-    // ---GUI
-    // -------------------------------------------------------------------------
     private JPanel getJPanelGui() {
         if (jPanelGui == null) {
             jPanelGui = new JPanel();
@@ -265,7 +347,7 @@ public class MercatorFrame extends JFrame {
             jPanelGuiNoMenu = new JPanel();
             jPanelGuiNoMenu.setLayout(new BorderLayout());
             //			jPanelGuiNoMenu.setPreferredSize(new Dimension(500, 112));
-            jPanelGuiNoMenu.add(getJTabbedPane(), BorderLayout.NORTH);
+            jPanelGuiNoMenu.add(getJTabbedPane(), BorderLayout.CENTER);
         }
         return jPanelGuiNoMenu;
     }
@@ -283,7 +365,6 @@ public class MercatorFrame extends JFrame {
                     jLabel.setText("Planets");
                     final JPanel jPanel = new JPanel();
                     jPanel.setLayout(new GridBagLayout());
-//                    jPanel.setBackground(new Color(198, 242, 255));
                     jPanel.add(jLabel, new GridBagConstraints());
                     jPanelGoup1.add(jPanel, BorderLayout.NORTH);
                 }
@@ -307,11 +388,7 @@ public class MercatorFrame extends JFrame {
                                                 // TODO Auto-generated catch block
                                                 e1.printStackTrace();
                                             }
-                                        } /*else {
-											lastTablePlanetsRowIndex = -1;
-											jTablePlanets.clearSelection();
-											universe.setSelected(null);
-											}*/
+                                        }
                                     }
                                 }
                             }
@@ -319,120 +396,117 @@ public class MercatorFrame extends JFrame {
                     });
                     jTablePlanets.setFillsViewportHeight(true);
                     final JScrollPane jScroll = new JScrollPane(jTablePlanets);
-                    jScroll.setPreferredSize(new Dimension(-1, 200));
                     jScroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
-                    jPanelGoup1.add(jScroll, BorderLayout.SOUTH);
+                    jPanelGoup1.add(jScroll, BorderLayout.CENTER);
                 }
-                jPanelPlanets.add(jPanelGoup1, BorderLayout.NORTH);
-            }
-            {
+
                 final JPanel jPanelSelected = new JPanel();
                 jPanelSelected.setLayout(new BorderLayout());
                 {
-                    final JPanel jPanelSelectedName = new JPanel();
-                    jPanelSelectedName.setLayout(new BorderLayout());
-                    {
-                        final JLabel jLabel = new JLabel();
-                        jLabel.setText("Selected Planet");
-                        final JPanel jPanel = new JPanel();
-                        jPanel.setLayout(new GridBagLayout());
-//                        jPanel.setBackground(new Color(198, 242, 255));
-                        jPanel.add(jLabel, new GridBagConstraints());
-                        jPanelSelectedName.add(jPanel, BorderLayout.NORTH);
-                    }
-                    {
-                        final JPanel jPanel = new JPanel();
-                        jPanel.setLayout(new GridLayout(0, 2, 0, 0));
-                        {
-                            final JLabel jLabel = new JLabel();
-                            jLabel.setText("Name");
-                            jPanel.add(jLabel);
-                        }
-                        {
-                            fieldSelectedPlanetName = new JTextField();
-                            fieldSelectedPlanetName.setColumns(10);
-                            jPanel.add(fieldSelectedPlanetName);
-                        }
-                        {
-                            final JLabel jLabel = new JLabel();
-                            jLabel.setText("Credits");
-                            jPanel.add(jLabel);
-                        }
-                        {
-                            fieldSelectedPlanetCredits = new JTextField();
-                            fieldSelectedPlanetCredits.setColumns(10);
-                            jPanel.add(fieldSelectedPlanetCredits);
-                        }
-                        jPanelSelectedName.add(jPanel, BorderLayout.SOUTH);
-                    }
-                    jPanelSelected.add(jPanelSelectedName, BorderLayout.NORTH);
+                    final JLabel jLabel = new JLabel();
+                    jLabel.setText("Selected Planet");
+                    final JPanel jPanel = new JPanel();
+                    jPanel.setLayout(new GridBagLayout());
+                    jPanel.add(jLabel, new GridBagConstraints());
+                    jPanelSelected.add(jPanel, BorderLayout.NORTH);
+                }
+                // Create tabbed pane for planet details
+                {
+                    final JTabbedPane jPlanetTabbedPane = new JTabbedPane();
+
+                    createPlanetInfo(jPlanetTabbedPane);
+
+                    // Goods tab
                     {
                         final JPanel jPanelGoods = new JPanel();
                         jPanelGoods.setLayout(new BorderLayout());
                         {
-                            final JLabel jLabel = new JLabel();
-                            jLabel.setText("Goods");
-                            final JPanel jPanel = new JPanel();
-                            jPanel.setLayout(new GridBagLayout());
-//                            jPanel.setBackground(new Color(198, 242, 255));
-                            jPanel.add(jLabel, new GridBagConstraints());
-                            jPanelGoods.add(jPanel, BorderLayout.NORTH);
-                        }
-                        {
                             jTableSelectedPlanetGoods = new JTable(new SelectedPlanetGoodsTableModel(universe));
                             jTableSelectedPlanetGoods.setFillsViewportHeight(true);
                             final JScrollPane jScroll = new JScrollPane(jTableSelectedPlanetGoods);
-                            jScroll.setPreferredSize(new Dimension(-1, 200));
                             jScroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
-                            jPanelGoods.add(jScroll, BorderLayout.SOUTH);
+                            jPanelGoods.add(jScroll, BorderLayout.CENTER);
                         }
-                        jPanelSelected.add(jPanelGoods, BorderLayout.CENTER);
+                        jPlanetTabbedPane.addTab("Goods", null, jPanelGoods, "Planet's goods inventory");
                     }
+
+                    // Factories tab
                     {
                         final JPanel jPanelFactories = new JPanel();
                         jPanelFactories.setLayout(new BorderLayout());
                         {
-                            final JLabel jLabel = new JLabel();
-                            jLabel.setText("Factories");
-                            final JPanel jPanel = new JPanel();
-                            jPanel.setLayout(new GridBagLayout());
-//                            jPanel.setBackground(new Color(198, 242, 255));
-                            jPanel.add(jLabel, new GridBagConstraints());
-                            jPanelFactories.add(jPanel, BorderLayout.NORTH);
-                        }
-                        {
                             jTableSelectedPlanetFactories = new JTable(new SelectedPlanetFactoriesTableModel(universe));
                             jTableSelectedPlanetFactories.setFillsViewportHeight(true);
                             final JScrollPane jScroll = new JScrollPane(jTableSelectedPlanetFactories);
-                            jScroll.setPreferredSize(new Dimension(-1, 200));
                             jPanelFactories.add(jScroll, BorderLayout.CENTER);
                         }
-                        {
-                            final JPanel jPanelSims = new JPanel();
-                            jPanelSims.setLayout(new BorderLayout());
-                            {
-                                final JLabel jLabel = new JLabel();
-                                jLabel.setText("Sims");
-                                final JPanel jPanel = new JPanel();
-                                jPanel.setLayout(new GridBagLayout());
-//                                jPanel.setBackground(new Color(198, 242, 255));
-                                jPanel.add(jLabel, new GridBagConstraints());
-                                jPanelSims.add(jPanel, BorderLayout.NORTH);
-                            }
-                            {
-                                jTableSelectedPlanetSims = new JTable(new SelectedPlanetSimsTableModel(universe));
-                                jTableSelectedPlanetSims.setFillsViewportHeight(true);
-                                final JScrollPane jScroll = new JScrollPane(jTableSelectedPlanetSims);
-                                jScroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
-                                jScroll.setPreferredSize(new Dimension(-1, 200));
-                                jPanelSims.add(jScroll, BorderLayout.SOUTH);
-                            }
-                            jPanelFactories.add(jPanelSims, BorderLayout.SOUTH);
-                        }
-                        jPanelSelected.add(jPanelFactories, BorderLayout.SOUTH);
+                        jPlanetTabbedPane.addTab("Factories", null, jPanelFactories, "Planet's factories");
                     }
+
+                    // Sims tab
+                    {
+                        final JPanel jPanelSims = new JPanel();
+                        jPanelSims.setLayout(new BorderLayout());
+                        {
+                            jTableSelectedPlanetSims = new JTable(new SelectedPlanetSimsTableModel(universe));
+                            jTableSelectedPlanetSims.setFillsViewportHeight(true);
+                            final JScrollPane jScroll = new JScrollPane(jTableSelectedPlanetSims);
+                            jScroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+                            jPanelSims.add(jScroll, BorderLayout.CENTER);
+                        }
+                        jPlanetTabbedPane.addTab("Sims", null, jPanelSims, "Planet's sims (inhabitants)");
+                    }
+
+                    // Events tab (now only non-SimEvents)
+                    {
+                        final JPanel jPanelEvents = new JPanel();
+                        jPanelEvents.setLayout(new BorderLayout());
+                        {
+                            jTableSelectedPlanetEvents = new JTable(new SelectedPlanetEventsTableModel(universe));
+                            jTableSelectedPlanetEvents.setFillsViewportHeight(true);
+                            jTableSelectedPlanetEvents.setAutoCreateRowSorter(true);
+                            jTableSelectedPlanetEvents.getColumnModel().getColumn(0).setPreferredWidth(80);
+                            jTableSelectedPlanetEvents.getColumnModel().getColumn(1).setPreferredWidth(80);
+                            jTableSelectedPlanetEvents.getColumnModel().getColumn(2).setPreferredWidth(60);
+                            jTableSelectedPlanetEvents.getColumnModel().getColumn(3).setPreferredWidth(80);
+                            jTableSelectedPlanetEvents.getColumnModel().getColumn(4).setPreferredWidth(400);
+                            final JScrollPane jScroll = new JScrollPane(jTableSelectedPlanetEvents);
+                            jScroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+                            jPanelEvents.add(jScroll, BorderLayout.CENTER);
+                        }
+                        jPlanetTabbedPane.addTab("Events", null, jPanelEvents, "Planet's general event history");
+                    }
+
+                    // SimEvents tab (only SimEvents)
+                    {
+                        final JPanel jPanelSimEvents = new JPanel();
+                        jPanelSimEvents.setLayout(new BorderLayout());
+                        {
+                            jTableSelectedPlanetSimEvents = new JTable(new SelectedPlanetSimEventsTableModel(universe));
+                            jTableSelectedPlanetSimEvents.setFillsViewportHeight(true);
+                            jTableSelectedPlanetSimEvents.setAutoCreateRowSorter(true);
+                            jTableSelectedPlanetSimEvents.getColumnModel().getColumn(0).setPreferredWidth(80);
+                            jTableSelectedPlanetSimEvents.getColumnModel().getColumn(1).setPreferredWidth(80);
+                            jTableSelectedPlanetSimEvents.getColumnModel().getColumn(2).setPreferredWidth(60);
+                            jTableSelectedPlanetSimEvents.getColumnModel().getColumn(3).setPreferredWidth(80);
+                            jTableSelectedPlanetSimEvents.getColumnModel().getColumn(4).setPreferredWidth(400);
+                            final JScrollPane jScroll = new JScrollPane(jTableSelectedPlanetSimEvents);
+                            jScroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+                            jPanelSimEvents.add(jScroll, BorderLayout.CENTER);
+                        }
+                        jPlanetTabbedPane.addTab("SimEvents", null, jPanelSimEvents, "Planet's simulation event history");
+                    }
+
+                    jPanelSelected.add(jPlanetTabbedPane, BorderLayout.CENTER);
                 }
-                jPanelPlanets.add(jPanelSelected, BorderLayout.SOUTH);
+
+                // Use JSplitPane to create 50/50 split that responds to window resizing
+                final JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, jPanelGoup1, jPanelSelected);
+                splitPane.setResizeWeight(0.5); // 50/50 split
+                splitPane.setOneTouchExpandable(true);
+                splitPane.setContinuousLayout(true);
+
+                jPanelPlanets.add(splitPane, BorderLayout.CENTER);
             }
         }
         return jPanelPlanets;
@@ -474,148 +548,176 @@ public class MercatorFrame extends JFrame {
             jPanelTraders.setLayout(new BorderLayout());
 
             {
-                final JLabel jLabel = new JLabel();
-                jLabel.setText("Traders");
-                final JPanel jPanel = new JPanel();
-                jPanel.setLayout(new GridBagLayout());
-                jPanel.add(jLabel, new GridBagConstraints());
-                jPanelTraders.add(jLabel, BorderLayout.NORTH);
-            }
-            {
-                jTableTraders = new JTable(new TradersTableModel(universe));
-                jTableTraders.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-                jTableTraders.setAutoCreateRowSorter(true);
-                jTableTraders.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
-                    @Override
-                    public void valueChanged(final ListSelectionEvent e) {
-                        if (enableEventFiring) {
-                            if (!e.getValueIsAdjusting()) {
-                                int rowIndex = jTableTraders.getSelectedRow();
-                                if (rowIndex > -1) {
-                                    rowIndex = jTableTraders.convertRowIndexToModel(rowIndex);
-                                    try {
-                                        universe.setSelected(universe.traderList.get(rowIndex), true);
-                                    } catch (final Exception e1) {
-                                        // TODO Auto-generated catch block
-                                        e1.printStackTrace();
+                final JPanel jPanelTradersList = new JPanel();
+                jPanelTradersList.setLayout(new BorderLayout());
+                {
+                    final JLabel jLabel = new JLabel();
+                    jLabel.setText("Traders");
+                    final JPanel jPanel = new JPanel();
+                    jPanel.setLayout(new GridBagLayout());
+                    jPanel.add(jLabel, new GridBagConstraints());
+                    jPanelTradersList.add(jPanel, BorderLayout.NORTH);
+                }
+
+                // Add filter text field
+                {
+                    final JPanel filterPanel = new JPanel();
+                    filterPanel.setLayout(new BorderLayout());
+                    final JLabel filterLabel = new JLabel("Filter by name: ");
+                    traderFilterField = new JTextField();
+                    filterPanel.add(filterLabel, BorderLayout.WEST);
+                    filterPanel.add(traderFilterField, BorderLayout.CENTER);
+                    jPanelTradersList.add(filterPanel, BorderLayout.NORTH);
+                }
+                {
+                    jTableTraders = new JTable(new TradersTableModel(universe));
+                    jTableTraders.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+                    jTableTraders.setAutoCreateRowSorter(true);
+                    // Add filter functionality
+                    final TableRowSorter<TradersTableModel> sorter = new TableRowSorter<>((TradersTableModel) jTableTraders.getModel());
+                    jTableTraders.setRowSorter(sorter);
+
+                    // Get reference to filter field from the panel above
+
+                    traderFilterField.getDocument().addDocumentListener(new DocumentListener() {
+                        @Override
+                        public void changedUpdate(DocumentEvent e) {
+                            updateFilter();
+                        }
+
+                        @Override
+                        public void insertUpdate(DocumentEvent e) {
+                            updateFilter();
+                        }
+
+                        @Override
+                        public void removeUpdate(DocumentEvent e) {
+                            updateFilter();
+                        }
+
+                        private void updateFilter() {
+                            String text = traderFilterField.getText().trim();
+                            if (text.length() == 0) {
+                                sorter.setRowFilter(null);
+                            } else {
+                                sorter.setRowFilter(RowFilter.regexFilter("(?i)" + text, 0)); // Assuming name is in column 0
+                            }
+                        }
+                    });
+                    jTableTraders.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+                        @Override
+                        public void valueChanged(final ListSelectionEvent e) {
+                            if (enableEventFiring) {
+                                if (!e.getValueIsAdjusting()) {
+                                    int rowIndex = jTableTraders.getSelectedRow();
+                                    if (rowIndex > -1) {
+                                        rowIndex = jTableTraders.convertRowIndexToModel(rowIndex);
+                                        try {
+                                            universe.setSelected(universe.traderList.get(rowIndex), true);
+                                        } catch (final Exception e1) {
+                                            // TODO Auto-generated catch block
+                                            e1.printStackTrace();
+                                        }
                                     }
                                 }
                             }
                         }
-                    }
-                });
-                jTableTraders.setFillsViewportHeight(true);
-                final JScrollPane jScroll = new JScrollPane(jTableTraders);
-                jPanelTraders.add(jScroll, BorderLayout.CENTER);
-            }
-            {
+                    });
+                    jTableTraders.setFillsViewportHeight(true);
+                    final JScrollPane jScroll = new JScrollPane(jTableTraders);
+                    jPanelTradersList.add(jScroll, BorderLayout.CENTER);
+                }
+
                 final JPanel jTraderSelected = new JPanel();
                 jTraderSelected.setLayout(new BorderLayout());
                 {
-                    final JPanel jPanelSelectedName = new JPanel();
-                    jPanelSelectedName.setLayout(new BorderLayout());
-                    {
-                        final JLabel jLabel = new JLabel();
-                        jLabel.setText("Selected Trader");
-                        final JPanel jPanel = new JPanel();
-                        jPanel.setLayout(new GridBagLayout());
-//                        jPanel.setBackground(new Color(198, 242, 255));
-                        jPanel.add(jLabel, new GridBagConstraints());
-                        jPanelSelectedName.add(jPanel, BorderLayout.NORTH);
-                    }
-                    {
-                        final JPanel jPanel = new JPanel();
-                        jPanel.setLayout(new GridLayout(0, 2, 0, 0));
-                        {
-                            final JLabel jLabel = new JLabel();
-                            jLabel.setText("Name");
-                            jPanel.add(jLabel);
-                        }
-                        {
-                            fieldSelectedTraderName = new JTextField();
-                            fieldSelectedTraderName.setColumns(10);
-                            jPanel.add(fieldSelectedTraderName);
-                        }
-                        {
-                            final JLabel jLabel = new JLabel();
-                            jLabel.setText("Credit");
-                            jPanel.add(jLabel);
-                        }
-                        {
-                            fieldSelectedTraderCredits = new JTextField();
-                            fieldSelectedTraderCredits.setColumns(10);
-                            jPanel.add(fieldSelectedTraderCredits);
-                        }
-                        jPanelSelectedName.add(jPanel, BorderLayout.SOUTH);
-                        jTraderSelected.add(jPanelSelectedName, BorderLayout.NORTH);
-                    }
-                    //needs panel
+                    final JLabel jLabel = new JLabel();
+                    jLabel.setText("Selected Trader");
+                    final JPanel jPanel = new JPanel();
+                    jPanel.setLayout(new GridBagLayout());
+                    jPanel.add(jLabel, new GridBagConstraints());
+                    jTraderSelected.add(jPanel, BorderLayout.NORTH);
+                }
+                // Create tabbed pane for trader details
+                {
+                    final JTabbedPane jTraderTabbedPane = new JTabbedPane();
+
+                    createTraderInfo(jTraderTabbedPane);
+
+                    // Needs tab
                     {
                         final JPanel jPanelTraderNeeds = new JPanel();
                         jPanelTraderNeeds.setLayout(new BorderLayout());
-                        jPanelTraderNeeds.setPreferredSize(new Dimension(-1, 150));
-                        {
-                            final JLabel jLabel = new JLabel();
-                            jLabel.setText("Needs");
-                            final JPanel jPanel = new JPanel();
-                            jPanel.setLayout(new GridBagLayout());
-//                            jPanel.setBackground(new Color(198, 242, 255));
-                            jPanel.add(jLabel, new GridBagConstraints());
-                            jPanelTraderNeeds.add(jPanel, BorderLayout.NORTH);
-                        }
                         {
                             jTableSelectedTraderNeeds = new JTable(new SelectedTraderNeedsTableModel(universe));
                             jTableSelectedTraderNeeds.setFillsViewportHeight(true);
                             final JScrollPane jScroll = new JScrollPane(jTableSelectedTraderNeeds);
                             jPanelTraderNeeds.add(jScroll, BorderLayout.CENTER);
                         }
-                        jTraderSelected.add(jPanelTraderNeeds, BorderLayout.CENTER);
+                        jTraderTabbedPane.addTab("Needs", null, jPanelTraderNeeds, "Trader's needs");
                     }
-                    //goods panel
+
+                    // Goods tab
                     {
                         final JPanel jPanelGoods = new JPanel();
                         jPanelGoods.setLayout(new BorderLayout());
-                        jPanelGoods.setPreferredSize(new Dimension(-1, 150));
-                        {
-                            final JLabel jLabel = new JLabel();
-                            jLabel.setText("Goods");
-                            final JPanel jPanel = new JPanel();
-                            jPanel.setLayout(new GridBagLayout());
-//                            jPanel.setBackground(new Color(198, 242, 255));
-                            jPanel.add(jLabel, new GridBagConstraints());
-                            jPanelGoods.add(jPanel, BorderLayout.NORTH);
-                        }
                         {
                             jTableSelectedTraderGoods = new JTable(new SelectedTraderGoodsTableModel(universe));
                             jTableSelectedTraderGoods.setFillsViewportHeight(true);
                             final JScrollPane jScroll = new JScrollPane(jTableSelectedTraderGoods);
                             jPanelGoods.add(jScroll, BorderLayout.CENTER);
                         }
-                        jTraderSelected.add(jPanelGoods, BorderLayout.SOUTH);
+                        jTraderTabbedPane.addTab("Goods", null, jPanelGoods, "Trader's goods inventory");
                     }
-                    // {
-                    // JPanel jPanelFactories = new JPanel();
-                    // jPanelFactories.setLayout( new BorderLayout() );
-                    // {
-                    // JLabel jLabel = new JLabel();
-                    // jLabel.setText( "Factories" );
-                    // JPanel jPanel = new JPanel();
-                    // jPanel.setLayout( new GridBagLayout() );
-                    // jPanel.setBackground( new Color( 198, 242, 255 ) );
-                    // jPanel.add( jLabel, new GridBagConstraints() );
-                    // jPanelFactories.add( jPanel, BorderLayout.NORTH );
-                    // }
-                    // {
-                    // jTableSelectedPlanetFactories = new JTable(
-                    // new SelectedPlanetFactoriesTableModel( universe ) );
-                    // jTableSelectedPlanetFactories.setFillsViewportHeight( true );
-                    // jScroll = new JScrollPane( jTableSelectedPlanetFactories );
-                    // jPanelFactories.add( jScroll, BorderLayout.CENTER );
-                    // }
-                    // jTraderSelected.add( jPanelFactories, BorderLayout.SOUTH );
-                    // }
+
+                    // Events tab
+                    {
+                        final JPanel jPanelEvents = new JPanel();
+                        jPanelEvents.setLayout(new BorderLayout());
+                        {
+                            jTableSelectedTraderEvents = new JTable(new SelectedTraderEventsTableModel(universe));
+                            jTableSelectedTraderEvents.setFillsViewportHeight(true);
+                            jTableSelectedTraderEvents.setAutoCreateRowSorter(true);
+                            jTableSelectedTraderEvents.getColumnModel().getColumn(0).setPreferredWidth(80);
+                            jTableSelectedTraderEvents.getColumnModel().getColumn(1).setPreferredWidth(80);
+                            jTableSelectedTraderEvents.getColumnModel().getColumn(2).setPreferredWidth(60);
+                            jTableSelectedTraderEvents.getColumnModel().getColumn(3).setPreferredWidth(80);
+                            jTableSelectedTraderEvents.getColumnModel().getColumn(4).setPreferredWidth(400);
+                            final JScrollPane jScroll = new JScrollPane(jTableSelectedTraderEvents);
+                            jPanelEvents.add(jScroll, BorderLayout.CENTER);
+                        }
+                        jTraderTabbedPane.addTab("Events", null, jPanelEvents, "Trader's general event history");
+                    }
+
+                    // SimEvents tab (only SimEvents)
+                    {
+                        final JPanel jPanelSimEvents = new JPanel();
+                        jPanelSimEvents.setLayout(new BorderLayout());
+                        {
+                            jTableSelectedTraderSimEvents = new JTable(new SelectedTraderSimEventsTableModel(universe));
+                            jTableSelectedTraderSimEvents.setFillsViewportHeight(true);
+                            jTableSelectedTraderSimEvents.setAutoCreateRowSorter(true);
+                            jTableSelectedTraderSimEvents.getColumnModel().getColumn(0).setPreferredWidth(80);
+                            jTableSelectedTraderSimEvents.getColumnModel().getColumn(1).setPreferredWidth(80);
+                            jTableSelectedTraderSimEvents.getColumnModel().getColumn(2).setPreferredWidth(60);
+                            jTableSelectedTraderSimEvents.getColumnModel().getColumn(3).setPreferredWidth(80);
+                            jTableSelectedTraderSimEvents.getColumnModel().getColumn(4).setPreferredWidth(400);
+                            final JScrollPane jScroll = new JScrollPane(jTableSelectedTraderSimEvents);
+                            jPanelSimEvents.add(jScroll, BorderLayout.CENTER);
+                        }
+                        jTraderTabbedPane.addTab("SimEvents", null, jPanelSimEvents, "Trader's simulation event history");
+                    }
+
+                    jTraderSelected.add(jTraderTabbedPane, BorderLayout.CENTER);
                 }
-                jPanelTraders.add(jTraderSelected, BorderLayout.SOUTH);
+
+                // Use JSplitPane to create 50/50 split that responds to window resizing
+                final JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, jPanelTradersList, jTraderSelected);
+                splitPane.setResizeWeight(0.5); // 50/50 split
+                splitPane.setOneTouchExpandable(true);
+                splitPane.setContinuousLayout(true);
+
+                jPanelTraders.add(splitPane, BorderLayout.CENTER);
             }
         }
         return jPanelTraders;
@@ -637,6 +739,22 @@ public class MercatorFrame extends JFrame {
             panel.add(getJPanelUniverseProperties(), null);
 
             jPanelUniverse.add(panel, BorderLayout.NORTH);
+
+            // Add the event panel to the lower part of the Universe tab
+            {
+                final JPanel jPanelEventsWrapper = new JPanel();
+                jPanelEventsWrapper.setLayout(new BorderLayout());
+                {
+                    final JLabel jLabel = new JLabel();
+                    jLabel.setText("Universe Events");
+                    final JPanel jPanel = new JPanel();
+                    jPanel.setLayout(new GridBagLayout());
+                    jPanel.add(jLabel, new GridBagConstraints());
+                    jPanelEventsWrapper.add(jPanel, BorderLayout.NORTH);
+                }
+                jPanelEventsWrapper.add(getEventPanel(), BorderLayout.CENTER);
+                jPanelUniverse.add(jPanelEventsWrapper, BorderLayout.CENTER);
+            }
         }
         return jPanelUniverse;
     }
@@ -910,9 +1028,12 @@ public class MercatorFrame extends JFrame {
     }
 
     private void initialize() throws Exception {
+        // Enable live resizing
+        System.setProperty("sun.awt.noerasebackground", "true");
+        Toolkit.getDefaultToolkit().setDynamicLayout(true);
         this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         this.setSize(new Dimension(FORM_WIDTH, 1000));
-        this.setBackground(Color.RED);
+//        this.setBackground(Color.RED);
         this.setContentPane(getJContentPane());
         this.setTitle("Mercator 1.0");
         this.setExtendedState(Frame.MAXIMIZED_VERT);
@@ -938,6 +1059,41 @@ public class MercatorFrame extends JFrame {
             }
         };
         new Timer(500, taskPerformer).start();
+    }
+
+    private void updatePlanetInfo() {
+        Planet planet = universe.selectedPlanet;
+        if (planet != null && !universe.selectedPlanet.getName().equals(planetName.getText())) {
+            planetName.setText(planet.getName());
+        }
+        if (planet != null && !String.valueOf(planet.getCredits()).equals(planetCredits.getText())) {
+            planetCredits.setText(String.valueOf(planet.getCredits()));
+        }
+    }
+
+    private void updateTraderInfo() {
+        Trader trader = universe.selectedTrader;
+        if (trader != null) {
+            if (!trader.getName().equals(traderName.getText())) {
+                traderName.setText(trader.getName());
+            }
+            if (!String.valueOf(trader.getCredits()).equals(traderCredits.getText())) {
+                traderCredits.setText(String.valueOf(trader.getCredits()));
+            }
+            if (trader.navigator.destinationPlanet != null && !trader.navigator.destinationPlanet.getName().equals(traderDestinationPlanet.getText())) {
+                traderDestinationPlanet.setText(trader.navigator.destinationPlanet.getName());
+            }
+            if (trader.navigator.nextWaypoint != null && !trader.navigator.nextWaypoint.getName().equals(traderNextWaypoint.getText())) {
+                traderNextWaypoint.setText(trader.navigator.nextWaypoint.getName());
+            }
+            if (trader.navigator.previousWaypoint != null && !trader.navigator.previousWaypoint.getName().equals(traderPreviousWaypoint.getText())) {
+                traderPreviousWaypoint.setText(trader.navigator.previousWaypoint.getName());
+            }
+            if (trader.navigator.sourcePlanet != null && !trader.navigator.sourcePlanet.getName().equals(traderSourcePlanet.getText())) {
+                traderSourcePlanet.setText(trader.navigator.sourcePlanet.getName());
+            }
+
+        }
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"

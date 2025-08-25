@@ -47,13 +47,51 @@ public class TraderUI {
     private       JTextField traderNextWaypoint;
     private       JTextField traderPreviousWaypoint;
     private       JTextField traderSourcePlanet;
+    private       JTextField traderStatus;
+    private       JTextField traderSubStatus;
     private final Universe   universe;
 
     public TraderUI(Universe universe) {
         this.universe = universe;
     }
 
-    private void createTraderInfo(JTabbedPane jTraderTabbedPane) {
+    private void createEventsTab(JTabbedPane jTraderTabbedPane) {
+        // Events tab
+        {
+            final JPanel jPanelEvents = new JPanel();
+            jPanelEvents.setLayout(new BorderLayout());
+            {
+                jTableTraderEvents = new JTable(new TraderEventsTableModel(universe));
+                jTableTraderEvents.setFillsViewportHeight(true);
+                jTableTraderEvents.setAutoCreateRowSorter(true);
+                jTableTraderEvents.getColumnModel().getColumn(0).setPreferredWidth(80);
+                jTableTraderEvents.getColumnModel().getColumn(1).setPreferredWidth(80);
+                jTableTraderEvents.getColumnModel().getColumn(2).setPreferredWidth(60);
+                jTableTraderEvents.getColumnModel().getColumn(3).setPreferredWidth(80);
+                jTableTraderEvents.getColumnModel().getColumn(4).setPreferredWidth(400);
+                final JScrollPane jScroll = new JScrollPane(jTableTraderEvents);
+                jPanelEvents.add(jScroll, BorderLayout.CENTER);
+            }
+            jTraderTabbedPane.addTab("Events", null, jPanelEvents, "Trader's general event history");
+        }
+    }
+
+    private void createGoodsTab(JTabbedPane jTraderTabbedPane) {
+        // Goods tab
+        {
+            final JPanel jPanelGoods = new JPanel();
+            jPanelGoods.setLayout(new BorderLayout());
+            {
+                jTableTraderGoods = new JTable(new TraderGoodsTableModel(universe));
+                jTableTraderGoods.setFillsViewportHeight(true);
+                final JScrollPane jScroll = new JScrollPane(jTableTraderGoods);
+                jPanelGoods.add(jScroll, BorderLayout.CENTER);
+            }
+            jTraderTabbedPane.addTab("Goods", null, jPanelGoods, "Trader's goods inventory");
+        }
+    }
+
+    private void createInfoTab(JTabbedPane jTraderTabbedPane) {
         // Info tab - move the trader details here
         {
             final JPanel jPanelTraderInfo = new JPanel();
@@ -127,9 +165,87 @@ public class TraderUI {
                     traderSourcePlanet.setEditable(false);
                     jPanel.add(traderSourcePlanet);
                 }
+                {
+                    final JLabel jLabel = new JLabel();
+                    jLabel.setText("Status");
+                    jPanel.add(jLabel);
+                }
+                {
+                    traderStatus = new JTextField();
+                    traderStatus.setColumns(10);
+                    traderStatus.setEditable(false);
+                    jPanel.add(traderStatus);
+                }
+                {
+                    final JLabel jLabel = new JLabel();
+                    jLabel.setText("Sub-status");
+                    jPanel.add(jLabel);
+                }
+                {
+                    traderSubStatus = new JTextField();
+                    traderSubStatus.setColumns(10);
+                    traderSubStatus.setEditable(false);
+                    jPanel.add(traderSubStatus);
+                }
                 jPanelTraderInfo.add(jPanel, BorderLayout.NORTH);
             }
             jTraderTabbedPane.addTab("Info", null, jPanelTraderInfo, "Trader's basic information");
+        }
+    }
+
+    private void createNeedsTab(JTabbedPane jTraderTabbedPane) {
+        // Needs tab
+        {
+            final JPanel jPanelTraderNeeds = new JPanel();
+            jPanelTraderNeeds.setLayout(new BorderLayout());
+            {
+                jTableTraderNeeds = new JTable(new TraderNeedsTableModel(universe));
+                jTableTraderNeeds.setFillsViewportHeight(true);
+                final JScrollPane jScroll = new JScrollPane(jTableTraderNeeds);
+                jPanelTraderNeeds.add(jScroll, BorderLayout.CENTER);
+            }
+            jTraderTabbedPane.addTab("Needs", null, jPanelTraderNeeds, "Trader's needs");
+        }
+    }
+
+    private void createSimEventsTab(JTabbedPane jTraderTabbedPane) {
+        // SimEvents tab (only SimEvents)
+        {
+            final JPanel jPanelSimEvents = new JPanel();
+            jPanelSimEvents.setLayout(new BorderLayout());
+            {
+                jTableTraderSimEvents = new JTable(new TraderSimEventsTableModel(universe));
+                jTableTraderSimEvents.setFillsViewportHeight(true);
+                jTableTraderSimEvents.setAutoCreateRowSorter(true);
+                jTableTraderSimEvents.getColumnModel().getColumn(0).setPreferredWidth(80);
+                jTableTraderSimEvents.getColumnModel().getColumn(1).setPreferredWidth(80);
+                jTableTraderSimEvents.getColumnModel().getColumn(2).setPreferredWidth(60);
+                jTableTraderSimEvents.getColumnModel().getColumn(3).setPreferredWidth(80);
+                jTableTraderSimEvents.getColumnModel().getColumn(4).setPreferredWidth(400);
+                final JScrollPane jScroll = new JScrollPane(jTableTraderSimEvents);
+                jPanelSimEvents.add(jScroll, BorderLayout.CENTER);
+            }
+            jTraderTabbedPane.addTab("SimEvents", null, jPanelSimEvents, "Trader's simulation event history");
+        }
+    }
+
+    private void createWaypointsTab(JTabbedPane jTraderTabbedPane) {
+        // Waypoints tab
+        {
+            final JPanel jPanelWaypoints = new JPanel();
+            jPanelWaypoints.setLayout(new BorderLayout());
+            {
+                jTableTraderWaypoints = new JTable(new TraderWaypointTableModel(universe));
+                jTableTraderWaypoints.setFillsViewportHeight(true);
+                jTableTraderWaypoints.setAutoCreateRowSorter(true);
+                jTableTraderWaypoints.getColumnModel().getColumn(0).setPreferredWidth(100); // City
+                jTableTraderWaypoints.getColumnModel().getColumn(1).setPreferredWidth(120); // Name
+                jTableTraderWaypoints.getColumnModel().getColumn(2).setPreferredWidth(100); // Sector
+                jTableTraderWaypoints.getColumnModel().getColumn(3).setPreferredWidth(100); // Trader
+                final JScrollPane jScroll = new JScrollPane(jTableTraderWaypoints);
+                jPanelWaypoints.add(jScroll, BorderLayout.CENTER);
+            }
+            jTraderTabbedPane.addTab("Waypoints", null, jPanelWaypoints, "Trader's navigation waypoints");
         }
     }
 
@@ -222,89 +338,12 @@ public class TraderUI {
                 {
                     final JTabbedPane jTraderTabbedPane = new JTabbedPane();
 
-                    createTraderInfo(jTraderTabbedPane);
-
-                    // Needs tab
-                    {
-                        final JPanel jPanelTraderNeeds = new JPanel();
-                        jPanelTraderNeeds.setLayout(new BorderLayout());
-                        {
-                            jTableTraderNeeds = new JTable(new TraderNeedsTableModel(universe));
-                            jTableTraderNeeds.setFillsViewportHeight(true);
-                            final JScrollPane jScroll = new JScrollPane(jTableTraderNeeds);
-                            jPanelTraderNeeds.add(jScroll, BorderLayout.CENTER);
-                        }
-                        jTraderTabbedPane.addTab("Needs", null, jPanelTraderNeeds, "Trader's needs");
-                    }
-
-                    // Goods tab
-                    {
-                        final JPanel jPanelGoods = new JPanel();
-                        jPanelGoods.setLayout(new BorderLayout());
-                        {
-                            jTableTraderGoods = new JTable(new TraderGoodsTableModel(universe));
-                            jTableTraderGoods.setFillsViewportHeight(true);
-                            final JScrollPane jScroll = new JScrollPane(jTableTraderGoods);
-                            jPanelGoods.add(jScroll, BorderLayout.CENTER);
-                        }
-                        jTraderTabbedPane.addTab("Goods", null, jPanelGoods, "Trader's goods inventory");
-                    }
-
-                    // Events tab
-                    {
-                        final JPanel jPanelEvents = new JPanel();
-                        jPanelEvents.setLayout(new BorderLayout());
-                        {
-                            jTableTraderEvents = new JTable(new TraderEventsTableModel(universe));
-                            jTableTraderEvents.setFillsViewportHeight(true);
-                            jTableTraderEvents.setAutoCreateRowSorter(true);
-                            jTableTraderEvents.getColumnModel().getColumn(0).setPreferredWidth(80);
-                            jTableTraderEvents.getColumnModel().getColumn(1).setPreferredWidth(80);
-                            jTableTraderEvents.getColumnModel().getColumn(2).setPreferredWidth(60);
-                            jTableTraderEvents.getColumnModel().getColumn(3).setPreferredWidth(80);
-                            jTableTraderEvents.getColumnModel().getColumn(4).setPreferredWidth(400);
-                            final JScrollPane jScroll = new JScrollPane(jTableTraderEvents);
-                            jPanelEvents.add(jScroll, BorderLayout.CENTER);
-                        }
-                        jTraderTabbedPane.addTab("Events", null, jPanelEvents, "Trader's general event history");
-                    }
-
-                    // SimEvents tab (only SimEvents)
-                    {
-                        final JPanel jPanelSimEvents = new JPanel();
-                        jPanelSimEvents.setLayout(new BorderLayout());
-                        {
-                            jTableTraderSimEvents = new JTable(new TraderSimEventsTableModel(universe));
-                            jTableTraderSimEvents.setFillsViewportHeight(true);
-                            jTableTraderSimEvents.setAutoCreateRowSorter(true);
-                            jTableTraderSimEvents.getColumnModel().getColumn(0).setPreferredWidth(80);
-                            jTableTraderSimEvents.getColumnModel().getColumn(1).setPreferredWidth(80);
-                            jTableTraderSimEvents.getColumnModel().getColumn(2).setPreferredWidth(60);
-                            jTableTraderSimEvents.getColumnModel().getColumn(3).setPreferredWidth(80);
-                            jTableTraderSimEvents.getColumnModel().getColumn(4).setPreferredWidth(400);
-                            final JScrollPane jScroll = new JScrollPane(jTableTraderSimEvents);
-                            jPanelSimEvents.add(jScroll, BorderLayout.CENTER);
-                        }
-                        jTraderTabbedPane.addTab("SimEvents", null, jPanelSimEvents, "Trader's simulation event history");
-                    }
-
-                    // Waypoints tab
-                    {
-                        final JPanel jPanelWaypoints = new JPanel();
-                        jPanelWaypoints.setLayout(new BorderLayout());
-                        {
-                            jTableTraderWaypoints = new JTable(new TraderWaypointTableModel(universe));
-                            jTableTraderWaypoints.setFillsViewportHeight(true);
-                            jTableTraderWaypoints.setAutoCreateRowSorter(true);
-                            jTableTraderWaypoints.getColumnModel().getColumn(0).setPreferredWidth(100); // City
-                            jTableTraderWaypoints.getColumnModel().getColumn(1).setPreferredWidth(120); // Name
-                            jTableTraderWaypoints.getColumnModel().getColumn(2).setPreferredWidth(100); // Sector
-                            jTableTraderWaypoints.getColumnModel().getColumn(3).setPreferredWidth(100); // Trader
-                            final JScrollPane jScroll = new JScrollPane(jTableTraderWaypoints);
-                            jPanelWaypoints.add(jScroll, BorderLayout.CENTER);
-                        }
-                        jTraderTabbedPane.addTab("Waypoints", null, jPanelWaypoints, "Trader's navigation waypoints");
-                    }
+                    createInfoTab(jTraderTabbedPane);
+                    createNeedsTab(jTraderTabbedPane);
+                    createGoodsTab(jTraderTabbedPane);
+                    createEventsTab(jTraderTabbedPane);
+                    createSimEventsTab(jTraderTabbedPane);
+                    createWaypointsTab(jTraderTabbedPane);
 
                     jTraderSelected.add(jTraderTabbedPane, BorderLayout.CENTER);
                 }
@@ -345,6 +384,12 @@ public class TraderUI {
             }
             if (traderSourcePlanet != null && trader.navigator.sourcePlanet != null && !trader.navigator.sourcePlanet.getName().equals(traderSourcePlanet.getText())) {
                 traderSourcePlanet.setText(trader.navigator.sourcePlanet.getName());
+            }
+            if (traderStatus != null && !trader.getTraderStatus().getDisplayName().equals(traderStatus.getText())) {
+                traderStatus.setText(trader.getTraderStatus().getDisplayName());
+            }
+            if (traderSubStatus != null && !trader.getTraderSubStatus().getDisplayName().equals(traderSubStatus.getText())) {
+                traderSubStatus.setText(trader.getTraderSubStatus().getDisplayName());
             }
         }
     }

@@ -53,7 +53,60 @@ public class PlanetUI {
         this.universe = universe;
     }
 
-    private void createPlanetInfo(JTabbedPane jPlanetTabbedPane) {
+    private void createEventsTab(JTabbedPane jPlanetTabbedPane) {
+        // Events tab (now only non-SimEvents)
+        {
+            final JPanel jPanelEvents = new JPanel();
+            jPanelEvents.setLayout(new BorderLayout());
+            {
+                jTablePlanetEvents = new JTable(new PlanetEventsTableModel(universe));
+                jTablePlanetEvents.setFillsViewportHeight(true);
+                jTablePlanetEvents.setAutoCreateRowSorter(true);
+                jTablePlanetEvents.getColumnModel().getColumn(0).setPreferredWidth(80);
+                jTablePlanetEvents.getColumnModel().getColumn(1).setPreferredWidth(80);
+                jTablePlanetEvents.getColumnModel().getColumn(2).setPreferredWidth(60);
+                jTablePlanetEvents.getColumnModel().getColumn(3).setPreferredWidth(80);
+                jTablePlanetEvents.getColumnModel().getColumn(4).setPreferredWidth(400);
+                final JScrollPane jScroll = new JScrollPane(jTablePlanetEvents);
+                jScroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+                jPanelEvents.add(jScroll, BorderLayout.CENTER);
+            }
+            jPlanetTabbedPane.addTab("Events", null, jPanelEvents, "Planet's general event history");
+        }
+    }
+
+    private void createFactoriesTab(JTabbedPane jPlanetTabbedPane) {
+        // Factories tab
+        {
+            final JPanel jPanelFactories = new JPanel();
+            jPanelFactories.setLayout(new BorderLayout());
+            {
+                jTablePlanetFactories = new JTable(new PlanetFactoriesTableModel(universe));
+                jTablePlanetFactories.setFillsViewportHeight(true);
+                final JScrollPane jScroll = new JScrollPane(jTablePlanetFactories);
+                jPanelFactories.add(jScroll, BorderLayout.CENTER);
+            }
+            jPlanetTabbedPane.addTab("Factories", null, jPanelFactories, "Planet's factories");
+        }
+    }
+
+    private void createGoodsTab(JTabbedPane jPlanetTabbedPane) {
+        // Goods tab
+        {
+            final JPanel jPanelGoods = new JPanel();
+            jPanelGoods.setLayout(new BorderLayout());
+            {
+                jTablePlanetGoods = new JTable(new PlanetGoodsTableModel(universe));
+                jTablePlanetGoods.setFillsViewportHeight(true);
+                final JScrollPane jScroll = new JScrollPane(jTablePlanetGoods);
+                jScroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+                jPanelGoods.add(jScroll, BorderLayout.CENTER);
+            }
+            jPlanetTabbedPane.addTab("Goods", null, jPanelGoods, "Planet's goods inventory");
+        }
+    }
+
+    private void createInfoTab(JTabbedPane jPlanetTabbedPane) {
         // Info tab - move the planet details here
         {
             final JPanel jPanelPlanetInfo = new JPanel();
@@ -117,6 +170,44 @@ public class PlanetUI {
                 jPanelPlanetInfo.add(jPanel, BorderLayout.NORTH);
             }
             jPlanetTabbedPane.addTab("Info", null, jPanelPlanetInfo, "Planet's basic information");
+        }
+    }
+
+    private void createSimEventsTab(JTabbedPane jPlanetTabbedPane) {
+        // SimEvents tab (only SimEvents)
+        {
+            final JPanel jPanelSimEvents = new JPanel();
+            jPanelSimEvents.setLayout(new BorderLayout());
+            {
+                jTablePlanetSimEvents = new JTable(new PlanetSimEventsTableModel(universe));
+                jTablePlanetSimEvents.setFillsViewportHeight(true);
+                jTablePlanetSimEvents.setAutoCreateRowSorter(true);
+                jTablePlanetSimEvents.getColumnModel().getColumn(0).setPreferredWidth(80);
+                jTablePlanetSimEvents.getColumnModel().getColumn(1).setPreferredWidth(80);
+                jTablePlanetSimEvents.getColumnModel().getColumn(2).setPreferredWidth(60);
+                jTablePlanetSimEvents.getColumnModel().getColumn(3).setPreferredWidth(80);
+                jTablePlanetSimEvents.getColumnModel().getColumn(4).setPreferredWidth(400);
+                final JScrollPane jScroll = new JScrollPane(jTablePlanetSimEvents);
+                jScroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+                jPanelSimEvents.add(jScroll, BorderLayout.CENTER);
+            }
+            jPlanetTabbedPane.addTab("SimEvents", null, jPanelSimEvents, "Planet's simulation event history");
+        }
+    }
+
+    private void createSimsTab(JTabbedPane jPlanetTabbedPane) {
+        // Sims tab
+        {
+            final JPanel jPanelSims = new JPanel();
+            jPanelSims.setLayout(new BorderLayout());
+            {
+                jTablePlanetSims = new JTable(new PlanetSimsTableModel(universe));
+                jTablePlanetSims.setFillsViewportHeight(true);
+                final JScrollPane jScroll = new JScrollPane(jTablePlanetSims);
+                jScroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+                jPanelSims.add(jScroll, BorderLayout.CENTER);
+            }
+            jPlanetTabbedPane.addTab("Sims", null, jPanelSims, "Planet's sims (inhabitants)");
         }
     }
 
@@ -215,88 +306,12 @@ public class PlanetUI {
                 {
                     final JTabbedPane jPlanetTabbedPane = new JTabbedPane();
 
-                    createPlanetInfo(jPlanetTabbedPane);
-
-                    // Goods tab
-                    {
-                        final JPanel jPanelGoods = new JPanel();
-                        jPanelGoods.setLayout(new BorderLayout());
-                        {
-                            jTablePlanetGoods = new JTable(new PlanetGoodsTableModel(universe));
-                            jTablePlanetGoods.setFillsViewportHeight(true);
-                            final JScrollPane jScroll = new JScrollPane(jTablePlanetGoods);
-                            jScroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
-                            jPanelGoods.add(jScroll, BorderLayout.CENTER);
-                        }
-                        jPlanetTabbedPane.addTab("Goods", null, jPanelGoods, "Planet's goods inventory");
-                    }
-
-                    // Factories tab
-                    {
-                        final JPanel jPanelFactories = new JPanel();
-                        jPanelFactories.setLayout(new BorderLayout());
-                        {
-                            jTablePlanetFactories = new JTable(new PlanetFactoriesTableModel(universe));
-                            jTablePlanetFactories.setFillsViewportHeight(true);
-                            final JScrollPane jScroll = new JScrollPane(jTablePlanetFactories);
-                            jPanelFactories.add(jScroll, BorderLayout.CENTER);
-                        }
-                        jPlanetTabbedPane.addTab("Factories", null, jPanelFactories, "Planet's factories");
-                    }
-
-                    // Sims tab
-                    {
-                        final JPanel jPanelSims = new JPanel();
-                        jPanelSims.setLayout(new BorderLayout());
-                        {
-                            jTablePlanetSims = new JTable(new PlanetSimsTableModel(universe));
-                            jTablePlanetSims.setFillsViewportHeight(true);
-                            final JScrollPane jScroll = new JScrollPane(jTablePlanetSims);
-                            jScroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
-                            jPanelSims.add(jScroll, BorderLayout.CENTER);
-                        }
-                        jPlanetTabbedPane.addTab("Sims", null, jPanelSims, "Planet's sims (inhabitants)");
-                    }
-
-                    // Events tab (now only non-SimEvents)
-                    {
-                        final JPanel jPanelEvents = new JPanel();
-                        jPanelEvents.setLayout(new BorderLayout());
-                        {
-                            jTablePlanetEvents = new JTable(new PlanetEventsTableModel(universe));
-                            jTablePlanetEvents.setFillsViewportHeight(true);
-                            jTablePlanetEvents.setAutoCreateRowSorter(true);
-                            jTablePlanetEvents.getColumnModel().getColumn(0).setPreferredWidth(80);
-                            jTablePlanetEvents.getColumnModel().getColumn(1).setPreferredWidth(80);
-                            jTablePlanetEvents.getColumnModel().getColumn(2).setPreferredWidth(60);
-                            jTablePlanetEvents.getColumnModel().getColumn(3).setPreferredWidth(80);
-                            jTablePlanetEvents.getColumnModel().getColumn(4).setPreferredWidth(400);
-                            final JScrollPane jScroll = new JScrollPane(jTablePlanetEvents);
-                            jScroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
-                            jPanelEvents.add(jScroll, BorderLayout.CENTER);
-                        }
-                        jPlanetTabbedPane.addTab("Events", null, jPanelEvents, "Planet's general event history");
-                    }
-
-                    // SimEvents tab (only SimEvents)
-                    {
-                        final JPanel jPanelSimEvents = new JPanel();
-                        jPanelSimEvents.setLayout(new BorderLayout());
-                        {
-                            jTablePlanetSimEvents = new JTable(new PlanetSimEventsTableModel(universe));
-                            jTablePlanetSimEvents.setFillsViewportHeight(true);
-                            jTablePlanetSimEvents.setAutoCreateRowSorter(true);
-                            jTablePlanetSimEvents.getColumnModel().getColumn(0).setPreferredWidth(80);
-                            jTablePlanetSimEvents.getColumnModel().getColumn(1).setPreferredWidth(80);
-                            jTablePlanetSimEvents.getColumnModel().getColumn(2).setPreferredWidth(60);
-                            jTablePlanetSimEvents.getColumnModel().getColumn(3).setPreferredWidth(80);
-                            jTablePlanetSimEvents.getColumnModel().getColumn(4).setPreferredWidth(400);
-                            final JScrollPane jScroll = new JScrollPane(jTablePlanetSimEvents);
-                            jScroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
-                            jPanelSimEvents.add(jScroll, BorderLayout.CENTER);
-                        }
-                        jPlanetTabbedPane.addTab("SimEvents", null, jPanelSimEvents, "Planet's simulation event history");
-                    }
+                    createInfoTab(jPlanetTabbedPane);
+                    createGoodsTab(jPlanetTabbedPane);
+                    createFactoriesTab(jPlanetTabbedPane);
+                    createSimsTab(jPlanetTabbedPane);
+                    createEventsTab(jPlanetTabbedPane);
+                    createSimEventsTab(jPlanetTabbedPane);
 
                     jPanelSelected.add(jPlanetTabbedPane, BorderLayout.CENTER);
                 }

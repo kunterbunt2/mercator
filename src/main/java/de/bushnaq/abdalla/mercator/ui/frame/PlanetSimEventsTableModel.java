@@ -51,7 +51,7 @@ public class PlanetSimEventsTableModel extends AbstractTableModel {
     }
 
     @Override
-    public int getRowCount() {
+    public synchronized int getRowCount() {
         if (universe.selectedPlanet != null && universe.selectedPlanet.eventManager != null) {
             // Count only SimEvents
             int simEventCount = 0;
@@ -66,7 +66,7 @@ public class PlanetSimEventsTableModel extends AbstractTableModel {
     }
 
     @Override
-    public Object getValueAt(final int rowIndex, final int columnIndex) {
+    public synchronized Object getValueAt(final int rowIndex, final int columnIndex) {
         if (universe.selectedPlanet != null && universe.selectedPlanet.eventManager != null) {
             // Find all SimEvents and reverse the order so newest are on top
             java.util.List<SimEvent> simEvents = new java.util.ArrayList<>();

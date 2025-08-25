@@ -16,8 +16,8 @@
 
 package de.bushnaq.abdalla.mercator.universe.sim;
 
-import de.bushnaq.abdalla.mercator.renderer.Renderable;
 import de.bushnaq.abdalla.engine.event.EventLevel;
+import de.bushnaq.abdalla.mercator.renderer.Renderable;
 import de.bushnaq.abdalla.mercator.universe.event.SimEventManager;
 import de.bushnaq.abdalla.mercator.universe.event.SimEventType;
 import de.bushnaq.abdalla.mercator.universe.factory.ProductionFacility;
@@ -84,15 +84,15 @@ public class Sim extends Renderable implements TradingPartner {
                 Transaction.trade(currentTime, good.type, good.price, 1, planet, this, planet, false);
                 // buy( currentTime, food.type, food.price, 1, planet, planet );
                 // needs.amount = (int)NEEDS_GOODS_EVERY;
-                if (eventManager.enabled) eventManager.add(currentTime, getVolume(), SimEventType.buy, credits, String.format("%d %s for %5.2f from %s.", 1, good.type.getName(), good.price * 1, planet.getName()));
+                if (eventManager.isEnabled()) eventManager.add(currentTime, getVolume(), SimEventType.buy, credits, String.format("%d %s for %5.2f from %s.", 1, good.type.getName(), good.price * 1, planet.getName()));
                 currentConsumedAmount += 1;
                 needs.consume(currentTime);
                 goodList.consume(good.type, 1);
-                if (eventManager.enabled) eventManager.add(currentTime, getVolume(), SimEventType.consue, credits, String.format("%d %s.", 1, good.type.getName()));
+                if (eventManager.isEnabled()) eventManager.add(currentTime, getVolume(), SimEventType.consue, credits, String.format("%d %s.", 1, good.type.getName()));
                 status = SimStatus.LIVING;
             }
             if (calculateStatus(currentTime)) {
-                if (eventManager.enabled) eventManager.add(currentTime, getVolume(), SimEventType.die, credits, "because no food.");
+                if (eventManager.isEnabled()) eventManager.add(currentTime, getVolume(), SimEventType.die, credits, "because no food.");
                 //				planet.universe.eventManager.add(EventLevel.error, currentTime, this, String.format("%s: died because no '%s' available at '%s'.", getName(), good.type.getName(), planet.getName()));
                 return true;
             }
@@ -191,7 +191,7 @@ public class Sim extends Renderable implements TradingPartner {
     @Override
     public void ern(final long currentTime, final float credits) {
         this.credits += credits;
-        if (eventManager.enabled) eventManager.add(currentTime, getVolume(), SimEventType.ern, getCredits(), String.format("%5.2f credits.", credits));
+        if (eventManager.isEnabled()) eventManager.add(currentTime, getVolume(), SimEventType.ern, getCredits(), String.format("%5.2f credits.", credits));
     }
 
     // @Override

@@ -55,7 +55,7 @@ public class PlanetSimEventsTableModel extends AbstractTableModel {
         if (universe.selectedPlanet != null && universe.selectedPlanet.eventManager != null) {
             // Count only SimEvents
             int simEventCount = 0;
-            for (IEvent event : universe.selectedPlanet.eventManager.eventList) {
+            for (IEvent event : universe.selectedPlanet.eventManager.getEventList()) {
                 if (event instanceof SimEvent) {
                     simEventCount++;
                 }
@@ -70,7 +70,7 @@ public class PlanetSimEventsTableModel extends AbstractTableModel {
         if (universe.selectedPlanet != null && universe.selectedPlanet.eventManager != null) {
             // Find all SimEvents and reverse the order so newest are on top
             java.util.List<SimEvent> simEvents = new java.util.ArrayList<>();
-            for (IEvent event : universe.selectedPlanet.eventManager.eventList) {
+            for (IEvent event : universe.selectedPlanet.eventManager.getEventList()) {
                 if (event instanceof SimEvent) {
                     simEvents.add((SimEvent) event);
                 }
@@ -85,11 +85,11 @@ public class PlanetSimEventsTableModel extends AbstractTableModel {
                     case 0:
                         return simEvent.getWhen();
                     case 1:
-                        return simEvent.eventType;
+                        return simEvent.getEventType();
                     case 2:
-                        return simEvent.volume;
+                        return simEvent.getVolume();
                     case 3:
-                        return simEvent.credits;
+                        return simEvent.getCredits();
                     case 4:
                         return simEvent.getWhat();
                     default:

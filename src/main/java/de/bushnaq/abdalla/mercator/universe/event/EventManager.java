@@ -35,11 +35,12 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+
 public class EventManager implements IEventManager {
     protected final Class<?>        classFilter;
     private         boolean         enablePrintEvent     = true;
-    public          boolean         enabled              = false;
-    public          List<IEvent>    eventList            = new ArrayList<>();
+    private final   boolean         enabled              = false;
+    protected final List<IEvent>    eventList            = new ArrayList<>();
     private final   String          fileName;
     private final   ExecutorService fileWriterExecutor   = Executors.newSingleThreadExecutor(r -> {
         Thread t = new Thread(r, "EventFileWriter");
@@ -84,6 +85,11 @@ public class EventManager implements IEventManager {
     }
 
     @Override
+    public void clear() {
+        eventList.clear();
+    }
+
+    @Override
     public List<IEvent> filter(final Object objectFilter) {
         filteredList.clear();
         for (final IEvent e : eventList) {
@@ -108,6 +114,11 @@ public class EventManager implements IEventManager {
             case PlanetCommunicationPartner pcp -> String.format("[PLANET ] %10s | %s | %15s | %s", timeStr, levelStr, pcp.getName(), event.getWhat());
             default -> String.format("[UNKNOWN] %10s | %s | %s | %s", timeStr, levelStr, event.getWho().getClass().getSimpleName(), event.getWhat());
         };
+    }
+
+    @Override
+    public List<IEvent> getEventList() {
+        return eventList;
     }
 
     @Override

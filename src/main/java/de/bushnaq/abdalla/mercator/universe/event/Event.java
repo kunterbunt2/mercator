@@ -29,12 +29,12 @@ import lombok.Getter;
 
 @Getter
 public class Event implements IEvent {
-    static        boolean             enableStackTrace = false;
-    private final EventLevel          level;
-    private       StackTraceElement[] stackTrace;
-    private final String              what;
-    private final long                when;
-    private final Object              who;
+    private static final boolean             enableStackTrace = false;
+    private final        EventLevel          level;
+    private              StackTraceElement[] stackTrace;
+    private final        String              what;
+    private final        long                when;
+    private final        Object              who;
 
     public Event(final EventLevel level, final long when, final Object who, final String what) {
         this.level = level;

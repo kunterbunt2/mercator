@@ -55,7 +55,7 @@ public class TraderEventsTableModel extends AbstractTableModel {
         if (universe.selectedTrader != null && universe.selectedTrader.eventManager != null) {
             // Count only non-SimEvents
             int nonSimEventCount = 0;
-            for (IEvent event : universe.selectedTrader.eventManager.eventList) {
+            for (IEvent event : universe.selectedTrader.eventManager.getEventList()) {
                 if (!(event instanceof SimEvent)) {
                     nonSimEventCount++;
                 }
@@ -70,7 +70,7 @@ public class TraderEventsTableModel extends AbstractTableModel {
         if (universe.selectedTrader != null && universe.selectedTrader.eventManager != null) {
             // Find all non-SimEvents and reverse the order so newest are on top
             java.util.List<IEvent> nonSimEvents = new java.util.ArrayList<>();
-            for (IEvent event : universe.selectedTrader.eventManager.eventList) {
+            for (IEvent event : universe.selectedTrader.eventManager.getEventList()) {
                 if (!(event instanceof SimEvent)) {
                     nonSimEvents.add(event);
                 }

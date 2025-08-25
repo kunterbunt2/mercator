@@ -68,15 +68,6 @@ public class Trader extends Sim {
     public               float                      y                         = TRADER_DOCKING_HEIGHT;
     public               float                      z;
 
-    //    private void alignToWaypoint() {
-//        if (subStatus == TraderSubStatus.TRADER_STATUS_ALIGNING) {
-//            if (destinationWaypointIndex < waypointList.size()) {
-//                maneuveringSystem.startRotation();
-//            } else {
-//                //destinationWaypointIndex is always looking one waypoint ahead
-//                if (Debug.isFilter(getName())
-//                    logger.info("cannot startRotation");
-//            }
     public Trader(int id, final Planet planet, final String name, final float credits) throws Exception {
         super(planet, name, credits);
         eventManager.add(EventLevel.trace, 0, this, String.format("We are docked at '%s'", planet.getName()));
@@ -161,39 +152,6 @@ public class Trader extends Sim {
         return planet.universe.traderCreditBuffer;
     }
 
-//    float calculateAcceleration() {
-//        float amount = 0;
-//        for (final Good g : getGoodList()) {
-//            amount += g.getAmount();
-//        }
-////        return  1 - (amount / MAX_GOOD_SPACE);
-//        return ENGINE_FORCE / amount;
-//    }
-
-//    void calculateEngineSpeed() {
-//        // are we paused?
-//        if (timeDelta == 0)
-//            return;
-//        if (subStatus == TraderSubStatus.TRADER_STATUS_TRAVELLING) {
-//            if (targetWaypoint == null || destinationWaypointDistance == 0) {
-//                engineSpeed = MIN_ENGINE_SPEED;
-//            } else {
-//                float acceleration = calculateAcceleration();
-//                float progress     = destinationWaypointDistanceProgress / destinationWaypointDistance;
-//                if (progress < 0.5) {
-//                    //accelerating
-//                    engineSpeed = Math.max(engineSpeed + acceleration, MIN_ENGINE_SPEED);
-////                    if (Debug.isFilter(getName())) logger.info("engine acceleration currentMaxEngineSpeed=" + engineSpeed);
-//                } else /*if (destinationPlanetDistance - destinationPlanetDistanceProgress <= ACCELLERATION_DISTANCE)*/ {
-//                    //deceleration
-//                    engineSpeed = Math.max(engineSpeed - acceleration, MIN_ENGINE_SPEED);
-////                    if (Debug.isFilter(getName())) logger.info("engine deceleration currentMaxEngineSpeed=" + engineSpeed);
-//                }
-
-    /// /            if (Debug.isFilter(getName())) logger.info("rotation acceleration");
-//            return Math.min(rotationSpeed + acceleration * deltaRealTime * 10, MAX_ROTATION_SPEED);
-//        } else /*if (destinationPlanetDistance - destinationPlanetDistanceProgress <= ACCELLERATION_DISTANCE)*/ {
-//            //deceleration
     private void checkArriving(long currentTime, MercatorRandomGenerator randomGenerator) {
         if (navigator.destinationWaypointDistanceProgress >= navigator.destinationWaypointDistance && TimeUnit.isInt(currentTime)/* ( ( currentTime - (int)currentTime ) == 0.0f ) */) {
             //we reached a waypoint
@@ -300,31 +258,6 @@ public class Trader extends Sim {
         }
     }
 
-//    float calculateRotationAcceleration() {
-//        float amount = 0;
-//        for (final Good g : getGoodList()) {
-//            amount += g.getAmount();
-//        }
-//        return THRUSTER_FORCE / amount;
-//    }
-
-//    private void calculateRotationProgress() {
-//        rotationProgress = calculateAngleDifference(rotation, startRotation) / calculateAngleDifference(endRotation, startRotation);
-//    }
-
-//    float calculateRotationSpeed() {
-//        float deltaRealTime = Gdx.graphics.getDeltaTime();
-//        float acceleration  = calculateRotationAcceleration();
-//        float a1            = calculateAngleDifference(rotation, startRotation);
-//        float a2            = calculateAngleDifference(endRotation, startRotation);
-//        if (rotationProgress < 0.5) {
-//            //accelerating
-
-    /// /                if (Debug.isFilter(trader.getName()))
-    /// /                    logger.info(String.format("destinationWaypointIndex=%d waypointList.size()=%d", destinationWaypointIndex, waypointList.size()));
-//            }
-//        }
-//    }
     private void checkStateEngine(final long currentTime, final MercatorRandomGenerator randomGenerator, PlanetList planetList) throws Exception {
         // ---Every time we use a jump gate, we mark it. This helps to visualize much
         // used jump gates.
@@ -389,35 +322,6 @@ public class Trader extends Sim {
         return value;
     }
 
-    /// /            else {
-    /// /            }
-    /// /            float accelleration = calculateAcceleration();
-    /// /            if (destinationPlanetDistanceProgress <= ACCELLERATION_DISTANCE) {
-    /// /                //accelerating
-    /// /                currentMaxEngineSpeed = Math.max(currentMaxEngineSpeed + accelleration, MIN_ENGINE_SPEED);
-    /// /            } else if (destinationPlanetDistance - destinationPlanetDistanceProgress <= ACCELLERATION_DISTANCE) {
-    /// /                //deceleration
-    /// /                if (Debug.isFilter(getName()))
-    /// /                    logger.info("deceleration");
-    /// /                currentMaxEngineSpeed = Math.max(currentMaxEngineSpeed - accelleration, MIN_ENGINE_SPEED);
-    /// /            } else {
-    /// /            }
-//            }
-//        }
-//    }
-
-//    float calculateAngleDifference(float end, float start) {
-//        if (end - start > 180) {
-//            return 360 + start - end;//lets turn the other way is it is shorter
-//        } else {
-//            return Math.abs(end - start);
-//        }
-//    }
-
-//    public float getEngineSpeed() {
-//        //max engine speed depends on how much goods we are carrying.
-//        return engineSpeed;
-//    }
     public void clearDock(Planet planet) {
         //we are free of the dock
 //        eventManager.add(EventLevel.trace, currentTime, this, String.format("we cleared the dock of '%s'", planet.getName()));//for planet logs
@@ -446,13 +350,6 @@ public class Trader extends Sim {
     public Engine getEngine() {
         return engine;
     }
-
-//    private void normalizeRotation() {
-//        if (rotation < 0)
-//            rotation += 360;
-//        if (rotation > 360)
-//            rotation -= 360;
-//    }
 
     public int getId() {
         return id;
@@ -489,12 +386,6 @@ public class Trader extends Sim {
         } else {
         }
     }
-
-//    public void occupyDock(Planet planet) {
-//        eventManager.add(EventLevel.trace, currentTime, this, String.format("we occupy the dock of '%s'", planet.getName()));//for planet logs
-//        planet.eventManager.add(EventLevel.trace, currentTime, this, String.format("we occupy the dock of '%s'", planet.getName()));//for planet logs
-//        planet.occupyDock(communicationPartner);
-//    }
 
     private boolean planJourney(long currentTime, MercatorRandomGenerator randomGenerator, PlanetList planetList) throws Exception {
         if (traderSubStatus == TraderSubStatus.TRADER_STATUS_DOCKED && TimeUnit.isInt(currentTime)) {

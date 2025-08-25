@@ -55,7 +55,7 @@ public class PlanetEventsTableModel extends AbstractTableModel {
         if (universe.selectedPlanet != null && universe.selectedPlanet.eventManager != null) {
             // Count only non-SimEvents
             int nonSimEventCount = 0;
-            for (IEvent event : universe.selectedPlanet.eventManager.eventList) {
+            for (IEvent event : universe.selectedPlanet.eventManager.getEventList()) {
                 if (!(event instanceof SimEvent)) {
                     nonSimEventCount++;
                 }
@@ -70,7 +70,7 @@ public class PlanetEventsTableModel extends AbstractTableModel {
         if (universe.selectedPlanet != null && universe.selectedPlanet.eventManager != null) {
             // Find all non-SimEvents and reverse the order so newest are on top
             java.util.List<IEvent> nonSimEvents = new java.util.ArrayList<>();
-            for (IEvent event : universe.selectedPlanet.eventManager.eventList) {
+            for (IEvent event : universe.selectedPlanet.eventManager.getEventList()) {
                 if (!(event instanceof SimEvent)) {
                     nonSimEvents.add(event);
                 }

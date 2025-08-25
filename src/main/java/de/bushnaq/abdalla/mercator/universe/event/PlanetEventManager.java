@@ -53,7 +53,7 @@ public class PlanetEventManager extends EventManager {
         out.printf("%3s %4s %4s %7s %8s %s\n", "-ID", "TIME", "-VOL", "CREDITS", "---EVENT", "DESCRIPTION");
         for (final IEvent event : eventList) {
             if (event instanceof SimEvent simEvent) {
-                out.printf("%s %s %4d %7.2f %8s %s\n", planet.getName(), TimeUnit.toString(simEvent.getWhen()), simEvent.volume, simEvent.credits, simEvent.eventType.name, simEvent.getWhat());
+                out.printf("%s %s %4d %7.2f %8s %s\n", planet.getName(), TimeUnit.toString(simEvent.getWhen()), simEvent.getVolume(), simEvent.getCredits(), simEvent.getEventType().name, simEvent.getWhat());
             } else {
 
             }

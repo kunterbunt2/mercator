@@ -33,7 +33,7 @@ public class EventTableModel extends AbstractTableModel {
 
     public EventTableModel(final Universe universe) {
         this.universe     = universe;
-        filteredEventList = universe.eventManager.eventList;
+        filteredEventList = universe.eventManager.getEventList();
     }
 
     @Override

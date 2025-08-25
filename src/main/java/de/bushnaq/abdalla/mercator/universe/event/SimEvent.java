@@ -17,20 +17,18 @@
 package de.bushnaq.abdalla.mercator.universe.event;
 
 import de.bushnaq.abdalla.engine.event.EventLevel;
+import lombok.Getter;
 
+@Getter
 public class SimEvent extends Event {
-    public float        credits;
-    public SimEventType eventType;
-    public int          volume;
-//    public String       what;
-//    public long         when;
+    private final float        credits;
+    private final SimEventType eventType;
+    private final int          volume;
 
     public SimEvent(final long when, final Object who, final int volume, final SimEventType eventType, final float credits, final String what) {
         super(EventLevel.info, when, who, what);
-//        this.when      = when;
         this.volume    = volume;
         this.eventType = eventType;
         this.credits   = credits;
-//        this.what      = what;
     }
 }

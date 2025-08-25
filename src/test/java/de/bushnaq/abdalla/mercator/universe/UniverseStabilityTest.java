@@ -58,8 +58,8 @@ public class UniverseStabilityTest {
                 universe.advanceInTime(100 * TimeUnit.TICKS_PER_DAY);
             }
             if (enableEventLog) {
-                final List<IEvent> eventList0 = universeList[0].eventManager.eventList;
-                final List<IEvent> eventList1 = universeList[1].eventManager.eventList;
+                final List<IEvent> eventList0 = universeList[0].eventManager.getEventList();
+                final List<IEvent> eventList1 = universeList[1].eventManager.getEventList();
                 for (int e = 0; e < Math.min(eventList0.size(), eventList1.size()); e++) {
                     final IEvent event0 = eventList0.get(e);
                     final IEvent event1 = eventList1.get(e);
@@ -93,7 +93,7 @@ public class UniverseStabilityTest {
                 }
                 assertEquals(eventList0.size(), eventList1.size(), String.format("in year %.2f in universe [size %d] event size is different", universeList[0].currentTime / 100f, UNIVERSE_SIZE));
                 for (final Universe universe : universeList) {
-                    universe.eventManager.eventList.clear();
+                    universe.eventManager.getEventList().clear();
                 }
             }
         }

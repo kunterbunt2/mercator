@@ -49,8 +49,8 @@ public class RandomGeneratorTest {
             results1[i] = g1.nextInt(i, this, 3);
             empty       = (float) Math.random();
             if (results0[i] != results1[i]) {
-                final List<IEvent> eventList0 = eventManager0.eventList;
-                final List<IEvent> eventList1 = eventManager1.eventList;
+                final List<IEvent> eventList0 = eventManager0.getEventList();
+                final List<IEvent> eventList1 = eventManager1.getEventList();
                 for (int e = 0; e < Math.min(eventList0.size(), eventList1.size()); e++) {
                     final IEvent event0 = eventList0.get(e);
                     final IEvent event1 = eventList1.get(e);
@@ -88,8 +88,8 @@ public class RandomGeneratorTest {
         //		System.out.println(results0[1818]);
         for (int i = 0; i < MAX_TEXT_LENGTH; i++) {
             if (results0[i] != results1[i]) {
-                final List<IEvent> eventList0 = eventManager0.eventList;
-                final List<IEvent> eventList1 = eventManager1.eventList;
+                final List<IEvent> eventList0 = eventManager0.getEventList();
+                final List<IEvent> eventList1 = eventManager1.getEventList();
                 for (int e = 0; e < Math.min(eventList0.size(), eventList1.size()); e++) {
                     final IEvent event0 = eventList0.get(e);
                     final IEvent event1 = eventList1.get(e);

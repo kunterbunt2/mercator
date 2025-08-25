@@ -212,7 +212,7 @@ public class Universe {
 
     public void advanceInTime(final long days) throws Exception {
         logger.info("----------------------------------------------------------------------------------");
-        eventManager.eventList.clear();
+        eventManager.clear();
         final long time  = System.currentTimeMillis();
         final long start = currentTime;
         logger.info(String.format("aging universe %s at %s for %s years...", getName(), TimeUnit.toString(start), TimeUnit.toString(days)));

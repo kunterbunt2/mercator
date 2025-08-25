@@ -121,7 +121,7 @@ public class MercatorFrame extends JFrame {
                                 int rowIndex = jTableEvents.getSelectedRow();
                                 if (rowIndex > -1) {
                                     rowIndex = jTableEvents.convertRowIndexToModel(rowIndex);
-                                    universe.selectEvent(universe.eventManager.eventList.get(rowIndex));
+                                    universe.selectEvent(universe.eventManager.getEventList().get(rowIndex));
                                 }
                             }
                         }

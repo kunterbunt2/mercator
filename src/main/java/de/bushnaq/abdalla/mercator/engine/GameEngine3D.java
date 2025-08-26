@@ -41,7 +41,8 @@ import de.bushnaq.abdalla.mercator.engine.ai.MercatorSystemPrompts;
 import de.bushnaq.abdalla.mercator.engine.audio.synthesis.MercatorAudioEngine;
 import de.bushnaq.abdalla.mercator.engine.camera.CameraProperties;
 import de.bushnaq.abdalla.mercator.engine.camera.ZoomingCameraInputController;
-import de.bushnaq.abdalla.mercator.engine.demo.Demo;
+import de.bushnaq.abdalla.mercator.engine.demo.Demo1;
+import de.bushnaq.abdalla.mercator.engine.demo.Demo2;
 import de.bushnaq.abdalla.mercator.renderer.ScreenListener;
 import de.bushnaq.abdalla.mercator.renderer.ShowGood;
 import de.bushnaq.abdalla.mercator.ui.Info;
@@ -56,6 +57,8 @@ import de.bushnaq.abdalla.mercator.util.Debug;
 import de.bushnaq.abdalla.mercator.util.TimeAccuracy;
 import de.bushnaq.abdalla.mercator.util.TimeUnit;
 import de.bushnaq.abdalla.mercator.util.TimeUtil;
+import lombok.Getter;
+import lombok.Setter;
 import net.mgsx.gltf.scene3d.attributes.PBRCubemapAttribute;
 import net.mgsx.gltf.scene3d.attributes.PBRFloatAttribute;
 import net.mgsx.gltf.scene3d.attributes.PBRTextureAttribute;
@@ -114,7 +117,9 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
     //    private final        GameObject<GameEngine3D>     ocean                         = null;
     public               AudioEngine                  audioEngine                   = new MercatorAudioEngine();
     private              Texture                      brdfLUT;
+    @Getter
     private              ZoomingCameraInputController camController;
+    @Getter
     private              MovingCamera                 camera;
     private              OrthographicCamera           camera2D;
     List<CelestialBody> celestialBodyList = new ArrayList<>();
@@ -123,7 +128,8 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
     private       float           centerZD;
     private       Context         context;
     private final IContextFactory contextFactory;
-    private       Demo            demo;
+    private       Demo1           demo1;
+    private       Demo2           demo2;
     //    private       float            dayAmbientIntensityB            = 1f;
 //    private       float            dayAmbientIntensityG            = 1f;
 //    private       float            dayAmbientIntensityR            = 1f;
@@ -139,21 +145,42 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
     Map<Integer, EnvironmentSnapshot> environmentSnapshotMap = new HashMap<>();
     private       boolean                      followMode;
     //    private              BitmapFont                   font;
-    private       boolean                      hrtfEnabled      = true;
+    private       boolean                      hrtfEnabled          = true;
     private       Info                         info;
-    private       boolean                      infoVisible;
-    private final InputMultiplexer             inputMultiplexer = new InputMultiplexer();
+    private final InputMultiplexer             inputMultiplexer     = new InputMultiplexer();
     private       GameObject<GameEngine3D>     instance;//TODO
-    private final List<Label>                  labels           = new ArrayList<>();
-    private       long                         lastCameraDirty  = 0;
+    private final List<Label>                  labels               = new ArrayList<>();
+    private       long                         lastCameraDirty      = 0;
     public        LaunchMode                   launchMode;
-    private final Logger                       logger           = LoggerFactory.getLogger(this.getClass());
+    private final Logger                       logger               = LoggerFactory.getLogger(this.getClass());
     public        OggPlayer                    oggPlayer;
-    private final boolean                      old              = true;
+    private final boolean                      old                  = true;
     public        RenderEngine3D<GameEngine3D> renderEngine;
-    //    private              Render2DMaster               render2DMaster;
-    private       boolean                      showFps;
-    public        ShowGood                     showGood         = ShowGood.Name;
+    @Getter
+    @Setter
+    private       boolean                      showAudioSources     = false;
+    @Getter
+    @Setter
+    private       boolean                      showCameraInfo       = false;
+    @Getter
+    @Setter
+    private       boolean                      showDemo2Info        = false;
+    @Getter
+    @Setter
+    private       boolean                      showDepthOfFieldInfo = false;
+    @Getter
+    @Setter
+    private       boolean                      showFps              = false;
+    public        ShowGood                     showGood             = ShowGood.Name;
+    @Getter
+    @Setter
+    private       boolean                      showInfo             = false;
+    @Getter
+    @Setter
+    private       boolean                      showTime             = true;
+    @Getter
+    @Setter
+    private       boolean                      showUniverseTime     = false;
     private       Cubemap                      specularCubemap;
     private       Stage                        stage;
     private       StringBuilder                stringBuilder;
@@ -162,8 +189,9 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
     private       boolean                      takeScreenShot;
     private       float                        timeOfDay;
     //	private ModelInstance uberModelInstance;
+    @Getter
     public final  Universe                     universe;
-    private       boolean                      vsyncEnabled     = true;
+    private       boolean                      vsyncEnabled         = true;
 
     public GameEngine3D(final IContextFactory contextFactory, final Universe universe, final LaunchMode launchMode) throws Exception {
         this.contextFactory = contextFactory;
@@ -286,7 +314,8 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
 //			createLand();
             createJumpGates();
 
-            demo      = new Demo(this, launchMode);
+            demo1     = new Demo1(this, launchMode);
+            demo2     = new Demo2(this, launchMode);
             subtitles = new Subtitles(this);
 
             if (universe.selected != null) {
@@ -375,7 +404,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
                         }
                     }
 
-                    celestialBodyList.get(0).getDirection().set(sun.direction);
+                    celestialBodyList.getFirst().getDirection().set(sun.direction);
                     for (CelestialBody cb : celestialBodyList) {
                         myIBLBuilder.Light light = new myIBLBuilder.Light();
                         light.direction.set(cb.getDirection());
@@ -700,14 +729,6 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
     //		return myCanvas.getCanvas();
     //	}
 
-    public ZoomingCameraInputController getCamController() {
-        return camController;
-    }
-
-    public MovingCamera getCamera() {
-        return camera;
-    }
-
     public int getCameraZoomIndex() {
         return camController.zoomIndex;
     }
@@ -775,10 +796,6 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
             // distinctiveColorlist.add( new Color( low, low, low, alpha ) );
         }
         // distinctiveColorArray = distinctiveColorlist.toArray( new Color[0] );
-    }
-
-    public boolean isInfoVisible() {
-        return infoVisible;
     }
 
     @Override
@@ -849,12 +866,27 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
                 renderEngine.setAlwaysDay(!renderEngine.isAlwaysDay());
                 return true;
             case Input.Keys.F6:
-                if (launchMode == LaunchMode.demo) launchMode = LaunchMode.normal;
-                else launchMode = LaunchMode.demo;
-                try {
-                    demo.startDemoMode();
-                } catch (OpenAlException e) {
-                    throw new RuntimeException(e);
+                switch (launchMode) {
+                    case normal:
+                    case development:
+                        launchMode = LaunchMode.demo1;
+                        try {
+                            demo1.startDemoMode();
+                        } catch (OpenAlException e) {
+                            throw new RuntimeException(e);
+                        }
+                        break;
+                    case demo1:
+                        launchMode = LaunchMode.demo2;
+                        try {
+                            demo2.startDemoMode();
+                        } catch (OpenAlException e) {
+                            throw new RuntimeException(e);
+                        }
+                        break;
+                    case demo2:
+                        launchMode = LaunchMode.normal;
+                        break;
                 }
                 return true;
 
@@ -886,7 +918,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
                 }
                 return true;
             case Input.Keys.I:
-                setInfoVisible(!isInfoVisible());
+                setShowInfo(!isShowInfo());
                 return true;
             case Input.Keys.V:
                 vsyncEnabled = !vsyncEnabled;
@@ -1066,8 +1098,10 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
 //        renderEngine.postProcessRender();
 
         renderEngine.renderEngine2D.batch.begin();
-        renderUniverse();
-        demo.renderDemo(deltaTime);
+        if (showUniverseTime)
+            renderUniverse();
+        demo1.renderDemo(deltaTime);
+        demo2.renderDemo(deltaTime);
         subtitles.render(deltaTime);
         renderEngine.renderEngine2D.batch.end();
 
@@ -1120,7 +1154,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
     }
 
     private void renderStage() throws Exception {
-        if (infoVisible) {
+        if (showInfo) {
             info.update(universe, universe.selected, renderEngine);
             info.act(Gdx.graphics.getDeltaTime());
             info.draw();
@@ -1134,35 +1168,42 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
             labels.get(labelIndex).setText(stringBuilder);
             labelIndex++;
         }
-        //demo mode
-        if (launchMode == LaunchMode.demo) {
+        //demo1 mode
+        if (launchMode == LaunchMode.demo1) {
             stringBuilder.setLength(0);
-            stringBuilder.append(String.format(" demo time=%s, demo index = %d, ambient music=%s", TimeUtil.create24hDurationString(System.currentTimeMillis() - demo.startTime, true, false, true, true, false), demo.index, demo.files[demo.index]));
+            stringBuilder.append(String.format(" demo1 time=%s, demo1 index = %d, ambient music=%s", TimeUtil.create24hDurationString(System.currentTimeMillis() - demo1.startTime, true, false, true, true, false), demo1.index, demo1.files[demo1.index]));
+            labels.get(labelIndex).getStyle().fontColor = Color.PINK;
+            labels.get(labelIndex++).setText(stringBuilder);
+        }
+
+        if (launchMode == LaunchMode.demo2 && showDemo2Info) {
+            stringBuilder.setLength(0);
+            stringBuilder.append(String.format(" demo1 time=%s, demo1 index = %d, ambient music=%s", TimeUtil.create24hDurationString(System.currentTimeMillis() - demo2.startTime, true, false, true, true, false), demo2.index, demo2.files[demo2.index]));
             labels.get(labelIndex).getStyle().fontColor = Color.PINK;
             labels.get(labelIndex++).setText(stringBuilder);
         }
         //camera properties
-        {
+        if (showCameraInfo) {
             stringBuilder.setLength(0);
             stringBuilder.append(String.format(" camera: zoomIndex(%d), position(%+.0f,%+.0f,%+.0f), lookAt(%+.0f, %+.0f, %+.0f)", camController.zoomIndex, camera.position.x, camera.position.y, camera.position.z, camera.lookat.x, camera.lookat.y, camera.lookat.z));
             labels.get(labelIndex).getStyle().fontColor = Color.ORANGE;
             labels.get(labelIndex++).setText(stringBuilder);
         }
         //depth of field
-        {
+        if (showDepthOfFieldInfo) {
             stringBuilder.setLength(0);
             stringBuilder.append(String.format(" focal depth = %.0f", renderEngine.getDepthOfFieldEffect().getFocalDepth()));
             labels.get(labelIndex++).setText(stringBuilder);
         }
         //audio sources
-        {
+        if (showAudioSources) {
             stringBuilder.setLength(0);
             stringBuilder.append(" audio sources enabled(").append(audioEngine.getEnabledAudioSourceCount()).append(") + disabled(").append(audioEngine.getDisabledAudioSourceCount()).append(") = total(").append(audioEngine.getNumberOfSources()).append(")");
             labels.get(labelIndex).getStyle().fontColor = Color.GREEN;
             labels.get(labelIndex++).setText(stringBuilder);
         }
         //time
-        {
+        if (showTime) {
             stringBuilder.setLength(0);
 
             final float time    = renderEngine.getCurrentDayTime();
@@ -1276,10 +1317,6 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
     @Override
     public void setCamera(final float x, final float z, final boolean setDirty) throws Exception {
         renderEngine.setCameraTo(x, z, setDirty);
-    }
-
-    public void setInfoVisible(final boolean infoVisible) {
-        this.infoVisible = infoVisible;
     }
 
     @Override

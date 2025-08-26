@@ -22,9 +22,9 @@ import com.badlogic.gdx.Graphics;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
+import de.bushnaq.abdalla.engine.event.EventLevel;
 import de.bushnaq.abdalla.mercator.engine.GameEngine3D;
 import de.bushnaq.abdalla.mercator.universe.Universe;
-import de.bushnaq.abdalla.engine.event.EventLevel;
 import de.bushnaq.abdalla.mercator.universe.sim.Sim;
 import de.bushnaq.abdalla.mercator.util.MavenPropertiesProvider;
 import de.bushnaq.abdalla.mercator.util.TimeUnit;
@@ -34,11 +34,11 @@ import org.slf4j.LoggerFactory;
 /**
  * @author kunterbunt
  */
-public class Launcher3DDemo implements ApplicationListener {
+public class Launcher3DDemo1 implements ApplicationListener {
     private static final int UNIVERSE_GENERATION_RANDOM_SEED = 1;
     private static final int UNIVERSE_SIZE                   = 10;
     DesktopContextFactory contextFactory = new DesktopContextFactory();
-    LaunchMode            launchMode     = LaunchMode.demo;
+    LaunchMode            launchMode     = LaunchMode.demo1;
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Override
@@ -119,7 +119,7 @@ public class Launcher3DDemo implements ApplicationListener {
     }
 
     public static void main(final String[] args) throws Exception {
-        Launcher3DDemo desktopLauncher3D = new Launcher3DDemo();
+        Launcher3DDemo1 desktopLauncher3D = new Launcher3DDemo1();
         desktopLauncher3D.start();
     }
 

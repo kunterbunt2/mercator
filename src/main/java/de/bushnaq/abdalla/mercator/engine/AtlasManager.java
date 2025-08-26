@@ -55,8 +55,8 @@ public class AtlasManager {
             new FontData("bold-128", Context.getAppFolderName() + "/assets/fonts/Roboto-Bold.ttf", 128),//
             new FontData("bold-256", Context.getAppFolderName() + "/assets/fonts/Roboto-Bold.ttf", 256),//
             new FontData("demo-mid-font", Context.getAppFolderName() + "/assets/fonts/Roboto-Regular.ttf", 32),//
-            new FontData("logo-font", Context.getAppFolderName() + "/assets/fonts/Roboto-Thin.ttf", 128), //
-            new FontData("version-font", Context.getAppFolderName() + "/assets/fonts/Roboto-Thin.ttf", 16) //
+            new FontData("logo-font", Context.getAppFolderName() + "/assets/fonts/Roboto-Thin.ttf", 32), //
+            new FontData("version-font", Context.getAppFolderName() + "/assets/fonts/Roboto-Thin.ttf", 8) //
     };
     public         AtlasRegion  gaugeTextureRegion;
     public         BitmapFont   logoFont;
@@ -76,15 +76,15 @@ public class AtlasManager {
     public AtlasManager() {
     }
 
-    public static String getAssetsFolderName() {
-        return assetsFolderName;
-    }
-
     public void dispose() {
         for (final FontData fontData : fontData) {
             fontData.font.dispose();
         }
         atlas.dispose();
+    }
+
+    public static String getAssetsFolderName() {
+        return assetsFolderName;
     }
 
     public void init() throws Exception {

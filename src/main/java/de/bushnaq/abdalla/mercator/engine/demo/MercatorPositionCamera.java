@@ -17,7 +17,6 @@
 package de.bushnaq.abdalla.mercator.engine.demo;
 
 import com.badlogic.gdx.math.Vector3;
-import de.bushnaq.abdalla.engine.IGameEngine;
 import de.bushnaq.abdalla.engine.chronos.Task;
 import de.bushnaq.abdalla.mercator.engine.GameEngine3D;
 import de.bushnaq.abdalla.mercator.universe.Universe;
@@ -25,7 +24,7 @@ import de.bushnaq.abdalla.mercator.universe.planet.Planet;
 
 import static de.bushnaq.abdalla.mercator.engine.GameEngine3D.*;
 
-public class MercatorPositionCamera<T extends IGameEngine> extends Task<T> {
+public class MercatorPositionCamera<T extends GameEngine3D> extends Task<T> {
     private final String name;
     private final int    zoomIndex;
 
@@ -37,7 +36,7 @@ public class MercatorPositionCamera<T extends IGameEngine> extends Task<T> {
 
     @Override
     public boolean execute(float deltaTime) {
-        GameEngine3D ge     = (GameEngine3D) gameEngine;
+        GameEngine3D ge     = gameEngine;
         Planet       planet = ge.universe.planetList.findByName(name);
 //        if (planet == null && !gameEngine.universe.planetList.isEmpty()) planet = gameEngine.universe.planetList.get(0);
         Vector3 lookat;
@@ -53,6 +52,7 @@ public class MercatorPositionCamera<T extends IGameEngine> extends Task<T> {
         ge.getCamController().update(true);
         ge.getCamera().update(true);
         ge.getCamera().setDirty(true);
+        gameEngine.getUniverse().updateSelectedPlanet();
         return true;
     }
 

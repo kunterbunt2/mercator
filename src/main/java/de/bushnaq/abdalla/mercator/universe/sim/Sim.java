@@ -276,7 +276,7 @@ public class Sim extends Renderable implements TradingPartner {
     //		return renderer;
     //	}
 
-    protected int getVolume() {
+    public int getVolume() {
         int volume = 0;
         for (final Good good : goodList) {
             volume += good.getAmount();

@@ -36,6 +36,8 @@ import de.bushnaq.abdalla.mercator.universe.sim.SimList;
 import de.bushnaq.abdalla.mercator.universe.sim.trader.TraderCommunicationPartner;
 import de.bushnaq.abdalla.mercator.universe.sim.trader.TraderList;
 import de.bushnaq.abdalla.mercator.util.*;
+import lombok.Getter;
+import lombok.Setter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,7 +46,6 @@ import org.slf4j.LoggerFactory;
  */
 public class Planet extends Waypoint implements TradingPartner {
     public static final float                      CHANNEL_SIZE           = 196 / Universe.WORLD_SCALE;
-    //    public final static float                  MIN_PLANET_DISTANCE    = 30;
     public static final int                        PLANET_DISTANCE        = 2048;
     public final static int                        PLANET_MAX_SIMS        = 10;
     public final static float                      PLANET_START_CREDITS   = 20000;
@@ -54,7 +55,8 @@ public class Planet extends Waypoint implements TradingPartner {
     public              SimList                    deadSimList            = new SimList(this);
     public              DockingDoors               dockingDoors           = new DockingDoors(this);
     public              PlanetEventManager         eventManager;
-    private             GoodList                   goodList               = new GoodList();
+    private final       GoodList                   goodList               = new GoodList();
+    @Setter
     private             HistoryManager             historyManager;
     private final       int                        id;
     public              CommunicationPartner       inDock                 = null;// the trader that is currently in the dock, or null if no trader is in the dock
@@ -63,6 +65,8 @@ public class Planet extends Waypoint implements TradingPartner {
     public              float                      orbitAngle             = 0.0f;
     public              PathSeeker                 pathSeeker             = new PathSeeker();
     public              ProductionFacilityList     productionFacilityList = new ProductionFacilityList();
+    @Getter
+    @Setter
     public              boolean                    selected;
     public              SimList                    simList                = new SimList(this);
     public              PlanetStatisticManager     statisticManager       = new PlanetStatisticManager();
@@ -73,8 +77,7 @@ public class Planet extends Waypoint implements TradingPartner {
 
     public Planet(int id, final String name, final float x, final float y, final float z, final Universe universe) {
         super(name, x, y, z);
-        this.id = id;
-        //		this.setName(name);
+        this.id       = id;
         this.universe = universe;
         set2DRenderer(new Planet2DRenderer(this));
         set3DRenderer(new Planet3DRenderer(this));
@@ -88,15 +91,14 @@ public class Planet extends Waypoint implements TradingPartner {
         // timeDelta = currentTime - lastTimeAdvancement;
         this.currentTime = currentTime;
         orbitAngle -= (Math.PI * ((float) timeDelta / TimeUnit.TICKS_PER_DAY)) / 360f;
-        if (TimeUnit.isInt(currentTime)/* ( currentTime - (int)currentTime ) == 0.0f */) {
-//            communicationPartner.handleRadioMessage();
+        if (TimeUnit.isInt(currentTime)) {
             pathList.reduceUsage();
             getGoodList().calculatePrice(currentTime);
             distributeEnigneers();
             productionFacilityList.advanceInTime(currentTime);
             simList.advanveInTime(currentTime, randomGenerator, this);
             getGoodList().calculatePrice(currentTime);
-            if (simList.size() == 0) {
+            if (simList.isEmpty()) {
                 if (goodList.getByType(GoodType.FOOD).getAmount() == 0)
                     status = PlanetStatus.DEAD_REASON_NO_FOOD;
                 else if (credits == 0)
@@ -105,7 +107,6 @@ public class Planet extends Waypoint implements TradingPartner {
                     status = PlanetStatus.DEAD_REASON_NO_SIMS;
                 sector = universe.sectorList.getAbandonedSector();
                 universe.deadPlanetList.add(this);
-                //				Tools.speak(String.format("PLanet %s is abandoned.\n", getName()));
             }
             // ---Ensure that this time is recorded in the history master
             getHistoryManager().get(currentTime);
@@ -297,18 +298,14 @@ public class Planet extends Waypoint implements TradingPartner {
     // transactionAmount, to );
     // }
     public int getSatisfactionFactor(final float currentTime) {
-        int satisfaction = 0;
+        float satisfaction = 0;
         for (final Sim sim : simList) {
             satisfaction += sim.getSatisfactionFactor((int) currentTime);
         }
-        if (simList.size() == 0)
+        if (simList.isEmpty())
             return 0;
         else
-            return satisfaction / simList.size();
-    }
-
-    public boolean isSelected() {
-        return selected;
+            return (int) (satisfaction / simList.size());
     }
 
     public void occupyDock(CommunicationPartner cp) {
@@ -375,25 +372,9 @@ public class Planet extends Waypoint implements TradingPartner {
         this.credits = credits;
     }
 
-    public void setGoodList(final GoodList goodList) {
-        this.goodList = goodList;
-    }
-
-    public void setHistoryManager(final HistoryManager historyManager) {
-        this.historyManager = historyManager;
-    }
-
-    //	public void setName(final String name) {
-    //		this.name = name;
-    //	}
-
     @Override
     public void setLastTransaction(final long currentTime) {
         lastTransaction = currentTime;
-    }
-
-    public void setSelected(boolean selected) {
-        this.selected = selected;
     }
 
     public void transported(final Planet from, final int amount) {

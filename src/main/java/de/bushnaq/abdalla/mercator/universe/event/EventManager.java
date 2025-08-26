@@ -32,6 +32,7 @@ import org.slf4j.LoggerFactory;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -40,7 +41,7 @@ public class EventManager implements IEventManager {
     protected final Class<?>        classFilter;
     private         boolean         enablePrintEvent     = true;
     private final   boolean         enabled              = false;
-    protected final List<IEvent>    eventList            = new ArrayList<>();
+    protected final List<IEvent>    eventList            = new CopyOnWriteArrayList<>();
     private final   String          fileName;
     private final   ExecutorService fileWriterExecutor   = Executors.newSingleThreadExecutor(r -> {
         Thread t = new Thread(r, "EventFileWriter");

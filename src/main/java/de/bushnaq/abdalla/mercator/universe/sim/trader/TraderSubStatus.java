@@ -26,7 +26,7 @@ package de.bushnaq.abdalla.mercator.universe.sim.trader;
 public enum TraderSubStatus {
     TRADER_STATUS_NA("N/A", false),//
     TRADER_STATUS_ALIGNING("Maneuvering", true),//
-    TRADER_STATUS_WAITING_FOR_WAYPOINT("In-Queue", false),//
+    TRADER_STATUS_WAITING_FOR_WAYPOINT("In-Queue", true),//
     TRADER_STATUS_ACCELERATING("Accelerating", true),//
     TRADER_STATUS_DECELERATING("Decelerating", true),//
     TRADER_STATUS_DOCKING_ACC("Docking Acc.", false),//

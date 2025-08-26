@@ -1,7 +1,9 @@
 package de.bushnaq.abdalla.mercator.universe.sim.trader;
 
+import de.bushnaq.abdalla.mercator.universe.path.Path;
 import de.bushnaq.abdalla.mercator.universe.path.Waypoint;
 import de.bushnaq.abdalla.mercator.universe.path.WaypointList;
+import de.bushnaq.abdalla.mercator.universe.path.WaypointProxy;
 import de.bushnaq.abdalla.mercator.universe.planet.Planet;
 
 /**
@@ -73,9 +75,12 @@ public class Navigator {
         return null;
     }
 
+    public void freePrevWaypoints() {
+        previousWaypoint.trader = null;//free
+    }
+
     public boolean pathIsClear() {
-        //next waypoint must be free
-        //destinationWaypointIndex-1
+        //- next waypoint must be free
         if (previousWaypoint != null && previousWaypoint.trader != null && previousWaypoint.trader != trader)
             return false;
         if (nextWaypoint.trader != null && nextWaypoint.trader != trader) return false;
@@ -104,4 +109,12 @@ public class Navigator {
         }
     }
 
+
+    public void unselect() {
+        for (WaypointProxy wpp : waypointList) {
+            for (Path p : wpp.waypoint.pathList) {
+                p.selected = false;
+            }
+        }
+    }
 }

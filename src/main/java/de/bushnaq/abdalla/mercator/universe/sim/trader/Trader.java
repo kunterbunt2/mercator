@@ -28,10 +28,10 @@ import de.bushnaq.abdalla.mercator.universe.path.WaypointProxy;
 import de.bushnaq.abdalla.mercator.universe.planet.Planet;
 import de.bushnaq.abdalla.mercator.universe.planet.PlanetList;
 import de.bushnaq.abdalla.mercator.universe.sim.Sim;
-import de.bushnaq.abdalla.mercator.util.Debug;
 import de.bushnaq.abdalla.mercator.util.MercatorRandomGenerator;
 import de.bushnaq.abdalla.mercator.util.TimeUnit;
 import de.bushnaq.abdalla.mercator.util.Transaction;
+import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,20 +49,26 @@ public class Trader extends Sim {
     public               TraderCommunicationPartner communicationPartner;
     public               long                       currentTime               = 0;
     private              int                        currentTransportedAmount;
+    @Getter
     private final        Engine                     engine                    = new Engine(this);
     private              boolean                    foundTradedGood           = false;
     public               int                        goodSpace                 = 0;
+    @Getter
     private final        int                        id;
     public               int                        lastYearTransportedAmount;
     private final        Logger                     logger                    = LoggerFactory.getLogger(this.getClass());
+    @Getter
     private final        ManeuveringSystem          maneuveringSystem         = new ManeuveringSystem(this);
     public               Navigator                  navigator                 = new Navigator(this);
+    public               OnTraderEvent              onEvent                   = new OnTraderEvent(this);
     public               long                       portRestingTime           = 0; // ---After a transaction or to wait for better prices, we recreate at a port
     protected            boolean                    selected                  = false;
     public final         Vector3                    speed                     = new Vector3(0, 0, 0);
     private              GoodType                   targetGoodType            = null; // ---Used to remember the index of good that we where to sell
     private              long                       timeDelta                 = 0;
+    @Getter
     private              TraderStatus               traderStatus              = TraderStatus.TRADER_STATUS_RESTING;
+    @Getter
     private              TraderSubStatus            traderSubStatus           = TraderSubStatus.TRADER_STATUS_DOCKED;
     public               float                      x;
     public               float                      y                         = TRADER_DOCKING_HEIGHT;
@@ -154,107 +160,7 @@ public class Trader extends Sim {
 
     private void checkArriving(long currentTime, MercatorRandomGenerator randomGenerator) {
         if (navigator.destinationWaypointDistanceProgress >= navigator.destinationWaypointDistance && TimeUnit.isInt(currentTime)/* ( ( currentTime - (int)currentTime ) == 0.0f ) */) {
-            //we reached a waypoint
-            //rotate towards next waypoint
-            //if next waypoint is still not a city?
-//            if (pathIsClear())
-            {
-                if (getTraderSubStatus() != TraderSubStatus.TRADER_STATUS_WAITING_FOR_WAYPOINT) {
-                    //					if (sourceWaypoint.getName().equals(targetWaypoint.getName())) {
-                    //						System.out.println(sourceWaypoint.getName());
-                    //					}
-                    float d = 0;
-                    for (int i = 1; i < navigator.destinationWaypointIndex - 1; i++) {
-                        final WaypointProxy sw = navigator.waypointList.get(i - 1);
-                        final WaypointProxy tw = navigator.waypointList.get(i);
-                        d += sw.waypoint.queryDistance(tw.waypoint);
-                    }
-                    eventManager.add(EventLevel.trace, currentTime, this, String.format("reached waypoint %s %f %f %f", navigator.nextWaypoint.getName(), d + navigator.destinationWaypointDistanceProgress, navigator.destinationPlanetDistanceProgress, navigator.destinationPlanetDistance));
-                } else {
-                    eventManager.add(EventLevel.trace, currentTime, this, String.format("waiting for waypoint %s to become clear", navigator.nextWaypoint.getName()));
-                }
-                if (navigator.nextWaypoint.city == null) {
-//                    if (Debug.isFilterTrader(getName()))
-//                        logger.info(String.format("reached waypoint %s %s %s", nextWaypoint.name, traderStatus.getDisplayName(), traderSubStatus.getDisplayName()));
-                    // we reached the next waypoint
-                    if (navigator.previousWaypoint != null) {
-                        navigator.previousWaypoint.trader = null;//free
-                    }
-                    navigator.previousWaypoint = navigator.nextWaypoint;
-                    navigator.reserveNextWaypoints();
-                    //					if (sourceWaypoint.getName().equals(targetWaypoint.getName())) {
-                    //						System.out.println(sourceWaypoint.getName());
-                    //					}
-                    navigator.destinationWaypointIndex++;
-                    navigator.nextWaypoint                        = navigator.waypointList.get(navigator.destinationWaypointIndex).waypoint;
-                    navigator.destinationWaypointDistanceProgress = navigator.destinationWaypointDistanceProgress - navigator.destinationWaypointDistance;
-                    navigator.destinationWaypointDistance         = navigator.previousWaypoint.queryDistance(navigator.nextWaypoint);
-                    setTraderSubStatus(TraderSubStatus.TRADER_STATUS_ALIGNING);
-                    if (Debug.isFilterTrader(getName()))
-                        logger.info("startRotation");
-                    maneuveringSystem.startRotation();
-                } else {
-                    //we reached a city
-                    if (getTraderSubStatus() == TraderSubStatus.TRADER_STATUS_DECELERATING) {
-                        if (Debug.isFilterTrader(getName()))
-                            eventManager.add(EventLevel.trace, currentTime, this, String.format("reached port '%s' [%s-%s}", navigator.nextWaypoint.name, traderStatus.getDisplayName(), traderSubStatus.getDisplayName()));
-//                            logger.info(String.format("reached city %s %s %s", navigator.nextWaypoint.name, traderStatus.getDisplayName(), traderSubStatus.getDisplayName()));
-                        if (navigator.previousWaypoint != null) freePrevWaypoints();
-                        // ---Pay for the jump
-                        final float costOfJump = costOfDistance(navigator.destinationWaypointDistance);
-                        setCredits(getCredits() - costOfJump);
-                        // TODO pay the planet
-                        //					targetWaypoint = waypointList.get(destinationWaypointIndex).waypoint;
-                        navigator.nextWaypoint.city.setCredits(navigator.nextWaypoint.city.getCredits() + costOfJump);
-                        eventManager.add(currentTime, getVolume(), SimEventType.payJump, getCredits(), String.format("and payed %5.2f to %s for jump cost.", costOfJump, planet.getName()));
-                        // ---we reached a new port
-                        navigator.destinationWaypointDistance         = 0;
-                        navigator.destinationWaypointDistanceProgress = 0;
-                        planet.traderList.remove(this);
-                        planet = (Planet) navigator.nextWaypoint;
-                        planet.traderList.add(this);
-//                        eventManager.add(EventLevel.trace, currentTime, this, String.format("arrived at '%s'", navigator.nextWaypoint.city.getName()));
-                        if (navigator.nextWaypoint == navigator.destinationPlanet) {
-                            setTraderSubStatus(TraderSubStatus.TRADER_STATUS_DOCKING_ACC);
-                            if (Debug.isFilterTrader(getName()))
-                                eventManager.add(EventLevel.trace, currentTime, this, String.format("reached target port '%s' [%s-%s}", navigator.nextWaypoint.name, traderStatus.getDisplayName(), traderSubStatus.getDisplayName()));
-//                                logger.info(String.format("reached city %s %s %s", navigator.nextWaypoint.name, traderStatus.getDisplayName(), traderSubStatus.getDisplayName()));
-                        } else {
-                            //we reached some city on the way
-                            // ---this is a multi city trip. Plan the next part of the trip
-                            //						destinationWaypointIndex++;
-                            navigator.previousWaypoint = navigator.nextWaypoint;
-                            //						destinationWaypointIndex++;
-//                            if (Debug.isFilterTrader(getName()))
-//                                System.out.printf("nextWaypoint = %s\n", navigator.nextWaypoint.name);
-                            navigator.destinationWaypointIndex++;
-                            navigator.nextWaypoint = navigator.waypointList.get(navigator.destinationWaypointIndex).waypoint;
-//                            if (Debug.isFilterTrader(getName()))
-//                                System.out.printf("nextWaypoint = %s\n", navigator.nextWaypoint.name);
-                            navigator.reserveNextWaypoints();
-                            navigator.destinationWaypointDistance = navigator.previousWaypoint.queryDistance(navigator.nextWaypoint);
-                            if (navigator.pathIsClear()) {
-                                setTraderSubStatus(TraderSubStatus.TRADER_STATUS_ALIGNING);
-                                if (Debug.isFilterTrader(getName()))
-                                    logger.info("startRotation");
-                                maneuveringSystem.startRotation();
-                                //							if (sourceWaypoint.getName().equals(targetWaypoint.getName())) {
-                                //								System.out.println(sourceWaypoint.getName());
-                                //							}
-                                //							if (targetWaypoint != null) {
-                                //							} else {
-                                //							}
-                            } else {
-                                setTraderSubStatus(TraderSubStatus.TRADER_STATUS_WAITING_FOR_WAYPOINT);
-                            }
-                        }
-                    }
-
-                }
-            }
-//            else {
-//                setSubStatus(TraderSubStatus.TRADER_STATUS_WAITING_FOR_WAYPOINT);
-//            }
+            onEvent.reachedWaypoint();
         }
     }
 
@@ -270,13 +176,7 @@ public class Trader extends Sim {
             case TRADER_STATUS_WAITING_FOR_WAYPOINT:
                 if (navigator.nextWaypoint != null)
                     if (navigator.pathIsClear()) {
-                        if (Debug.isFilterTrader(getName()))
-                            eventManager.add(EventLevel.trace, currentTime, this, String.format("we are cleared for next waypoint %s", navigator.nextWaypoint.name));
-//                            logger.info(String.format("**** we are cleared for next waypoint %s", navigator.nextWaypoint.name));
-                        if (navigator.destinationWaypointIndex >= 2 && navigator.waypointList.get(navigator.destinationWaypointIndex - 2).waypoint.city != null) {//TODO we only release the first dock
-                            clearDock(navigator.waypointList.get(navigator.destinationWaypointIndex - 2).waypoint.city);//finished undocking
-                        }
-                        setTraderSubStatus(TraderSubStatus.TRADER_STATUS_ACCELERATING);
+                        onEvent.waypointCleared();
                     }
                 break;
             case TRADER_STATUS_ACCELERATING:
@@ -307,13 +207,6 @@ public class Trader extends Sim {
             }
             break;
         }
-//        if (getSubStatus() == TraderSubStatus.TRADER_STATUS_ALIGNING) {
-//        } else {
-//            if (subStatus == TraderSubStatus.TRADER_STATUS_WAITING_FOR_WAYPOINT) {
-//                if (pathIsClear())
-//                    setSubStatus(TraderSubStatus.TRADER_STATUS_ACCELERATING);
-//            }
-//        }
     }
 
     float clamp(final float value, final float min, final float max) {
@@ -323,9 +216,6 @@ public class Trader extends Sim {
     }
 
     public void clearDock(Planet planet) {
-        //we are free of the dock
-//        eventManager.add(EventLevel.trace, currentTime, this, String.format("we cleared the dock of '%s'", planet.getName()));//for planet logs
-//        planet.eventManager.add(EventLevel.trace, currentTime, this, String.format("we cleared the dock of '%s'", planet.getName()));//for planet logs
         planet.clearDock(communicationPartner);
     }
 
@@ -337,38 +227,6 @@ public class Trader extends Sim {
         goodSpace            = Trader.MIN_GOOD_SPACE + randomGenerator.nextInt(0, this, Trader.MAX_GOOD_SPACE - Trader.MIN_GOOD_SPACE);
         portRestingTime      = randomGenerator.nextInt(0, this, Trader.TRADER_MAX_PORT_REST_TIME) * TimeUnit.TICKS_PER_DAY;
         communicationPartner = new TraderCommunicationPartner(gameEngine, this);
-    }
-
-    /// /            if (Debug.isFilter(getName())) logger.info("rotation deceleration");
-//            return Math.max(rotationSpeed - acceleration * deltaRealTime * 10, MIN_ROTATION_SPEED);
-//        }
-//    }
-    private void freePrevWaypoints() {
-        navigator.previousWaypoint.trader = null;//free
-    }
-
-    public Engine getEngine() {
-        return engine;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public ManeuveringSystem getManeuveringSystem() {
-        return maneuveringSystem;
-    }
-
-    public ManeuveringSystem getThrusters() {
-        return maneuveringSystem;
-    }
-
-    public TraderStatus getTraderStatus() {
-        return traderStatus;
-    }
-
-    public TraderSubStatus getTraderSubStatus() {
-        return traderSubStatus;
     }
 
     public void markJumpGateUsage() {
@@ -412,44 +270,25 @@ public class Trader extends Sim {
                 navigator.destinationWaypointDistanceProgress = 0;
                 navigator.destinationPlanetDistanceProgress   = 0;
                 if (planet == navigator.destinationPlanet) {
-                    // best sell is where we are
+                    //- best sell is where we are
                     navigator.nextWaypoint                = null;
                     navigator.destinationWaypointIndex    = -1;
                     navigator.destinationWaypointDistance = 0;
-
                     sell(currentTime, randomGenerator);
                 } else {
-                    //we need to travel somewhere to actually sell
-                    //as for permission to undock
+                    //- we need to travel somewhere to actually sell
+                    //- as for permission to undock
                     setTraderSubStatus(TraderSubStatus.TRADER_STATUS_REQUESTING_UNDOCKING);
-                    // need to wait for permission to undock
-
+                    //- need to wait for permission to undock
                     navigator.extractWaypointList();
-                    navigator.previousWaypoint = navigator.sourcePlanet;
-                    navigator.nextWaypoint     = navigator.waypointList.get(1).waypoint;
-//                        destinationWaypointDistance = 0;
+                    navigator.previousWaypoint            = navigator.sourcePlanet;
+                    navigator.nextWaypoint                = navigator.waypointList.get(1).waypoint;
                     navigator.destinationWaypointDistance = navigator.previousWaypoint.queryDistance(navigator.nextWaypoint);
-
-                    navigator.destinationPlanetDistance = planet.queryDistance(navigator.waypointList);
-                    navigator.destinationWaypointIndex  = 1;
+                    navigator.destinationPlanetDistance   = planet.queryDistance(navigator.waypointList);
+                    navigator.destinationWaypointIndex    = 1;
                     communicationPartner.requestUndocking(planet);
-                    //						if (pathIsClear()) {
-                    //							sourceWaypoint.trader = this;
-                    //							//							if (sourceWaypoint.getName().equals(targetWaypoint.getName())) {
-                    //							//								System.out.println(sourceWaypoint.getName());
-                    //							//							}
-                    //							planet.universe.eventManager.add(EventLevel.trace, currentTime, this, String.format("departing %s to reach %s", sourceWaypoint.getName(), destinationPlanet.city.getName()));
-                    //							// MarkJumpGateUsage();
-                    //							// DestinationWaypointPlanet = PortPlanet->QueryNextWaypoint( DestinationPlanet
-                    //							// );
-                    //							traderStatus = TraderStatus.TRADER_STATUS_SELLING;
-                    //							if (selected) {
-                    //								planetList.markTraderPath(this);
-                    //							} else {
-                    //							}
-                    //						} else {
-                    //							traderStatus = TraderStatus.TRADER_STATUS_WAITING_FOR_WAYPOINT;
-                    //						}
+                    eventManager.add(EventLevel.trace, currentTime, this, String.format("departing '%s' to reach '%s' %s", planet.getName(), navigator.destinationPlanet.city.getName(), navigator.WaypointPortsAsString()));
+                    planet.eventManager.add(EventLevel.trace, currentTime, this, String.format("'%s' undocking", getName()));//for planet logs
                 }
                 // ---And go
             } else {
@@ -472,42 +311,26 @@ public class Trader extends Sim {
                 navigator.destinationWaypointDistanceProgress = 0;
                 navigator.destinationPlanetDistanceProgress   = 0;
                 if (planet == navigator.destinationPlanet) {
-                    // best buy is where we are
+                    //- best buy is where we are
                     navigator.nextWaypoint                = null;
                     navigator.destinationWaypointIndex    = -1;
                     navigator.destinationWaypointDistance = 0;
                     buy(currentTime, randomGenerator);
                 } else {
-//                    communicationPartner.informControlTower();
+                    //- we need to travel somewhere to actually buy
+                    //- as for permission to undock
+                    setTraderSubStatus(TraderSubStatus.TRADER_STATUS_REQUESTING_UNDOCKING);
                     navigator.extractWaypointList();
                     navigator.previousWaypoint            = null;
-                    navigator.nextWaypoint                = navigator.waypointList.get(0).waypoint;
-                    navigator.destinationWaypointIndex    = 1;
+                    navigator.nextWaypoint                = navigator.waypointList.get(1).waypoint;
                     navigator.destinationWaypointDistance = 0;
                     navigator.destinationPlanetDistance   = planet.queryDistance(navigator.waypointList);
-                    setTraderSubStatus(TraderSubStatus.TRADER_STATUS_ALIGNING);
-                    maneuveringSystem.startRotation();
+                    navigator.destinationWaypointIndex    = 1;
+//                    setTraderSubStatus(TraderSubStatus.TRADER_STATUS_ALIGNING);
+//                    maneuveringSystem.startRotation();
+                    communicationPartner.requestUndocking(planet);
                     eventManager.add(EventLevel.trace, currentTime, this, String.format("departing '%s' to reach '%s' %s", planet.getName(), navigator.destinationPlanet.city.getName(), navigator.WaypointPortsAsString()));
                     planet.eventManager.add(EventLevel.trace, currentTime, this, String.format("'%s' undocking", getName()));//for planet logs
-                    //						if (pathIsClear()) {
-                    //							sourceWaypoint.trader = this;
-                    //							//							if (sourceWaypoint.getName().equals(targetWaypoint.getName())) {
-                    //							//								System.out.println(sourceWaypoint.getName());
-                    //							//							}
-                    //							// MarkJumpGateUsage();
-                    //							// DestinationWaypointPlanet = PortPlanet->QueryNextWaypoint( DestinationPlanet
-                    //							// );
-                    //							traderStatus = TraderStatus.TRADER_STATUS_BUYING;
-                    //							if (selected) {
-                    //								planetList.markTraderPath(this);
-                    //							} else {
-                    //							}
-                    //							//						eventManager.add(currentTime, getVolume(), SimEventType.travel, getCredits(), String.format("%.0f from %s to %s targeting %s %s(%5.2f).", planet.pathSeeker.get(destinationPlanet).distance, planet.getName(), destinationWaypointPlanet.getName(), destinationPlanet.getName(), targetGoodType.getName(), destinationPlanet.getGoodList().getByType(targetGoodType).price));
-                    //							//TODO!!!
-                    //
-                    //						} else {
-                    //							traderStatus = TraderStatus.TRADER_STATUS_CANNOT_SELL;
-                    //						}
                 }
             }
         }
@@ -515,10 +338,7 @@ public class Trader extends Sim {
     }
 
     private Planet queryBestPlanetAndGoodToBuy(final long currentTime, final PlanetList planetList, final int goodSpace, final float credits) throws Exception {
-        // planet.universe.timeStatisticManager.start( QUERY_BEST_BUY_AIT );
-        // portPlanet.pathSeeker.mapGalaxy( portPlanet, credits );
-        Planet bestPlanet = null;
-        // int maximumPlanetValue = 0;
+        Planet      bestPlanet                = null;
         float       maximumPlanetValuePerTime = 0;
         float       bestPlanetValuePerTime    = 0;
         final int[] anualTradingGoodVolume    = planet.universe.getHistoryManager().getAnualTradingGoodVolume();
@@ -526,8 +346,7 @@ public class Trader extends Sim {
         for (final Planet p : planetList) {
             // GoodType targetGoodType = null;
             for (final Good good : p.getGoodList()) {
-                // ---Prevent trader from buying good from a planet that does not produce this
-                // good
+                // -Prevent trader from buying good from a planet that does not produce this good
                 if (p.productionFacilityList.getByType(good.type) != null) {
                     // ---Prevent trader to buy in bad times
                     if (anualTradingGoodVolume[good.type.ordinal()] > 0 && good.price <= good.getAveragePrice()) {
@@ -536,15 +355,9 @@ public class Trader extends Sim {
                         final float jumpCost          = costOfDistance(distance);
                         final int   amountWeCanAfford = (int) Math.floor((credits - jumpCost) / good.price);
                         final int   transactionAmount = (Math.min(goodSpace, Math.min(amountWeCanAfford, good.getAmount())));
-                        // int amount = (int)Math.min( goodSpace, credits / good.price );
-                        // ---In case we cannot afford any of the these prices or the planet has no
-                        // goods to sell
+                        // -In case we cannot afford any of the these prices or the planet has no
+                        // -goods to sell
                         if (transactionAmount != 0) {
-                            // PathSeeker sellingPathSeeker = new PathSeeker();
-                            // sellingPathSeeker.mapGalaxy( planet, credits );
-                            // if ( planet.name.equals( "P-20" ) && good.type == GoodType.Food && good.price
-                            // < 90 )
-                            // System.out.println( "Found..." );
                             Good goodToSell = null;
                             try {
                                 goodToSell = good.clone();
@@ -585,7 +398,6 @@ public class Trader extends Sim {
                 }
             }
         }
-        // planet.universe.timeStatisticManager.stop( QUERY_BEST_BUY_AIT );
         return bestPlanet;
     }
 
@@ -600,24 +412,22 @@ public class Trader extends Sim {
         // ---This value is calculated of following inputs:
         // ---1- the time needed to reach a destination
         // ---2- the difference to the average good price
-        // portPlanet.pathSeeker.mapGalaxy( portPlanet, (int)( (
-        // goodToSell.getMaxPrice() - goodToSell.price ) * goodToSell.amount ) );
         float maximumPlanetValuePerTime = 0;
         float bestPlanetValuePerTime    = 0;
         for (final Planet p : planetList) {
             final float distance = planet.pathSeeker.get(p).distance;
             final float jumpCost = costOfDistance(distance);
             final Good  good     = p.getGoodList().getByType(goodToSell.type);
-            // ---Prevent trader from selling good to a planet that produces this good
+            // -Prevent trader from selling good to a planet that produces this good
             if (p.productionFacilityList.getByType(good.type) == null) {
-                // ---Prevent trader to sell in bad times
+                // -Prevent trader to sell in bad times
                 if (good.isTraded(currentTime) && good.price >= good.getAveragePrice()) {
                     portPlanet.pathSeeker.goodPrice = good.price;
                     float profit = (good.price - goodToSell.price) * goodToSell.getAmount();
                     profit                            = Math.min(profit, p.getCredits());
                     portPlanet.pathSeeker.planetValue = profit - jumpCost;
                     portPlanet.pathSeeker.time        = distance / engine.getEngineSpeed();
-                    // assume we need to buy food at that planet to cover the whole trip
+                    //- assume we need to buy food at that planet to cover the whole trip
                     final float catering           = queryAverageFoodConsumption(portPlanet.pathSeeker.time) * p.queryAverageFoodPrice();
                     final float planetValuePerTime = (portPlanet.pathSeeker.planetValue - catering) / portPlanet.pathSeeker.time;
                     bestPlanetValuePerTime = Math.max(bestPlanetValuePerTime, planetValuePerTime);
@@ -647,12 +457,10 @@ public class Trader extends Sim {
         // ---Sell
         final Good portGood = planet.getGoodList().getByType(targetGoodType);
         final Good ownGood  = getGoodList().getByType(targetGoodType);
-        // ---we can only sell what the planet can afford, what we can store into the
-        // planet, or the amount that is there. We take the minimum of all 3.
+        // -we can only sell what the planet can afford, what we can store into the planet, or the amount that is there. We take the minimum of all 3.
         final int amountPlanetCanAfford = (int) Math.floor(planet.getCredits() / portGood.price);
         final int transactionAmount     = (Math.min(portGood.getMaxAmount() - portGood.getAmount(), Math.min(amountPlanetCanAfford, ownGood.getAmount())));
-        // ---In case we cannot afford any of the these prices or the planet has no
-        // goods to sell
+        // -In case we cannot afford any of the these prices or the planet has no goods to sell
         if (transactionAmount <= 0 || portGood.price < ownGood.price) {
             portRestingTime = randomGenerator.nextInt(currentTime, this, TRADER_MAX_PORT_REST_TIME) * TimeUnit.TICKS_PER_DAY;
             setTraderStatus(TraderStatus.TRADER_STATUS_WAITING_TO_SELL);
@@ -661,8 +469,6 @@ public class Trader extends Sim {
             return;
         }
         Transaction.trade(currentTime, portGood.type, portGood.price, transactionAmount, this, planet, navigator.sourcePlanet, true);
-//        calculateEngineSpeed();
-        //		lastTransaction = currentTime;
         eventManager.add(EventLevel.trace, currentTime, this, String.format("sells %d %s(%5.2f) for %5.2f from %s.", transactionAmount, portGood.type.getName(), portGood.price, portGood.price * transactionAmount, getName()));
         planet.eventManager.add(currentTime, planet.getGoodList().getByType(portGood.type).getAmount(), SimEventType.buy, planet.getCredits(), String.format("%d %s(%5.2f) for %5.2f from %s.", transactionAmount, portGood.type.getName(), portGood.price, portGood.price * transactionAmount, getName()));
         eventManager.add(currentTime, getVolume(), SimEventType.sell, getCredits(), String.format("%d %s(%5.2f) for %5.2f to %s.", transactionAmount, portGood.type.getName(), portGood.price, portGood.price * transactionAmount, planet.getName()));
@@ -676,17 +482,11 @@ public class Trader extends Sim {
     }
 
     public void setTraderStatus(TraderStatus traderStatus) {
-//        if (Debug.isFilterTrader(getName()))
-//            logger.info(String.format("** trader '%s' status changed from %s to %s", this.getName(), this.traderStatus.getName(), traderStatus.getName()));
-//            planet.universe.eventManager.add(EventLevel.trace, currentTime, this, String.format("** status changed from %s to %s", this.traderStatus.getName(), traderStatus.getName()));
         eventManager.add(EventLevel.trace, currentTime, this, String.format("change status to [%s-%s]", traderStatus.getDisplayName(), traderSubStatus.getDisplayName()));
         this.traderStatus = traderStatus;
     }
 
     public void setTraderSubStatus(TraderSubStatus traderSubStatus) {
-//        if (Debug.isFilterTrader(getName()))
-//            logger.info(String.format("** trader '%s' sub-status changed from %s to %s", this.getName(), this.traderSubStatus.getName(), traderSubStatus.getName()));
-//            planet.universe.eventManager.add(EventLevel.trace, currentTime, this, String.format("** sub-status changed from %s to %s", this.traderStatus.getName(), traderStatus.getName()));
         eventManager.add(EventLevel.trace, currentTime, this, String.format("change status to [%s-%s]", traderStatus.getDisplayName(), traderSubStatus.getDisplayName()));
         this.traderSubStatus = traderSubStatus;
     }
@@ -698,7 +498,7 @@ public class Trader extends Sim {
     private void tradeInPort(long currentTime, MercatorRandomGenerator randomGenerator) {
         navigator.destinationPlanetDistanceProgress = 0;
         navigator.destinationWaypointIndex          = 0;
-        // ---We reached our destination
+        // -We reached our destination
         navigator.destinationPlanet = null;
         navigator.nextWaypoint      = null;
         if (getGoodList().queryAmount() != 0) {
@@ -710,11 +510,7 @@ public class Trader extends Sim {
 
     public void unselect() throws OpenAlException {
         selected = false;
-        for (WaypointProxy wpp : navigator.waypointList) {
-            for (Path p : wpp.waypoint.pathList) {
-                p.selected = false;
-            }
-        }
+        navigator.unselect();
         communicationPartner.unselect();
     }
 }

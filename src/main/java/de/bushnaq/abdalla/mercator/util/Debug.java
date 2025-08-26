@@ -27,9 +27,9 @@ public class Debug {
     //    private static final String  filterPlanet       = "Leo Minor Port";
 //    private static final String  filterPlanet       = "Pollux Hub";
     private static final String  filterPlanet       = "Pollux Hub";
-    //    private static final String  filterTrader       = "Starpath";
+    private static final String  filterTrader       = "Starpath";
 //    private static final String  filterTrader       = "Frontier Star";
-    private static final String  filterTrader       = "Damocles";
+//    private static final String  filterTrader       = "Damocles";
 
     public static String getFilterPlanet() {
         return filterPlanet;

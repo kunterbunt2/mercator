@@ -19,9 +19,9 @@ package de.bushnaq.abdalla.mercator.universe.sim.trader;
 import de.bushnaq.abdalla.engine.IGameEngine;
 import de.bushnaq.abdalla.engine.ai.PromptTags;
 import de.bushnaq.abdalla.engine.audio.*;
+import de.bushnaq.abdalla.engine.event.EventLevel;
 import de.bushnaq.abdalla.mercator.engine.ai.MerkatorPromptTags;
 import de.bushnaq.abdalla.mercator.engine.ai.RadioMessageId;
-import de.bushnaq.abdalla.engine.event.EventLevel;
 import de.bushnaq.abdalla.mercator.universe.event.EventManager;
 import de.bushnaq.abdalla.mercator.universe.planet.Planet;
 import de.bushnaq.abdalla.mercator.util.Debug;
@@ -34,7 +34,6 @@ public class TraderCommunicationPartner implements CommunicationPartner {
     private final AudioEngine audioEngine;
     private final IGameEngine gameEngine;
     private final Logger      logger = LoggerFactory.getLogger(this.getClass());
-    //    List<RadioMessage> radioMessages = new ArrayList<>();
     private final Trader      trader;
 
     public TraderCommunicationPartner(IGameEngine gameEngine, Trader trader) throws OpenAlException {

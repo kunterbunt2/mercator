@@ -25,9 +25,7 @@ import de.bushnaq.abdalla.engine.GameObject;
 import de.bushnaq.abdalla.engine.RenderEngine3D;
 import de.bushnaq.abdalla.engine.audio.OggPlayer;
 import de.bushnaq.abdalla.engine.audio.OpenAlException;
-import de.bushnaq.abdalla.mercator.engine.AtlasManager;
 import de.bushnaq.abdalla.mercator.engine.GameEngine3D;
-import de.bushnaq.abdalla.engine.event.EventLevel;
 import de.bushnaq.abdalla.mercator.universe.good.Good;
 import de.bushnaq.abdalla.mercator.util.Debug;
 import net.mgsx.gltf.scene3d.attributes.PBRColorAttribute;
@@ -54,18 +52,15 @@ public class Engine {
     public static final  float                    MIN_ENGINE_SPEED             = .1f;
     //    private static final float                    MAX_TIME_DELTA               = 0.1f;//everything above will be ignored as a glitch
     private static final float                    PY2                          = 3.14159f / 2;
-    final static         Vector3                  yVector                      = new Vector3(0, 1, 0);
+    private final static Vector3                  yVector                      = new Vector3(0, 1, 0);
     private              float                    engineSpeed                  = MIN_ENGINE_SPEED;
     private              GameObject<GameEngine3D> gameObject;
     private              boolean                  gameObjectAdded              = false;
-    public               int                      lightMode                    = 0;
-    //    public float getAcceleration() {
-//        return acceleration;
-//    }
-    public               float                    lightTimer                   = 0;
+    private              int                      lightMode                    = 0;
+    private              float                    lightTimer                   = 0;
     private final        Logger                   logger                       = LoggerFactory.getLogger(this.getClass());
     private              OggPlayer                oggPlayer;
-    public final         PointLight               pointLight;
+    private final        PointLight               pointLight;
     private final        float[]                  position                     = new float[3];
     private final        Trader                   trader;
     private final        float[]                  velocity                     = new float[3];
@@ -199,9 +194,7 @@ public class Engine {
                 engineSpeed = Math.max(engineSpeed - acceleration * timeDelta * 10, MIN_ENGINE_SPEED);
 //                if (Debug.isFilterTrader(trader.getName())) logger.info(String.format("engine deceleration engineSpeed=%f height=%f", engineSpeed, trader.y));
             } else {
-                trader.clearDock(trader.navigator.destinationPlanet);//finished docking
-                trader.setTraderSubStatus(TraderSubStatus.TRADER_STATUS_DOCKED);
-                trader.eventManager.add(EventLevel.trace, trader.currentTime, trader, String.format("Docked at '%s'", trader.navigator.nextWaypoint.city.getName()));
+                trader.onEvent.docked();
             }
         } else if (trader.getTraderSubStatus() == TraderSubStatus.TRADER_STATUS_UNDOCKING_ACC || trader.getTraderSubStatus() == TraderSubStatus.TRADER_STATUS_UNDOCKING_DEC) {
             // ascend to undock
@@ -226,7 +219,7 @@ public class Engine {
                 //after undocking
                 trader.planet.dockingDoors.setDockingDoorStatus(CLOSING);
                 trader.setTraderSubStatus(TraderSubStatus.TRADER_STATUS_ALIGNING);
-                trader.getThrusters().startRotation();
+                trader.getManeuveringSystem().startRotation();
 //                trader.communicationPartner.requestUndocking();
             }
         }
@@ -240,7 +233,7 @@ public class Engine {
         gameObject = new GameObject<GameEngine3D>(new ModelInstanceHack(renderEngine.getGameEngine().assetManager.flame.scene.model), trader);
         try {
             oggPlayer = renderEngine.getGameEngine().audioEngine.createAudioProducer(OggPlayer.class);
-            oggPlayer.setFile(Gdx.files.internal(AtlasManager.getAssetsFolderName() + "/audio/large-rocket-engine-86240.ogg"));
+//            oggPlayer.setFile(Gdx.files.internal(AtlasManager.getAssetsFolderName() + "/audio/large-rocket-engine-86240.ogg"));
             oggPlayer.setGain(100.0f);
             oggPlayer.setAmbient(false);
             oggPlayer.setLoop(true);
@@ -292,7 +285,7 @@ public class Engine {
             }
             animate(renderEngine);
             gameObject.instance.transform.setToTranslation(translation);
-            gameObject.instance.transform.rotate(yVector, trader.getThrusters().rotation);
+            gameObject.instance.transform.rotate(yVector, trader.getManeuveringSystem().rotation);
             float factor = 4;
             gameObject.instance.transform.translate(0, 0, direction * Trader3DRenderer.TRADER_SIZE_Z / 2);//position ion beam
             gameObject.instance.transform.rotate(Vector3.Y, direction * -90 + factor - (float) Math.random() * factor * 2);
@@ -304,36 +297,7 @@ public class Engine {
             Vector3     lightTranslation = new Vector3();
             gameObject.instance.transform.getTranslation(lightTranslation);
             pointLight.set(Color.WHITE, lightTranslation.x + 0.2f, lightTranslation.y, lightTranslation.z, intensity);
-        }
-//        else
-//            if (trader.subStatus == TraderSubStatus.TRADER_STATUS_DECELERATING)
-//        {
-//            if (renderEngine.getCamera().position.dst(translation) < 1000) {
-//                oggPlayer.play();
-//            } else {
-//                oggPlayer.pause();
-//            }
-//            if (!gameObjectAdded) {
-//                renderEngine.addDynamic(gameObject);
-//                renderEngine.add(pointLight, true);
-//                gameObjectAdded = true;
-//            }
-//            animate(renderEngine);
-//            gameObject.instance.transform.setToTranslation(translation);
-//            gameObject.instance.transform.rotate(yVector, trader.getThrusters().rotation);
-//            gameObject.instance.transform.translate(0, 0, -Trader3DRenderer.TRADER_SIZE_Z / 2);
-//            float factor = 4;
-//            gameObject.instance.transform.rotate(Vector3.Y, 90 + factor - (float) Math.random() * factor * 2);
-//            gameObject.instance.transform.rotate(Vector3.Z, factor - (float) Math.random() * factor * 2);
-//            gameObject.instance.transform.rotate(Vector3.X, factor - (float) Math.random() * factor * 2);
-//            gameObject.instance.transform.scale(4, 4, 4);
-//            gameObject.update();
-//            final float intensity        = calculateIntensity();
-//            Vector3     lightTranslation = new Vector3();
-//            gameObject.instance.transform.getTranslation(lightTranslation);
-//            pointLight.set(Color.WHITE, lightTranslation.x + 0.2f, lightTranslation.y, lightTranslation.z, intensity);
-//        }
-        else {
+        } else {
             if (gameObjectAdded) {
                 renderEngine.remove(pointLight, true);
                 renderEngine.removeDynamic(gameObject);

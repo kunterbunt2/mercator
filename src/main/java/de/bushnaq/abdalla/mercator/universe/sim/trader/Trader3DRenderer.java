@@ -187,7 +187,7 @@ public class Trader3DRenderer extends ObjectRenderer<GameEngine3D> {
                 0f,//front/right/top
                 180f,//back/left/bottom
         };
-        trader.getThrusters().create(renderEngine.getGameEngine().getAudioEngine());
+        trader.getManeuveringSystem().create(renderEngine.getGameEngine().getAudioEngine());
         for (int i = 0; i < NUMBER_OF_THRUSTERS; i++) {
             trader.getManeuveringSystem().getThrusters().add(new Thruster(renderEngine, delta[i], direction[i], rotationDirection[i], rotation[i], new GameObject<GameEngine3D>(new ModelInstanceHack(renderEngine.getGameEngine().assetManager.flame.scene.model), trader)));
         }
@@ -247,12 +247,12 @@ public class Trader3DRenderer extends ObjectRenderer<GameEngine3D> {
             float rotation = trader.getManeuveringSystem().rotation;
             {
                 final Matrix4 m = new Matrix4();
-                //move center of text to center of trader
+                //- move center of text to center of trader
                 m.setToTranslation(translation.x, translation.y, translation.z);
                 m.rotate(Vector3.Y, rotation);
-                //move to the top and back on engine
+                //- move to the top and back on engine
                 m.translate(0, -TRADER_SIZE_Y, 0);
-                //rotate into the xz layer
+                //- rotate into the xz layer
                 m.rotate(Vector3.X, -90);
                 renderEngine.renderEngine25D.setTransformMatrix(m);
             }
@@ -292,7 +292,7 @@ public class Trader3DRenderer extends ObjectRenderer<GameEngine3D> {
                 renderEngine.renderEngine25D.label(translation, rotation, systemTextureRegion, 0, TRADER_EXTERNAL_SIZE_Y / 2, 0, TRADER_SIZE_Z * .75f, HAlignment.LEFT, VAlignment.TOP, 0.2f, modelFont, Color.WHITE, "Heading", TRADER_NAME_COLOR, value, Color.YELLOW);
             }
             if (trader.getTraderSubStatus() == TraderSubStatus.TRADER_STATUS_ALIGNING) {
-                String value = String.format("%.1f °/s", trader.getThrusters().rotationSpeed);
+                String value = String.format("%.1f °/s", trader.getManeuveringSystem().rotationSpeed);
                 renderEngine.renderEngine25D.label(translation, rotation, systemTextureRegion, 0, TRADER_EXTERNAL_SIZE_Y / 2, TRADER_SIZE_Z / 2, TRADER_SIZE_Z * .75f, HAlignment.LEFT, VAlignment.BOTTOM, 0.2f, modelFont, Color.WHITE, "Aligning", TRADER_NAME_COLOR, value, Color.YELLOW);
             } else if (trader.getTraderSubStatus() == TraderSubStatus.TRADER_STATUS_ACCELERATING) {
                 String value = String.format("%.1f m/s", trader.getEngine().getEngineSpeed() * Engine.ENGINE_TO_REALITY_FACTOR);

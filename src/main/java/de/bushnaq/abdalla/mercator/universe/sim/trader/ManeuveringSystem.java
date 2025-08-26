@@ -16,18 +16,15 @@
 
 package de.bushnaq.abdalla.mercator.universe.sim.trader;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import de.bushnaq.abdalla.engine.RenderEngine3D;
 import de.bushnaq.abdalla.engine.audio.AudioEngine;
 import de.bushnaq.abdalla.engine.audio.OggPlayer;
 import de.bushnaq.abdalla.engine.audio.OpenAlException;
-import de.bushnaq.abdalla.mercator.engine.AtlasManager;
 import de.bushnaq.abdalla.mercator.engine.GameEngine3D;
 import de.bushnaq.abdalla.mercator.universe.good.Good;
 import de.bushnaq.abdalla.mercator.universe.path.Waypoint;
-import de.bushnaq.abdalla.mercator.util.Debug;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -157,7 +154,7 @@ public class ManeuveringSystem {
     public void create(AudioEngine audioEngine) {
         try {
             oggPlayer = audioEngine.createAudioProducer(OggPlayer.class);
-            oggPlayer.setFile(Gdx.files.internal(AtlasManager.getAssetsFolderName() + "/audio/thrusters_loop.ogg"));
+//            oggPlayer.setFile(Gdx.files.internal(AtlasManager.getAssetsFolderName() + "/audio/thrusters_loop.ogg"));
             oggPlayer.setGain(100.0f);
             oggPlayer.setAmbient(false);
             oggPlayer.setLoop(true);
@@ -178,40 +175,7 @@ public class ManeuveringSystem {
             rotation = endRotation;
 //            if (Debug.isFilter(trader.getName()))
 //                logger.info("end");
-            //TODO move to Navigator.reachedWaypoint?
-            if (trader.navigator.reachedDestination()) {
-                //case 3
-                if (Debug.isFilterTrader(trader.getName()))
-                    System.out.printf("reached destination %s port %s\n", trader.navigator.nextWaypoint.city.getName(), trader.navigator.destinationPlanet.getName());
-                //dock
-                trader.setTraderSubStatus(TraderSubStatus.TRADER_STATUS_REQUESTING_DOCKING);
-                trader.communicationPartner.requestDocking(trader.navigator.nextWaypoint.city);
-            } else if (trader.navigator.reachedTransit()) {
-                //case 2
-                if (Debug.isFilterTrader(trader.getName()))
-                    System.out.printf("reached transit %s port %s\n", trader.navigator.nextWaypoint.city.getName(), trader.navigator.destinationPlanet.getName());
-                //transition
-                trader.setTraderSubStatus(TraderSubStatus.TRADER_STATUS_REQUESTING_TRANSITION);
-                trader.communicationPartner.requestTransition(trader.navigator.nextWaypoint.city);
-            } else {
-                //wait
-                if (Debug.isFilterTrader(trader.getName()))
-                    System.out.printf("reached waypoint %s port %s\n", trader.navigator.nextWaypoint.getName(), trader.navigator.destinationPlanet.getName());
-                trader.setTraderSubStatus(TraderSubStatus.TRADER_STATUS_WAITING_FOR_WAYPOINT);
-            }
-//            if (trader.navigator.nextWaypoint.city != null) {
-//                if (trader.navigator.reachedDestination()) {
-//                    //dock
-//                    trader.setTraderSubStatus(TraderSubStatus.TRADER_STATUS_REQUESTING_DOCKING);
-//                    trader.communicationPartner.requestDocking(trader.navigator.nextWaypoint.city);
-//                } else if (trader.navigator.reachedTransit()) {
-//                    //transition
-//                    trader.setTraderSubStatus(TraderSubStatus.TRADER_STATUS_REQUESTING_TRANSITION);
-//                    trader.communicationPartner.requestTransition(trader.navigator.nextWaypoint.city);
-//                }
-//            } else {
-//                trader.setTraderSubStatus(TraderSubStatus.TRADER_STATUS_WAITING_FOR_WAYPOINT);
-//            }
+            trader.onEvent.aligned();
         } else {
 //            if (Debug.isFilter(trader.getName()))
 //                logger.info("not-end");
@@ -234,15 +198,12 @@ public class ManeuveringSystem {
     public void startRotation() {
         if (trader.getTraderSubStatus() == TraderSubStatus.TRADER_STATUS_ALIGNING) {
             Waypoint    targetWaypoint = trader.navigator.waypointList.get(trader.navigator.destinationWaypointIndex).waypoint;
-            final float scalex         = (targetWaypoint.x - trader.navigator.previousWaypoint.x);
-            final float scaley         = (targetWaypoint.y - trader.navigator.previousWaypoint.y);
-            final float scalez         = (targetWaypoint.z - trader.navigator.previousWaypoint.z);
+            final float scaleX         = (targetWaypoint.x - trader.navigator.previousWaypoint.x);
+            final float scaleZ         = (targetWaypoint.z - trader.navigator.previousWaypoint.z);
             startRotation = rotation;
-            Vector2 d = new Vector2(scalex, scalez);
+            Vector2 d = new Vector2(scaleX, scaleZ);
             endRotation = zVector.angleDeg(d);
             progress    = 0f;
-//            if (Debug.isFilter(trader.getName()))
-//                logger.info(String.format("**** %s->%s startRotation=%f rotation=%f endRotation=%f", trader.sourceWaypoint.name, targetWaypoint.name, startRotation, rotation, endRotation));
         }
     }
 

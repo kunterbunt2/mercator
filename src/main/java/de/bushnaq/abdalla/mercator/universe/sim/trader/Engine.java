@@ -232,11 +232,12 @@ public class Engine {
     public void create(RenderEngine3D<GameEngine3D> renderEngine) {
         gameObject = new GameObject<GameEngine3D>(new ModelInstanceHack(renderEngine.getGameEngine().assetManager.flame.scene.model), trader);
         try {
-            oggPlayer = renderEngine.getGameEngine().audioEngine.createAudioProducer(OggPlayer.class);
+            oggPlayer = renderEngine.getGameEngine().audioEngine.createAudioProducer(OggPlayer.class, trader.getName() + "-engine");
 //            oggPlayer.setFile(Gdx.files.internal(AtlasManager.getAssetsFolderName() + "/audio/large-rocket-engine-86240.ogg"));
             oggPlayer.setGain(100.0f);
             oggPlayer.setAmbient(false);
             oggPlayer.setLoop(true);
+            oggPlayer.ignore(true);
         } catch (OpenAlException e) {
             throw new RuntimeException(e);
         }

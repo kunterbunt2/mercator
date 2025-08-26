@@ -28,8 +28,8 @@ public class MercatorSynthesizerFactory extends AbstractSynthesizerFactory<Merca
     }
 
     @Override
-    public MercatorSynthesizer uncacheSynth(AudioEngine audioEngine) throws OpenAlException {
-        return new MercatorSynthesizer();
+    public MercatorSynthesizer uncacheSynth(AudioEngine audioEngine, String name) throws OpenAlException {
+        return new MercatorSynthesizer(name);
     }
 
 }

@@ -1,6 +1,6 @@
 package de.bushnaq.abdalla.mercator.engine.ai;
 
-import de.bushnaq.abdalla.engine.LLMPrompt;
+import de.bushnaq.abdalla.engine.ai.ollama.LLMPrompt;
 import de.bushnaq.abdalla.engine.audio.Radio;
 
 public class MercatorSystemPrompts {
@@ -26,9 +26,9 @@ public class MercatorSystemPrompts {
                 - **System failure:** “Docking cleared,<pause> repair team ready at bay 12.”
             
             Example approvals:
-            - "<station>,<pause> calling <ship>,<pause> docking request approved,<pause> proceed to bay 7."
-            - "<station>,<pause> calling <ship>,<pause> clearance granted,<pause> medical team dispatched to bay 25."
-            - "<station>,<pause> calling station <ship>,<pause> docking approved,<pause> refuel crew waiting at bay 3."
+            - "<station> calling <ship> <pause> docking request approved,<pause> proceed to bay 7."
+            - "<station> calling <ship>,<pause> clearance granted,<pause> medical team dispatched to bay 25."
+            - "<station> calling station <ship>,<pause> docking approved,<pause> refuel crew waiting at bay 3."
             """;
     private static final String APPROVE_TRANSITION_SYSTEM_PROMPT = """
             You are a space station traffic control officer handling incoming ship communications.
@@ -72,10 +72,10 @@ public class MercatorSystemPrompts {
                 - **Medical transfer:** “Undock approved,<pause> patient transfer confirmed,<pause> safe travels.”
             
             Example approvals:
-            - "<station>,<pause> calling <ship>,<pause> undock request approved,<pause> docking clamps releasing now."
-            - "<station>,<pause> calling <ship> <ship>,<pause> clearance granted,<pause> avoid debris field near exit vector."
-            - "<station>,<pause> calling <ship>,<pause> you are free to depart,<pause> safe journey."
-            - "<station>,<pause> calling <ship>,<pause> undocking authorized,<pause> patrol ships in the sector,<pause> proceed with caution."
+            - "<ship>, undock request approved. Docking clamps releasing now."
+            - "<ship>, clearance granted. Avoid debris field near exit vector."
+            - "<ship>, you are free to depart. Safe journey."
+            - "<ship>, undocking authorized. Patrol ships in the sector.<pause> proceed with caution."
             """;
     private static final String REQUEST_DOCKING_SYSTEM_PROMPT    = """
             You are the communications officer on a cargo ship in space.
@@ -133,10 +133,10 @@ public class MercatorSystemPrompts {
             - Always end with a clear request for undocking approval.
             
             Example requests:
-            - "<ship>,<pause> calling <station>,<pause> requesting permission to undock."
-            - "<ship>,<pause> calling station <station>,<pause> resupply complete,<pause> requesting clearance to leave dock."
-            - "<ship>,<pause> calling <station>,<pause> systems nominal,<pause> requesting to undock."
-            - "<ship>,<pause> calling station <station>,<pause> we have <cargo> loaded, <pause> requesting to undock."
+            - "<station>, requesting permission to undock."
+            - "<station>, resupply complete. Requesting clearance to leave dock."
+            - "<station>, systems nominal. Requesting to undock."
+            - "station <station>, we have <cargo> loaded. Requesting to undock."
             """;
 
     public static void register(Radio radio) {

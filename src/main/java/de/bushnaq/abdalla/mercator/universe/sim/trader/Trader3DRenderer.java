@@ -103,8 +103,9 @@ public class Trader3DRenderer extends ObjectRenderer<GameEngine3D> {
             createThrusters(renderEngine);
             createEngine(renderEngine);
             createGoods(renderEngine);
-            synth = renderEngine.getGameEngine().audioEngine.createAudioProducer(MercatorSynthesizer.class);
+            synth = renderEngine.getGameEngine().audioEngine.createAudioProducer(MercatorSynthesizer.class, trader.getName() + "-synth");
             synth.setGain(100);
+            synth.ignore(true);
         } catch (final Exception e) {
             e.printStackTrace();
         }

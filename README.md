@@ -56,6 +56,7 @@ Then you can start mercator by one of its starting classes
 1. subtitles show too soon
 2. stations are too shallow, we can see the traders inside the station.
 3. there should be the possibility to select a ship but still hear teh station chat
+4. tts should generate next binaries while we are playing the current ones.
 100. Form selecting an item does not show info in the lower pane.
 101. Economy is not stable, all sims eventually die of hunger.
 102. simulation advanceintime is triggered every frame.

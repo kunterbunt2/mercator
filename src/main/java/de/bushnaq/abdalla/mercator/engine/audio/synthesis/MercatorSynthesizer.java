@@ -38,8 +38,8 @@ public class MercatorSynthesizer extends Synthesizer {
     private final SinOscillator sin1;
     private final SinOscillator sin2;
 
-    public MercatorSynthesizer() throws OpenAlException {
-        super(44100);
+    public MercatorSynthesizer(String name) throws OpenAlException {
+        super(44100, name);
 
         saw1 = new SawOscillator();
         add(saw1);

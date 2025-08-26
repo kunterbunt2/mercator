@@ -154,7 +154,7 @@ public class Demo {
     }
 
     private void startAmbientMusic() throws OpenAlException {
-        gameEngine.oggPlayer = gameEngine.audioEngine.createAudioProducer(OggPlayer.class);
+        gameEngine.oggPlayer = gameEngine.audioEngine.createAudioProducer(OggPlayer.class, "main-ambient");
         playNext();
     }
 

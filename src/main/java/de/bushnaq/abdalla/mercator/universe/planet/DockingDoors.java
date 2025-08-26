@@ -51,7 +51,7 @@ public class DockingDoors extends ArrayList<DockingDoor> {
             dockingDoor.create(renderEngine);
         }
         try {
-            oggPlayer = renderEngine.getGameEngine().audioEngine.createAudioProducer(OggPlayer.class);
+            oggPlayer = renderEngine.getGameEngine().audioEngine.createAudioProducer(OggPlayer.class, planet.getName() + "-docking-doors");
             oggPlayer.setFile(Gdx.files.internal(AtlasManager.getAssetsFolderName() + "/audio/docking-door.ogg"));
             oggPlayer.setGain(200.0f);
             oggPlayer.setAmbient(false);

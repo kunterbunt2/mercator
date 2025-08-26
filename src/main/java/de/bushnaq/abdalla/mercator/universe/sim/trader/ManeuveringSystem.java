@@ -16,12 +16,14 @@
 
 package de.bushnaq.abdalla.mercator.universe.sim.trader;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import de.bushnaq.abdalla.engine.RenderEngine3D;
 import de.bushnaq.abdalla.engine.audio.AudioEngine;
 import de.bushnaq.abdalla.engine.audio.OggPlayer;
 import de.bushnaq.abdalla.engine.audio.OpenAlException;
+import de.bushnaq.abdalla.mercator.engine.AtlasManager;
 import de.bushnaq.abdalla.mercator.engine.GameEngine3D;
 import de.bushnaq.abdalla.mercator.universe.good.Good;
 import de.bushnaq.abdalla.mercator.universe.path.Waypoint;
@@ -153,11 +155,13 @@ public class ManeuveringSystem {
 
     public void create(AudioEngine audioEngine) {
         try {
-            oggPlayer = audioEngine.createAudioProducer(OggPlayer.class);
-//            oggPlayer.setFile(Gdx.files.internal(AtlasManager.getAssetsFolderName() + "/audio/thrusters_loop.ogg"));
+            oggPlayer = audioEngine.createAudioProducer(OggPlayer.class, trader.getName() + "-maneuvering-system");
+            oggPlayer.setFile(Gdx.files.internal(AtlasManager.getAssetsFolderName() + "/audio/thrusters_loop.ogg"));
             oggPlayer.setGain(100.0f);
             oggPlayer.setAmbient(false);
             oggPlayer.setLoop(true);
+            oggPlayer.disable();
+            oggPlayer.ignore(true);
         } catch (OpenAlException e) {
             throw new RuntimeException(e);
         }

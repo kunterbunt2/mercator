@@ -18,7 +18,10 @@ package de.bushnaq.abdalla.mercator.universe.planet;
 
 import de.bushnaq.abdalla.engine.IGameEngine;
 import de.bushnaq.abdalla.engine.ai.PromptTags;
-import de.bushnaq.abdalla.engine.audio.*;
+import de.bushnaq.abdalla.engine.audio.AudioEngine;
+import de.bushnaq.abdalla.engine.audio.CommunicationPartner;
+import de.bushnaq.abdalla.engine.audio.OpenAlException;
+import de.bushnaq.abdalla.engine.audio.RadioMessage;
 import de.bushnaq.abdalla.engine.event.EventLevel;
 import de.bushnaq.abdalla.engine.event.IEventManager;
 import de.bushnaq.abdalla.mercator.engine.ai.MerkatorPromptTags;
@@ -47,10 +50,9 @@ public class PlanetCommunicationPartner implements CommunicationPartner {
      * This method removes any post tags in the string.
      *
      * @param string The subtitle text to be added.
-     * @param tags   The PromptTags containing post tags to be replaced in the string.
      */
-    private void addSubtitle(String string, PromptTags tags) {
-        gameEngine.getSubtitles().add(tags.removeAllPostTags(string));
+    private void addSubtitle(String string) {
+        gameEngine.getSubtitles().add(string);
     }
 
     @Override
@@ -76,7 +78,7 @@ public class PlanetCommunicationPartner implements CommunicationPartner {
     void handleRadioMessage(RadioMessage rm) {
         if (planet.inDock != null) {
             if (rm != null) {
-                planet.eventManager.add(EventLevel.trace, planet.currentTime, planet, String.format("Queuing request from '%s' because dock is occupied by '%s'.", rm.from.getName(), planet.inDock.getName()));
+                planet.eventManager.add(EventLevel.trace, planet.currentTime, planet, String.format("Queuing request from '%s' because dock is occupied by '%s'.", rm.getFrom().getName(), planet.inDock.getName()));
                 radioMessageQueue.add(rm);
             }
             return;
@@ -85,23 +87,23 @@ public class PlanetCommunicationPartner implements CommunicationPartner {
             //our dock just got free
             if (!radioMessageQueue.isEmpty()) {
                 rm = radioMessageQueue.removeFirst();
-                planet.eventManager.add(EventLevel.trace, planet.currentTime, planet, String.format("Handling queued request from '%s' because dock got freed.", rm.from.getName()));
+                planet.eventManager.add(EventLevel.trace, planet.currentTime, planet, String.format("Handling queued request from '%s' because dock got freed.", rm.getFrom().getName()));
             }
         }
         if (rm != null) {
-            PromptTags tags = new MerkatorPromptTags(planet, rm.from);
-            switch (RadioMessageId.valueOf(rm.radioMessageId)) {
+            PromptTags tags = new MerkatorPromptTags(planet, rm.getFrom());
+            switch (RadioMessageId.valueOf(rm.getMessageId())) {
                 case REQUEST_DOCKING -> {
-                    planet.occupyDock(rm.from);//occupy dock before informing the trader
-                    audioEngine.radio.queueRadioMessageGeneration(new RadioRequest(!planet.isSelected(), this, rm.from, RadioMessageId.APPROVE_DOCKING.name(), tags));
+                    planet.occupyDock(rm.getFrom());//occupy dock before informing the trader
+                    audioEngine.radio.queueRadioMessageGeneration(new RadioMessage(!planet.isSelected(), this, rm.getFrom(), RadioMessageId.APPROVE_DOCKING.name(), tags));
                 }
                 case REQUEST_UNDOCKING -> {
-                    planet.occupyDock(rm.from);//occupy dock before informing the trader
-                    audioEngine.radio.queueRadioMessageGeneration(new RadioRequest(!planet.isSelected(), this, rm.from, RadioMessageId.APPROVE_UNDOCKING.name(), tags));
+                    planet.occupyDock(rm.getFrom());//occupy dock before informing the trader
+                    audioEngine.radio.queueRadioMessageGeneration(new RadioMessage(!planet.isSelected(), this, rm.getFrom(), RadioMessageId.APPROVE_UNDOCKING.name(), tags));
                 }
                 case REQUEST_TRANSITION -> {
-                    planet.occupyDock(rm.from);//occupy dock before informing the trader
-                    audioEngine.radio.queueRadioMessageGeneration(new RadioRequest(!planet.isSelected(), this, rm.from, RadioMessageId.APPROVE_TRANSITION.name(), tags));
+                    planet.occupyDock(rm.getFrom());//occupy dock before informing the trader
+                    audioEngine.radio.queueRadioMessageGeneration(new RadioMessage(!planet.isSelected(), this, rm.getFrom(), RadioMessageId.APPROVE_TRANSITION.name(), tags));
                 }
             }
         }
@@ -118,19 +120,25 @@ public class PlanetCommunicationPartner implements CommunicationPartner {
     }
 
     @Override
-    public void notifyStartedTalking(RadioMessage message) {
+    public void notifyStartedTalking(RadioMessage rm) {
+        if (!rm.isSilent()) {
+            String postText = rm.getTags().removeAllPostTags(rm.getMessage());
+            addSubtitle(planet.getName() + ": " + postText);
+            planet.eventManager.add(EventLevel.trace, planet.currentTime, planet, postText);
+        }
     }
 
     @Override
-    public void processRadioMessage(RadioRequest rr) {
+    public void processRadioMessage(RadioMessage rm) {
 //                            if (Debug.isFilterPlanet(planet.getName()))
 //                                logger.info(String.format("answering %s message", rm.id.name()));
-        String string = RadioMessage.createMessage(audioEngine.radio.resolveString(rr.getMessageId(), rr.getTags(), rr.isSilent()), rr.getTags());
-        if (!rr.isSilent()) {
-            addSubtitle(string, rr.getTags());
-            planet.eventManager.add(EventLevel.trace, planet.currentTime, planet, rr.getTags().removeAllPostTags(string));
-        }
-        RadioMessage rm = new RadioMessage(planet.currentTime, rr.getFrom(), rr.getTo(), rr.getMessageId(), rr.getTags().replaceAllPostTags(string), rr.isSilent());
+        rm.setMessage(audioEngine.radio.resolveString(rm.getMessageId(), rm.getTags(), rm.isSilent()));
+        rm.setTime(planet.currentTime);
+//        if (!rm.isSilent()) {
+//            addSubtitle(string, rm.getTags());
+//            planet.eventManager.add(EventLevel.trace, planet.currentTime, planet, rm.getTags().removeAllPostTags(string));
+//        }
+//        RadioMessage rm = new RadioMessage(planet.currentTime, rm.getFrom(), rm.getTo(), rm.getMessageId(), rm.getTags().replaceAllPostTags(string), rm.isSilent(), rm.getTags());
         gameEngine.getRadio().radio(rm);// send to partner
     }
 

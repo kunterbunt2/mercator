@@ -61,7 +61,7 @@ public class Demo2 {
         index++;
         index = index % 5;
         gameEngine.oggPlayer.setFile(Gdx.files.internal(AtlasManager.getAssetsFolderName() + "/audio/" + files[index]));
-        gameEngine.oggPlayer.setGain(.1f);
+        gameEngine.oggPlayer.setGain(.05f);
         gameEngine.oggPlayer.play();
     }
 

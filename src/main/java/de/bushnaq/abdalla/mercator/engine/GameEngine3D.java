@@ -90,7 +90,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
     private static final float                        MAX_TIME_DELTA                = 0.1f;//everything above will be ignored as a glitch
     // private static final float MAX_VOXEL_DIMENSION = 20;
 //    public static final  Color                        NOT_PRODUCING_FACTORY_COLOR   = Color.RED; // 0xffFF0000;
-    public static final  int                          NUMBER_OF_CELESTIAL_BODIES    = 10000;//TODO should be 10000
+    public static final  int                          NUMBER_OF_CELESTIAL_BODIES    = 100000;//TODO should be 10000
     private static final float                        ROTATION_SPEED                = 1f;//degrees
     //    public static final  int                          RAYS_NUM                      = 128;
 //    private static final float                        RENDER_2D_UNTIL               = 1500;
@@ -247,10 +247,10 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
             renderEngine.getFog().setFullDistance(3000f);
 
             renderEngine.setSkyBox(true);
-            renderEngine.setDayAmbientLight(.4f, .4f, .4f, 1f);
+            renderEngine.setDayAmbientLight(.8f, .8f, .8f, 1f);
             renderEngine.setNightAmbientLight(.2f, .2f, .2f, 1f);
             renderEngine.setAlwaysDay(true);
-            renderEngine.setDynamicDayTime(true);
+            renderEngine.setDynamicDayTime(false);
             renderEngine.setShadowEnabled(true);
 
             renderEngine.getShadowLight().setColor(Color.WHITE);
@@ -381,9 +381,10 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
 
     private void createImageBasedLighting(float timeOfDay) {
         if (old) {
-            if (brdfLUT == null) brdfLUT = new Texture(Gdx.files.classpath("net/mgsx/gltf/shaders/brdfLUT.png"));
+            if (brdfLUT == null)
             // setup quick IBL (image based lighting)
             {
+                brdfLUT = new Texture(Gdx.files.classpath("net/mgsx/gltf/shaders/brdfLUT.png"));
                 Integer             index               = (int) (angle);
                 EnvironmentSnapshot environmentSnapshot = environmentSnapshotMap.get(index);
                 if (environmentSnapshot == null) {

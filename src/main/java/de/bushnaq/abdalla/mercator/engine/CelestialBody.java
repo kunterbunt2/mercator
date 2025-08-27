@@ -22,17 +22,17 @@ import com.badlogic.gdx.math.Vector3;
 
 public class CelestialBody {
     Color color;
-    float exponent;
     private Vector3 direction = new Vector3();
+    float exponent;
 
     public CelestialBody() {
-        float         xAngle = (float) Math.random() * 360;
-        float         yAngle = (float) Math.random() * 360;
-        float         zAngle = (float) Math.random() * 360;
-        final Matrix4 m      = new Matrix4();
+        float xAngle = (float) Math.random() * 360;
+        float yAngle = (float) Math.random() * 360;
+//        float         zAngle = (float) Math.random() * 360;
+        final Matrix4 m = new Matrix4();
         m.rotate(Vector3.X, xAngle);
         m.rotate(Vector3.Y, yAngle);
-        m.rotate(Vector3.Z, zAngle);
+        m.rotate(Vector3.Z, 0);
         m.translate(0, 0, -1);
         m.getTranslation(direction);
         {
@@ -46,8 +46,8 @@ public class CelestialBody {
             float r          = brightness + (float) Math.random() * (1f - brightness);
             float g          = brightness + (float) Math.random() * (1f - brightness);
             float b          = brightness + (float) Math.random() * (1f - brightness);
-            float a          = minAlpha + (float) Math.random() * (1f - minAlpha);
-            color = new Color(r, g, b, a);
+//            float a          = minAlpha + (float) Math.random() * (1f - minAlpha);
+            color = new Color(r, g, b, 1);
         }
     }
 

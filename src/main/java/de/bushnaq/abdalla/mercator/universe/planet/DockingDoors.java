@@ -56,7 +56,7 @@ public class DockingDoors extends ArrayList<DockingDoor> {
             oggPlayer.setGain(200.0f);
             oggPlayer.setAmbient(false);
             oggPlayer.setLoop(true);
-            oggPlayer.ignore(true);
+//            oggPlayer.ignore(true);
         } catch (OpenAlException e) {
             throw new RuntimeException(e);
         }

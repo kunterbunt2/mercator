@@ -17,16 +17,16 @@
 package de.bushnaq.abdalla.mercator.util;
 
 import de.bushnaq.abdalla.mercator.universe.planet.Planet;
-import de.bushnaq.abdalla.mercator.universe.planet.PlanetCommunicationPartner;
+import de.bushnaq.abdalla.mercator.universe.planet.PlanetRadioChannel;
 import de.bushnaq.abdalla.mercator.universe.sim.trader.Trader;
-import de.bushnaq.abdalla.mercator.universe.sim.trader.TraderCommunicationPartner;
+import de.bushnaq.abdalla.mercator.universe.sim.trader.TraderRadioChannel;
 
 public class Debug {
     private static final boolean enablePlanetFilter = true;
     private static final boolean enableTraderFilter = true;
-    //    private static final String  filterPlanet       = "Leo Minor Port";
+    private static final String  filterPlanet       = "Leo Minor Port";
+    //    private static final String  filterPlanet       = "Pollux Hub";
 //    private static final String  filterPlanet       = "Pollux Hub";
-    private static final String  filterPlanet       = "Pollux Hub";
     private static final String  filterTrader       = "Starpath";
 //    private static final String  filterTrader       = "Frontier Star";
 //    private static final String  filterTrader       = "Damocles";
@@ -50,12 +50,12 @@ public class Debug {
     public static boolean isFiltered(Object object) {
         if (object instanceof Trader) {
             return isFilterTrader(((Trader) object).getName());
-        } else if (object instanceof TraderCommunicationPartner) {
-            return isFilterTrader(((TraderCommunicationPartner) object).getName());
+        } else if (object instanceof TraderRadioChannel) {
+            return isFilterTrader(((TraderRadioChannel) object).getName());
         } else if (object instanceof Planet) {
             return isFilterPlanet(((Planet) object).getName());
-        } else if (object instanceof PlanetCommunicationPartner) {
-            return isFilterTrader(((PlanetCommunicationPartner) object).getName());
+        } else if (object instanceof PlanetRadioChannel) {
+            return isFilterTrader(((PlanetRadioChannel) object).getName());
         }
         return false;
     }

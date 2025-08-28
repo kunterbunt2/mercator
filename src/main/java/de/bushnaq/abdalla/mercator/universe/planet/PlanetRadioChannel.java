@@ -19,27 +19,28 @@ package de.bushnaq.abdalla.mercator.universe.planet;
 import de.bushnaq.abdalla.engine.IGameEngine;
 import de.bushnaq.abdalla.engine.ai.PromptTags;
 import de.bushnaq.abdalla.engine.audio.AudioEngine;
-import de.bushnaq.abdalla.engine.audio.CommunicationPartner;
 import de.bushnaq.abdalla.engine.audio.OpenAlException;
-import de.bushnaq.abdalla.engine.audio.RadioMessage;
+import de.bushnaq.abdalla.engine.audio.radio.RadioChannel;
+import de.bushnaq.abdalla.engine.audio.radio.RadioMessage;
+import de.bushnaq.abdalla.engine.audio.radio.RadioWave;
 import de.bushnaq.abdalla.engine.event.EventLevel;
 import de.bushnaq.abdalla.engine.event.IEventManager;
 import de.bushnaq.abdalla.mercator.engine.ai.MerkatorPromptTags;
-import de.bushnaq.abdalla.mercator.engine.ai.RadioMessageId;
+import de.bushnaq.abdalla.mercator.engine.audio.radio.RadioMessageId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class PlanetCommunicationPartner implements CommunicationPartner {
+public class PlanetRadioChannel implements RadioChannel {
     private final AudioEngine        audioEngine;
     private final IGameEngine        gameEngine;
     private final Logger             logger            = LoggerFactory.getLogger(this.getClass());
     private final Planet             planet;
     private final List<RadioMessage> radioMessageQueue = new ArrayList<>();
 
-    public PlanetCommunicationPartner(IGameEngine gameEngine, Planet planet) throws OpenAlException {
+    public PlanetRadioChannel(IGameEngine gameEngine, Planet planet) throws OpenAlException {
         this.gameEngine  = gameEngine;
         this.audioEngine = gameEngine.getAudioEngine();
         this.planet      = planet;
@@ -120,9 +121,10 @@ public class PlanetCommunicationPartner implements CommunicationPartner {
     }
 
     @Override
-    public void notifyStartedTalking(RadioMessage rm) {
+    public void notifyStartedTalking(RadioWave rw) {
+        RadioMessage rm = rw.radioMessage();
         if (!rm.isSilent()) {
-            String postText = rm.getTags().removeAllPostTags(rm.getMessage());
+            String postText = rm.getTags().removeAllPostTags(rm.getMessages().get(rw.index()));
             addSubtitle(planet.getName() + ": " + postText);
             planet.eventManager.add(EventLevel.trace, planet.currentTime, planet, postText);
         }
@@ -132,7 +134,7 @@ public class PlanetCommunicationPartner implements CommunicationPartner {
     public void processRadioMessage(RadioMessage rm) {
 //                            if (Debug.isFilterPlanet(planet.getName()))
 //                                logger.info(String.format("answering %s message", rm.id.name()));
-        rm.setMessage(audioEngine.radio.resolveString(rm.getMessageId(), rm.getTags(), rm.isSilent()));
+        rm.addMessage(audioEngine.radio.resolveString(rm.getMessageId(), rm.getTags(), rm.isSilent()));
         rm.setTime(planet.currentTime);
 //        if (!rm.isSilent()) {
 //            addSubtitle(string, rm.getTags());

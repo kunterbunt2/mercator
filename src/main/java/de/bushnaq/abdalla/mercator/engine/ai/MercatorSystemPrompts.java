@@ -1,7 +1,8 @@
 package de.bushnaq.abdalla.mercator.engine.ai;
 
 import de.bushnaq.abdalla.engine.ai.ollama.LLMPrompt;
-import de.bushnaq.abdalla.engine.audio.Radio;
+import de.bushnaq.abdalla.engine.audio.radio.Radio;
+import de.bushnaq.abdalla.mercator.engine.audio.radio.RadioMessageId;
 
 public class MercatorSystemPrompts {
     private static final String APPROVE_DOCKING_SYSTEM_PROMPT    = """
@@ -136,7 +137,7 @@ public class MercatorSystemPrompts {
             - "<station>, requesting permission to undock."
             - "<station>, resupply complete. Requesting clearance to leave dock."
             - "<station>, systems nominal. Requesting to undock."
-            - "station <station>, we have <cargo> loaded. Requesting to undock."
+            - "<station>, we have <cargo> loaded. Requesting to undock."
             """;
 
     public static void register(Radio radio) {

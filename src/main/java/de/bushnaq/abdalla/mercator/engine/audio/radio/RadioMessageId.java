@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package de.bushnaq.abdalla.mercator.engine.ai;
+package de.bushnaq.abdalla.mercator.engine.audio.radio;
 
 public enum RadioMessageId {
     REQUEST_DOCKING,//

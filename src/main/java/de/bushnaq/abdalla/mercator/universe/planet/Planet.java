@@ -17,8 +17,8 @@
 package de.bushnaq.abdalla.mercator.universe.planet;
 
 import de.bushnaq.abdalla.engine.IGameEngine;
-import de.bushnaq.abdalla.engine.audio.CommunicationPartner;
 import de.bushnaq.abdalla.engine.audio.OpenAlException;
+import de.bushnaq.abdalla.engine.audio.radio.RadioChannel;
 import de.bushnaq.abdalla.engine.event.EventLevel;
 import de.bushnaq.abdalla.mercator.universe.Universe;
 import de.bushnaq.abdalla.mercator.universe.event.PlanetEventManager;
@@ -33,8 +33,8 @@ import de.bushnaq.abdalla.mercator.universe.path.Waypoint;
 import de.bushnaq.abdalla.mercator.universe.path.WaypointList;
 import de.bushnaq.abdalla.mercator.universe.sim.Sim;
 import de.bushnaq.abdalla.mercator.universe.sim.SimList;
-import de.bushnaq.abdalla.mercator.universe.sim.trader.TraderCommunicationPartner;
 import de.bushnaq.abdalla.mercator.universe.sim.trader.TraderList;
+import de.bushnaq.abdalla.mercator.universe.sim.trader.TraderRadioChannel;
 import de.bushnaq.abdalla.mercator.util.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -45,35 +45,35 @@ import org.slf4j.LoggerFactory;
  * @author bushnaq Created 13.02.2005
  */
 public class Planet extends Waypoint implements TradingPartner {
-    public static final float                      CHANNEL_SIZE           = 196 / Universe.WORLD_SCALE;
-    public static final int                        PLANET_DISTANCE        = 2048;
-    public final static int                        PLANET_MAX_SIMS        = 10;
-    public final static float                      PLANET_START_CREDITS   = 20000;
-    public              PlanetCommunicationPartner communicationPartner;
-    private             float                      credits                = PLANET_START_CREDITS;
-    public              long                       currentTime            = 0;
-    public              SimList                    deadSimList            = new SimList(this);
-    public              DockingDoors               dockingDoors           = new DockingDoors(this);
-    public              PlanetEventManager         eventManager;
-    private final       GoodList                   goodList               = new GoodList();
+    public static final float                  CHANNEL_SIZE           = 196 / Universe.WORLD_SCALE;
+    public static final int                    PLANET_DISTANCE        = 2048;
+    public final static int                    PLANET_MAX_SIMS        = 10;
+    public final static float                  PLANET_START_CREDITS   = 20000;
+    public              PlanetRadioChannel     communicationPartner;
+    private             float                  credits                = PLANET_START_CREDITS;
+    public              long                   currentTime            = 0;
+    public              SimList                deadSimList            = new SimList(this);
+    public              DockingDoors           dockingDoors           = new DockingDoors(this);
+    public              PlanetEventManager     eventManager;
+    private final       GoodList               goodList               = new GoodList();
     @Setter
-    private             HistoryManager             historyManager;
-    private final       int                        id;
-    public              CommunicationPartner       inDock                 = null;// the trader that is currently in the dock, or null if no trader is in the dock
-    public              long                       lastTransaction        = 0;
-    private final       Logger                     logger                 = LoggerFactory.getLogger(this.getClass());
-    public              float                      orbitAngle             = 0.0f;
-    public              PathSeeker                 pathSeeker             = new PathSeeker();
-    public              ProductionFacilityList     productionFacilityList = new ProductionFacilityList();
+    private             HistoryManager         historyManager;
+    private final       int                    id;
+    public              RadioChannel           inDock                 = null;// the trader that is currently in the dock, or null if no trader is in the dock
+    public              long                   lastTransaction        = 0;
+    private final       Logger                 logger                 = LoggerFactory.getLogger(this.getClass());
+    public              float                  orbitAngle             = 0.0f;
+    public              PathSeeker             pathSeeker             = new PathSeeker();
+    public              ProductionFacilityList productionFacilityList = new ProductionFacilityList();
     @Getter
     @Setter
-    public              boolean                    selected;
-    public              SimList                    simList                = new SimList(this);
-    public              PlanetStatisticManager     statisticManager       = new PlanetStatisticManager();
-    public              PlanetStatus               status                 = PlanetStatus.LIVING;
-    public              long                       timeDelta              = 0;
-    public              TraderList                 traderList             = new TraderList();
-    public              Universe                   universe;
+    public              boolean                selected;
+    public              SimList                simList                = new SimList(this);
+    public              PlanetStatisticManager statisticManager       = new PlanetStatisticManager();
+    public              PlanetStatus           status                 = PlanetStatus.LIVING;
+    public              long                   timeDelta              = 0;
+    public              TraderList             traderList             = new TraderList();
+    public              Universe               universe;
 
     public Planet(int id, final String name, final float x, final float y, final float z, final Universe universe) {
         super(name, x, y, z);
@@ -113,7 +113,7 @@ public class Planet extends Waypoint implements TradingPartner {
         }
     }
 
-    public void clearDock(TraderCommunicationPartner cp) {
+    public void clearDock(TraderRadioChannel cp) {
         if (inDock == cp) {
             if (Debug.isFilterTrader(cp.getName())) {
                 cp.getEventManager().add(EventLevel.trace, currentTime, cp, String.format("'%s' cleared the dock", inDock.getName()));
@@ -214,7 +214,7 @@ public class Planet extends Waypoint implements TradingPartner {
         // }
         // factoryList.add( factory );
         // }
-        communicationPartner = new PlanetCommunicationPartner(gameEngine, this);
+        communicationPartner = new PlanetRadioChannel(gameEngine, this);
     }
 
     private void distributeEnigneers() {
@@ -308,7 +308,7 @@ public class Planet extends Waypoint implements TradingPartner {
             return (int) (satisfaction / simList.size());
     }
 
-    public void occupyDock(CommunicationPartner cp) {
+    public void occupyDock(RadioChannel cp) {
         if (inDock == null) {
             inDock = cp;
             if (Debug.isFilterTrader(cp.getName())) {

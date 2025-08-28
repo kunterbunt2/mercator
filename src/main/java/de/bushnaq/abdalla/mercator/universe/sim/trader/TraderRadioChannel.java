@@ -19,12 +19,13 @@ package de.bushnaq.abdalla.mercator.universe.sim.trader;
 import de.bushnaq.abdalla.engine.IGameEngine;
 import de.bushnaq.abdalla.engine.ai.PromptTags;
 import de.bushnaq.abdalla.engine.audio.AudioEngine;
-import de.bushnaq.abdalla.engine.audio.CommunicationPartner;
 import de.bushnaq.abdalla.engine.audio.OpenAlException;
-import de.bushnaq.abdalla.engine.audio.RadioMessage;
+import de.bushnaq.abdalla.engine.audio.radio.RadioChannel;
+import de.bushnaq.abdalla.engine.audio.radio.RadioMessage;
+import de.bushnaq.abdalla.engine.audio.radio.RadioWave;
 import de.bushnaq.abdalla.engine.event.EventLevel;
 import de.bushnaq.abdalla.mercator.engine.ai.MerkatorPromptTags;
-import de.bushnaq.abdalla.mercator.engine.ai.RadioMessageId;
+import de.bushnaq.abdalla.mercator.engine.audio.radio.RadioMessageId;
 import de.bushnaq.abdalla.mercator.universe.event.EventManager;
 import de.bushnaq.abdalla.mercator.universe.planet.Planet;
 import org.slf4j.Logger;
@@ -32,13 +33,13 @@ import org.slf4j.LoggerFactory;
 
 import static de.bushnaq.abdalla.mercator.universe.planet.DockingDoor.DockingDoorState.LOWERING;
 
-public class TraderCommunicationPartner implements CommunicationPartner {
+public class TraderRadioChannel implements RadioChannel {
     private final AudioEngine audioEngine;
     private final IGameEngine gameEngine;
     private final Logger      logger = LoggerFactory.getLogger(this.getClass());
     private final Trader      trader;
 
-    public TraderCommunicationPartner(IGameEngine gameEngine, Trader trader) throws OpenAlException {
+    public TraderRadioChannel(IGameEngine gameEngine, Trader trader) throws OpenAlException {
         this.gameEngine  = gameEngine;
         this.trader      = trader;
         this.audioEngine = gameEngine.getAudioEngine();
@@ -96,14 +97,15 @@ public class TraderCommunicationPartner implements CommunicationPartner {
 
     @Override
     public void notifyFinishedTalking(RadioMessage rm) {
-//        System.out.println("TraderCommunicationPartner.notifyFinishedTalking");
+//        System.out.println("TraderRadioChannel.notifyFinishedTalking");
         handleRadioMessages(rm);
     }
 
     @Override
-    public void notifyStartedTalking(RadioMessage rm) {
+    public void notifyStartedTalking(RadioWave rw) {
+        RadioMessage rm = rw.radioMessage();
         if (!rm.isSilent()) {
-            String postText = rm.getTags().removeAllPostTags(rm.getMessage());
+            String postText = rm.getTags().removeAllPostTags(rm.getMessages().get(rw.index()));
             addSubtitle(trader.getName() + ": " + postText);
             trader.eventManager.add(EventLevel.trace, trader.currentTime, trader, postText);
         }
@@ -111,7 +113,8 @@ public class TraderCommunicationPartner implements CommunicationPartner {
 
     @Override
     public void processRadioMessage(RadioMessage rm) {
-        rm.setMessage(audioEngine.radio.resolveString(rm.getMessageId(), rm.getTags(), rm.isSilent()));
+        long time = System.currentTimeMillis();
+        rm.addMessage(audioEngine.radio.resolveString(rm.getMessageId(), rm.getTags(), rm.isSilent()));
         rm.setTime(trader.currentTime);
 //        if (!rm.isSilent()) {
 //            addSubtitle(string, rm.getTags());

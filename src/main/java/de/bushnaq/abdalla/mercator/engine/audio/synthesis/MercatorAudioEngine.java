@@ -19,7 +19,7 @@ package de.bushnaq.abdalla.mercator.engine.audio.synthesis;
 
 import de.bushnaq.abdalla.engine.audio.AudioEngine;
 import de.bushnaq.abdalla.engine.audio.OggPlayerFactory;
-import de.bushnaq.abdalla.engine.audio.TTSPlayerFactory;
+import de.bushnaq.abdalla.engine.audio.radio.TTSPlayerFactory;
 
 public class MercatorAudioEngine extends AudioEngine {
 

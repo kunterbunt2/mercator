@@ -1,7 +1,7 @@
 package de.bushnaq.abdalla.mercator.engine.ai;
 
 import de.bushnaq.abdalla.engine.ai.PromptTags;
-import de.bushnaq.abdalla.engine.audio.CommunicationPartner;
+import de.bushnaq.abdalla.engine.audio.radio.RadioChannel;
 import de.bushnaq.abdalla.mercator.universe.good.Good;
 import de.bushnaq.abdalla.mercator.universe.planet.Planet;
 import de.bushnaq.abdalla.mercator.universe.sim.trader.Trader;
@@ -31,7 +31,7 @@ public class MerkatorPromptTags extends PromptTags {
         addPreTag(DESTINATION_TAG, trader.navigator.destinationPlanet.getName());
     }
 
-    public MerkatorPromptTags(Planet planet, CommunicationPartner from) {
+    public MerkatorPromptTags(Planet planet, RadioChannel from) {
         addPreTag(STATION_TAG, planet.getName());
         addPreTag(SHIP_TAG, from.getName());
     }

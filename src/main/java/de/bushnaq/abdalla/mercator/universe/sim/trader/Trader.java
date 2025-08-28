@@ -41,38 +41,38 @@ import static de.bushnaq.abdalla.mercator.universe.sim.trader.Trader3DRenderer.T
  * @author bushnaq Created 13.02.2005
  */
 public class Trader extends Sim {
-    private static final float                      JUMP_UNIT_COST            = 1f / (1000f);
-    public static final  int                        MAX_GOOD_SPACE            = 160;
-    public static final  int                        MIN_GOOD_SPACE            = 30;
-    public final static  int                        TRADER_MAX_PORT_REST_TIME = 3;
-    public static final  float                      TRADER_START_CREDITS      = 1000.0f;
-    public               TraderCommunicationPartner communicationPartner;
-    public               long                       currentTime               = 0;
-    private              int                        currentTransportedAmount;
+    private static final float              JUMP_UNIT_COST            = 1f / (1000f);
+    public static final  int                MAX_GOOD_SPACE            = 160;
+    public static final  int                MIN_GOOD_SPACE            = 30;
+    public final static  int                TRADER_MAX_PORT_REST_TIME = 3;
+    public static final  float              TRADER_START_CREDITS      = 1000.0f;
+    public               TraderRadioChannel communicationPartner;
+    public               long               currentTime               = 0;
+    private              int                currentTransportedAmount;
     @Getter
-    private final        Engine                     engine                    = new Engine(this);
-    private              boolean                    foundTradedGood           = false;
-    public               int                        goodSpace                 = 0;
+    private final        Engine             engine                    = new Engine(this);
+    private              boolean            foundTradedGood           = false;
+    public               int                goodSpace                 = 0;
     @Getter
-    private final        int                        id;
-    public               int                        lastYearTransportedAmount;
-    private final        Logger                     logger                    = LoggerFactory.getLogger(this.getClass());
+    private final        int                id;
+    public               int                lastYearTransportedAmount;
+    private final        Logger             logger                    = LoggerFactory.getLogger(this.getClass());
     @Getter
-    private final        ManeuveringSystem          maneuveringSystem         = new ManeuveringSystem(this);
-    public               Navigator                  navigator                 = new Navigator(this);
-    public               OnTraderEvent              onEvent                   = new OnTraderEvent(this);
-    public               long                       portRestingTime           = 0; // ---After a transaction or to wait for better prices, we recreate at a port
-    protected            boolean                    selected                  = false;
-    public final         Vector3                    speed                     = new Vector3(0, 0, 0);
-    private              GoodType                   targetGoodType            = null; // ---Used to remember the index of good that we where to sell
-    private              long                       timeDelta                 = 0;
+    private final        ManeuveringSystem  maneuveringSystem         = new ManeuveringSystem(this);
+    public               Navigator          navigator                 = new Navigator(this);
+    public               OnTraderEvent      onEvent                   = new OnTraderEvent(this);
+    public               long               portRestingTime           = 0; // ---After a transaction or to wait for better prices, we recreate at a port
+    protected            boolean            selected                  = false;
+    public final         Vector3            speed                     = new Vector3(0, 0, 0);
+    private              GoodType           targetGoodType            = null; // ---Used to remember the index of good that we where to sell
+    private              long               timeDelta                 = 0;
     @Getter
-    private              TraderStatus               traderStatus              = TraderStatus.TRADER_STATUS_RESTING;
+    private              TraderStatus       traderStatus              = TraderStatus.TRADER_STATUS_RESTING;
     @Getter
-    private              TraderSubStatus            traderSubStatus           = TraderSubStatus.TRADER_STATUS_DOCKED;
-    public               float                      x;
-    public               float                      y                         = TRADER_DOCKING_HEIGHT;
-    public               float                      z;
+    private              TraderSubStatus    traderSubStatus           = TraderSubStatus.TRADER_STATUS_DOCKED;
+    public               float              x;
+    public               float              y                         = TRADER_DOCKING_HEIGHT;
+    public               float              z;
 
     public Trader(int id, final Planet planet, final String name, final float credits) throws Exception {
         super(planet, name, credits);
@@ -226,7 +226,7 @@ public class Trader extends Sim {
     public void create(IGameEngine gameEngine, final MercatorRandomGenerator randomGenerator) throws OpenAlException {
         goodSpace            = Trader.MIN_GOOD_SPACE + randomGenerator.nextInt(0, this, Trader.MAX_GOOD_SPACE - Trader.MIN_GOOD_SPACE);
         portRestingTime      = randomGenerator.nextInt(0, this, Trader.TRADER_MAX_PORT_REST_TIME) * TimeUnit.TICKS_PER_DAY;
-        communicationPartner = new TraderCommunicationPartner(gameEngine, this);
+        communicationPartner = new TraderRadioChannel(gameEngine, this);
     }
 
     public void markJumpGateUsage() {

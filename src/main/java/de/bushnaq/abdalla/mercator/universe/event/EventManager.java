@@ -20,10 +20,10 @@ import de.bushnaq.abdalla.engine.event.EventLevel;
 import de.bushnaq.abdalla.engine.event.IEvent;
 import de.bushnaq.abdalla.engine.event.IEventManager;
 import de.bushnaq.abdalla.mercator.universe.planet.Planet;
-import de.bushnaq.abdalla.mercator.universe.planet.PlanetCommunicationPartner;
+import de.bushnaq.abdalla.mercator.universe.planet.PlanetRadioChannel;
 import de.bushnaq.abdalla.mercator.universe.sim.Sim;
 import de.bushnaq.abdalla.mercator.universe.sim.trader.Trader;
-import de.bushnaq.abdalla.mercator.universe.sim.trader.TraderCommunicationPartner;
+import de.bushnaq.abdalla.mercator.universe.sim.trader.TraderRadioChannel;
 import de.bushnaq.abdalla.mercator.util.Debug;
 import de.bushnaq.abdalla.mercator.util.TimeUnit;
 import org.slf4j.Logger;
@@ -109,10 +109,10 @@ public class EventManager implements IEventManager {
 
         return switch (event.getWho()) {
             case Trader trader -> String.format("[TRADER ] %10s | %s | %15s | %s", timeStr, levelStr, trader.getName(), event.getWhat());
-            case TraderCommunicationPartner tcp -> String.format("[TRADER ] %10s | %s | %15s | %s", timeStr, levelStr, tcp.getName(), event.getWhat());
+            case TraderRadioChannel tcp -> String.format("[TRADER ] %10s | %s | %15s | %s", timeStr, levelStr, tcp.getName(), event.getWhat());
             case Sim sim -> String.format("[SIM    ] %10s | %s | %15s | %s", timeStr, levelStr, sim.getName(), event.getWhat());
             case Planet planet -> String.format("[PLANET ] %10s | %s | %15s | %s", timeStr, levelStr, planet.getName(), event.getWhat());
-            case PlanetCommunicationPartner pcp -> String.format("[PLANET ] %10s | %s | %15s | %s", timeStr, levelStr, pcp.getName(), event.getWhat());
+            case PlanetRadioChannel pcp -> String.format("[PLANET ] %10s | %s | %15s | %s", timeStr, levelStr, pcp.getName(), event.getWhat());
             default -> String.format("[UNKNOWN] %10s | %s | %s | %s", timeStr, levelStr, event.getWho().getClass().getSimpleName(), event.getWhat());
         };
     }

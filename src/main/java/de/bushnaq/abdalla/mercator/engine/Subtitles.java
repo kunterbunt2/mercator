@@ -53,7 +53,7 @@ public class Subtitles implements ISubtitles {
                 final float x2 = renderEngine2D.untransformX(x1 + width + 20);
                 final float y1 = renderEngine2D.untransformY(renderEngine2D.height / 2 - 100 - 10);
                 final float y2 = renderEngine2D.untransformY(y1 + layout.height * 1.5f + 10);
-                gameEngine.getRenderEngine().renderEngine2D.bar(gameEngine.getAtlasManager().systemTextureRegion, x1, y1, x2, y2, new Color(0f, 0f, 0f, 0.4f));
+                gameEngine.getRenderEngine().renderEngine2D.bar(gameEngine.getAtlasManager().systemTextureRegion, x1, y1, x2, y2, new Color(0f, 0f, 0f, 0.7f));
             }
             final GlyphLayout lastLayout = ds.font.draw(renderEngine2D.batch, ds.text, textX, y, width, Align.left, true);
             deltaY += lastLayout.height * lineHeightFactor;

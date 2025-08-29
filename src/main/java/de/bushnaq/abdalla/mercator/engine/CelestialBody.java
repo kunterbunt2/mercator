@@ -36,7 +36,7 @@ public class CelestialBody {
         m.translate(0, 0, -1);
         m.getTranslation(direction);
         {
-            float max = 100000000;
+            float max = 1000000 * 5;
             float min = 100000;
             exponent = (float) (min + Math.random() * (max - min));
         }
@@ -46,8 +46,8 @@ public class CelestialBody {
             float r          = brightness + (float) Math.random() * (1f - brightness);
             float g          = brightness + (float) Math.random() * (1f - brightness);
             float b          = brightness + (float) Math.random() * (1f - brightness);
-//            float a          = minAlpha + (float) Math.random() * (1f - minAlpha);
-            color = new Color(r, g, b, 1);
+            float a          = minAlpha + (float) Math.random() * (1f - minAlpha);
+            color = new Color(r, g, b, a);
         }
     }
 

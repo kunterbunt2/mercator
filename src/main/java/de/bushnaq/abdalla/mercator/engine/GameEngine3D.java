@@ -90,7 +90,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
     private static final float                        MAX_TIME_DELTA                = 0.1f;//everything above will be ignored as a glitch
     // private static final float MAX_VOXEL_DIMENSION = 20;
 //    public static final  Color                        NOT_PRODUCING_FACTORY_COLOR   = Color.RED; // 0xffFF0000;
-    public static final  int                          NUMBER_OF_CELESTIAL_BODIES    = 100000;//TODO should be 10000
+    public static final  int                          NUMBER_OF_CELESTIAL_BODIES    = 10000;//TODO should be 10000
     private static final float                        ROTATION_SPEED                = 1f;//degrees
     //    public static final  int                          RAYS_NUM                      = 128;
 //    private static final float                        RENDER_2D_UNTIL               = 1500;
@@ -247,7 +247,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
             renderEngine.getFog().setFullDistance(3000f);
 
             renderEngine.setSkyBox(true);
-            renderEngine.setDayAmbientLight(.8f, .8f, .8f, 1f);
+            renderEngine.setDayAmbientLight(1f, 1f, 1f, 1f);
             renderEngine.setNightAmbientLight(.2f, .2f, .2f, 1f);
             renderEngine.setAlwaysDay(true);
             renderEngine.setDynamicDayTime(false);
@@ -396,8 +396,9 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
                     {
                         celestialBodyList.clear();
                         int numberOfBodies;
-                        if (index == -1) numberOfBodies = 10;
+                        if (index == -1) numberOfBodies = 10000;
                         else numberOfBodies = NUMBER_OF_CELESTIAL_BODIES;
+//                        numberOfBodies = 10;
                         logger.info(String.format("numberOfBodies=%d", numberOfBodies));
                         celestialBodyList.add(new CelestialBody(sun.direction, sun.color, 10000f));
                         for (int i = 0; i < numberOfBodies; i++) {

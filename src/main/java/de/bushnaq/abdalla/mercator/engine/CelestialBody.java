@@ -17,7 +17,6 @@
 package de.bushnaq.abdalla.mercator.engine;
 
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
 
 public class CelestialBody {
@@ -26,27 +25,34 @@ public class CelestialBody {
     float exponent;
 
     public CelestialBody() {
-        float xAngle = (float) Math.random() * 360;
-        float yAngle = (float) Math.random() * 360;
-//        float         zAngle = (float) Math.random() * 360;
-        final Matrix4 m = new Matrix4();
-        m.rotate(Vector3.X, xAngle);
-        m.rotate(Vector3.Y, yAngle);
-        m.rotate(Vector3.Z, 0);
-        m.translate(0, 0, -1);
-        m.getTranslation(direction);
+        // Generate uniform random point on sphere surface
+        // Use proper spherical coordinate distribution to avoid pole clustering
+        float u = (float) Math.random(); // [0, 1)
+        float v = (float) Math.random(); // [0, 1)
+
+        // Convert to spherical coordinates with uniform distribution
+        float theta = (float) (2 * Math.PI * u); // azimuthal angle [0, 2π)
+        float phi   = (float) Math.acos(2 * v - 1); // polar angle from uniform cosine distribution
+
+        // Convert spherical coordinates to Cartesian
+        float x = (float) (Math.sin(phi) * Math.cos(theta));
+        float y = (float) (Math.sin(phi) * Math.sin(theta));
+        float z = (float) Math.cos(phi);
+
+        direction.set(x, y, z);
         {
-            float max = 1000000 * 5;
-            float min = 100000;
+            float max = 1000000000;
+            float min = 1000000;
             exponent = (float) (min + Math.random() * (max - min));
         }
         {
-            float minAlpha   = .1f;
-            float brightness = (float) Math.random();
-            float r          = brightness + (float) Math.random() * (1f - brightness);
-            float g          = brightness + (float) Math.random() * (1f - brightness);
-            float b          = brightness + (float) Math.random() * (1f - brightness);
-            float a          = minAlpha + (float) Math.random() * (1f - minAlpha);
+            float minAlpha    = .1f;
+            float colorFactor = 0.1f;
+            float brightness  = (float) Math.random() * (1f - colorFactor);
+            float r           = brightness + (float) Math.random() * (colorFactor);
+            float g           = brightness + (float) Math.random() * (colorFactor);
+            float b           = brightness + (float) Math.random() * (colorFactor);
+            float a           = minAlpha + (float) Math.random() * (0.7f - minAlpha);
             color = new Color(r, g, b, a);
         }
     }

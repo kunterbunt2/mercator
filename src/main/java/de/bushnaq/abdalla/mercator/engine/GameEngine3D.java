@@ -66,6 +66,7 @@ import net.mgsx.gltf.scene3d.lights.DirectionalLightEx;
 import net.mgsx.gltf.scene3d.model.ModelInstanceHack;
 import net.mgsx.gltf.scene3d.scene.SceneSkybox;
 import net.mgsx.gltf.scene3d.utils.IBLBuilder;
+import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -90,7 +91,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
     private static final float                        MAX_TIME_DELTA                = 0.1f;//everything above will be ignored as a glitch
     // private static final float MAX_VOXEL_DIMENSION = 20;
 //    public static final  Color                        NOT_PRODUCING_FACTORY_COLOR   = Color.RED; // 0xffFF0000;
-    public static final  int                          NUMBER_OF_CELESTIAL_BODIES    = 10000;//TODO should be 10000
+    public static final  int                          NUMBER_OF_CELESTIAL_BODIES    = 1000000;//TODO should be 10000
     private static final float                        ROTATION_SPEED                = 1f;//degrees
     //    public static final  int                          RAYS_NUM                      = 128;
 //    private static final float                        RENDER_2D_UNTIL               = 1500;
@@ -388,7 +389,9 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
                 Integer             index               = (int) (angle);
                 EnvironmentSnapshot environmentSnapshot = environmentSnapshotMap.get(index);
                 if (environmentSnapshot == null) {
+                    long time = System.currentTimeMillis();
                     logger.info(String.format("setupImageBasedLighting = %d", index));
+                    logger.info("----------------------------------------------------------------------------------");
                     DirectionalLightEx sun = new DirectionalLightEx();
                     sun.direction.set(renderEngine.getShadowLight().direction.x, renderEngine.getShadowLight().direction.y, renderEngine.getShadowLight().direction.z).nor();
                     sun.color.set(Color.WHITE);
@@ -399,7 +402,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
                         if (index == -1) numberOfBodies = 10000;
                         else numberOfBodies = NUMBER_OF_CELESTIAL_BODIES;
 //                        numberOfBodies = 10;
-                        logger.info(String.format("numberOfBodies=%d", numberOfBodies));
+                        logger.info(String.format("numberOfBodies=%dk", numberOfBodies / 1000));
                         celestialBodyList.add(new CelestialBody(sun.direction, sun.color, 10000f));
                         for (int i = 0; i < numberOfBodies; i++) {
                             celestialBodyList.add(new CelestialBody());
@@ -431,6 +434,11 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
                     environmentSnapshot = new EnvironmentSnapshot(environmentCubemap, irradianceMap, radianceMap);
                     environmentSnapshotMap.put(index, environmentSnapshot);
                     ibl.dispose();
+                    logger.info("----------------------------------------------------------------------------------");
+
+                    long   durationMs = System.currentTimeMillis() - time;
+                    String formatted  = DurationFormatUtils.formatDuration(durationMs, "H'h' m'm' s's' SSS'ms'");
+                    logger.info(String.format("setupImageBasedLighting done in %s", formatted));
                 }
                 renderEngine.setDaySkyBox(environmentSnapshot.getEnvironmentCubemap());
                 renderEngine.setNightSkyBox(environmentSnapshot.getEnvironmentCubemap());

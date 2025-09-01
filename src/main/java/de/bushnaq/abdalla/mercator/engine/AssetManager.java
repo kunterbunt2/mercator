@@ -208,7 +208,9 @@ public class AssetManager {
 //        final Attribute   blending        = new BlendingAttribute(0.5f); // opacity is set by pbrMetallicRoughness below
         ColorAttribute emissive = PBRColorAttribute.createEmissive(new Color(Color.WHITE));
         for (Material m : flame.scene.model.materials) {
-            if (m.id.equals("flame.material")) m.set(baseColorFactor/*, blending*/, emissive);
+            if (m.id.equals("flame.material")) m.set(baseColorFactor, emissive);
+            if (m.id.equals("Thruster_Material")) m.set(emissive);
+
         }
     }
 
@@ -335,7 +337,7 @@ public class AssetManager {
 //            Model model = mb.end();
 //            trader = model;
 //        }
-        trader = new GLBLoader().load(Gdx.files.internal(String.format(AtlasManager.getAssetsFolderName() + "/models/trader.glb")));
+        trader = new GLBLoader().load(Gdx.files.internal(String.format(AtlasManager.getAssetsFolderName() + "/models/trader-1.glb")));
 //        for (Material m : trader.scene.model.materials) {
 //            if (m.id.equals("body.material"))
 //            m.set(metallic, roughness, color);

@@ -1,6 +1,7 @@
 import bpy
 from bpy_extras import view3d_utils
 import colorsys
+import math
 
 # -------------------------------------------------------
 import os
@@ -16,82 +17,92 @@ importlib.reload(lib)
 
 def create_container( s_x=0, s_y=0, s_z=0, s_f=8 ):
     for cx in range(0, 3):
-        bpy.ops.mesh.primitive_cube_add(size=1, enter_editmode=False, align='WORLD', location=(x, y-4*s_f+cx*s_f, z-1*s_f), scale=(1*s_f, 1*s_f, 1*s_f))
+        bpy.ops.mesh.primitive_cube_add(size=1, enter_editmode=False, align='WORLD', location=(x, y-4*s_f+cx*s_f, z-1*s_f), scale=(1*s_f, 1*s_f, 1*s_f) )
         obj = bpy.context.active_object
         obj.name = 'container-'+str(cx)
         mat = create_material(m_name="m.container.plane",m_color=(0.5, 0.5, 1.0, 1.0),m_metallic=0.7,m_roughness=0.2)
         # No Specular input found, skipping it.
         obj.data.materials.append(mat)
 
+def create_cone( name, location, material, s_f=8, rotation=(0,0,0) ):
+    bpy.ops.mesh.primitive_cone_add(radius1=0.21*s_f, radius2=0.11*s_f, depth=.5*s_f, enter_editmode=False, align='WORLD', location=location, scale=(1, 1, 1), vertices=8)
+    cone = bpy.context.active_object
+    
+    cone.name = name
+    bpy.ops.mesh.primitive_cone_add(radius1=0.2*s_f, radius2=0.1*s_f, depth=.5*s_f, enter_editmode=False, align='WORLD', location=location, scale=(1, 1, 1), vertices=8)
+    cone_inner = bpy.context.active_object
+    cone_inner.hide_set(True)
+    m1 = lib.create_boolean_modifier( root=cone, name='m'+name, operation='DIFFERENCE', object=cone_inner, apply=True )
+    cone.rotation_euler = rotation
+    cone.data.materials.append(material)
 
-def create_thruster( s_name='thruster', s_x=0, s_y=0, s_z=0, s_f=8, s_orientation='right' ):
+
+def create_thruster( name, s_x=0, s_y=0, s_z=0, s_f=8, s_orientation='right' ):
     if s_orientation == 'right':
         dx = 1
     else:
         dx = -1
+
+    thruster_mat = lib.create_material( name="m.thruster", color=(1, 1, 1, 1.0), metallic=0.9, roughness=0.5)
+    bpy.ops.mesh.primitive_uv_sphere_add(radius=0.5*s_f, enter_editmode=False, align='WORLD', location=(s_x, s_y, s_z), scale=(1, 1, 1), segments=8, ring_count=8)
+    ball = bpy.context.active_object
+    ball.name = 'xxx'
+    ball.data.materials.append(thruster_mat)
+
+    create_cone( name='cone_top'+name, location=(s_x, s_y, s_z+0.5*s_f), rotation=(math.radians(180),0,0), material=thruster_mat )
+    create_cone( name='cone_bottom'+name, location=(s_x, s_y, s_z-0.5*s_f), material=thruster_mat )
+    create_cone( name='cone_back'+name, location=(s_x, s_y-0.5*s_f, s_z), rotation=(math.radians(270),0,0), material=thruster_mat )
+    create_cone( name='cone_front'+name, location=(s_x, s_y+0.5*s_f, s_z), rotation=(math.radians(90),0,0), material=thruster_mat )
+    create_cone( name='cone_x'+name, location=(s_x+dx*0.5*s_f, s_y, s_z), rotation=(0,-dx*math.radians(90),0), material=thruster_mat )
     
-    bpy.ops.mesh.primitive_uv_sphere_add(radius=0.3*s_f, enter_editmode=False, align='WORLD', location=(s_x, s_y, s_z+0.5*s_f), scale=(1, 1, 1))
-    ball_top = bpy.context.active_object
-    ball_top.hide_set(True)
 
-    bpy.ops.mesh.primitive_uv_sphere_add(radius=0.3*s_f, enter_editmode=False, align='WORLD', location=(s_x, s_y+0.5*s_f, s_z), scale=(1, 1, 1))
-    ball_front = bpy.context.active_object
-    ball_front.hide_set(True)
+    
+#    bpy.ops.mesh.primitive_uv_sphere_add(radius=0.3*s_f, enter_editmode=False, align='WORLD', location=(s_x, s_y, s_z+0.5*s_f), scale=(1, 1, 1))
+#    ball_top = bpy.context.active_object
+#    ball_top.hide_set(True)
 
-    bpy.ops.mesh.primitive_uv_sphere_add(radius=0.3*s_f, enter_editmode=False, align='WORLD', location=(s_x, s_y-0.5*s_f, s_z), scale=(1, 1, 1))
-    ball_back = bpy.context.active_object
-    ball_back.hide_set(True)
+#    bpy.ops.mesh.primitive_uv_sphere_add(radius=0.3*s_f, enter_editmode=False, align='WORLD', location=(s_x, s_y+0.5*s_f, s_z), scale=(1, 1, 1))
+#    ball_front = bpy.context.active_object
+#    ball_front.hide_set(True)
 
-    bpy.ops.mesh.primitive_uv_sphere_add(radius=0.3*s_f, enter_editmode=False, align='WORLD', location=(s_x, s_y, s_z-0.5*s_f), scale=(1, 1, 1))
-    ball_bottom = bpy.context.active_object
-    ball_bottom.hide_set(True)
+#    bpy.ops.mesh.primitive_uv_sphere_add(radius=0.3*s_f, enter_editmode=False, align='WORLD', location=(s_x, s_y-0.5*s_f, s_z), scale=(1, 1, 1))
+#    ball_back = bpy.context.active_object
+#    ball_back.hide_set(True)
 
-    bpy.ops.mesh.primitive_uv_sphere_add(radius=0.3*s_f, enter_editmode=False, align='WORLD', location=(s_x+dx*0.5*s_f, s_y, s_z), scale=(1, 1, 1))
-    ball_x = bpy.context.active_object
-    ball_x.hide_set(True)
+#    bpy.ops.mesh.primitive_uv_sphere_add(radius=0.3*s_f, enter_editmode=False, align='WORLD', location=(s_x, s_y, s_z-0.5*s_f), scale=(1, 1, 1))
+#    ball_bottom = bpy.context.active_object
+#    ball_bottom.hide_set(True)
 
-    thruster_mat = lib.create_material(m_name="m.thruster",m_color=(1, 1, 1, 1.0),m_metallic=0.5,m_roughness=0.5)
+#    bpy.ops.mesh.primitive_uv_sphere_add(radius=0.3*s_f, enter_editmode=False, align='WORLD', location=(s_x+dx*0.5*s_f, s_y, s_z), scale=(1, 1, 1))
+#    ball_x = bpy.context.active_object
+#    ball_x.hide_set(True)
 
-    bpy.ops.mesh.primitive_cube_add(size=1, enter_editmode=False, align='WORLD', location=(s_x, s_y, s_z), scale=(1*s_f, 1*s_f, 1*s_f))
-    thruster = bpy.context.active_object
-    thruster.name = 'thruster'
-    thruster.data.materials.append(thruster_mat)
 
-    m1 = thruster.modifiers.new(name="b1", type='BOOLEAN')
-    m1.operation = 'DIFFERENCE'
-    m1.object = ball_top
-    bpy.context.view_layer.objects.active = thruster
-    bpy.ops.object.modifier_apply(modifier='b1')
+#    bpy.ops.mesh.primitive_cube_add(size=1, enter_editmode=False, align='WORLD', location=(s_x, s_y, s_z), scale=(1*s_f, 1*s_f, 1*s_f))
+#    thruster = bpy.context.active_object
+#    thruster.name = 'thruster'
+#    thruster.data.materials.append(thruster_mat)
 
-    m2 = thruster.modifiers.new(name="b2", type='BOOLEAN')
-    m2.operation = 'DIFFERENCE'
-    m2.object = ball_front
-    bpy.context.view_layer.objects.active = thruster
-    bpy.ops.object.modifier_apply(modifier='b2')
+#    m6 = lib.create_bevel_modifier( root = thruster, name="m6", segments=5, width=0.8, apply=True )
+#    m1 = lib.create_boolean_modifier( root=thruster, name="m1", operation='DIFFERENCE', object=ball_top, apply=True )
+#    m2 = lib.create_boolean_modifier( root=thruster, name="m2", operation='DIFFERENCE', object=ball_front, apply=True )
+#    m3 = lib.create_boolean_modifier( root=thruster, name="m3", operation='DIFFERENCE', object=ball_back, apply=True )
+#    m4 = lib.create_boolean_modifier( root=thruster, name="m4", operation='DIFFERENCE', object=ball_bottom, apply=True )
+#    m5 = lib.create_boolean_modifier( root=thruster, name="m5", operation='DIFFERENCE', object=ball_x, apply=True )
 
-    m3 = thruster.modifiers.new(name="b3", type='BOOLEAN')
-    m3.operation = 'DIFFERENCE'
-    m3.object = ball_back
-    bpy.context.view_layer.objects.active = thruster
-    bpy.ops.object.modifier_apply(modifier='b3')
 
-    m4 = thruster.modifiers.new(name="b4", type='BOOLEAN')
-    m4.operation = 'DIFFERENCE'
-    m4.object = ball_bottom
-    bpy.context.view_layer.objects.active = thruster
-    bpy.ops.object.modifier_apply(modifier='b4')
+def create_weld_modifier( root, name, apply=False ):
+    m = root.modifiers.new(name=name, type='WELD')
+    root.select_set(True)
+    if apply:
+        bpy.context.view_layer.objects.active = root
+        bpy.ops.object.modifier_apply(modifier=m.name)
+    return m
 
-    m5 = thruster.modifiers.new(name="b5", type='BOOLEAN')
-    m5.operation = 'DIFFERENCE'
-    m5.object = ball_x
-    bpy.context.view_layer.objects.active = thruster
-    bpy.ops.object.modifier_apply(modifier='b5')
-
-    #create_bevel_modifier( m_root = thruster, m_name="b6", m_segments=3, m_width_pct=0.4 )
 
 def create_ship( s_x=0, s_y=0, s_z=0, s_f=8 ):
 
-    body_mat = lib.create_material(m_name="m.body",m_color=lib.hex_to_rgba("#FFA500FF"),m_metallic=0.1,m_roughness=.5)
+    body_mat = lib.create_material( name="m.body", color=lib.hex_to_rgba("#FFA500FF"), metallic=0.1, roughness=.5)
     # body-top
     bpy.ops.mesh.primitive_cube_add(size=1, enter_editmode=False, align='WORLD', location=(s_x, s_y, s_z), scale=(1*s_f, 11*s_f, 1*s_f))
     body_top = bpy.context.active_object
@@ -99,18 +110,18 @@ def create_ship( s_x=0, s_y=0, s_z=0, s_f=8 ):
     body_top.data.materials.append(body_mat)
 
     # body-cockpit
-    pilot_head_mat = lib.create_material(m_name="m.pilot.head",m_color=(1,1,1,1),m_metallic=0.5,m_roughness=0.5)
+    pilot_head_mat = lib.create_material( name="m.pilot.head", color=(1,1,1,1), metallic=0.5, roughness=0.5)
     bpy.ops.mesh.primitive_uv_sphere_add(radius=0.2*s_f, enter_editmode=False, align='WORLD', location=(s_x, s_y+6*s_f+0.1, s_z+0.1), scale=(1, 1, 1))
     pilot_head = bpy.context.active_object
     pilot_head.data.materials.append(pilot_head_mat)
 
 
-    cockpit_mat = lib.create_material(m_name="m.cockpit",m_color=(0, 0, 0, 1),m_metallic=1,m_roughness=0.1,m_alpha=0.8)
+    cockpit_mat = lib.create_material( name="m.cockpit", color=(0, 0, 0, 1), metallic=1, roughness=0.1, alpha=0.8)
     bpy.ops.mesh.primitive_cube_add(size=1, enter_editmode=False, align='WORLD', location=(s_x, s_y+6*s_f+0.1, s_z+0.1), scale=(1*s_f, 1*s_f, 1*s_f))
     body_cockpit = bpy.context.active_object
     body_cockpit.name = 'body_cockpit'
     body_cockpit.data.materials.append(cockpit_mat)
-    lib.create_bevel_modifier( m_root = body_cockpit, m_name="b8", m_segments=3, m_width_pct=.4 )
+    lib.create_bevel_modifier( root = body_cockpit, name="b8", segments=1, width=.4, apply=True )
 
     # body-front
 #    bpy.ops.mesh.primitive_cube_add(size=1, enter_editmode=False, align='WORLD', location=(s_x, s_y+5*s_f, s_z-1.5*s_f), scale=(1*s_f, 1*s_f, 2*s_f))
@@ -152,59 +163,16 @@ def create_ship( s_x=0, s_y=0, s_z=0, s_f=8 ):
     body_back_left.data.materials.append(body_mat)
     thruster_back_left = create_thruster( 'thruster_back_left', s_x-2*s_f, s_y-5*s_f, s_z*s_f, s_orientation='left' )
     
-#    join_remesh( objects_to_join=["body_top"/*, "body_back", "body_front"*/,"body_front_right","body_front_left","body_back_right","body_back_left","thruster_back_right", "thruster_back_left"])
-    lib.join_remesh( objects_to_join=["body_top","body_front_right","body_front_left","body_back_right","body_back_left","thruster_back_right", "thruster_back_left"])
+    lib.join( objects_to_join=[ "body_top", "body_front_right", "body_front_left", "body_back_right", "body_back_left", 'thruster_front_right','thruster_front_left', "thruster_back_right", "thruster_back_left"])
+    #create_weld_modifier( root = body_top, name='w1', apply=True )
+    lib.create_remesh( bpy.context.view_layer.objects.active, name='remesh1', octree_depth=4, apply=True )
 
-#    m = m_root.modifiers.new(name=m_name, type='BEVEL')
-#    m.offset_type = 'ABSOLUTE'
-#    m.width = m_width_pct
-#    m.segments = m_segments
-#    m.angle_limit = 0.523599
-#    m_root.select_set(True)
-#    bpy.context.view_layer.objects.active = m_root
-#    bpy.ops.object.modifier_apply(modifier=m.name)
+    lib.create_bevel_modifier( root = body_top, name="b8", segments=1, width=.8, apply=True )
     
-#    create_boolean_modifier( m_root = body_top, m_name="b1", m_operation = 'UNION', m_object = body_front )
-#    create_boolean_modifier( m_root = body_top, m_name="b2", m_operation = 'UNION', m_object = body_back )
-#    create_boolean_modifier( m_root = body_top, m_name="b3", m_operation = 'UNION', m_object = body_front_right )
-#    create_boolean_modifier( m_root = body_top, m_name="b4", m_operation = 'UNION', m_object = body_front_left )
-#    create_boolean_modifier( m_root = body_top, m_name="b5", m_operation = 'UNION', m_object = body_back_right )
-#    create_boolean_modifier( m_root = body_top, m_name="b6", m_operation = 'UNION', m_object = body_back_left )
-#    create_boolean_modifier( m_root = body_top, m_name="b7", m_operation = 'UNION', m_object = body_cockpit )
-    width_pct = .8
-    lib.create_bevel_modifier( m_root = body_top, m_name="b8", m_segments=5, m_width_pct=width_pct )
-    
-#    create_bevel_modifier( m_root = body_front, m_name="b8", m_segments=3, m_width_pct=width_pct )
-#    create_bevel_modifier( m_root = body_back, m_name="b8", m_segments=3, m_width_pct=width_pct )
-#    create_bevel_modifier( m_root = body_front_right, m_name="b8", m_segments=3, m_width_pct=width_pct )
-#    create_bevel_modifier( m_root = body_front_left, m_name="b8", m_segments=3, m_width_pct=width_pct )
-#    create_bevel_modifier( m_root = body_back_right, m_name="b8", m_segments=3, m_width_pct=width_pct )
-#    create_bevel_modifier( m_root = body_back_left, m_name="b8", m_segments=3, m_width_pct=width_pct )
-#    create_bevel_modifier( m_root = body_cockpit, m_name="b8", m_segments=3, m_width_pct=width_pct )
 
-
-x=0
-y=0
-z=0
 
 # main script
 lib.clear_scene()
 create_ship()
 #create_container()
-
-
-
-
-
-#obj = bpy.context.active_object
-#mod = obj.modifiers.new(name="Bevel", type="BEVEL")
-#mod.width = 0.02
-#mod.segments = 3
-#mod.profile = 0.5
-#bpy.context.object.modifiers["Bevel"].width = 0.01
-#bpy.context.object.modifiers["Bevel"].angle_limit = 0.523599
-
-
-
-
 

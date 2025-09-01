@@ -28,8 +28,8 @@ Then you can start mercator by one of its starting classes
 
 | key(s)                | description                     |
 |-----------------------|---------------------------------|
-| a, w, d, s            | move camera (still broken)      |
-| left, up, right, down | move camera (still broken)      |
+| a, w, d, s            | move camera                     |
+| left, up, right, down | move camera                     |
 | ESC                   | quit                            |
 | pause                 | pause/unpause                   |
 | print                 | print screen/                   |

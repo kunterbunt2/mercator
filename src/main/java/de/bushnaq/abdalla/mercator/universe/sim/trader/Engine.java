@@ -39,6 +39,9 @@ import static de.bushnaq.abdalla.mercator.universe.sim.trader.Trader3DRenderer.T
 import static de.bushnaq.abdalla.mercator.universe.sim.trader.Trader3DRenderer.TRADER_FLIGHT_HEIGHT;
 
 
+/**
+ * Engine for translational movement
+ */
 public class Engine {
     private static final float                    ENGINE_FORCE                 = 3f;//newton
     public static final  float                    ENGINE_TO_REALITY_FACTOR     = 10;

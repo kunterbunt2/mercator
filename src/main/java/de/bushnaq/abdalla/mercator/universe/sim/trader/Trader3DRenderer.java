@@ -59,9 +59,9 @@ public class Trader3DRenderer extends ObjectRenderer<GameEngine3D> {
     public static final  float                                         TRADER_EXTERNAL_SIZE_Y  = 8 / Universe.WORLD_SCALE;
     public static final  float                                         TRADER_FLIGHT_HEIGHT    = 24f;
     private static final Color                                         TRADER_NAME_COLOR       = new Color(0xffa500ff);
-    private static final float                                         TRADER_SIZE_X           = 16 / Universe.WORLD_SCALE;
+    private static final float                                         TRADER_SIZE_X           = 8 / Universe.WORLD_SCALE;
     public static final  float                                         TRADER_SIZE_Y           = 16 / Universe.WORLD_SCALE;
-    public static final  float                                         TRADER_SIZE_Z           = (16 + 64 + 16)/*16*/ / Universe.WORLD_SCALE;
+    public static final  float                                         TRADER_SIZE_Z           = (16 + 64 + 32 - 8) / Universe.WORLD_SCALE;
     private static final float                                         TRADER_TRAVELING_HEIGHT = -TRADER_SIZE_Y / 2 + Planet3DRenderer.WATER_Y;
     public static final  float                                         TRADER_WIDTH            = 16f;
     final static         Vector3                                       xVectorNeg              = new Vector3(-1, 0, 0);
@@ -412,7 +412,7 @@ public class Trader3DRenderer extends ObjectRenderer<GameEngine3D> {
             final int   zContainer = (int) Math.floor(i / (xEdgeSize * yEdgeSize));
             final float x          = -TRADER_SIZE_X / 2 + Good3DRenderer.GOOD_X / 2 - .5f + xContainer * (Good3DRenderer.GOOD_X + 1);
             final float z          = /*-40*/ +16 - TRADER_SIZE_Z / 2 + Good3DRenderer.GOOD_Y / 2 + zContainer * (Good3DRenderer.GOOD_Z + 1);
-            final float y          = +0.5f + TRADER_SIZE_Y / 2 - Good3DRenderer.GOOD_Z / 2 - yContainer * (Good3DRenderer.GOOD_Y + 1);
+            final float y          = +0.5f /*+ TRADER_SIZE_Y / 2*/ - Good3DRenderer.GOOD_Y - yContainer * (Good3DRenderer.GOOD_Y + 1);
 
 
             go.instance.transform.translate(x, y, z);

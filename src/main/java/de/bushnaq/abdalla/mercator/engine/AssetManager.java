@@ -183,7 +183,7 @@ public class AssetManager {
     private void createDockingDoor(ModelBuilder modelBuilder) {
         final Attribute color     = new PBRColorAttribute(PBRColorAttribute.BaseColorFactor, Color.WHITE);
         final Attribute metallic  = PBRFloatAttribute.createMetallic(0.5f);
-        final Attribute roughness = PBRFloatAttribute.createRoughness(0.5f);
+        final Attribute roughness = PBRFloatAttribute.createRoughness(.9f);
 //        final Attribute occlusion = PBRFloatAttribute.createOcclusionStrength(1.0f);
         final Material material = new Material(metallic, roughness, color);
         dockingDoorModel = modelBuilder.createBox(1.0f, 1.0f, 1.0f, material, Usage.Position | Usage.Normal);
@@ -195,7 +195,7 @@ public class AssetManager {
 //        final Attribute roughness = PBRFloatAttribute.createRoughness(0.5f);
 //        final Material  material  = new Material(metallic, roughness, color);
 //        planetModel = modelCreator.createBox(material);
-        dockingStation = new GLBLoader().load(Gdx.files.internal(String.format(AtlasManager.getAssetsFolderName() + "/models/station.glb")));
+        dockingStation = new GLBLoader().load(Gdx.files.internal(String.format(AtlasManager.getAssetsFolderName() + "/models/station-1.glb")));
     }
 
 //    private void createDynamicStation(ModelBuilder modelBuilder, ModelCreator modelCreator) {

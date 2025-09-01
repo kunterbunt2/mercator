@@ -42,74 +42,34 @@ import java.util.List;
 
 public class Good3DRenderer extends ObjectRenderer<GameEngine3D> {
 
-    public static final  int                            CONTAINER_EDGE_SIZE        = 4;
-    public static final  float                          GOOD_HEIGHT                = 8f;
-    public static final  float                          GOOD_X                     = 8f / Universe.WORLD_SCALE;
-    public static final  float                          GOOD_Y                     = 8f / Universe.WORLD_SCALE;
-    public static final  float                          GOOD_Z                     = 8f / Universe.WORLD_SCALE;
-    public static final  Color                          NOT_TRADED_GOOD_COLOR      = Color.LIGHT_GRAY; // 0xffbbbbbb;
-    public static final  Color                          SELECTED_GOOD_COLOR        = Color.LIGHT_GRAY; // 0xffeeeeee;
-    public static final  float                          SPACE_BETWEEN_GOOD         = GameEngine3D.SPACE_BETWEEN_OBJECTS * 2;
-    static final         Color                          GOOD_COLOR                 = new Color(0.09f, 0.388f, 0.69f, 0.8f); // 0xff000000;
-    private static final float                          ANGLE_BORDER               = (float) Math.PI / 256;
-    private static final int                            GOOD_AMOUNT_DRAWING_FACTOR = 5;
-    private static final Color                          GOOD_NAME_COLOR            = new Color(0.596f, 0.08f, 0.247f, 0.8f);
-    private static final float                          MAX_RADIUS                 = Planet2DRenderer.PLANET_SIZE * 7.5f;
-    private static final float                          MIN_ANGLE                  = (float) Math.PI / 12;
-    private static final float                          MIN_RADIUS                 = Planet2DRenderer.PLANET_SIZE * 6f + 3;
-    private static       Color                          DIAMON_BLUE_COLOR          = new Color(0x006ab6ff);
-    private static       Color                          GRAY_COLOR                 = new Color(0x404853ff);
-    private static       Color                          POST_GREEN_COLOR           = new Color(0x00614eff);
-    private static       Color                          SCARLET_COLOR              = new Color(0xb00233ff);
-    private final        Good                           good;
-    private final        Logger                         logger                     = LoggerFactory.getLogger(this.getClass());
-    private final        List<GameObject<GameEngine3D>> unusedMls                  = new ArrayList<>();
-    private final        List<GameObject<GameEngine3D>> usedMls                    = new ArrayList<>();
+    private static final float ANGLE_BORDER               = (float) Math.PI / 256;
+    public static final  int   CONTAINER_EDGE_SIZE        = 4;
+    private static final Color DIAMON_BLUE_COLOR          = new Color(0x006ab6ff);
+    private static final int   GOOD_AMOUNT_DRAWING_FACTOR = 5;
+    static final         Color GOOD_COLOR                 = new Color(0.09f, 0.388f, 0.69f, 0.8f); // 0xff000000;
+    public static final  float GOOD_HEIGHT                = 8f;
+    private static final Color GOOD_NAME_COLOR            = new Color(0.596f, 0.08f, 0.247f, 0.8f);
+    public static final  float GOOD_X                     = 8f / Universe.WORLD_SCALE;
+    public static final  float GOOD_Y                     = 8f / Universe.WORLD_SCALE;
+    public static final  float GOOD_Z                     = 8f / Universe.WORLD_SCALE;
+    private static final Color GRAY_COLOR                 = new Color(0x404853ff);
+    private static final float MAX_RADIUS                 = Planet2DRenderer.PLANET_SIZE * 7.5f;
+    private static final float MIN_ANGLE                  = (float) Math.PI / 12;
+    private static final float MIN_RADIUS                 = Planet2DRenderer.PLANET_SIZE * 6f + 3;
+    public static final  Color NOT_TRADED_GOOD_COLOR      = Color.LIGHT_GRAY; // 0xffbbbbbb;
+    private static final Color POST_GREEN_COLOR           = new Color(0x00614eff);
+    private static final Color SCARLET_COLOR              = new Color(0xb00233ff);
+    public static final  Color SELECTED_GOOD_COLOR        = Color.LIGHT_GRAY; // 0xffeeeeee;
+    public static final  float SPACE_BETWEEN_GOOD         = GameEngine3D.SPACE_BETWEEN_OBJECTS * 2;
+    public static final  int   SPACE_FROM_EDGE            = 16;
     AnnulusSegment annulusSegment;
+    private final Good                           good;
+    private final Logger                         logger    = LoggerFactory.getLogger(this.getClass());
+    private final List<GameObject<GameEngine3D>> unusedMls = new ArrayList<>();
+    private final List<GameObject<GameEngine3D>> usedMls   = new ArrayList<>();
 
     public Good3DRenderer(final Good good) {
         this.good = good;
-    }
-
-    public static Color getColor(final int index) {
-        switch (index) {
-            case 0:
-                return POST_GREEN_COLOR;
-            case 1:
-                return SCARLET_COLOR;
-            case 2:
-                return DIAMON_BLUE_COLOR;
-            case 3:
-                return GRAY_COLOR;
-            case -1:
-                return Color.WHITE;//we are not transporting any good
-            default:
-                return Color.WHITE;
-        }
-    }
-
-    public static GameObject<GameEngine3D> instanciateGoodGameObject(final Good good, final RenderEngine3D<GameEngine3D> renderEngine) {
-        GameObject<GameEngine3D> scene     = null;
-        final Material           material1 = renderEngine.getGameEngine().assetManager.goodContainer.scene.model.materials.get(0);
-        scene = new GameObject<GameEngine3D>(new ModelInstanceHack(renderEngine.getGameEngine().assetManager.goodContainer.scene.model), good);
-        //TODO reuse instances
-//        final Material            material2 = scene.instance.materials.get(0);
-//        final Iterator<Attribute> i         = material1.iterator();
-//        material2.clear();
-//        while (i.hasNext()) {
-//            final Attribute a = i.next();
-//            material2.set(a);
-//        }
-        for (Material material : scene.instance.materials) {
-//            if (material.id.equals("m.type"))
-            {
-                material.set(new PBRColorAttribute(PBRColorAttribute.BaseColorFactor, getColor(good.type.ordinal())));
-            }
-
-        }
-
-//        scene.instance.materials.get(0).set(new PBRColorAttribute(PBRColorAttribute.BaseColorFactor, getColor(good.type.ordinal())));
-        return scene;
     }
 
     private void drawGood(final float aX, final float aY, final Good good, final RenderEngine3D<GameEngine3D> renderEngine, final int index, final boolean selected) {
@@ -168,6 +128,47 @@ public class Good3DRenderer extends ObjectRenderer<GameEngine3D> {
         annulusSegment = new AnnulusSegment(tx, ty, MIN_RADIUS, MAX_RADIUS, minAngle, maxAngle);
     }
 
+    public static Color getColor(final int index) {
+        switch (index) {
+            case 0:
+                return POST_GREEN_COLOR;
+            case 1:
+                return SCARLET_COLOR;
+            case 2:
+                return DIAMON_BLUE_COLOR;
+            case 3:
+                return GRAY_COLOR;
+            case -1:
+                return Color.WHITE;//we are not transporting any good
+            default:
+                return Color.WHITE;
+        }
+    }
+
+    public static GameObject<GameEngine3D> instanciateGoodGameObject(final Good good, final RenderEngine3D<GameEngine3D> renderEngine) {
+        GameObject<GameEngine3D> scene     = null;
+        final Material           material1 = renderEngine.getGameEngine().assetManager.goodContainer.scene.model.materials.get(0);
+        scene = new GameObject<GameEngine3D>(new ModelInstanceHack(renderEngine.getGameEngine().assetManager.goodContainer.scene.model), good);
+        //TODO reuse instances
+//        final Material            material2 = scene.instance.materials.get(0);
+//        final Iterator<Attribute> i         = material1.iterator();
+//        material2.clear();
+//        while (i.hasNext()) {
+//            final Attribute a = i.next();
+//            material2.set(a);
+//        }
+        for (Material material : scene.instance.materials) {
+//            if (material.id.equals("m.type"))
+            {
+                material.set(new PBRColorAttribute(PBRColorAttribute.BaseColorFactor, getColor(good.type.ordinal())));
+            }
+
+        }
+
+//        scene.instance.materials.get(0).set(new PBRColorAttribute(PBRColorAttribute.BaseColorFactor, getColor(good.type.ordinal())));
+        return scene;
+    }
+
     @Override
     public void render2D(final float x, final float y, final RenderEngine3D<GameEngine3D> renderEngine, final int index, final boolean selected) {
         drawGood(x, y, good, renderEngine, index, selected);
@@ -177,8 +178,8 @@ public class Good3DRenderer extends ObjectRenderer<GameEngine3D> {
     public void renderText(final float aX, final float aY, final float aZ, final RenderEngine3D<GameEngine3D> renderEngine, final int index) {
 //	public void renderText(final RenderEngine<Screen3D> renderEngine, final int index) {
         {
-            final float dy = -Planet3DRenderer.PLANET_3D_SIZE / 2 + index * (CONTAINER_EDGE_SIZE + 1) * (GOOD_Y + SPACE_BETWEEN_GOOD);
-            final float dx = Planet3DRenderer.PLANET_3D_SIZE / 2 - (CONTAINER_EDGE_SIZE) * (GOOD_X + SPACE_BETWEEN_GOOD);
+            final float dy = -Planet3DRenderer.PLANET_3D_SIZE / 2 + SPACE_FROM_EDGE + index * (CONTAINER_EDGE_SIZE + 1) * (GOOD_Y + SPACE_BETWEEN_GOOD);
+            final float dx = Planet3DRenderer.PLANET_3D_SIZE / 2 - SPACE_FROM_EDGE - (CONTAINER_EDGE_SIZE) * (GOOD_X + SPACE_BETWEEN_GOOD);
             renderTextOnTop(aX, aY, aZ, renderEngine, dy, 0, dx, good.type.getName(), GOOD_X);
             //			final float size = 8;
             //			final float x = aX;
@@ -204,11 +205,6 @@ public class Good3DRenderer extends ObjectRenderer<GameEngine3D> {
 
         }
 
-    }
-
-    @Override
-    public void update(final float x, final float y, final float z, final RenderEngine3D<GameEngine3D> renderEngine, final long currentTime, final float timeOfDay, final int index, final boolean selected) {
-        updateGood(x, y, z, renderEngine, currentTime, index, false);
     }
 
     private void renderTextOnTop(final float aX, final float aY, final float aZ, final RenderEngine3D<GameEngine3D> renderEngine, final float dx, final float dy, final float dz, final String text, final float size) {
@@ -237,6 +233,11 @@ public class Good3DRenderer extends ObjectRenderer<GameEngine3D> {
             font.setColor(GOOD_NAME_COLOR);
             font.draw(batch, text, 0, 0);
         }
+    }
+
+    @Override
+    public void update(final float x, final float y, final float z, final RenderEngine3D<GameEngine3D> renderEngine, final long currentTime, final float timeOfDay, final int index, final boolean selected) {
+        updateGood(x, y, z, renderEngine, currentTime, index, false);
     }
 
     private void updateGood(final float aX, final float aY, final float aZ, final RenderEngine3D<GameEngine3D> renderEngine, final long currentTime, final int index, final boolean selected) {
@@ -276,8 +277,8 @@ public class Good3DRenderer extends ObjectRenderer<GameEngine3D> {
                 final int        xContainer = usedMls.size() % xEdgeSize;
                 final int        zContainer = (int) Math.floor(usedMls.size() / xEdgeSize) % yEdgeSize;
                 final int        yContainer = (int) Math.floor(usedMls.size() / (xEdgeSize * yEdgeSize));
-                final float      x          = aX - Planet3DRenderer.PLANET_3D_SIZE / 2 + GOOD_X / 2 + xContainer * (GOOD_X + 1);
-                final float      z          = aZ + Planet3DRenderer.PLANET_3D_SIZE / 2 - GOOD_Z / 2 - zContainer * (GOOD_Z) + 1 - index * (edgeSize + 1) * (GOOD_Z + 1);
+                final float      x          = aX - Planet3DRenderer.PLANET_3D_SIZE / 2 + SPACE_FROM_EDGE + GOOD_X / 2 + xContainer * (GOOD_X + 1);
+                final float      z          = aZ + Planet3DRenderer.PLANET_3D_SIZE / 2 - SPACE_FROM_EDGE - GOOD_Z / 2 - zContainer * (GOOD_Z) + 1 - index * (edgeSize + 1) * (GOOD_Z + 1);
                 final float      y          = aY + GOOD_Y / 2 + yContainer * (GOOD_Y);
                 final GameObject go         = instanciateGoodGameObject(good, renderEngine);
                 go.instance.transform.setToTranslationAndScaling(x, y, z, GOOD_X - SPACE_BETWEEN_GOOD, GOOD_Y - SPACE_BETWEEN_GOOD, GOOD_Z - SPACE_BETWEEN_GOOD);

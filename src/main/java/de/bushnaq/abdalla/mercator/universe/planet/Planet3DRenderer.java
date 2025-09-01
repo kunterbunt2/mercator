@@ -77,13 +77,14 @@ public class Planet3DRenderer extends ObjectRenderer<GameEngine3D> {
     public static final  float                          WATER_HIGHT            = 1;
     public static final  float                          WATER_SIZE             = SECTOR_SIZE;
     public static final  float                          WATER_Y                = -10;//TODO should use context.getWaterLevel()
-    static               float                          STATION_Z_SHIFT        = -12;
+    static               float                          STATION_Z_SHIFT        = 0;
     private final        List<GameObject<GameEngine3D>> animatedObjects        = new ArrayList<>();
     private              boolean                        dayMode                = true;
     //	Scene scene;
     private              GameObject<GameEngine3D>       dockingStationGameObject;
     //    private              GameObject<GameEngine3D>       dynamicStationGameObject;
     int index = 0;
+    private       GameObject<GameEngine3D>       planeGameObject;
     //    private       GameObject<GameEngine3D>       mirrorObject;
     //	private GameObject ganeObject;
     private final Planet                         planet;
@@ -228,6 +229,13 @@ public class Planet3DRenderer extends ObjectRenderer<GameEngine3D> {
             dockingStationGameObject.update();
             renderEngine.addStatic(dockingStationGameObject);
 
+
+//            planeGameObject = new GameObject<GameEngine3D>(new ModelInstanceHack(renderEngine.getGameEngine().assetManager.dockingStation.scene.model), planet, this);
+//            planeGameObject.instance.transform.setToTranslation(x, 0 + STATION_Z_SHIFT, z);
+//            planeGameObject.update();
+//            renderEngine.addStatic(planeGameObject);
+
+
 //            mirrorObject = new GameObject<GameEngine3D>(new ModelInstanceHack(renderEngine.getGameEngine().assetManager.mirrorModel), planet, this);
 //            mirrorObject.instance.transform.setToTranslationAndScaling(x, 1, z, PLANET_3D_SIZE, PLANET_HIGHT, PLANET_3D_SIZE);
 //            mirrorObject.update();
@@ -276,7 +284,7 @@ public class Planet3DRenderer extends ObjectRenderer<GameEngine3D> {
         //																	controller.setAnimation(ganeObject.instance.getAnimation("CubeAction"), -1);
         //																	renderMaster.sceneClusterManager.addDynamic(ganeObject);
         //																}
-        createFactories(renderEngine);
+//        createFactories(renderEngine);//hiding factories for now
 //        createCity(renderEngine, x, z);
         //sector
         //		{

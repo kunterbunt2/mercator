@@ -98,7 +98,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
 //    private static final float                        RENDER_3D_UNTIL               = 2000;
     //	private static final String RENDER_DURATION = "render()";
     //	private static final String RENDER_LIGHT = "light";
-    private static final float                        SCROLL_SPEED                  = 10f;
+    private static final float                        SCROLL_SPEED                  = 20f;
     //    public static final  Color                        SELECTED_PLANET_COLOR         = Color.BLUE;
 //    public static final  Color                        SELECTED_TRADER_COLOR         = Color.RED; // 0xffff0000;
 //    public static final  float                        SIM_HEIGHT                    = 0.3f;
@@ -231,34 +231,34 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
             renderEngine = new RenderEngine3D<GameEngine3D>(context, this, camera, camera2D, getAtlasManager().menuFont, getAtlasManager().menuBoldFont, getAtlasManager().systemTextureRegion);
             renderEngine.setSceneBoxMin(new Vector3(-500, -500, -500));
             renderEngine.setSceneBoxMax(new Vector3(1000, 0, 1000));
-            renderEngine.getWater().setPresent(false);
-            renderEngine.getWater().setWaterLevel(-10f);
+//            renderEngine.getWater().setPresent(false);
+//            renderEngine.getWater().setWaterLevel(-10f);
 //            renderEngine.getWater().setTiling(universe.size * 2 * 4 * 2 * 4 / Universe.WORLD_SCALE);
 //            renderEngine.getWater().setWaveStrength(0.01f / Universe.WORLD_SCALE);
 //            renderEngine.getWater().setWaveSpeed(0.01f);
 //            renderEngine.getWater().setRefractiveMultiplicator(1f);
-            renderEngine.getMirror().setPresent(false);
-            renderEngine.getMirror().setMirrorLevel(-12f);
+//            renderEngine.getMirror().setPresent(false);
+//            renderEngine.getMirror().setMirrorLevel(-12f);
 //            renderEngine.getMirror().setReflectivity(0.2f);
 //            renderEngine.setReflectionClippingPlane(-(context.getWaterLevel() - 2));
 //            renderEngine.setRefractionClippingPlane((context.getWaterLevel() - 2));
-            renderEngine.getFog().setEnabled(true);
-            renderEngine.getFog().setColor(Color.BLACK);
-            renderEngine.getFog().setBeginDistance(2000f);
-            renderEngine.getFog().setFullDistance(3000f);
+//            renderEngine.getFog().setEnabled(true);
+//            renderEngine.getFog().setColor(Color.BLACK);
+//            renderEngine.getFog().setBeginDistance(2000f);
+//            renderEngine.getFog().setFullDistance(3000f);
 
             renderEngine.setSkyBox(true);
-            renderEngine.setDayAmbientLight(1f, 1f, 1f, 1f);
-            renderEngine.setNightAmbientLight(.2f, .2f, .2f, 1f);
+            renderEngine.setDayAmbientLight(.8f, .8f, .8f, 5f);
+            renderEngine.setNightAmbientLight(.8f, .8f, .8f, 10f);
             renderEngine.setAlwaysDay(true);
             renderEngine.setDynamicDayTime(false);
             renderEngine.setShadowEnabled(true);
-
             renderEngine.getShadowLight().setColor(Color.WHITE);
             renderEngine.setFixedShadowDirection(true);
             renderEngine.getDepthOfFieldEffect().setEnabled(true);
-            renderEngine.getSsaoEffect().setEnabled(false);
-            renderEngine.getSsaoCombineEffect().setEnabled(false);
+//            renderEngine.getSsaoEffect().setEnabled(false);
+//            renderEngine.getSsaoCombineEffect().setEnabled(false);
+            renderEngine.setGammaCorrected(true);
 
 //            {
 //                DirectionalLightEx sun = new DirectionalLightEx();
@@ -403,7 +403,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
                         else numberOfBodies = NUMBER_OF_CELESTIAL_BODIES;
 //                        numberOfBodies = 10;
                         logger.info(String.format("numberOfBodies=%dk", numberOfBodies / 1000));
-                        celestialBodyList.add(new CelestialBody(sun.direction, sun.color, 10000f));
+                        celestialBodyList.add(new CelestialBody(sun.direction, sun.color, 10f));
                         for (int i = 0; i < numberOfBodies; i++) {
                             celestialBodyList.add(new CelestialBody());
                         }
@@ -463,7 +463,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
         renderEngine.environment.set(PBRCubemapAttribute.createDiffuseEnv(diffuseCubemap));
         renderEngine.environment.set(PBRCubemapAttribute.createSpecularEnv(specularCubemap));
         renderEngine.environment.set(new PBRTextureAttribute(PBRTextureAttribute.BRDFLUTTexture, brdfLUT));
-        renderEngine.environment.set(new PBRFloatAttribute(PBRFloatAttribute.ShadowBias, .03f));
+        renderEngine.environment.set(new PBRFloatAttribute(PBRFloatAttribute.ShadowBias, .002f));
     }
 
     private void createInputProcessor(final InputProcessor inputProcessor, GameEngine3D gameEngine) throws Exception {

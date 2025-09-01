@@ -42,8 +42,8 @@ import static de.bushnaq.abdalla.mercator.universe.sim.trader.Trader3DRenderer.T
  */
 public class Trader extends Sim {
     private static final float              JUMP_UNIT_COST            = 1f / (1000f);
-    public static final  int                MAX_GOOD_SPACE            = 160;
-    public static final  int                MIN_GOOD_SPACE            = 30;
+    public static final  int                MAX_GOOD_SPACE            = 100;
+    public static final  int                MIN_GOOD_SPACE            = 25;
     public final static  int                TRADER_MAX_PORT_REST_TIME = 3;
     public static final  float              TRADER_START_CREDITS      = 1000.0f;
     public               TraderRadioChannel communicationPartner;

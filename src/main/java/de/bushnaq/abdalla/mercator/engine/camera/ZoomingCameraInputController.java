@@ -36,7 +36,7 @@ public class ZoomingCameraInputController extends CameraInputController {
     private final Vector3            tmpV1           = new Vector3();
     private final Vector3            tmpV2           = new Vector3();
     public        CameraProperties[] zoomFactors     = {//
-            new CameraProperties(100, 100, 30f, 0, 1000f),//
+            new CameraProperties(100, 100, 30f, 0, 300f),//
             new CameraProperties(150, 200, 40f, 0, 2000f),//
             new CameraProperties(150, 300, 46f, 100, 8000f, 600f),//
             new CameraProperties(400, 500, 60f, 0, 8000f),//
@@ -156,10 +156,19 @@ public class ZoomingCameraInputController extends CameraInputController {
 //                logger.info(String.format("camera update zoomIndex=%d targetZoomIndex=%d x=%f y=%f z=%f", zoomIndex, targetZoomIndex, x, y, z));
                 camera.translate(x, y, z);
                 camera.far = farY;
+                System.out.printf("far=%f near=%f%n", camera.far, camera.near);
                 movingCamera.lookAt(movingCamera.lookat.x, lookatY, movingCamera.lookat.z);
                 movingCamera.fieldOfView = fieldOfView;
                 camera.update();
                 movingCamera.setDirty(true);
+//                {
+//                    Vector3 max = new Vector3();
+//                    Vector3 min = new Vector3();
+//                    gameEngine.getRenderEngine().getSceneBox().getMax(max);
+//                    gameEngine.getRenderEngine().getSceneBox().getMin(min);
+//                    max.set(cameraY, cameraY, cameraY);
+//                    gameEngine.getRenderEngine().getSceneBox().set(min, max);
+//                }
 //                logger.info(String.format("%f %f %f  %f %f %f", movingCamera.position.x, movingCamera.position.y, movingCamera.position.z, movingCamera.lookat.x, movingCamera.lookat.y, movingCamera.lookat.z));
 //                logger.info("");
                 //not if we are forcing and actually both zoom levels are the same, otherwise process will never be updated again

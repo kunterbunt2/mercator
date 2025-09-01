@@ -30,44 +30,61 @@ def hex_to_linear_rgba(hex_str):
         a
     )
 
-def create_material(m_name, m_color, m_metallic,m_roughness,m_alpha=1):
-    mat = bpy.data.materials.get(m_name)
+def create_material( name, color, metallic, roughness, alpha=1):
+    mat = bpy.data.materials.get(name)
     if mat is None:
-        mat = bpy.data.materials.new(name=m_name)
+        mat = bpy.data.materials.new(name=name)
         #mat = bpy.ops.material.new()
         #bpy.context.object.active_material.name = "material.container.plane"
         mat.use_nodes = True
-        principled_bsdf = bpy.data.materials[m_name].node_tree.nodes["Principled BSDF"].inputs[2]
+        principled_bsdf = bpy.data.materials[name].node_tree.nodes["Principled BSDF"].inputs[2]
         principled_bsdf = mat.node_tree.nodes["Principled BSDF"]
-        principled_bsdf.inputs['Base Color'].default_value = m_color
-        principled_bsdf.inputs['Metallic'].default_value = m_metallic
-        principled_bsdf.inputs['Roughness'].default_value = m_roughness
-        principled_bsdf.inputs['Alpha'].default_value = m_alpha
+        principled_bsdf.inputs['Base Color'].default_value = color
+        principled_bsdf.inputs['Metallic'].default_value = metallic
+        principled_bsdf.inputs['Roughness'].default_value = roughness
+        principled_bsdf.inputs['Alpha'].default_value = alpha
     return mat
 
-def create_boolean_modifier( m_root, m_name, m_operation, m_object ):
-    m = m_root.modifiers.new(name=m_name, type='BOOLEAN')
-    m.operation = m_operation
-    m.object = m_object
-    m_root.select_set(True)
-    bpy.context.view_layer.objects.active = m_root
-    bpy.ops.object.modifier_apply(modifier=m.name)
+def create_boolean_modifier( root, name, operation, object, apply=False ):
+    m = root.modifiers.new(name=name, type='BOOLEAN')
+    m.operation = operation
+    m.object = object
+    root.select_set(True)
+    if apply:
+        bpy.context.view_layer.objects.active = root
+        bpy.ops.object.modifier_apply(modifier=m.name)
     return m
 
-def create_bevel_modifier( m_root, m_name, m_segments=1, m_width_pct=1, m_width=1 ):
-    m = m_root.modifiers.new(name=m_name, type='BEVEL')
+def create_bevel_modifier( root, name, segments=1, width=1, apply=False ):
+    m = root.modifiers.new(name=name, type='BEVEL')
 #    m.offset_type = 'PERCENT'
-#    m.width_pct = m_width_pct
+#    m.width_pct = width_pct
     m.offset_type = 'ABSOLUTE'
-    m.width = m_width
-    m.segments = m_segments
+    m.width = width
+    m.segments = segments
     m.angle_limit = 0.523599
-    m_root.select_set(True)
-    bpy.context.view_layer.objects.active = m_root
-    bpy.ops.object.modifier_apply(modifier=m.name)
+    root.select_set(True)
+    if apply:
+        bpy.context.view_layer.objects.active = root
+        bpy.ops.object.modifier_apply(modifier=m.name)
     return m
 
-def join_remesh( objects_to_join ):
+def create_remesh( root, name, threshold=1, octree_depth=1, use_smooth_shade=False, apply=False):
+    # Add a Remesh modifier
+    remesh = root.modifiers.new(name=name, type='REMESH')
+    # Set remesh properties
+    remesh.mode = 'SHARP'       # Options: 'BLOCKS', 'SMOOTH', 'SHARP'
+    remesh.threshold = threshold
+    remesh.use_remove_disconnected = True
+    remesh.use_smooth_shade = use_smooth_shade
+    remesh.octree_depth = octree_depth
+    if apply:
+        bpy.context.view_layer.objects.active = root
+        bpy.ops.object.modifier_apply(modifier=remesh.name)
+
+
+    
+def join( objects_to_join ):
     # List of object names you want to join
     #objects_to_join = ["Cube", "Sphere", "Cylinder"]
 
@@ -85,17 +102,6 @@ def join_remesh( objects_to_join ):
 
     # Perform join
     bpy.ops.object.join()
-
-    # Add a Remesh modifier
-    remesh = bpy.context.view_layer.objects.active.modifiers.new(name="rm1", type='REMESH')
-
-    # Set remesh properties
-    remesh.mode = 'SHARP'       # Options: 'BLOCKS', 'SMOOTH', 'SHARP'
-    remesh.threshold = 1
-    remesh.use_remove_disconnected = True
-    remesh.use_smooth_shade = False
-    remesh.threshold = 1
-    bpy.ops.object.modifier_apply(modifier='rm1')
 
 
 

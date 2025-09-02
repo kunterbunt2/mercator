@@ -156,7 +156,6 @@ public class ZoomingCameraInputController extends CameraInputController {
 //                logger.info(String.format("camera update zoomIndex=%d targetZoomIndex=%d x=%f y=%f z=%f", zoomIndex, targetZoomIndex, x, y, z));
                 camera.translate(x, y, z);
                 camera.far = farY;
-                System.out.printf("far=%f near=%f%n", camera.far, camera.near);
                 movingCamera.lookAt(movingCamera.lookat.x, lookatY, movingCamera.lookat.z);
                 movingCamera.fieldOfView = fieldOfView;
                 camera.update();

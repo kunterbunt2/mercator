@@ -242,10 +242,10 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
 //            renderEngine.getMirror().setReflectivity(0.2f);
 //            renderEngine.setReflectionClippingPlane(-(context.getWaterLevel() - 2));
 //            renderEngine.setRefractionClippingPlane((context.getWaterLevel() - 2));
-//            renderEngine.getFog().setEnabled(true);
-//            renderEngine.getFog().setColor(Color.BLACK);
-//            renderEngine.getFog().setBeginDistance(2000f);
-//            renderEngine.getFog().setFullDistance(3000f);
+            renderEngine.getFog().setEnabled(true);
+            renderEngine.getFog().setColor(Color.BLACK);
+            renderEngine.getFog().setBeginDistance(2000f);
+            renderEngine.getFog().setFullDistance(3000f);
 
             renderEngine.setSkyBox(true);
             renderEngine.setDayAmbientLight(.8f, .8f, .8f, 5f);

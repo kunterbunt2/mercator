@@ -91,7 +91,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
     private static final float                        MAX_TIME_DELTA                = 0.1f;//everything above will be ignored as a glitch
     // private static final float MAX_VOXEL_DIMENSION = 20;
 //    public static final  Color                        NOT_PRODUCING_FACTORY_COLOR   = Color.RED; // 0xffFF0000;
-    public static final  int                          NUMBER_OF_CELESTIAL_BODIES    = 1000000;//TODO should be 10000
+    public static final  int                          NUMBER_OF_CELESTIAL_BODIES    = 100000;//TODO should be 10000
     private static final float                        ROTATION_SPEED                = 1f;//degrees
     //    public static final  int                          RAYS_NUM                      = 128;
 //    private static final float                        RENDER_2D_UNTIL               = 1500;
@@ -231,7 +231,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
             renderEngine = new RenderEngine3D<GameEngine3D>(context, this, camera, camera2D, getAtlasManager().menuFont, getAtlasManager().menuBoldFont, getAtlasManager().systemTextureRegion);
             renderEngine.setSceneBoxMin(new Vector3(-500, -500, -500));
             renderEngine.setSceneBoxMax(new Vector3(1000, 0, 1000));
-//            renderEngine.getWater().setPresent(false);
+            renderEngine.getWater().setPresent(false);
 //            renderEngine.getWater().setWaterLevel(-10f);
 //            renderEngine.getWater().setTiling(universe.size * 2 * 4 * 2 * 4 / Universe.WORLD_SCALE);
 //            renderEngine.getWater().setWaveStrength(0.01f / Universe.WORLD_SCALE);
@@ -260,31 +260,6 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
 //            renderEngine.getSsaoCombineEffect().setEnabled(false);
             renderEngine.setGammaCorrected(true);
 
-//            {
-//                DirectionalLightEx sun = new DirectionalLightEx();
-//                sun.direction.set(1, -1, 1).nor();
-//                sun.color.set(Color.WHITE);
-//                myIBLBuilder       ibl   = new myIBLBuilder(null);
-//                myIBLBuilder.Light light = new myIBLBuilder.Light();
-//                light.direction.set(sun.direction).nor();
-//                light.color.set(sun.color);
-//                light.exponent = 10f;
-//                ibl.lights.add(light);
-//                ibl.nearGroundColor.set(0.0F, 0.0F, 0.0F, 1.0F);
-//                ibl.farGroundColor.set(0.0F, 0.0F, .0F, 1.0F);
-//                ibl.nearSkyColor.set(0.0F, 0.0F, .0F, 1.0F);
-//                ibl.farSkyColor.set(0.0F, 0.0F, .0F, 1.0F);
-//                Cubemap environmentCubemap = ibl.buildEnvMap(1024, null, null);
-//                renderEngine.setDaySkyBox(new SceneSkybox(environmentCubemap));
-//                renderEngine.setNightSkyBox(new SceneSkybox(environmentCubemap));
-//            }
-//            renderEngine.setAmbientLight(.9f, .9f, .9f);
-//            dayAmbientIntensityR = .9f;
-//            dayAmbientIntensityG = .9f;
-//            dayAmbientIntensityB = .9f;
-//            dayShadowIntensity   = .5f;
-//            renderEngine.setNightAmbientLight(.04f, .04f, .04f, 10f);
-//            setDayAmbientLight(.9f, .9f, .9f, 1f);
             createInputProcessor(this, this);
             createLogo();
 
@@ -390,8 +365,8 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
                 EnvironmentSnapshot environmentSnapshot = environmentSnapshotMap.get(index);
                 if (environmentSnapshot == null) {
                     long time = System.currentTimeMillis();
-                    logger.info(String.format("setupImageBasedLighting = %d", index));
                     logger.info("----------------------------------------------------------------------------------");
+                    logger.info(String.format("setupImageBasedLighting = %d", index));
                     DirectionalLightEx sun = new DirectionalLightEx();
                     sun.direction.set(renderEngine.getShadowLight().direction.x, renderEngine.getShadowLight().direction.y, renderEngine.getShadowLight().direction.z).nor();
                     sun.color.set(Color.WHITE);
@@ -401,9 +376,8 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
                         int numberOfBodies;
                         if (index == -1) numberOfBodies = 10000;
                         else numberOfBodies = NUMBER_OF_CELESTIAL_BODIES;
-//                        numberOfBodies = 10;
                         logger.info(String.format("numberOfBodies=%dk", numberOfBodies / 1000));
-                        celestialBodyList.add(new CelestialBody(sun.direction, sun.color, 10f));
+                        celestialBodyList.add(new CelestialBody(sun.direction, sun.color, 10000f));
                         for (int i = 0; i < numberOfBodies; i++) {
                             celestialBodyList.add(new CelestialBody());
                         }

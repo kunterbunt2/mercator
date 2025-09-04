@@ -98,7 +98,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
 //    private static final float                        RENDER_3D_UNTIL               = 2000;
     //	private static final String RENDER_DURATION = "render()";
     //	private static final String RENDER_LIGHT = "light";
-    private static final float                             SCROLL_SPEED                    = 20f;
+    private static final float                             SCROLL_SPEED                    = 40f;
     //    public static final  Color                        SELECTED_PLANET_COLOR         = Color.BLUE;
 //    public static final  Color                        SELECTED_TRADER_COLOR         = Color.RED; // 0xffff0000;
 //    public static final  float                        SIM_HEIGHT                    = 0.3f;

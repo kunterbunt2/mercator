@@ -64,7 +64,7 @@ public class Trader3DRenderer extends ObjectRenderer<GameEngine3D> {
     private static final Color                                         TRADER_NAME_COLOR       = Color.BLACK;//)new Color(0xffa500ff);
     private static final float                                         TRADER_SIZE_X           = 1 / Universe.WORLD_SCALE;
     public static final  float                                         TRADER_SIZE_Y           = 3 / Universe.WORLD_SCALE;
-    public static final  float                                         TRADER_SIZE_Z           = (12) / Universe.WORLD_SCALE;
+    public static final  float                                         TRADER_SIZE_Z           = 11 / Universe.WORLD_SCALE;
     private static final float                                         TRADER_TRAVELING_HEIGHT = -TRADER_SIZE_Y / 2 + Planet3DRenderer.WATER_Y;
     public static final  float                                         TRADER_WIDTH            = 16f;
     final static         Vector3                                       xVectorNeg              = new Vector3(-1, 0, 0);
@@ -409,13 +409,13 @@ public class Trader3DRenderer extends ObjectRenderer<GameEngine3D> {
             go.instance.transform.rotate(Vector3.Y, trader.getManeuveringSystem().rotation);
 
             final int   xEdgeSize  = (int) (TRADER_SIZE_X / Good3DRenderer.GOOD_X);
-            final int   yEdgeSize  = (int) (TRADER_SIZE_Y / Good3DRenderer.GOOD_Y);
+            final int   zEdgeSize  = (int) (TRADER_SIZE_Z / Good3DRenderer.GOOD_Z);
             final int   xContainer = i % xEdgeSize;
-            final int   yContainer = (int) Math.floor(i / xEdgeSize) % yEdgeSize;
-            final int   zContainer = (int) Math.floor(i / (xEdgeSize * yEdgeSize));
+            final int   zContainer = (int) Math.floor(i / xEdgeSize) % zEdgeSize;
+            final int   yContainer = (int) Math.floor(i / (xEdgeSize * zEdgeSize));
             final float x          = -TRADER_SIZE_X / 2 + Good3DRenderer.GOOD_X / 2 + xContainer * (Good3DRenderer.GOOD_X + SPACE_BETWEEN_GOOD);
-            final float z          = /*-40*/ 1 - TRADER_SIZE_Z / 2 + Good3DRenderer.GOOD_Y / 2 + zContainer * (Good3DRenderer.GOOD_Z + SPACE_BETWEEN_GOOD);
-            final float y          = +/*+ TRADER_SIZE_Y / 2*/ -Good3DRenderer.GOOD_Y - yContainer * (Good3DRenderer.GOOD_Y + SPACE_BETWEEN_GOOD);
+            final float z          = -TRADER_SIZE_Z / 2 + Good3DRenderer.GOOD_Z / 2 + zContainer * (Good3DRenderer.GOOD_Z + SPACE_BETWEEN_GOOD);
+            final float y          = -Good3DRenderer.GOOD_Y - SPACE_BETWEEN_GOOD - yContainer * (Good3DRenderer.GOOD_Y + SPACE_BETWEEN_GOOD);
 
 
             go.instance.transform.translate(x, y, z);

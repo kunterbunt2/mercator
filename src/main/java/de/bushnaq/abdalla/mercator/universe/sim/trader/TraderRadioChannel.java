@@ -97,7 +97,8 @@ public class TraderRadioChannel implements RadioChannel {
 
     @Override
     public void notifyFinishedTalking(RadioMessage rm) {
-//        System.out.println("TraderRadioChannel.notifyFinishedTalking");
+        if (!rm.isSilent())
+            logger.info("{} received notifyFinishedTalking messageId: {}, from: {}, to: {} ", getName(), rm.getMessageId(), rm.getFrom().getName(), rm.getTo().getName());
         handleRadioMessages(rm);
     }
 
@@ -113,11 +114,16 @@ public class TraderRadioChannel implements RadioChannel {
 
     @Override
     public void processRadioMessage(RadioMessage rm) {
-        long time = System.currentTimeMillis();
-        if (rm.getOriginalRequest() == null)
-            rm.addMessage(audioEngine.radio.generateLlmAnswer(rm.getMessageId(), null, rm.getTags(), rm.isSilent()));
-        else
-            rm.addMessage(audioEngine.radio.generateLlmAnswer(rm.getMessageId(), rm.getOriginalRequest().getAggregatedMessages(), rm.getTags(), rm.isSilent()));
+        long   time = System.currentTimeMillis();
+        String message;
+        if (rm.getOriginalRequest() == null) {
+            message = audioEngine.radio.generateLlmAnswer(rm.getMessageId(), null, rm.getTags(), rm.isSilent());
+            rm.addMessage(message);
+        } else {
+            message = audioEngine.radio.generateLlmAnswer(rm.getMessageId(), rm.getOriginalRequest().getAggregatedMessages(), rm.getTags(), rm.isSilent());
+            rm.addMessage(message);
+        }
+        trader.eventManager.add(EventLevel.trace, trader.currentTime, trader, message);
         rm.setTime(trader.currentTime);
 //        if (!rm.isSilent()) {
 //            addSubtitle(string, rm.getTags());

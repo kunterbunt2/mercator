@@ -118,6 +118,8 @@ public class PlanetRadioChannel implements RadioChannel {
 
     @Override
     public void notifyFinishedTalking(RadioMessage rm) {
+        if (!rm.isSilent())
+            logger.info("{} received notifyFinishedTalking messageId: {}, from: {}, to: {} ", getName(), rm.getMessageId(), rm.getFrom().getName(), rm.getTo().getName());
         handleRadioMessage(rm);
     }
 
@@ -135,7 +137,9 @@ public class PlanetRadioChannel implements RadioChannel {
     public void processRadioMessage(RadioMessage rm) {
 //                            if (Debug.isFilterPlanet(planet.getName()))
 //                                logger.info(String.format("answering %s message", rm.id.name()));
-        rm.addMessage(audioEngine.radio.generateLlmAnswer(rm.getMessageId(), rm.getOriginalRequest().getAggregatedMessages(), rm.getTags(), rm.isSilent()));
+        String message = audioEngine.radio.generateLlmAnswer(rm.getMessageId(), rm.getOriginalRequest().getAggregatedMessages(), rm.getTags(), rm.isSilent());
+        rm.addMessage(message);
+        planet.eventManager.add(EventLevel.trace, planet.currentTime, planet, message);
         rm.setTime(planet.currentTime);
 //        if (!rm.isSilent()) {
 //            addSubtitle(string, rm.getTags());

@@ -42,31 +42,31 @@ import java.util.List;
 
 public class Good3DRenderer extends ObjectRenderer<GameEngine3D> {
 
-    private static final float ANGLE_BORDER               = (float) Math.PI / 256;
-    public static final  int   CONTAINER_EDGE_SIZE        = 4;
-    private static final Color DIAMON_BLUE_COLOR          = new Color(0x006ab6ff);
-    private static final int   GOOD_AMOUNT_DRAWING_FACTOR = 5;
-    static final         Color GOOD_COLOR                 = new Color(0.09f, 0.388f, 0.69f, 0.8f); // 0xff000000;
-    public static final  float GOOD_HEIGHT                = 8f;
-    private static final Color GOOD_NAME_COLOR            = new Color(0.596f, 0.08f, 0.247f, 0.8f);
-    public static final  float GOOD_X                     = 8f / Universe.WORLD_SCALE;
-    public static final  float GOOD_Y                     = 8f / Universe.WORLD_SCALE;
-    public static final  float GOOD_Z                     = 8f / Universe.WORLD_SCALE;
-    private static final Color GRAY_COLOR                 = new Color(0x404853ff);
-    private static final float MAX_RADIUS                 = Planet2DRenderer.PLANET_SIZE * 7.5f;
-    private static final float MIN_ANGLE                  = (float) Math.PI / 12;
-    private static final float MIN_RADIUS                 = Planet2DRenderer.PLANET_SIZE * 6f + 3;
-    public static final  Color NOT_TRADED_GOOD_COLOR      = Color.LIGHT_GRAY; // 0xffbbbbbb;
-    private static final Color POST_GREEN_COLOR           = new Color(0x00614eff);
-    private static final Color SCARLET_COLOR              = new Color(0xb00233ff);
-    public static final  Color SELECTED_GOOD_COLOR        = Color.LIGHT_GRAY; // 0xffeeeeee;
-    public static final  float SPACE_BETWEEN_GOOD         = GameEngine3D.SPACE_BETWEEN_OBJECTS * 2;
-    public static final  int   SPACE_FROM_EDGE            = 16;
-    AnnulusSegment annulusSegment;
-    private final Good                           good;
-    private final Logger                         logger    = LoggerFactory.getLogger(this.getClass());
-    private final List<GameObject<GameEngine3D>> unusedMls = new ArrayList<>();
-    private final List<GameObject<GameEngine3D>> usedMls   = new ArrayList<>();
+    private static final float                          ANGLE_BORDER               = (float) Math.PI / 256;
+    public static final  int                            CONTAINER_EDGE_SIZE        = 4;
+    private static final Color                          DIAMON_BLUE_COLOR          = new Color(0x006ab6ff);
+    private static final int                            GOOD_AMOUNT_DRAWING_FACTOR = 5;
+    static final         Color                          GOOD_COLOR                 = new Color(0.09f, 0.388f, 0.69f, 0.8f); // 0xff000000;
+    public static final  float                          GOOD_HEIGHT                = 8f;
+    private static final Color                          GOOD_NAME_COLOR            = new Color(0.596f, 0.08f, 0.247f, 0.8f);
+    public static final  float                          GOOD_X                     = 1f / Universe.WORLD_SCALE;
+    public static final  float                          GOOD_Y                     = 1f / Universe.WORLD_SCALE;
+    public static final  float                          GOOD_Z                     = 1f / Universe.WORLD_SCALE;
+    private static final Color                          GRAY_COLOR                 = new Color(0x404853ff);
+    private static final float                          MAX_RADIUS                 = Planet2DRenderer.PLANET_SIZE * 7.5f;
+    private static final float                          MIN_ANGLE                  = (float) Math.PI / 12;
+    private static final float                          MIN_RADIUS                 = Planet2DRenderer.PLANET_SIZE * 6f + 3;
+    public static final  Color                          NOT_TRADED_GOOD_COLOR      = Color.LIGHT_GRAY; // 0xffbbbbbb;
+    private static final Color                          POST_GREEN_COLOR           = new Color(0x00614eff);
+    private static final Color                          SCARLET_COLOR              = new Color(0xb00233ff);
+    public static final  Color                          SELECTED_GOOD_COLOR        = Color.LIGHT_GRAY; // 0xffeeeeee;
+    public static final  float                          SPACE_BETWEEN_GOOD         = GameEngine3D.SPACE_BETWEEN_OBJECTS * 2;
+    public static final  int                            SPACE_FROM_EDGE            = 16;
+    private              AnnulusSegment                 annulusSegment;
+    private final        Good                           good;
+    private final        Logger                         logger                     = LoggerFactory.getLogger(this.getClass());
+    private final        List<GameObject<GameEngine3D>> unusedMls                  = new ArrayList<>();
+    private final        List<GameObject<GameEngine3D>> usedMls                    = new ArrayList<>();
 
     public Good3DRenderer(final Good good) {
         this.good = good;

@@ -76,123 +76,123 @@ import java.util.List;
 import java.util.Map;
 
 public class GameEngine3D implements ScreenListener, ApplicationListener, InputProcessor, IGameEngine {
-    public static final  float                        CAMERA_OFFSET_X               = 100f;
-    public static final  float                        CAMERA_OFFSET_Y               = 300f;
-    public static final  float                        CAMERA_OFFSET_Z               = 500f;
-    static final         Color                        DEBUG_GRID_BORDER_COLOR       = new Color(1f, 1f, 1f, 0.1f);
-    static final         Color                        DEBUG_GRID_COLOR              = new Color(.0f, .0f, .0f, 0.2f);
+    public static final  float                             CAMERA_OFFSET_X                 = 10f;
+    public static final  float                             CAMERA_OFFSET_Y                 = 30f;
+    public static final  float                             CAMERA_OFFSET_Z                 = 50f;
+    static final         Color                             DEBUG_GRID_BORDER_COLOR         = new Color(1f, 1f, 1f, 0.1f);
+    static final         Color                             DEBUG_GRID_COLOR                = new Color(.0f, .0f, .0f, 0.2f);
     //	private static final String BATCH_END_DURATION = "batch.end()";
     //	private static final String DRAW_DURATION = "draw()";
 //    public static final  Color                        FACTORY_COLOR                 = Color.DARK_GRAY; // 0xff000000;
 //    public static final  float                        FACTORY_HEIGHT                = 1.2f;
 //    public static final  float                        FACTORY_WIDTH                 = 2.4f;
-    public static final  float                        FIELD_OF_VIEW_Y               = 46f;
-    public static final  int                          FONT_SIZE                     = 9;
-    private static final float                        MAX_TIME_DELTA                = 0.1f;//everything above will be ignored as a glitch
+    public static final  float                             FIELD_OF_VIEW_Y                 = 46f;
+    public static final  int                               FONT_SIZE                       = 9;
+    private static final float                             MAX_TIME_DELTA                  = 0.1f;//everything above will be ignored as a glitch
     // private static final float MAX_VOXEL_DIMENSION = 20;
 //    public static final  Color                        NOT_PRODUCING_FACTORY_COLOR   = Color.RED; // 0xffFF0000;
-    public static final  int                          NUMBER_OF_CELESTIAL_BODIES    = 100000;//TODO should be 10000
-    private static final float                        ROTATION_SPEED                = 1f;//degrees
+    public static final  int                               NUMBER_OF_CELESTIAL_BODIES      = 100000;//TODO should be 100000
+    private static final float                             ROTATION_SPEED                  = 1f;//degrees
     //    public static final  int                          RAYS_NUM                      = 128;
 //    private static final float                        RENDER_2D_UNTIL               = 1500;
 //    private static final float                        RENDER_3D_UNTIL               = 2000;
     //	private static final String RENDER_DURATION = "render()";
     //	private static final String RENDER_LIGHT = "light";
-    private static final float                        SCROLL_SPEED                  = 20f;
+    private static final float                             SCROLL_SPEED                    = 20f;
     //    public static final  Color                        SELECTED_PLANET_COLOR         = Color.BLUE;
 //    public static final  Color                        SELECTED_TRADER_COLOR         = Color.RED; // 0xffff0000;
 //    public static final  float                        SIM_HEIGHT                    = 0.3f;
 //    public static final  float                        SIM_WIDTH                     = 0.3f;
 //    public static final  float                        SOOM_SPEED                    = 8.0f * 10;
-    public static final  float                        SPACE_BETWEEN_OBJECTS         = 0.1f / Universe.WORLD_SCALE;
-    public static final  Color                        TEXT_COLOR                    = Color.WHITE; // 0xffffffff;
+    public static final  float                             SPACE_BETWEEN_OBJECTS           = 0.03f / Universe.WORLD_SCALE;
+    public static final  Color                             TEXT_COLOR                      = Color.WHITE; // 0xffffffff;
     //	private static final Color trafficEndColor = new Color(0xffff0000);
     //	private static final Color trafficStartColor = new Color(0xff55ff55);
     //	private static final float VOXEL_SIZE = 0.5f;
-    private static final Color                        TIME_MACHINE_BACKGROUND_COLOR = new Color(0.0f, 0.0f, 0.0f, 0.9f);
-    public static final  int                          TIME_MACHINE_FONT_SIZE        = 10;
-    private static final Color                        TIME_MACHINE_SUB_MARKER_COLOR = new Color(0.7f, 0.7f, 0.7f, 1.0f);
-    private              float                        angle                         = -1;
-    public               AssetManager                 assetManager;
-    private              AtlasManager                 atlasManager;
+    private static final Color                             TIME_MACHINE_BACKGROUND_COLOR   = new Color(0.0f, 0.0f, 0.0f, 0.9f);
+    public static final  int                               TIME_MACHINE_FONT_SIZE          = 10;
+    private static final Color                             TIME_MACHINE_SUB_MARKER_COLOR   = new Color(0.7f, 0.7f, 0.7f, 1.0f);
+    private              float                             angle                           = -1;
+    public               AssetManager                      assetManager;
+    private              AtlasManager                      atlasManager;
     //    private final        GameObject<GameEngine3D>     ocean                         = null;
-    public               AudioEngine                  audioEngine                   = new MercatorAudioEngine();
-    private              Texture                      brdfLUT;
+    public               AudioEngine                       audioEngine                     = new MercatorAudioEngine();
+    private              Texture                           brdfLUT;
     @Getter
-    private              ZoomingCameraInputController camController;
+    private              ZoomingCameraInputController      camController;
     @Getter
-    private              MovingCamera                 camera;
-    private              OrthographicCamera           camera2D;
-    List<CelestialBody> celestialBodyList = new ArrayList<>();
-    private       float           centerRD;//camera rotation
-    private       float           centerXD;
-    private       float           centerZD;
-    private       Context         context;
-    private final IContextFactory contextFactory;
-    private       Demo1           demo1;
-    private       Demo2           demo2;
+    private              MovingCamera                      camera;
+    private              OrthographicCamera                camera2D;
+    private final        List<CelestialBody>               celestialBodyList               = new ArrayList<>();
+    private              float                             centerRD;//camera rotation
+    public               float                             centerXD;
+    private              float                             centerZD;
+    private              Context                           context;
+    private final        IContextFactory                   contextFactory;
+    private              Demo1                             demo1;
+    private              Demo2                             demo2;
     //    private       float            dayAmbientIntensityB            = 1f;
 //    private       float            dayAmbientIntensityG            = 1f;
 //    private       float            dayAmbientIntensityR            = 1f;
 //    private       float            dayShadowIntensity              = 5f;
-    private       Cubemap         diffuseCubemap;
-    public        List<Color>     distinctiveColorlist            = new ArrayList<Color>();
-    public        List<Color>     distinctiveTransparentColorlist = new ArrayList<Color>();
+    private              Cubemap                           diffuseCubemap;
+    public               List<Color>                       distinctiveColorlist            = new ArrayList<Color>();
+    public               List<Color>                       distinctiveTransparentColorlist = new ArrayList<Color>();
     //	private boolean end = false;
     //	private MercatorFrame frame;
     //	private LwjglApplicationConfiguration config;
-    private       Cubemap         environmentDayCubemap;
-    private       Cubemap         environmentNightCubemap;
-    Map<Integer, EnvironmentSnapshot> environmentSnapshotMap = new HashMap<>();
-    private       boolean                      followMode;
+    private              Cubemap                           environmentDayCubemap;
+    private              Cubemap                           environmentNightCubemap;
+    private final        Map<Integer, EnvironmentSnapshot> environmentSnapshotMap          = new HashMap<>();
+    private              boolean                           followMode;
     //    private              BitmapFont                   font;
-    private       boolean                      hrtfEnabled          = true;
-    private       Info                         info;
-    private final InputMultiplexer             inputMultiplexer     = new InputMultiplexer();
-    private       GameObject<GameEngine3D>     instance;//TODO
-    private final List<Label>                  labels               = new ArrayList<>();
-    private       long                         lastCameraDirty      = 0;
-    public        LaunchMode                   launchMode;
-    private final Logger                       logger               = LoggerFactory.getLogger(this.getClass());
-    public        OggPlayer                    oggPlayer;
-    private final boolean                      old                  = true;
-    public        RenderEngine3D<GameEngine3D> renderEngine;
+    private              boolean                           hrtfEnabled                     = true;
+    private              Info                              info;
+    private final        InputMultiplexer                  inputMultiplexer                = new InputMultiplexer();
+    private              GameObject<GameEngine3D>          instance;//TODO
+    private final        List<Label>                       labels                          = new ArrayList<>();
+    private              long                              lastCameraDirty                 = 0;
+    public               LaunchMode                        launchMode;
+    private final        Logger                            logger                          = LoggerFactory.getLogger(this.getClass());
+    public               OggPlayer                         oggPlayer;
+    private final        boolean                           old                             = true;
+    public               RenderEngine3D<GameEngine3D>      renderEngine;
     @Getter
     @Setter
-    private       boolean                      showAudioSources     = false;
+    private              boolean                           showAudioSources                = false;
     @Getter
     @Setter
-    private       boolean                      showCameraInfo       = false;
+    private              boolean                           showCameraInfo                  = true;
     @Getter
     @Setter
-    private       boolean                      showDemo2Info        = false;
+    private              boolean                           showDemo2Info                   = false;
     @Getter
     @Setter
-    private       boolean                      showDepthOfFieldInfo = false;
+    private              boolean                           showDepthOfFieldInfo            = false;
     @Getter
     @Setter
-    private       boolean                      showFps              = false;
-    public        ShowGood                     showGood             = ShowGood.Name;
+    private              boolean                           showFps                         = false;
+    public               ShowGood                          showGood                        = ShowGood.Name;
     @Getter
     @Setter
-    private       boolean                      showInfo             = false;
+    private              boolean                           showInfo                        = false;
     @Getter
     @Setter
-    private       boolean                      showTime             = true;
+    private              boolean                           showTime                        = true;
     @Getter
     @Setter
-    private       boolean                      showUniverseTime     = false;
-    private       Cubemap                      specularCubemap;
-    private       Stage                        stage;
-    private       StringBuilder                stringBuilder;
-    private       Subtitles                    subtitles;
+    private              boolean                           showUniverseTime                = false;
+    private              Cubemap                           specularCubemap;
+    private              Stage                             stage;
+    private              StringBuilder                     stringBuilder;
+    private              Subtitles                         subtitles;
     //    Vector3 sunPosition = new Vector3();
-    private       boolean                      takeScreenShot;
-    private       float                        timeOfDay;
+    private              boolean                           takeScreenShot;
+    private              float                             timeOfDay;
     //	private ModelInstance uberModelInstance;
     @Getter
-    public final  Universe                     universe;
-    private       boolean                      vsyncEnabled         = true;
+    public final         Universe                          universe;
+    private              boolean                           vsyncEnabled                    = true;
 
     public GameEngine3D(final IContextFactory contextFactory, final Universe universe, final LaunchMode launchMode) throws Exception {
         this.contextFactory = contextFactory;
@@ -248,7 +248,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
             renderEngine.getFog().setFullDistance(3000f);
 
             renderEngine.setSkyBox(true);
-            renderEngine.setDayAmbientLight(.8f, .8f, .8f, 5f);
+            renderEngine.setDayAmbientLight(1f, 1f, 1f, 3f);
             renderEngine.setNightAmbientLight(.8f, .8f, .8f, 10f);
             renderEngine.setAlwaysDay(true);
             renderEngine.setDynamicDayTime(false);
@@ -377,7 +377,8 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
                         if (index == -1) numberOfBodies = 10000;
                         else numberOfBodies = NUMBER_OF_CELESTIAL_BODIES;
                         logger.info(String.format("numberOfBodies=%dk", numberOfBodies / 1000));
-                        celestialBodyList.add(new CelestialBody(sun.direction, sun.color, 10000f));
+                        CelestialBody star = new CelestialBody(sun.direction, sun.color, 10000f);
+                        celestialBodyList.add(star);
                         for (int i = 0; i < numberOfBodies; i++) {
                             celestialBodyList.add(new CelestialBody());
                         }
@@ -398,13 +399,19 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
                     ibl.nearSkyColor.set(tint, tint, tint, 1.0F);
                     ibl.farSkyColor.set(tint, tint, tint, 1.0F);
                     Cubemap environmentCubemap = ibl.buildEnvMap(1024 * 4, renderEngine.batch2D, atlasManager.bold256Font);
-                    tint = 0.0f;
+                    tint = 0.3f;//ambience
                     ibl.nearGroundColor.set(tint, tint, tint, 1.0F);
                     ibl.farGroundColor.set(tint, tint, tint, 1.0F);
                     ibl.nearSkyColor.set(tint, tint, tint, 1.0F);
                     ibl.farSkyColor.set(tint, tint, tint, 1.0F);
                     Cubemap irradianceMap = ibl.buildIrradianceMap(256 * 4, renderEngine.batch2D, atlasManager.bold256Font);
-                    Cubemap radianceMap   = ibl.buildRadianceMap(12, renderEngine.batch2D, atlasManager.bold256Font);
+                    tint                       = 0.0f;//metallic reflection
+                    ibl.lights.get(0).exponent = 10;
+                    ibl.nearGroundColor.set(tint, tint, tint, 1.0F);
+                    ibl.farGroundColor.set(tint, tint, tint, 1.0F);
+                    ibl.nearSkyColor.set(tint, tint, tint, 1.0F);
+                    ibl.farSkyColor.set(tint, tint, tint, 1.0F);
+                    Cubemap radianceMap = ibl.buildRadianceMap(12, renderEngine.batch2D, atlasManager.bold256Font);
                     environmentSnapshot = new EnvironmentSnapshot(environmentCubemap, irradianceMap, radianceMap);
                     environmentSnapshotMap.put(index, environmentSnapshot);
                     ibl.dispose();
@@ -448,7 +455,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
         inputMultiplexer.addProcessor(camController);
         Gdx.input.setInputProcessor(inputMultiplexer);
         camController.setTargetZoomIndex(2);
-        camController.zoomIndex = 2;
+        camController.setZoomIndex(2);
         camController.update(true);
     }
 
@@ -714,7 +721,11 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
     //	}
 
     public int getCameraZoomIndex() {
-        return camController.zoomIndex;
+        return camController.getZoomIndex();
+    }
+
+    public int getCameraZoomThreshold() {
+        return camController.getCameraZoomThreshold();
     }
 
     public Radio getRadio() {
@@ -939,6 +950,10 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
             case Input.Keys.E:
                 centerRD = 0;
                 return true;
+            case Input.Keys.C:
+                getCamera().setDirty(true);
+                break;
+
         }
         return false;
     }
@@ -991,8 +1006,6 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
 
     private void render(final long currentTime) throws Exception {
         final float deltaTime = Gdx.graphics.getDeltaTime();
-        renderEngine.render2D = getCameraZoomIndex() > 5;
-        renderEngine.render3D = getCameraZoomIndex() <= 5;
 
 
         if (followMode && universe.selected instanceof Trader) {
@@ -1007,6 +1020,9 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
         camController.update();
         renderEngine.updateCameraXZ(centerXD, 0f, centerZD);
         renderEngine.updateCameraRotationY(centerRD);
+        renderEngine.render2D = getCameraZoomIndex() > getCameraZoomThreshold();
+        renderEngine.render3D = getCameraZoomIndex() <= getCameraZoomThreshold();
+//        centerXD = 0;
         updateDepthOfFieldFocusDistance();
 //        if (camera.position.y > 1000) {
 //            renderEngine.getFog().setBeginDistance(camera.position.y + 100);
@@ -1169,7 +1185,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
         //camera properties
         if (showCameraInfo) {
             stringBuilder.setLength(0);
-            stringBuilder.append(String.format(" camera: zoomIndex(%d), position(%+.0f,%+.0f,%+.0f), lookAt(%+.0f, %+.0f, %+.0f)", camController.zoomIndex, camera.position.x, camera.position.y, camera.position.z, camera.lookat.x, camera.lookat.y, camera.lookat.z));
+            stringBuilder.append(String.format(" camera: zoomIndex(%d), position(%+.0f,%+.0f,%+.0f), lookAt(%+.0f, %+.0f, %+.0f)", camController.getZoomIndex(), camera.position.x, camera.position.y, camera.position.z, camera.lookat.x, camera.lookat.y, camera.lookat.z));
             labels.get(labelIndex).getStyle().fontColor = Color.ORANGE;
             labels.get(labelIndex++).setText(stringBuilder);
         }
@@ -1378,10 +1394,10 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
 
     private void updateDepthOfFieldFocusDistance() {
         if (camera.isDirty()) {
-            CameraProperties zoomFactor = camController.zoomFactors[camController.zoomIndex];
-            if (zoomFactor.focalDistance != 0) {
+            CameraProperties zoomFactor = camController.getZoomFactors()[camController.getZoomIndex()];
+            if (zoomFactor.focalDistance() != 0) {
                 //camera has fixed focal distance
-                renderEngine.getDepthOfFieldEffect().setFocalDepth(zoomFactor.focalDistance);
+                renderEngine.getDepthOfFieldEffect().setFocalDepth(zoomFactor.focalDistance());
             } else {
                 //calculate focal distance as the distance of the camera to the xz plane that we are looking at
                 Ray     pickRay      = camera.getPickRay(Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2);
@@ -1408,7 +1424,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
             final Vector3 shadowLightDirection = new Vector3();
             final Matrix4 m                    = new Matrix4();
             if (renderEngine.isFixedShadowDirection()) {
-                angle = 360 * 15f / 24;//0=pz,1=-pz,6=px,12=nz,18=nx
+                angle = 360 * 8f / 24;//0=pz,1=-pz,6=px,12=nz,18=nx
             } else {
                 angle = 360 * timeOfDay / 24;
             }

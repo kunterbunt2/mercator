@@ -38,6 +38,8 @@ import de.bushnaq.abdalla.mercator.universe.sim.SimList;
 import de.bushnaq.abdalla.mercator.universe.sim.trader.Trader;
 import de.bushnaq.abdalla.mercator.universe.sim.trader.TraderList;
 import de.bushnaq.abdalla.mercator.util.*;
+import lombok.Getter;
+import lombok.Setter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,10 +52,10 @@ public class Universe {
     private static final String                  ADVANCE_IN_TIME_UNIVERSE_DURATION = "All      AIT";
     private static final long                    SIMULATION_DELTA                  = 20L;//ms
     public static final  float                   WORLD_SCALE                       = 1.0f;
-    //    VoiceManager voiceManager;
+    @Setter
     private              ScreenListener          ScreenListener;
-    //	private static final String APPLICATION_VERSION_STRING = "0.1.0.0";
     public               PieChartData            amountPieChart                    = new PieChartData("volumen");
+    private final        boolean                 autoSelectNearestPlanet           = true;
     public               PieChartData            creditPieChart                    = new PieChartData("credits");
     private              float                   credits; // ---credits at creation time, should never change
     public               long                    currentTime                       = 0L;//simulation time in milliseconds
@@ -62,14 +64,19 @@ public class Universe {
     public               GraphChartData          deadSimStatistics                 = new GraphChartData("dead sims", Color.RED);
     public               TraderList              deadTraderList                    = new TraderList();
     public               GraphChartData          deadTraderStatistics              = new GraphChartData("dead traders", Color.RED);
+    @Getter
+    @Setter
     private              boolean                 enableTime                        = true;
     public               EventManager            eventManager;
     private              IGameEngine             gameEngine;
+    @Getter
     private final        GraphicsDimentions      graphicsDimentions;
+    @Getter
     private              HistoryManager          historyManager;
     public               LandList                landList                          = new LandList();
     private              long                    lastTime                          = 0;
     private final        Logger                  logger                            = LoggerFactory.getLogger(this.getClass());
+    @Getter
     private              String                  name;
     public               PathList                pathList                          = new PathList();
     public               PieChartData            planetDeadReasonPieChart          = new PieChartData("planet death");
@@ -96,8 +103,9 @@ public class Universe {
     public               TraderList              traderList                        = new TraderList();
     private              long                    universeAge                       = 100L * TimeUnit.TICKS_PER_DAY;
     public               MercatorRandomGenerator universeRG;
-    //    Voice   helloVoice;
-    boolean useFixedDelta = false;
+    @Getter
+    @Setter
+    private              boolean                 useFixedDelta                     = false;
 
 
     public Universe(final String name, final GraphicsDimentions graphicsDimentions, final EventLevel level, final Class<?> eventFilter) {
@@ -273,22 +281,6 @@ public class Universe {
     }
 
     public void dispose() {
-    }
-
-    public GraphicsDimentions getGraphicsDimentions() {
-        return graphicsDimentions;
-    }
-
-    public HistoryManager getHistoryManager() {
-        return historyManager;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public boolean isEnableTime() {
-        return enableTime;
     }
 
     public void kill(final Sim sim) {
@@ -482,10 +474,6 @@ public class Universe {
         selectedEvent = event;
     }
 
-    public void setEnableTime(final boolean enableTime) {
-        this.enableTime = enableTime;
-    }
-
     //	public void selectTrader(final Trader aTrader) {
     //		setSelected(aTrader);
     //		planetList.markTraderPath(selectedTrader);
@@ -497,10 +485,6 @@ public class Universe {
 
     private void setName(final String name) {
         this.name = name;
-    }
-
-    public void setScreenListener(final ScreenListener ScreenListener) {
-        this.ScreenListener = ScreenListener;
     }
 
     public void setSelected(final Object selected, final boolean setDirty) throws Exception {
@@ -544,55 +528,20 @@ public class Universe {
     }
 
     public void updateSelectedPlanet() {
-        try {
-            Planet planet = planetList.findNearestPlanet(gameEngine.getCamera().lookat.x, gameEngine.getCamera().lookat.y, gameEngine.getCamera().lookat.z);
-            if (planet != selectedPlanet) {
-//                selected       = planet;
-                if (selectedPlanet != null) {
-                    selectedPlanet.unselect();
+        if (autoSelectNearestPlanet) {
+            try {
+                Planet planet = planetList.findNearestPlanet(gameEngine.getCamera().lookat.x, gameEngine.getCamera().lookat.y, gameEngine.getCamera().lookat.z);
+                if (planet != selectedPlanet) {
+                    if (selectedPlanet != null) {
+                        selectedPlanet.unselect();
+                    }
+                    selectedPlanet = planet;
+                    selectedPlanet.select();
                 }
-                selectedPlanet = planet;
-                selectedPlanet.select();
-//                if (ScreenListener != null)
-//                    ScreenListener.setCamera(selectedPlanet.x, selectedPlanet.z, true);
+            } catch (final Exception e) {
+                logger.error(e.getMessage(), e);
             }
-        } catch (final Exception e) {
-            logger.error(e.getMessage(), e);
         }
     }
-
-//    private void windowstts() {
-//        SpeechEngine speechEngine = null;
-//        try {
-//            speechEngine = SpeechEngineNative.getInstance();
-//            List<Voice> voices = speechEngine.getAvailableVoices();
-//
-//            //            System.out.println("For now the following voices are supported:\n");
-//            String text = "The answer to the ultimate question of life, the universe, and everything is 42";
-//            for (Voice voice : voices) {
-//                System.out.printf("%s%n", voice);
-//            }
-//            // We want to find a voice according our preferences
-//            VoicePreferences voicePreferences = new VoicePreferences();
-//            voicePreferences.setLanguage("en"); //  ISO-639-1
-//            voicePreferences.setCountry("GB"); // ISO 3166-1 Alpha-2 code
-//            voicePreferences.setGender(VoicePreferences.Gender.FEMALE);
-//            Voice voice = speechEngine.findVoiceByPreferences(voicePreferences);
-//
-//            // simple fallback just in case our preferences didn't match any voice
-//            if (voice == null) {
-//                System.out.printf("Warning: Voice has not been found by the voice preferences %s%n", voicePreferences);
-//                voice = voices.get(0); // it is guaranteed that the speechEngine supports at least one voice
-//                System.out.printf("Using \"%s\" instead.%n", voice);
-//            }
-//
-//            speechEngine.setVoice(voice.getName());
-//            speechEngine.say(text);
-//        } catch (SpeechEngineCreationException e) {
-//            throw new RuntimeException(e);
-//        } catch (IOException e) {
-//            throw new RuntimeException(e);
-//        }
-//    }
 
 }

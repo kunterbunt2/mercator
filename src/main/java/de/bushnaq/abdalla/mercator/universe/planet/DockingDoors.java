@@ -33,8 +33,8 @@ public class DockingDoors extends ArrayList<DockingDoor> {
 
     public DockingDoors(Planet planet) {
         this.planet = planet;
-        add(new DockingDoor(planet, planet.getName().substring(0, planet.getName().length() / 2), -32f, 0));
-        add(new DockingDoor(planet, planet.getName().substring(planet.getName().length() / 2), 32f, 0));
+        add(new DockingDoor(planet, planet.getName().substring(0, planet.getName().length() / 2), -4f, 0));
+        add(new DockingDoor(planet, planet.getName().substring(planet.getName().length() / 2), 4f, 0));
         position[0] = planet.x;
         position[1] = planet.y;
         position[2] = planet.z;
@@ -56,7 +56,7 @@ public class DockingDoors extends ArrayList<DockingDoor> {
             oggPlayer.setGain(200.0f);
             oggPlayer.setAmbient(false);
             oggPlayer.setLoop(true);
-//            oggPlayer.ignore(true);
+            oggPlayer.ignore(true);
         } catch (OpenAlException e) {
             throw new RuntimeException(e);
         }
@@ -86,9 +86,9 @@ public class DockingDoors extends ArrayList<DockingDoor> {
     }
 
     public void renderText(final RenderEngine3D<GameEngine3D> renderEngine) {
-        for (DockingDoor dockingDoor : this) {
-            dockingDoor.renderText(renderEngine);
-        }
+//        for (DockingDoor dockingDoor : this) {
+//            dockingDoor.renderText(renderEngine);
+//        }
     }
 
     public void setDockingDoorStatus(DockingDoor.DockingDoorState dockingDoorState) {

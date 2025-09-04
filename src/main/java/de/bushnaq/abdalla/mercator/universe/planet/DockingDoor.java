@@ -22,6 +22,8 @@ import com.badlogic.gdx.math.Vector3;
 import de.bushnaq.abdalla.engine.GameObject;
 import de.bushnaq.abdalla.engine.RenderEngine3D;
 import de.bushnaq.abdalla.mercator.engine.GameEngine3D;
+import lombok.Getter;
+import lombok.Setter;
 import net.mgsx.gltf.scene3d.model.ModelInstanceHack;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,12 +32,14 @@ import static de.bushnaq.abdalla.mercator.universe.planet.DockingDoor.DockingDoo
 import static de.bushnaq.abdalla.mercator.universe.planet.Planet3DRenderer.STATION_Z_SHIFT;
 
 public class DockingDoor {
-    private static final float                    DOCKING_DOOR_HEIGHT = 8;
-    private static final float                    HORIZONTAL_SPEED    = 15f;
+    private static final float                    DOCKING_DOOR_HEIGHT = 1f;
+    private static final float                    HORIZONTAL_SPEED    = 2f;
     private static final Color                    PLANET_NAME_COLOR   = new Color(0xffa500ff);
-    private static final float                    VERTICAL_SPEED      = 2f;
+    private static final float                    VERTICAL_SPEED      = 1f;
     private static final float                    XZ_MOVEMENT_LEEWAY  = 58f;
     private              GameObject<GameEngine3D> dockingDoorGameObject;
+    @Setter
+    @Getter
     private              DockingDoorState         dockingDoorState    = CLOSED;
     private final        float                    dx;
     private final        float                    dz;
@@ -57,8 +61,8 @@ public class DockingDoor {
         this.dz     = dz;
         singDz      = -Math.signum(dz);
         singDx      = -Math.signum(dx);
-        scalingX    = Math.abs(dx * 2) + Math.abs(dz * 4);
-        scalingZ    = Math.abs(dz * 2) + Math.abs(dx * 4);
+        scalingX    = Math.abs(dx * 2) + Math.abs(dz * 4) - .1f;
+        scalingZ    = Math.abs(dz * 2) + Math.abs(dx * 4) - .1f;
     }
 
     public void advanceInTime(float realTimeDelta) {
@@ -71,31 +75,31 @@ public class DockingDoor {
             }
             case LOWERING -> {
                 y -= realTimeDelta * VERTICAL_SPEED;
-                if (y <= planet.y + STATION_Z_SHIFT - DOCKING_DOOR_HEIGHT / 2 - 5f) {
-                    y                = planet.y + STATION_Z_SHIFT - DOCKING_DOOR_HEIGHT / 2 - 5f;
+                if (y <= planet.y + STATION_Z_SHIFT - DOCKING_DOOR_HEIGHT * 3f / 2f) {
+                    y                = planet.y + STATION_Z_SHIFT - DOCKING_DOOR_HEIGHT * 3f / 2f;
                     dockingDoorState = DockingDoorState.OPENING;
                 }
             }
             case OPENING -> {
                 z -= realTimeDelta * singDz * HORIZONTAL_SPEED;
                 x -= realTimeDelta * singDx * HORIZONTAL_SPEED;
-                if (dz != 0 && Math.abs(planet.z + dz - z) > XZ_MOVEMENT_LEEWAY) {
-                    z                = planet.z + dz - singDz * XZ_MOVEMENT_LEEWAY;
+                if (dz != 0 && Math.abs(planet.z + dz - z) > Math.abs(dx * 2)) {
+                    z                = planet.z + dz - singDz * Math.abs(dx * 2);
                     dockingDoorState = DockingDoorState.OPEN;
                 }
-                if (dx != 0 && Math.abs(planet.x + dx - x) > XZ_MOVEMENT_LEEWAY) {
-                    x                = planet.x + dx - singDx * XZ_MOVEMENT_LEEWAY;
+                if (dx != 0 && Math.abs(planet.x + dx - x) > Math.abs(dx * 2)) {
+                    x                = planet.x + dx - singDx * Math.abs(dx * 2);
                     dockingDoorState = DockingDoorState.OPEN;
                 }
             }
             case CLOSING -> {
                 z += realTimeDelta * singDz * HORIZONTAL_SPEED;
                 x += realTimeDelta * singDx * HORIZONTAL_SPEED;
-                if (dz != 0 && Math.abs(planet.z + dz - z) < 1f) {
+                if (dz != 0 && Math.abs(planet.z + dz - z) <= .1f) {
                     z                = planet.z + dz;
                     dockingDoorState = DockingDoorState.RAISING;
                 }
-                if (dx != 0 && Math.abs(planet.x + dx - x) < 1f) {
+                if (dx != 0 && Math.abs(planet.x + dx - x) <= .1f) {
                     x                = planet.x + dx;
                     dockingDoorState = DockingDoorState.RAISING;
                 }
@@ -121,10 +125,6 @@ public class DockingDoor {
 
     }
 
-    public DockingDoorState getDockingDoorState() {
-        return dockingDoorState;
-    }
-
     public void render(RenderEngine3D<GameEngine3D> renderEngine) {
         dockingDoorGameObject.instance.transform.setToTranslationAndScaling(x, y, z, scalingX, DOCKING_DOOR_HEIGHT, scalingZ);
         dockingDoorGameObject.update();
@@ -137,10 +137,6 @@ public class DockingDoor {
         float factor = (140 / (float) title.length());
         renderEngine.renderEngine25D.renderTextCenterOnTop(translation, 0, Math.signum(dx) * factor * title.length() / 64, 4 + .2f, 0, font, Color.BLACK, PLANET_NAME_COLOR, title, factor);
 
-    }
-
-    public void setDockingDoorState(DockingDoorState dockingDoorState) {
-        this.dockingDoorState = dockingDoorState;
     }
 
     public enum DockingDoorState {

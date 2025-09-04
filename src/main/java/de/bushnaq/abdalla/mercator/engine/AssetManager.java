@@ -183,7 +183,7 @@ public class AssetManager {
     private void createDockingDoor(ModelBuilder modelBuilder) {
         final Attribute color     = new PBRColorAttribute(PBRColorAttribute.BaseColorFactor, Color.WHITE);
         final Attribute metallic  = PBRFloatAttribute.createMetallic(0.5f);
-        final Attribute roughness = PBRFloatAttribute.createRoughness(.9f);
+        final Attribute roughness = PBRFloatAttribute.createRoughness(.5f);
 //        final Attribute occlusion = PBRFloatAttribute.createOcclusionStrength(1.0f);
         final Material material = new Material(metallic, roughness, color);
         dockingDoorModel = modelBuilder.createBox(1.0f, 1.0f, 1.0f, material, Usage.Position | Usage.Normal);

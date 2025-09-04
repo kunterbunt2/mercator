@@ -28,6 +28,7 @@ import de.bushnaq.abdalla.engine.audio.OpenAlException;
 import de.bushnaq.abdalla.mercator.engine.GameEngine3D;
 import de.bushnaq.abdalla.mercator.universe.good.Good;
 import de.bushnaq.abdalla.mercator.util.Debug;
+import lombok.Getter;
 import net.mgsx.gltf.scene3d.attributes.PBRColorAttribute;
 import net.mgsx.gltf.scene3d.model.ModelInstanceHack;
 import org.slf4j.Logger;
@@ -56,6 +57,7 @@ public class Engine {
     //    private static final float                    MAX_TIME_DELTA               = 0.1f;//everything above will be ignored as a glitch
     private static final float                    PY2                          = 3.14159f / 2;
     private final static Vector3                  yVector                      = new Vector3(0, 1, 0);
+    @Getter
     private              float                    engineSpeed                  = MIN_ENGINE_SPEED;
     private              GameObject<GameEngine3D> gameObject;
     private              boolean                  gameObjectAdded              = false;
@@ -246,10 +248,6 @@ public class Engine {
         }
     }
 
-    public float getEngineSpeed() {
-        return engineSpeed;
-    }
-
     public void resetLightOffTimer() {
         lightTimer = LIGHT_OFF_DURATION_AVERAGE + LIGHT_OFF_DURATION_DEVIATION / 2 - (LIGHT_OFF_DURATION_DEVIATION * ((float) Math.random()));
     }
@@ -295,7 +293,7 @@ public class Engine {
             gameObject.instance.transform.rotate(Vector3.Y, direction * -90 + factor - (float) Math.random() * factor * 2);
             gameObject.instance.transform.rotate(Vector3.Z, factor - (float) Math.random() * factor * 2);
             gameObject.instance.transform.rotate(Vector3.X, factor - (float) Math.random() * factor * 2);
-            gameObject.instance.transform.scale(4, 4, 4);
+            gameObject.instance.transform.scale(0.5f, 0.5f, 0.5f);
             gameObject.update();
             final float intensity        = calculateIntensity();
             Vector3     lightTranslation = new Vector3();

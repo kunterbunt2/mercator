@@ -47,7 +47,7 @@ public class CelestialBody {
         }
         {
             float minAlpha    = .1f;
-            float colorFactor = 0.1f;
+            float colorFactor = 0.3f;
             float brightness  = (float) Math.random() * (1f - colorFactor);
             float r           = brightness + (float) Math.random() * (colorFactor);
             float g           = brightness + (float) Math.random() * (colorFactor);

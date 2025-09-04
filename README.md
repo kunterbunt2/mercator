@@ -53,16 +53,20 @@ Then you can start mercator by one of its starting classes
 
 ## Issues
 
-1. subtitles show too soon
-2. stations are too shallow, we can see the traders inside the station.
-3. there should be the possibility to select a ship but still hear teh station chat
-4. tts should generate next binaries while we are playing the current ones.
+1. subtitles show too long
+2. there should be the possibility to select a ship but still hear the station chat
+3. factory goods keep making static cache dirty
+4. pipes visible through hanger door.
+5. goods under trader do not stack far enough into the back.
+6. silent traders do not wait.
+7. subtitles are nto split on cr, ? or !.
+8. subtitles include spaces at start and end.
 100. Form selecting an item does not show info in the lower pane.
 101. Economy is not stable, all sims eventually die of hunger.
 102. simulation advanceintime is triggered every frame.
 103. ensure adding/removing lights does not cause any caching to get dirty.
 104. optimize selected path performance
-105. audio engine cannto switch to new audio output.
+105. audio engine cannot switch to new audio output.
 
 ## Tasks
 

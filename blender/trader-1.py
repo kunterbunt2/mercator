@@ -14,8 +14,9 @@ if blend_dir not in sys.path:
 import lib
 importlib.reload(lib)
 # -------------------------------------------------------
+min_distance = .01
 
-def create_container( s_x=0, s_y=0, s_z=0, s_f=8 ):
+def create_container( s_x=0, s_y=0, s_z=0, s_f=1 ):
     for cx in range(0, 3):
         bpy.ops.mesh.primitive_cube_add(size=1, enter_editmode=False, align='WORLD', location=(x, y-4*s_f+cx*s_f, z-1*s_f), scale=(1*s_f, 1*s_f, 1*s_f) )
         obj = bpy.context.active_object
@@ -24,7 +25,7 @@ def create_container( s_x=0, s_y=0, s_z=0, s_f=8 ):
         # No Specular input found, skipping it.
         obj.data.materials.append(mat)
 
-def create_cone( name, location, material, s_f=8, rotation=(0,0,0) ):
+def create_cone( name, location, material, s_f=1, rotation=(0,0,0) ):
     bpy.ops.mesh.primitive_cone_add(radius1=0.21*s_f, radius2=0.11*s_f, depth=.5*s_f, enter_editmode=False, align='WORLD', location=location, scale=(1, 1, 1), vertices=8)
     cone = bpy.context.active_object
     
@@ -37,7 +38,7 @@ def create_cone( name, location, material, s_f=8, rotation=(0,0,0) ):
     cone.data.materials.append(material)
 
 
-def create_thruster( name, s_x=0, s_y=0, s_z=0, s_f=8, s_orientation='right' ):
+def create_thruster( name, s_x=0, s_y=0, s_z=0, s_f=1, s_orientation='right' ):
     if s_orientation == 'right':
         dx = 1
     else:
@@ -100,7 +101,7 @@ def create_weld_modifier( root, name, apply=False ):
     return m
 
 
-def create_ship( s_x=0, s_y=0, s_z=0, s_f=8 ):
+def create_ship( s_x=0, s_y=0, s_z=0, s_f=1 ):
 
     body_mat = lib.create_material( name="m.body", color=lib.hex_to_rgba("#FFA500FF"), metallic=0.1, roughness=.5)
     # body-top
@@ -114,14 +115,24 @@ def create_ship( s_x=0, s_y=0, s_z=0, s_f=8 ):
     bpy.ops.mesh.primitive_uv_sphere_add(radius=0.2*s_f, enter_editmode=False, align='WORLD', location=(s_x, s_y+6*s_f+0.1, s_z+0.1), scale=(1, 1, 1))
     pilot_head = bpy.context.active_object
     pilot_head.data.materials.append(pilot_head_mat)
+    # enable smooth shading
+    bpy.ops.object.shade_smooth()
+    # enable Auto Smooth so edges stay sharp
+    mod = pilot_head.modifiers.new(name="Smooth by Angle", type='NODES')
+    bpy.ops.object.shade_auto_smooth(use_auto_smooth=True, angle=1.0472)
 
 
     cockpit_mat = lib.create_material( name="m.cockpit", color=(0, 0, 0, 1), metallic=1, roughness=0.1, alpha=0.8)
-    bpy.ops.mesh.primitive_cube_add(size=1, enter_editmode=False, align='WORLD', location=(s_x, s_y+6*s_f+0.1, s_z+0.1), scale=(1*s_f, 1*s_f, 1*s_f))
+    bpy.ops.mesh.primitive_cube_add(size=1, enter_editmode=False, align='WORLD', location=(s_x, s_y+6*s_f+min_distance, s_z+min_distance), scale=(1*s_f, 1*s_f, 1*s_f))
     body_cockpit = bpy.context.active_object
     body_cockpit.name = 'body_cockpit'
     body_cockpit.data.materials.append(cockpit_mat)
-    lib.create_bevel_modifier( root = body_cockpit, name="b8", segments=1, width=.4, apply=True )
+    lib.create_bevel_modifier( root = body_cockpit, name="b8", segments=3, width=5, apply=True )
+    # enable smooth shading
+    bpy.ops.object.shade_smooth()
+    # enable Auto Smooth so edges stay sharp
+    mod = body_cockpit.modifiers.new(name="Smooth by Angle", type='NODES')
+    bpy.ops.object.shade_auto_smooth(use_auto_smooth=True, angle=1.0472)
 
     # body-front
 #    bpy.ops.mesh.primitive_cube_add(size=1, enter_editmode=False, align='WORLD', location=(s_x, s_y+5*s_f, s_z-1.5*s_f), scale=(1*s_f, 1*s_f, 2*s_f))
@@ -140,6 +151,11 @@ def create_ship( s_x=0, s_y=0, s_z=0, s_f=8 ):
     body_front_right = bpy.context.active_object
     body_front_right.name = 'body_front_right'
     body_front_right.data.materials.append(body_mat)
+    # enable smooth shading
+    bpy.ops.object.shade_smooth()
+    # enable Auto Smooth so edges stay sharp
+    mod = body_front_right.modifiers.new(name="Smooth by Angle", type='NODES')
+    bpy.ops.object.shade_auto_smooth(use_auto_smooth=True, angle=1.0472)
     thruster_front_right = create_thruster( 'thruster_front_right', s_x+2*s_f, s_y+5*s_f, s_z*s_f )
 
     # body-front-left-sholder
@@ -167,7 +183,13 @@ def create_ship( s_x=0, s_y=0, s_z=0, s_f=8 ):
     #create_weld_modifier( root = body_top, name='w1', apply=True )
     lib.create_remesh( bpy.context.view_layer.objects.active, name='remesh1', octree_depth=4, apply=True )
 
-    lib.create_bevel_modifier( root = body_top, name="b8", segments=1, width=.8, apply=True )
+    # enable smooth shading
+    bpy.ops.object.shade_smooth()
+    # enable Auto Smooth so edges stay sharp
+    mod = body_top.modifiers.new(name="Smooth by Angle", type='NODES')
+    bpy.ops.object.shade_auto_smooth(use_auto_smooth=True, angle=1.0472)
+
+    lib.create_bevel_modifier( root = body_top, name="b8", segments=3, width=5, apply=True )
     
 
 

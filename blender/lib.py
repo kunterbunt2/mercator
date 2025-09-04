@@ -57,10 +57,10 @@ def create_boolean_modifier( root, name, operation, object, apply=False ):
 
 def create_bevel_modifier( root, name, segments=1, width=1, apply=False ):
     m = root.modifiers.new(name=name, type='BEVEL')
-#    m.offset_type = 'PERCENT'
-#    m.width_pct = width_pct
-    m.offset_type = 'ABSOLUTE'
-    m.width = width
+    m.offset_type = 'PERCENT'
+    m.width_pct = width
+    #m.offset_type = 'ABSOLUTE'
+    #m.width = width
     m.segments = segments
     m.angle_limit = 0.523599
     root.select_set(True)

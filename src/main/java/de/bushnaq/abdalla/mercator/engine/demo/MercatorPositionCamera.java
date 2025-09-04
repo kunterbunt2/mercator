@@ -48,7 +48,7 @@ public class MercatorPositionCamera<T extends GameEngine3D> extends Task<T> {
 //            gameEngine.getCamera().near = 2f;
 //            gameEngine.getCamera().far  = 8000f;
         ge.getCamController().setTargetZoomIndex(zoomIndex);
-        ge.getCamController().zoomIndex = zoomIndex;
+        ge.getCamController().setZoomIndex(zoomIndex);
         ge.getCamController().update(true);
         ge.getCamera().update(true);
         ge.getCamera().setDirty(true);

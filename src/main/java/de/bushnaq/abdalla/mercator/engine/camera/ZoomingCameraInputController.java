@@ -24,6 +24,8 @@ import com.badlogic.gdx.math.Vector3;
 import de.bushnaq.abdalla.engine.camera.MovingCamera;
 import de.bushnaq.abdalla.mercator.engine.GameEngine3D;
 import de.bushnaq.abdalla.mercator.universe.Universe;
+import lombok.Getter;
+import lombok.Setter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,24 +34,27 @@ public class ZoomingCameraInputController extends CameraInputController {
     private final GameEngine3D       gameEngine;
     private final Logger             logger          = LoggerFactory.getLogger(this.getClass());
     private       float              progress        = 0;
+    @Getter
+    @Setter
     private       int                targetZoomIndex = 2;
     private final Vector3            tmpV1           = new Vector3();
     private final Vector3            tmpV2           = new Vector3();
-    public        CameraProperties[] zoomFactors     = {//
-            new CameraProperties(100, 100, 30f, 0, 300f),//
-            new CameraProperties(150, 200, 40f, 0, 2000f),//
-            new CameraProperties(150, 300, 46f, 100, 8000f, 600f),//
-            new CameraProperties(400, 500, 60f, 0, 8000f),//
-            new CameraProperties(1000, 700, 46f, 0, 8000f),//
-//            new CameraProperties(1500, 100, 8000f),//
-            new CameraProperties(2000, 1000, 46f, 0, 8000f),//
-//            new CameraProperties(2500, 10, 8000f),//
-//            new CameraProperties(3000, 0, 8000f),//
-            new CameraProperties(4000, 0, 46f, 0, 8000f),//
-//            new CameraProperties(6000, 0, 8000f),//
-            new CameraProperties(10000, 0, 46f, 0, 10000f),//
+    @Getter
+    private final CameraProperties[] zoomFactors     = {//
+            new CameraProperties(10, 10, 30f, 0, 300f),//zoomIndex=0
+            new CameraProperties(15, 20, 40f, 0, 2000f),//zoomIndex=1
+            new CameraProperties(25, 30, 46f, 0, 8000f),//zoomIndex=2
+            new CameraProperties(40, 75, 60f, 0, 8000f),//zoomIndex=3
+            new CameraProperties(100, 100, 46f, 0, 8000f),//zoomIndex=4
+            new CameraProperties(200, 200, 46f, 0, 8000f),//zoomIndex=5
+            new CameraProperties(500, 200, 60f, 0, 8000f),//zoomIndex=5
+            new CameraProperties(1000, 400, 60f, 0, 8000f),//zoomIndex=5
+            new CameraProperties(4000, 0, 60f, 0, 8000f),//zoomIndex=6
+            new CameraProperties(10000, 0, 60f, 0, 20000f),//zoomIndex=7
     };
-    public        int                zoomIndex       = 5;
+    @Getter
+    @Setter
+    private       int                zoomIndex       = 5;
 
     public ZoomingCameraInputController(final Camera camera, GameEngine3D gameEngine) throws Exception {
         super(camera);
@@ -58,8 +63,8 @@ public class ZoomingCameraInputController extends CameraInputController {
         pinchZoomFactor = 1f / Universe.WORLD_SCALE;
     }
 
-    public int getTargetZoomIndex() {
-        return targetZoomIndex;
+    public int getCameraZoomThreshold() {
+        return 7;
     }
 
     @Override
@@ -109,10 +114,6 @@ public class ZoomingCameraInputController extends CameraInputController {
         return true;
     }
 
-    public void setTargetZoomIndex(int targetZoomIndex) {
-        this.targetZoomIndex = targetZoomIndex;
-    }
-
     @Override
     public void update() {
         update(false);
@@ -124,31 +125,31 @@ public class ZoomingCameraInputController extends CameraInputController {
                 Vector2 distanceXZ = new Vector2(camera.position.x, camera.position.z);//current camera xy position
                 {
                     distanceXZ.sub(movingCamera.lookat.x, movingCamera.lookat.z);//current xy distance of camera to look-at
-                    if (zoomFactors[zoomIndex].distanceXZ != 0f) {
-                        float factor = zoomFactors[zoomIndex].distanceXZ / distanceXZ.len();//old-target-distance / old-actual-distance factor
+                    if (zoomFactors[zoomIndex].distanceXZ() != 0f) {
+                        float factor = zoomFactors[zoomIndex].distanceXZ() / distanceXZ.len();//old-target-distance / old-actual-distance factor
                         distanceXZ.scl(factor);
                     }
                 }
                 Vector2 targetDistanceXZ = new Vector2(camera.position.x, camera.position.z);
                 {
                     targetDistanceXZ.sub(movingCamera.lookat.x, movingCamera.lookat.z);
-                    if (zoomFactors[targetZoomIndex].distanceXZ != 0f) {
-                        float factor = zoomFactors[targetZoomIndex].distanceXZ / targetDistanceXZ.len();
+                    if (zoomFactors[targetZoomIndex].distanceXZ() != 0f) {
+                        float factor = zoomFactors[targetZoomIndex].distanceXZ() / targetDistanceXZ.len();
                         targetDistanceXZ.scl(factor);
                     }
                 }
-                float distanceY       = zoomFactors[zoomIndex].distanceY;
-                float targetDistanceY = zoomFactors[targetZoomIndex].distanceY;
+                float distanceY       = zoomFactors[zoomIndex].lookatY();
+                float targetDistanceY = zoomFactors[targetZoomIndex].lookatY();
 
 
-//                logger.info(String.format("%f %f ", distanceXZ.x, distanceXZ.y));
-//                logger.info(String.format("%f %f ", movingCamera.lookat.x + distanceXZ.x, movingCamera.lookat.z + distanceXZ.y));
-                float cameraY     = zoomFactors[zoomIndex].y + (zoomFactors[targetZoomIndex].y - zoomFactors[zoomIndex].y) * progress;
+//                logger.info(String.format("distanceXZ.x=%f distanceXZ.y=%f ", distanceXZ.x, distanceXZ.y));
+//                logger.info(String.format("movingCamera.lookat.x + distanceXZ.x=%f movingCamera.lookat.z + distanceXZ.y=%f ", movingCamera.lookat.x + distanceXZ.x, movingCamera.lookat.z + distanceXZ.y));
+                float cameraY     = zoomFactors[zoomIndex].cameraY() + (zoomFactors[targetZoomIndex].cameraY() - zoomFactors[zoomIndex].cameraY()) * progress;
                 float cameraX     = distanceXZ.x + (targetDistanceXZ.x - distanceXZ.x) * progress;
                 float cameraZ     = distanceXZ.y + (targetDistanceXZ.y - distanceXZ.y) * progress;
-                float farY        = zoomFactors[zoomIndex].far + (zoomFactors[targetZoomIndex].far - zoomFactors[zoomIndex].far) * progress;
+                float farY        = zoomFactors[zoomIndex].farClippingDistance() + (zoomFactors[targetZoomIndex].farClippingDistance() - zoomFactors[zoomIndex].farClippingDistance()) * progress;
                 float lookatY     = distanceY + (targetDistanceY - distanceY) * progress;
-                float fieldOfView = zoomFactors[zoomIndex].fieldOfView + (zoomFactors[targetZoomIndex].fieldOfView - zoomFactors[zoomIndex].fieldOfView) * progress;
+                float fieldOfView = zoomFactors[zoomIndex].fieldOfView() + (zoomFactors[targetZoomIndex].fieldOfView() - zoomFactors[zoomIndex].fieldOfView()) * progress;
 
                 float x = cameraX - (camera.position.x - movingCamera.lookat.x);
                 float y = cameraY - camera.position.y;

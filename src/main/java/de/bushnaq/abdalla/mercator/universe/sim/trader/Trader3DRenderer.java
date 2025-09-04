@@ -42,6 +42,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static de.bushnaq.abdalla.mercator.engine.GameEngine3D.SPACE_BETWEEN_OBJECTS;
+import static de.bushnaq.abdalla.mercator.universe.good.Good3DRenderer.SPACE_BETWEEN_GOOD;
+
 public class Trader3DRenderer extends ObjectRenderer<GameEngine3D> {
 
     private static final float                                         ANTENNA_LENGTH          = 8f;
@@ -54,14 +57,14 @@ public class Trader3DRenderer extends ObjectRenderer<GameEngine3D> {
     public static final  Color                                         TRADER_COLOR            = new Color(.7f, .7f, .7f, 0.45f); // 0xffcc5555;
     public static final  Color                                         TRADER_COLOR_IS_GOOD    = Color.LIGHT_GRAY; // 0xaaaaaa
     public static final  float                                         TRADER_DOCKING_HEIGHT   = -128f;
-    private static final float                                         TRADER_ENGINE_SIZE_Z    = 16f;
-    private static final float                                         TRADER_EXTERNAL_SIZE_X  = 32 / Universe.WORLD_SCALE;
-    public static final  float                                         TRADER_EXTERNAL_SIZE_Y  = 8 / Universe.WORLD_SCALE;
-    public static final  float                                         TRADER_FLIGHT_HEIGHT    = 24f;
-    private static final Color                                         TRADER_NAME_COLOR       = new Color(0xffa500ff);
-    private static final float                                         TRADER_SIZE_X           = 8 / Universe.WORLD_SCALE;
-    public static final  float                                         TRADER_SIZE_Y           = 16 / Universe.WORLD_SCALE;
-    public static final  float                                         TRADER_SIZE_Z           = (16 + 64 + 32 - 8) / Universe.WORLD_SCALE;
+    private static final float                                         TRADER_ENGINE_SIZE_Z    = 2f;
+    private static final float                                         TRADER_EXTERNAL_SIZE_X  = 11 / Universe.WORLD_SCALE;
+    public static final  float                                         TRADER_EXTERNAL_SIZE_Y  = 1 / Universe.WORLD_SCALE;
+    public static final  float                                         TRADER_FLIGHT_HEIGHT    = 4f;
+    private static final Color                                         TRADER_NAME_COLOR       = Color.BLACK;//)new Color(0xffa500ff);
+    private static final float                                         TRADER_SIZE_X           = 1 / Universe.WORLD_SCALE;
+    public static final  float                                         TRADER_SIZE_Y           = 3 / Universe.WORLD_SCALE;
+    public static final  float                                         TRADER_SIZE_Z           = (12) / Universe.WORLD_SCALE;
     private static final float                                         TRADER_TRAVELING_HEIGHT = -TRADER_SIZE_Y / 2 + Planet3DRenderer.WATER_Y;
     public static final  float                                         TRADER_WIDTH            = 16f;
     final static         Vector3                                       xVectorNeg              = new Vector3(-1, 0, 0);
@@ -308,16 +311,16 @@ public class Trader3DRenderer extends ObjectRenderer<GameEngine3D> {
     @Override
     public void renderText(final RenderEngine3D<GameEngine3D> renderEngine, final int index, final boolean selected) {
 //        renderTextOnTop(renderEngine, 0, 0, trader.getName().substring(2), TRADER_ENGINE_SIZE_Z);//old name
-        renderTextOnTop(renderEngine, 0, 0, trader.getName(), (40 / (float) trader.getName().length()));
+        renderTextOnTop(renderEngine, 0, 0, trader.getName(), (4 / (float) trader.getName().length()));
         if (renderEngine.isDebugMode()) {
-            renderTextOnTop(renderEngine, -6, -5f, "" + (int) velocity[0], 3);//x speed
-            renderTextOnTop(renderEngine, 6, -5f, "" + (int) velocity[2], 3);//z speed
-            renderTextOnTop(renderEngine, 0, -5f, String.valueOf(toOneDigitPrecision(synth.getGain())), 3);//bass gain
+//            renderTextOnTop(renderEngine, -6, -5f, "" + (int) velocity[0], 3);//x speed
+//            renderTextOnTop(renderEngine, 6, -5f, "" + (int) velocity[2], 3);//z speed
+//            renderTextOnTop(renderEngine, 0, -5f, String.valueOf(toOneDigitPrecision(synth.getGain())), 3);//bass gain
         }
-        renderTextOnTop(renderEngine, -6, 6.5f, String.format("%.1f°", trader.getManeuveringSystem().rotationSpeed), 3);
-        renderTextOnTop(renderEngine, 6, 6.5f, String.format("%.1f", trader.getEngine().getEngineSpeed()), 3);
-        renderTextOnTop(renderEngine, 0, 6.5f, String.format("%.1f", trader.getCredits()), 3);
-        renderTextOnTop(renderEngine, 0, -6.5f, trader.getTraderSubStatus().getDisplayName(), 3);
+//        renderTextOnTop(renderEngine, -6, 6.5f, String.format("%.1f°", trader.getManeuveringSystem().rotationSpeed), 3);
+//        renderTextOnTop(renderEngine, 6, 6.5f, String.format("%.1f", trader.getEngine().getEngineSpeed()), 3);
+//        renderTextOnTop(renderEngine, 0, 6.5f, String.format("%.1f", trader.getCredits()), 3);
+//        renderTextOnTop(renderEngine, 0, -6.5f, trader.getTraderSubStatus().getDisplayName(), 1);
         if (trader.selected) {
             renderDetails(renderEngine);
         }
@@ -345,7 +348,7 @@ public class Trader3DRenderer extends ObjectRenderer<GameEngine3D> {
 
     private void renderTextOnTop(final RenderEngine3D<GameEngine3D> renderEngine, final float dx, final float dy, final String text, final float size) {
         final BitmapFont font = renderEngine.getGameEngine().getAtlasManager().bold256Font;
-        renderEngine.renderEngine25D.renderTextCenterOnTop(translation, trader.getManeuveringSystem().rotation, dx, TRADER_EXTERNAL_SIZE_Y / 2.0f + 0.2f, dy - (+TRADER_SIZE_Z / 2 - TRADER_ENGINE_SIZE_Z + (TRADER_ENGINE_SIZE_Z / 2)), font, Color.BLACK, TRADER_NAME_COLOR, text, size);
+        renderEngine.renderEngine25D.renderTextCenterOnTop(translation, trader.getManeuveringSystem().rotation, dx, TRADER_EXTERNAL_SIZE_Y / 2.0f + SPACE_BETWEEN_OBJECTS, dy - (+TRADER_SIZE_Z / 2 - TRADER_ENGINE_SIZE_Z + (TRADER_ENGINE_SIZE_Z / 2)), font, Color.BLACK, TRADER_NAME_COLOR, text, size);
     }
 
     private float toOneDigitPrecision(final float value) {
@@ -410,9 +413,9 @@ public class Trader3DRenderer extends ObjectRenderer<GameEngine3D> {
             final int   xContainer = i % xEdgeSize;
             final int   yContainer = (int) Math.floor(i / xEdgeSize) % yEdgeSize;
             final int   zContainer = (int) Math.floor(i / (xEdgeSize * yEdgeSize));
-            final float x          = -TRADER_SIZE_X / 2 + Good3DRenderer.GOOD_X / 2 - .5f + xContainer * (Good3DRenderer.GOOD_X + 1);
-            final float z          = /*-40*/ +16 - TRADER_SIZE_Z / 2 + Good3DRenderer.GOOD_Y / 2 + zContainer * (Good3DRenderer.GOOD_Z + 1);
-            final float y          = +0.5f /*+ TRADER_SIZE_Y / 2*/ - Good3DRenderer.GOOD_Y - yContainer * (Good3DRenderer.GOOD_Y + 1);
+            final float x          = -TRADER_SIZE_X / 2 + Good3DRenderer.GOOD_X / 2 + xContainer * (Good3DRenderer.GOOD_X + SPACE_BETWEEN_GOOD);
+            final float z          = /*-40*/ 1 - TRADER_SIZE_Z / 2 + Good3DRenderer.GOOD_Y / 2 + zContainer * (Good3DRenderer.GOOD_Z + SPACE_BETWEEN_GOOD);
+            final float y          = +/*+ TRADER_SIZE_Y / 2*/ -Good3DRenderer.GOOD_Y - yContainer * (Good3DRenderer.GOOD_Y + SPACE_BETWEEN_GOOD);
 
 
             go.instance.transform.translate(x, y, z);

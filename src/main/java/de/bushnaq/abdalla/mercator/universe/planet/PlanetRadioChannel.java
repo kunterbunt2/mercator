@@ -96,15 +96,16 @@ public class PlanetRadioChannel implements RadioChannel {
             switch (RadioMessageId.valueOf(rm.getMessageId())) {
                 case REQUEST_DOCKING -> {
                     planet.occupyDock(rm.getFrom());//occupy dock before informing the trader
-                    audioEngine.radio.queueRadioMessageGeneration(new RadioMessage(!planet.isSelected(), this, rm.getFrom(), RadioMessageId.APPROVE_DOCKING.name(), tags));
+                    audioEngine.radio.queueRadioMessageGeneration(new RadioMessage(!planet.isSelected(), this, rm, rm.getFrom(), RadioMessageId.APPROVE_DOCKING.name(), tags));
                 }
                 case REQUEST_UNDOCKING -> {
+                    // we got an undock request
                     planet.occupyDock(rm.getFrom());//occupy dock before informing the trader
-                    audioEngine.radio.queueRadioMessageGeneration(new RadioMessage(!planet.isSelected(), this, rm.getFrom(), RadioMessageId.APPROVE_UNDOCKING.name(), tags));
+                    audioEngine.radio.queueRadioMessageGeneration(new RadioMessage(!planet.isSelected(), this, rm, rm.getFrom(), RadioMessageId.APPROVE_UNDOCKING.name(), tags));
                 }
                 case REQUEST_TRANSITION -> {
                     planet.occupyDock(rm.getFrom());//occupy dock before informing the trader
-                    audioEngine.radio.queueRadioMessageGeneration(new RadioMessage(!planet.isSelected(), this, rm.getFrom(), RadioMessageId.APPROVE_TRANSITION.name(), tags));
+                    audioEngine.radio.queueRadioMessageGeneration(new RadioMessage(!planet.isSelected(), this, rm, rm.getFrom(), RadioMessageId.APPROVE_TRANSITION.name(), tags));
                 }
             }
         }
@@ -134,7 +135,7 @@ public class PlanetRadioChannel implements RadioChannel {
     public void processRadioMessage(RadioMessage rm) {
 //                            if (Debug.isFilterPlanet(planet.getName()))
 //                                logger.info(String.format("answering %s message", rm.id.name()));
-        rm.addMessage(audioEngine.radio.resolveString(rm.getMessageId(), rm.getTags(), rm.isSilent()));
+        rm.addMessage(audioEngine.radio.generateLlmAnswer(rm.getMessageId(), rm.getOriginalRequest().getAggregatedMessages(), rm.getTags(), rm.isSilent()));
         rm.setTime(planet.currentTime);
 //        if (!rm.isSilent()) {
 //            addSubtitle(string, rm.getTags());

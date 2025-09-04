@@ -18,7 +18,8 @@ package de.bushnaq.abdalla.mercator.universe.planet;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.PointLight;
 import com.badlogic.gdx.math.Matrix4;
@@ -42,6 +43,8 @@ import net.mgsx.gltf.scene3d.model.ModelInstanceHack;
 import java.util.ArrayList;
 import java.util.List;
 
+import static de.bushnaq.abdalla.mercator.engine.GameEngine3D.SPACE_BETWEEN_OBJECTS;
+
 public class Planet3DRenderer extends ObjectRenderer<GameEngine3D> {
 
     private static final Color                          BRIGHT_WHITE           = new Color(0xfefefeff);
@@ -59,7 +62,7 @@ public class Planet3DRenderer extends ObjectRenderer<GameEngine3D> {
     private static final Color                          ORANGE_YELLOW          = new Color(0xf07e02ff);
     private static final Color                          PEACOCK_BLUE           = new Color(0x092f5cff);
     public static final  float                          PLANET_2D_SIZE         = 64;
-    public static final  float                          PLANET_3D_SIZE         = 512;
+    public static final  float                          PLANET_3D_SIZE         = 128;
     public static final  float                          PLANET_ATMOSPHARE_SIZE = 9.6f;
     public static final  int                            PLANET_BORDER          = 256;
     public static final  Color                          PLANET_COLOR           = new Color(0.5f, 0.5f, 0.8f, 1.0f); // 0xff8888cc;
@@ -70,9 +73,10 @@ public class Planet3DRenderer extends ObjectRenderer<GameEngine3D> {
     private static final Color                          PLANET_NAME_COLOR      = new Color(0xffa500ff);
     public static final  int                            PLANET_SPAN_SPACE      = Planet.PLANET_DISTANCE + PLANET_BORDER;
     public static final  float                          SECTOR_HIGHT           = 8;
-    public static final  float                          SECTOR_SIZE            = Planet.PLANET_DISTANCE - GameEngine3D.SPACE_BETWEEN_OBJECTS;
+    public static final  float                          SECTOR_SIZE            = Planet.PLANET_DISTANCE - SPACE_BETWEEN_OBJECTS;
     public static final  float                          SECTOR_Y               = -500;
     private static final Color                          SKY_BLUE               = new Color(0x3980c2ff);
+    private static final Color                          STATION_NAME_COLOR     = new Color(0xffa500ff);
     private static final float                          TURBINE_SIZE           = 4;
     public static final  float                          WATER_HIGHT            = 1;
     public static final  float                          WATER_SIZE             = SECTOR_SIZE;
@@ -479,51 +483,51 @@ public class Planet3DRenderer extends ObjectRenderer<GameEngine3D> {
     public void renderText(final RenderEngine3D<GameEngine3D> renderEngine, final int index, final boolean selected) {
         if (renderEngine.getCamera().frustum.boundsInFrustum(dockingStationGameObject.transformedBoundingBox)) {
             planet.dockingDoors.renderText(renderEngine);
-            final float size = 64;
+            final float size = 8;
             final float x    = planet.x;
             final float z    = planet.z;
             translation.set(planet.x, 0, planet.z);
             //draw text
-//            final BitmapFont font = renderEngine.getGameEngine().getAtlasManager().bold256Font;
-//            String           text = planet.getName();
-//            renderEngine.renderEngine25D.renderTextOnTop(translation, 0, -PLANET_3D_SIZE / 2, 10, -PLANET_3D_SIZE / 2, font, Color.BLACK, PLANET_NAME_COLOR, text, size);
-//            {
-//                final Matrix4     m        = new Matrix4();
-//                final float       fontSize = font.getLineHeight();
-//                final float       scaling  = size / fontSize;
-//                final GlyphLayout layout   = new GlyphLayout();
-//                layout.setText(font, text);
-//                final float   width   = layout.width;// contains the width of the current set text
-//                final float   height  = layout.height;// contains the width of the current set text
-//                final Vector3 xVector = new Vector3(1, 0, 0);
-//                m.setToTranslation(x + PLANET_3D_SIZE / 2 - width * scaling, 1, z + PLANET_3D_SIZE / 2 - height * 2 * scaling);
-//                m.rotate(xVector, -90);
-//                m.scale(scaling, scaling, 1f);
-//                renderEngine.renderEngine25D.setTransformMatrix(m);
-//                renderEngine.renderEngine25D.text(0, 0, font, Color.BLACK, PLANET_NAME_COLOR, text);
-//            }
+            final BitmapFont font = renderEngine.getGameEngine().getAtlasManager().bold256Font;
+            String           text = planet.getName();
+//            renderEngine.renderEngine25D.renderText(translation, 0, -PLANET_3D_SIZE / 2, 10, -PLANET_3D_SIZE / 2, font, Color.BLACK, PLANET_NAME_COLOR, text, size, HAlignment.CENTER, VAlignment.CENTER);
+            {
+                final Matrix4     m        = new Matrix4();
+                final float       fontSize = font.getLineHeight();
+                final float       scaling  = size / fontSize;
+                final GlyphLayout layout   = new GlyphLayout();
+                layout.setText(font, text);
+                final float   width   = layout.width;// contains the width of the current set text
+                final float   height  = layout.height;// contains the width of the current set text
+                final Vector3 xVector = new Vector3(1, 0, 0);
+                m.setToTranslation(x + PLANET_3D_SIZE / 2 - width * scaling - 5, SPACE_BETWEEN_OBJECTS, z + PLANET_3D_SIZE / 2 - height * 2 * scaling);
+                m.rotate(xVector, -90);
+                m.scale(scaling, scaling, 1f);
+                renderEngine.renderEngine25D.setTransformMatrix(m);
+                renderEngine.renderEngine25D.text(0, 0, font, Color.BLACK, PLANET_NAME_COLOR, text);
+            }
             int i = 0;
             for (final Good good : planet.getGoodList()) {
                 good.get3DRenderer().renderText(planet.x, planet.y, planet.z, renderEngine, i++);
             }
-            if (planet.selected) {
-                {
-                    final Matrix4 m = new Matrix4();
-                    //move center of text to center of trader
-                    m.setToTranslation(translation.x, translation.y, translation.z);
-                    m.rotate(Vector3.Y, rotation);
-                    //move to the top and back on engine
-                    m.translate(0, -1, 0);
-                    //rotate into the xz layer
-                    m.rotate(Vector3.X, -90);
-                    renderEngine.renderEngine25D.setTransformMatrix(m);
-                }
-                TextureAtlas.AtlasRegion systemTextureRegion = renderEngine.getGameEngine().getAtlasManager().systemTextureRegion;
+//            if (planet.selected) {
+//                {
+//                    final Matrix4 m = new Matrix4();
+//                    //move center of text to center of trader
+//                    m.setToTranslation(translation.x, translation.y + SPACE_BETWEEN_OBJECTS, translation.z);
+//                    m.rotate(Vector3.Y, rotation);
+//                    //move to the top of station
+//                    m.translate(0, SPACE_BETWEEN_OBJECTS, 0);
+//                    //rotate into the xz layer
+//                    m.rotate(Vector3.X, -90);
+//                    renderEngine.renderEngine25D.setTransformMatrix(m);
+//                }
+//                TextureAtlas.AtlasRegion systemTextureRegion = renderEngine.getGameEngine().getAtlasManager().systemTextureRegion;
 //                renderEngine.renderEngine25D.fillCircle(systemTextureRegion, 0, 0, PLANET_3D_SIZE, 128, new Color(.2f, .2f, .4f, 0.2f));
-                renderEngine.renderEngine25D.circle(renderEngine.getGameEngine().getAtlasManager().patternCircle24, 0, 0, PLANET_3D_SIZE - .5f, 1f, new Color(.9f, .9f, .9f, .5f), 128);
-                if (renderEngine.getGameEngine().getCameraZoomIndex() < 4)
-                    renderEngine.renderEngine25D.renderRose(systemTextureRegion, renderEngine.getGameEngine().getAtlasManager().modelFont, translation, PLANET_3D_SIZE / 2, -1);
-            }
+//                renderEngine.renderEngine25D.circle(renderEngine.getGameEngine().getAtlasManager().patternCircle24, 0, 0, PLANET_3D_SIZE / 2 - 5f, 1f, STATION_NAME_COLOR, 128);
+//                if (renderEngine.getGameEngine().getCameraZoomIndex() < 4)
+//                    renderEngine.renderEngine25D.renderRose(systemTextureRegion, renderEngine.getGameEngine().getAtlasManager().modelFont, translation, PLANET_3D_SIZE / 2, -1);
+//            }
         }
     }
 

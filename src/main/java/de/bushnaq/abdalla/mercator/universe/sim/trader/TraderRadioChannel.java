@@ -114,7 +114,10 @@ public class TraderRadioChannel implements RadioChannel {
     @Override
     public void processRadioMessage(RadioMessage rm) {
         long time = System.currentTimeMillis();
-        rm.addMessage(audioEngine.radio.resolveString(rm.getMessageId(), rm.getTags(), rm.isSilent()));
+        if (rm.getOriginalRequest() == null)
+            rm.addMessage(audioEngine.radio.generateLlmAnswer(rm.getMessageId(), null, rm.getTags(), rm.isSilent()));
+        else
+            rm.addMessage(audioEngine.radio.generateLlmAnswer(rm.getMessageId(), rm.getOriginalRequest().getAggregatedMessages(), rm.getTags(), rm.isSilent()));
         rm.setTime(trader.currentTime);
 //        if (!rm.isSilent()) {
 //            addSubtitle(string, rm.getTags());
@@ -129,7 +132,7 @@ public class TraderRadioChannel implements RadioChannel {
         PromptTags tags = new MerkatorPromptTags(trader, planet);
 //        if (Debug.isFilterTrader(trader.getName()))
 //            System.out.printf("%s requesting %s to %s\n", trader.getName(), RadioMessageId.REQUEST_DOCKING.name(), planet.getName());
-        audioEngine.radio.queueRadioMessageGeneration(new RadioMessage(!planet.isSelected(), this, planet.communicationPartner, RadioMessageId.REQUEST_DOCKING.name(), tags));
+        audioEngine.radio.queueRadioMessageGeneration(new RadioMessage(!planet.isSelected(), this, null, planet.communicationPartner, RadioMessageId.REQUEST_DOCKING.name(), tags));
     }
 
     public void requestTransition(Planet planet) {
@@ -137,7 +140,7 @@ public class TraderRadioChannel implements RadioChannel {
         PromptTags tags = new MerkatorPromptTags(trader, planet);
 //        if (Debug.isFilterTrader(trader.getName()))
 //            System.out.printf("%s requesting %s to %s\n", trader.getName(), RadioMessageId.REQUEST_TRANSITION.name(), planet.getName());
-        audioEngine.radio.queueRadioMessageGeneration(new RadioMessage(!planet.isSelected(), this, planet.communicationPartner, RadioMessageId.REQUEST_TRANSITION.name(), tags));
+        audioEngine.radio.queueRadioMessageGeneration(new RadioMessage(!planet.isSelected(), this, null, planet.communicationPartner, RadioMessageId.REQUEST_TRANSITION.name(), tags));
     }
 
     public void requestUndocking(Planet planet) {
@@ -145,7 +148,7 @@ public class TraderRadioChannel implements RadioChannel {
         PromptTags tags = new MerkatorPromptTags(trader, planet);
 //        if (Debug.isFilterTrader(trader.getName()))
 //            System.out.printf("%s requesting %s to %s\n", trader.getName(), RadioMessageId.REQUEST_UNDOCKING.name(), planet.getName());
-        audioEngine.radio.queueRadioMessageGeneration(new RadioMessage(!planet.isSelected(), this, planet.communicationPartner, RadioMessageId.REQUEST_UNDOCKING.name(), tags));
+        audioEngine.radio.queueRadioMessageGeneration(new RadioMessage(!planet.isSelected(), this, null, planet.communicationPartner, RadioMessageId.REQUEST_UNDOCKING.name(), tags));
     }
 
     /**

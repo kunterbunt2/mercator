@@ -14,9 +14,10 @@ import java.util.List;
 
 public class Subtitles implements ISubtitles {
     private final GameEngine3D   gameEngine;
-    private final List<TextData> text  = new ArrayList<>();
-    private final float          textX = 100;
-    private final float          textY = 100;
+    private final List<TextData> text               = new ArrayList<>();
+    private final float          textX              = 100;
+    private final float          textY              = 100;
+    private       long           timeOfLastSubtitle = 0;
 
     public Subtitles(GameEngine3D gameEngine) {
         this.gameEngine = gameEngine;
@@ -25,6 +26,7 @@ public class Subtitles implements ISubtitles {
     public void add(String subtitle) {
         text.clear();
         text.add(new TextData(subtitle, gameEngine.getAtlasManager().demoMidFont, Color.WHITE));
+        timeOfLastSubtitle = System.currentTimeMillis();
     }
 
     public void render(float deltaTime) throws IOException, OpenAlException {
@@ -57,6 +59,11 @@ public class Subtitles implements ISubtitles {
             }
             final GlyphLayout lastLayout = ds.font.draw(renderEngine2D.batch, ds.text, textX, y, width, Align.left, true);
             deltaY += lastLayout.height * lineHeightFactor;
+        }
+        if (System.currentTimeMillis() - timeOfLastSubtitle > 5000) {
+            // remove subtitle after 5 seconds
+            text.clear();
+            timeOfLastSubtitle = 0;
         }
 //        textY += 100 * deltaTime;
 //        if (textY - deltaY > gameEngine.getRenderEngine().renderEngine2D.height * lineHeightFactor) textY = 0;

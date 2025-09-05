@@ -36,6 +36,7 @@ import com.kotcrab.vis.ui.widget.VisTable;
 import com.kotcrab.vis.ui.widget.VisTextButton;
 import de.bushnaq.abdalla.mercator.desktop.Context;
 import de.bushnaq.abdalla.mercator.engine.GameEngine3D;
+import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,20 +55,24 @@ public abstract class AbstractDialog {
     protected static final int                  DIALOG_WIDTH        = 150;
     protected static final int                  LABEL_WIDTH         = 250;
     protected static final Color                LIGHT_BLUE_COLOR    = new Color(0x1BA1E2FF);
+    private final          Batch                batch;
+    protected              Camera               camera;
+    @Getter
+    private                VisDialog            dialog;
+    @Getter
+    private final          GameEngine3D         gameEngine;
+    private final          InputMultiplexer     inputMultiplexer;
+    private final          List<InputProcessor> inputProcessorCache = new ArrayList<>();
     // private float blurAmount = 1f;
 //	private int						blurPasses			= 1;
 //	private BlurMode				blurMode			= BlurMode.up;
     final                  Logger               logger              = LoggerFactory.getLogger(this.getClass());
-    private final          Batch                batch;
-    private final          InputMultiplexer     inputMultiplexer;
-    protected              Camera               camera;
     protected              boolean              modal               = false;
-    private                VisDialog            dialog;
-    private                GameEngine3D         gameEngine;
-    private                List<InputProcessor> inputProcessorCache = new ArrayList<>();
     private                AbstractDialog       parent;
     private                Stage                stage;
-    private                VisTable             table               = new VisTable(true);
+    @Getter
+    private final          VisTable             table               = new VisTable(true);
+    @Getter
     private                boolean              visible             = false;
 
     public AbstractDialog(GameEngine3D gameEngine, final Batch batch, Camera camera, final InputMultiplexer inputMultiplexer) throws Exception {
@@ -196,24 +201,8 @@ public abstract class AbstractDialog {
         close();
     }
 
-    public VisDialog getDialog() {
-        return dialog;
-    }
-
-    public GameEngine3D getGameEngine() {
-        return gameEngine;
-    }
-
-    public VisTable getTable() {
-        return table;
-    }
-
     public Viewport getViewport() {
         return stage.getViewport();
-    }
-
-    public boolean isVisible() {
-        return visible;
     }
 
     protected void packAndPosition() {

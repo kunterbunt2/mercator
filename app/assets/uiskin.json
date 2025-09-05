@@ -58,10 +58,10 @@
     windowsBack: {
       name: default-window,
       color: {
-        r: 0.9,
-        g: 0.9,
-        b: 0.9,
-        a: 0.95
+        r: 0.0,
+        g: 0.0,
+        b: 0.0,
+        a: 0.9
       }
     }
   },

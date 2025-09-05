@@ -24,17 +24,17 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g3d.attributes.PointLightsAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.PointLight;
 import com.badlogic.gdx.graphics.profiling.GLProfiler;
-import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.*;
+import com.badlogic.gdx.scenes.scene2d.ui.Cell;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle;
-import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.Window;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import de.bushnaq.abdalla.engine.RenderEngine3D;
 import de.bushnaq.abdalla.mercator.engine.AtlasManager;
-import de.bushnaq.abdalla.mercator.engine.GameEngine2D;
 import de.bushnaq.abdalla.mercator.engine.GameEngine3D;
 import de.bushnaq.abdalla.mercator.universe.Universe;
 import de.bushnaq.abdalla.mercator.universe.factory.Factory;
@@ -66,12 +66,12 @@ public class Info {
     private final        List<LabelData>              labels         = new ArrayList<LabelData>();
     private              RenderEngine3D<GameEngine3D> renderEngine;
     private              float                        screenHeight   = 0;
+    private              float                        screenWidth;
     private              Skin                         skin;
     private              Stage                        stage;
     private final        StringBuilder                stringBuilder  = new StringBuilder();
     private final        String                       title          = "info";
     private              Class<?>                     type;
-    //	private final Universe universe;
     private              Window                       window;
 
     //	public Info(Render2DMaster renderMaster, InputMultiplexer inputMultiplexer) {
@@ -123,17 +123,17 @@ public class Info {
         }
         window = new Window(title, skin);
         // window.setDebug( true );
-        final TextButton closeButton = new TextButton("X", skin);
-        window.getTitleTable().add(closeButton).height(window.getPadTop());
+//        final TextButton closeButton = new TextButton("X", skin);
+//        window.getTitleTable().add(closeButton).height(window.getPadTop());
         window.setMovable(true);
-        closeButton.addListener(new ClickListener() {
-            @Override
-            public void clicked(final InputEvent event, final float x, final float y) {
-                //				universe.selected = null;
-                // System.err.println(
-                // "------------------------------------------------------------" );
-            }
-        });
+//        closeButton.addListener(new ClickListener() {
+//            @Override
+//            public void clicked(final InputEvent event, final float x, final float y) {
+        //				universe.selected = null;
+        // System.err.println(
+        // "------------------------------------------------------------" );
+//            }
+//        });
         stage.addActor(window);
         window.pack();
     }
@@ -161,11 +161,12 @@ public class Info {
 
     private void positionWindow() {
         if (window != null)
-            window.setPosition(0, screenHeight - window.getHeight() - GameEngine2D.FONT_SIZE - 2);
+            window.setPosition(screenWidth - window.getWidth(), screenHeight - window.getHeight()/* - GameEngine2D.FONT_SIZE - 2*/);
     }
 
     public void resize(final float w, final float h) {
         screenHeight = h;
+        screenWidth  = w;
         positionWindow();
     }
 
@@ -279,11 +280,14 @@ public class Info {
 
     private void update(final Universe universe, final Planet planet) {
         if (planet != null) {
-            final int size = 10;
+            final int size = 13;
             clearUnmatchedSizeAndType(size, Planet.class);
             updateNameAndValue("name", planet.getName(), NAME_LABEL);
-            updateNameAndValue("sector", planet.sector.name, NAME_LABEL);
             updateNameAndValue("credits", planet.getCredits(), VARIABLE_LABEL);
+            updateNameAndValue("docking door state", planet.dockingDoors.getDockingDoorStatus().name(), VARIABLE_LABEL);
+            updateNameAndValue("in dock", planet.inDock != null ? planet.inDock.getName() : "-", VARIABLE_LABEL);
+            updateNameAndValue("status", planet.status.name(), VARIABLE_LABEL);
+            updateNameAndValue("sector", planet.sector.name, NAME_LABEL);
             updateNameAndValue("satisfaction", planet.getSatisfactionFactor(universe.currentTime), VARIABLE_LABEL);
             updateNameAndValue("anual export amount", planet.getHistoryManager().getAnualExportAmountOfGoods(), VARIABLE_LABEL);
             updateNameAndValue("anual import amount", planet.getHistoryManager().getAnualImportAmountOfGoods(), VARIABLE_LABEL);
@@ -355,26 +359,26 @@ public class Info {
             }
             final int size = 20 + 1 + 1 + numberOfGoods + 1 + 1 + trader.simNeedsList.size();
             clearUnmatchedSizeAndType(size, Trader.class);
-            updateNameAndValue("name", trader.getName(), NAME_LABEL);
-            updateNameAndValue("status", trader.status.getName(), VARIABLE_LABEL);
-            updateNameAndValue("traderStatus", trader.getTraderStatus().getDisplayName(), VARIABLE_LABEL);
-            updateNameAndValue("traderSubStatus", trader.getTraderSubStatus().getDisplayName(), VARIABLE_LABEL);
-            updateNameAndValue("start credits", Sim.SIM_START_CREDITS, STATIC_LABEL);
-            updateNameAndValue("cargo size", trader.goodSpace, STATIC_LABEL);
-            updateNameAndValue("engine speed", trader.getEngine().getEngineSpeed() * Engine.ENGINE_TO_REALITY_FACTOR, STATIC_LABEL);
-            updateNameAndValue("engine accelleration", trader.getEngine().getEngineSpeed(), STATIC_LABEL);
-            updateNameAndValue("rotation speed", trader.getManeuveringSystem().rotationSpeed, STATIC_LABEL);
-            updateNameAndValue("credits", String.format("%.2f", trader.getCredits()), VARIABLE_LABEL);
-            updateNameAndValue("creditsToSave", String.format("%.2f", trader.creditsToSave), VARIABLE_LABEL);
-            updateNameAndValue("factory", trader.productionFacility != null ? trader.productionFacility.getName() : "-", NAME_LABEL);
-            updateNameAndValue("profession", trader.profession.name(), VARIABLE_LABEL);
-            updateNameAndValue("satisfaction", trader.getSatisfactionFactor(universe.currentTime), VARIABLE_LABEL);
-            updateNameAndValue("resting", trader.portRestingTime, VARIABLE_LABEL);
-            updateNameAndValue("source", trader.navigator.sourcePlanet != null ? trader.navigator.sourcePlanet.getName() : "-", NAME_LABEL);
-            updateNameAndValue("planet", trader.planet != null ? trader.planet.getName() : "-", NAME_LABEL);
-            updateNameAndValue("destination", trader.navigator.destinationPlanet != null ? trader.navigator.destinationPlanet.getName() : "-", NAME_LABEL);
-            updateNameAndValue("sourceWaypoint", trader.navigator.previousWaypoint != null ? trader.navigator.previousWaypoint.getName() : "-", NAME_LABEL);
-            updateNameAndValue("targetWaypoint", trader.navigator.nextWaypoint != null ? trader.navigator.nextWaypoint.getName() : "-", NAME_LABEL);
+            updateNameAndValue("Name", trader.getName(), NAME_LABEL);
+            updateNameAndValue("Sim Status", trader.status.getName(), VARIABLE_LABEL);
+            updateNameAndValue("Trader Status", trader.getTraderStatus().getDisplayName(), VARIABLE_LABEL);
+            updateNameAndValue("Trader Substatus", trader.getTraderSubStatus().getDisplayName(), VARIABLE_LABEL);
+            updateNameAndValue("Start Credits", Sim.SIM_START_CREDITS, STATIC_LABEL);
+            updateNameAndValue("Cargo Capacity", trader.goodSpace, STATIC_LABEL);
+            updateNameAndValue("Engine Speed", trader.getEngine().getEngineSpeed() * Engine.ENGINE_TO_REALITY_FACTOR, STATIC_LABEL);
+            updateNameAndValue("Engine Acceleration", trader.getEngine().getEngineSpeed(), STATIC_LABEL);
+            updateNameAndValue("Rotation Speed", trader.getManeuveringSystem().rotationSpeed, STATIC_LABEL);
+            updateNameAndValue("Credits", String.format("%.2f", trader.getCredits()), VARIABLE_LABEL);
+            updateNameAndValue("Credits to Save", String.format("%.2f", trader.creditsToSave), VARIABLE_LABEL);
+            updateNameAndValue("Factory", trader.productionFacility != null ? trader.productionFacility.getName() : "-", NAME_LABEL);
+            updateNameAndValue("Profession", trader.profession.name(), VARIABLE_LABEL);
+            updateNameAndValue("Satisfaction", trader.getSatisfactionFactor(universe.currentTime), VARIABLE_LABEL);
+            updateNameAndValue("Resting", trader.portRestingTime, VARIABLE_LABEL);
+            updateNameAndValue("Source Station", trader.navigator.sourcePlanet != null ? trader.navigator.sourcePlanet.getName() : "-", NAME_LABEL);
+            updateNameAndValue("Current Station", trader.planet != null ? trader.planet.getName() : "-", NAME_LABEL);
+            updateNameAndValue("Destination Station", trader.navigator.destinationPlanet != null ? trader.navigator.destinationPlanet.getName() : "-", NAME_LABEL);
+            updateNameAndValue("Previous Waypoint", trader.navigator.previousWaypoint != null ? trader.navigator.previousWaypoint.getName() : "-", NAME_LABEL);
+            updateNameAndValue("Next Waypoint", trader.navigator.nextWaypoint != null ? trader.navigator.nextWaypoint.getName() : "-", NAME_LABEL);
             updateNameAndValue("", "", VARIABLE_LABEL);
             updateGood("good", CAPTION_LABEL, "price", CAPTION_LABEL, "average", CAPTION_LABEL, "amount", CAPTION_LABEL, "average", CAPTION_LABEL);
             for (final Good good : trader.getGoodList()) {

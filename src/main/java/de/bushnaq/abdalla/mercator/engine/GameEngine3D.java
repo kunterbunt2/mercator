@@ -508,13 +508,13 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
     private void createStage() throws Exception {
         info = new Info(renderEngine, getAtlasManager(), camera2D, renderEngine.renderEngine2D.batch, inputMultiplexer);
         info.createStage();
-        final int height = 12;
+        final int height = 15;
         stage = new Stage();
-//        font  = new BitmapFont();
         for (int i = 0; i < 8; i++) {
-            final Label label = new Label(" ", new Label.LabelStyle(getAtlasManager().menuFont, Color.WHITE));
-
-            label.setPosition(0, i * height);
+            final RichLabel label = new RichLabel(" ", new Label.LabelStyle(getAtlasManager().menuFont, Color.WHITE), getAtlasManager().systemTextureRegion);
+            label.setBackgroundColor(new Color(0f, 0f, 0f, 0.7f)); // Semi-transparent black
+            label.setPadding(6f, 3f); // Horizontal and vertical padding
+            label.setPosition(0, Gdx.graphics.getHeight() - (i + 1) * height);
             stage.addActor(label);
             labels.add(label);
         }
@@ -1286,6 +1286,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
 
     @Override
     public void resize(final int width, final int height) {
+        info.resize(width, height);
         renderEngine.renderEngine2D.width  = width;
         renderEngine.renderEngine2D.height = height;
     }

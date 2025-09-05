@@ -53,8 +53,7 @@ Then you can start mercator by one of its starting classes
 
 ## Issues
 
-- screen info text keeps interfering with info panels.
-- info text badly visible on new light toy mode.
+- remove trader detailed info in 3D as it does not go well with depth of field effect.
 - light bokeh grows too fast with distance
 - there should be the possibility to select a ship but still hear the station chat
 - factory goods keep making static cache dirty
@@ -64,6 +63,7 @@ Then you can start mercator by one of its starting classes
 - ensure adding/removing lights does not cause any caching to get dirty.
 - optimize selected path performance
 - audio engine cannot switch to new audio output.
+-
 - Fixed? add all spoken messages to event manager.
 - Fixed? subtitles now are missing message endings like ., ?, !.
 - Fixed? subtitles include <> tags sometimes.

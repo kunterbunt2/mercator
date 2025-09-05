@@ -353,7 +353,7 @@ public class Info {
                     numberOfGoods++;
                 }
             }
-            final int size = 20 + 1 + numberOfGoods + 1 + 1 + trader.simNeedsList.size();
+            final int size = 20 + 1 + 1 + numberOfGoods + 1 + 1 + trader.simNeedsList.size();
             clearUnmatchedSizeAndType(size, Trader.class);
             updateNameAndValue("name", trader.getName(), NAME_LABEL);
             updateNameAndValue("status", trader.status.getName(), VARIABLE_LABEL);

@@ -47,12 +47,14 @@ public class PauseScreen {
         final float relativeX;
         final float relativeY;
         final float width;
+        final float height;
 
-        KeyboardKey(String label, float relativeX, float relativeY, float width) {
+        KeyboardKey(String label, float relativeX, float relativeY, float width, float height) {
             this.label = label;
             this.relativeX = relativeX;
             this.relativeY = relativeY;
             this.width = width;
+            this.height = height;
         }
     }
 
@@ -226,8 +228,9 @@ public class PauseScreen {
         float x = svgX * scaleFactor;
         float y = -svgY * scaleFactor; // Negative to flip Y coordinate
         float width = svgWidth * scaleFactor;
+        float height = svgHeight * scaleFactor;
 
-        allKeys.add(new KeyboardKey(label, x, y, width));
+        allKeys.add(new KeyboardKey(label, x, y, width, height));
     }
 
     private void calculateLayout() {
@@ -316,7 +319,7 @@ public class PauseScreen {
                     keyboardStartX + key.relativeX,
                     keyboardStartY + key.relativeY,
                     key.width,
-                    KEY_HEIGHT
+                    key.height
             );
         }
         shapeRenderer.end();
@@ -331,7 +334,7 @@ public class PauseScreen {
                     keyboardStartX + key.relativeX,
                     keyboardStartY + key.relativeY,
                     key.width,
-                    KEY_HEIGHT
+                    key.height
             );
         }
         shapeRenderer.end();
@@ -345,7 +348,7 @@ public class PauseScreen {
             atlasManager.menuBoldFont.getData().setScale(1.2f); // Slightly smaller for better fit
 
             float labelX = keyboardStartX + key.relativeX + 4; // Small padding from left edge
-            float labelY = keyboardStartY + key.relativeY + KEY_HEIGHT - 8; // Near top edge
+            float labelY = keyboardStartY + key.relativeY + key.height - 8; // Near top edge
 
             atlasManager.menuBoldFont.draw(
                     stage.getBatch(),
@@ -370,24 +373,24 @@ public class PauseScreen {
                 String[] words = command.description.split(" ");
                 StringBuilder currentLine = new StringBuilder();
                 int totalLines = 0;
-                float maxLines = 3; // Maximum lines that fit in the key
+                float maxLines = Math.max(1, (key.height - 20) / lineHeight); // Dynamic max lines based on key height
 
                 // Count total lines needed
                 for (String word : words) {
-                    String testLine = currentLine.length() > 0 ? currentLine + " " + word : word;
+                    String testLine = !currentLine.isEmpty() ? currentLine + " " + word : word;
 
                     // Check if the line would be too wide for the key
                     com.badlogic.gdx.graphics.g2d.GlyphLayout testLayout = new com.badlogic.gdx.graphics.g2d.GlyphLayout();
                     testLayout.setText(atlasManager.menuFont, testLine);
 
-                    if (testLayout.width > key.width - 8 && currentLine.length() > 0) {
+                    if (testLayout.width > key.width - 8 && !currentLine.isEmpty()) {
                         totalLines++;
                         currentLine = new StringBuilder(word);
                     } else {
                         currentLine = new StringBuilder(testLine);
                     }
                 }
-                if (currentLine.length() > 0) {
+                if (!currentLine.isEmpty()) {
                     totalLines++;
                 }
 
@@ -405,13 +408,13 @@ public class PauseScreen {
                 }
 
                 for (String word : words) {
-                    String testLine = currentLine.length() > 0 ? currentLine + " " + word : word;
+                    String testLine = !currentLine.isEmpty() ? currentLine + " " + word : word;
 
                     // Check if the line would be too wide for the key
                     com.badlogic.gdx.graphics.g2d.GlyphLayout testLayout = new com.badlogic.gdx.graphics.g2d.GlyphLayout();
                     testLayout.setText(atlasManager.menuFont, testLine);
 
-                    if (testLayout.width > key.width - 8 && currentLine.length() > 0) {
+                    if (testLayout.width > key.width - 8 && !currentLine.isEmpty()) {
                         // Draw current line
                         if (lineCount < maxLines) {
                             float descY = startY - (lineCount * lineHeight);
@@ -430,7 +433,7 @@ public class PauseScreen {
                 }
 
                 // Draw the last line
-                if (currentLine.length() > 0 && lineCount < maxLines) {
+                if (!currentLine.isEmpty() && lineCount < maxLines) {
                     float descY = startY - (lineCount * lineHeight);
                     atlasManager.menuFont.draw(
                             stage.getBatch(),

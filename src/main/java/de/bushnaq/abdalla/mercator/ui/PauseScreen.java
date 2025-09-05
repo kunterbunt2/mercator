@@ -75,13 +75,13 @@ public class PauseScreen {
     private static final Color                        KEY_BORDER_COLOR  = new Color(0.6f, 0.6f, 0.6f, 1.0f);
     private static final Color                        KEY_COLOR         = new Color(0.2f, 0.2f, 0.2f, 0.9f);
     private static final Color                        ASSIGNED_KEY_COLOR = new Color(0.3f, 0.3f, 0.5f, 0.9f);
-    private static final float                        KEY_HEIGHT        = 30f;
-    private static final float                        KEY_SPACING       = 2f;
-    private static final float                        KEY_WIDTH         = 40f;
-    private static final float                        FUNCTION_KEY_WIDTH = 35f;
+    private static final float                        KEY_HEIGHT        = 60f;  // 2x bigger (was 30f, reduced from 120f)
+    private static final float                        KEY_SPACING       = 4f;   // 2x bigger (was 2f, reduced from 8f)
+    private static final float                        KEY_WIDTH         = 80f;  // 2x bigger (was 40f, reduced from 160f)
+    private static final float                        FUNCTION_KEY_WIDTH = 70f;  // 2x bigger (was 35f, reduced from 140f)
     private static final Color                        LINE_COLOR        = new Color(0.5f, 0.5f, 0.8f, 0.8f);
     private static final Color                        OVERLAY_COLOR     = new Color(0.0f, 0.0f, 0.0f, 0.7f);
-    private static final float                        ROW_SPACING       = 10f;
+    private static final float                        ROW_SPACING       = 20f;  // 2x bigger (was 10f, reduced from 40f)
     private static final Color                        TITLE_COLOR       = Color.WHITE;
 
     private final        AtlasManager                 atlasManager;
@@ -320,18 +320,26 @@ public class PauseScreen {
         stage.getBatch().begin();
 
         for (KeyboardKey key : allKeys) {
-            // Draw key text
-            atlasManager.menuFont.setColor(Color.WHITE);
-            float textX = keyboardStartX + key.relativeX + key.width / 2;
-            float textY = keyboardStartY + key.relativeY + KEY_HEIGHT / 2 + 5;
+            // Draw key text with larger font
+            atlasManager.menuBoldFont.setColor(Color.WHITE);
+            atlasManager.menuBoldFont.getData().setScale(1.5f); // Make font 1.5x larger
 
-            // Center the text horizontally
-            atlasManager.menuFont.draw(
+            // Calculate proper text positioning using GlyphLayout for accurate centering
+            com.badlogic.gdx.graphics.g2d.GlyphLayout layout = new com.badlogic.gdx.graphics.g2d.GlyphLayout();
+            layout.setText(atlasManager.menuBoldFont, key.label);
+
+            float textX = keyboardStartX + key.relativeX + (key.width - layout.width) / 2;
+            float textY = keyboardStartY + key.relativeY + (KEY_HEIGHT + layout.height) / 2;
+
+            atlasManager.menuBoldFont.draw(
                     stage.getBatch(),
                     key.label,
-                    textX - key.label.length() * 3, // Rough centering
+                    textX,
                     textY
             );
+
+            // Reset font scale for descriptions
+            atlasManager.menuBoldFont.getData().setScale(1.0f);
 
             // Draw description if this key has a command
             KeyboardCommand command = commands.get(key.label);

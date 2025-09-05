@@ -170,7 +170,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
     private              boolean                           showDemo2Info                   = false;
     @Getter
     @Setter
-    private              boolean                           showDepthOfFieldInfo            = false;
+    private              boolean                           showDepthOfFieldInfo            = true;
     @Getter
     @Setter
     private              boolean                           showFps                         = false;
@@ -1199,7 +1199,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
         //depth of field
         if (showDepthOfFieldInfo) {
             stringBuilder.setLength(0);
-            stringBuilder.append(String.format(" focal depth = %.0f", renderEngine.getDepthOfFieldEffect().getFocalDepth()));
+            stringBuilder.append(String.format(" focal depth = %.0f, FarDofStart = %.0f, FarDofDist = %.0f", renderEngine.getDepthOfFieldEffect().getFocalDepth(), renderEngine.getDepthOfFieldEffect().getFarDofStart(), renderEngine.getDepthOfFieldEffect().getFarDofDist()));
             labels.get(labelIndex++).setText(stringBuilder);
         }
         //audio sources

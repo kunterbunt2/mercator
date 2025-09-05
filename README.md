@@ -53,6 +53,7 @@ Then you can start mercator by one of its starting classes
 
 ## Issues
 
+- after a while several traders are in-queue, but station believes they are in-dock.
 - tts ignoring pause.
 - no way to see selected station or trader
 - trader acceleration is not constant, why?

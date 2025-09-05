@@ -512,9 +512,9 @@ public class Trader3DRenderer extends ObjectRenderer<GameEngine3D> {
 //            instance2.instance.transform.scale(1f, 1f, 4000f);
         }
 
-//        trader.x = translation.x;
-//        trader.y = translation.y;
-//        trader.z = translation.z;
+        trader.x = translation.x;
+        trader.y = translation.y;
+        trader.z = translation.z;
         traderGameObject.update();
 //        instance1.update();
 //        instance2.update();

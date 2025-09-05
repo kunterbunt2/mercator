@@ -20,7 +20,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import de.bushnaq.abdalla.engine.RichLabel;
@@ -69,15 +68,12 @@ public class PauseScreen {
         createUI();
     }
 
-    private void addCommand(String key, String description, float descX, float descY) {
+    private void addCommand(String key, String description) {
         KeyboardCommand command = new KeyboardCommand(key, description);
-        command.descriptionPosition.set(descX, descY);
         commands.put(key, command);
     }
 
     private void addKeyFromSVG(String label, float svgX, float svgY, float svgWidth, float svgHeight, float scaleFactor) {
-        // Convert SVG coordinates to our coordinate system
-        // SVG Y coordinates are from top, but we want from bottom, so we need to flip Y
         float x      = svgX * scaleFactor;
         float y      = -svgY * scaleFactor; // Negative to flip Y coordinate
         float width  = svgWidth * scaleFactor;
@@ -357,53 +353,131 @@ public class PauseScreen {
 //        drawArc(x + width - radius, y + height - radius, radius, 0, 90); // Top-right
 //    }
     private void initializeKeyboardCommands() {
-        // Initialize command descriptions and positions
-        // Movement commands
-        addCommand("W", "Move Forward", 100, 400);
-        addCommand("A", "Move Left", 100, 380);
-        addCommand("S", "Move Backward", 100, 360);
-        addCommand("D", "Move Right", 100, 340);
-        addCommand("Q", "Rotate Left", 100, 320);
-        addCommand("E", "Rotate Right", 100, 300);
+        // ---------------------------------------------------------
+        // Function keys
+        // ---------------------------------------------------------
+        addCommand("F1", "Gamma Correction");
+        addCommand("F2", "Depth of Field");
+        addCommand("F3", "Bokeh");
+        addCommand("F4", "SSAO");
 
-        // Function key commands
-        addCommand("F1", "Gamma Correction", 300, 400);
-        addCommand("F2", "Depth of Field", 300, 380);
-        addCommand("F3", "Render Bokeh", 300, 360);
-        addCommand("F4", "SSAO", 300, 340);
-        addCommand("F5", "Always Day", 300, 320);
-        addCommand("F6", "Cycle Demo Modes", 300, 300);
-        addCommand("F9", "Show Graphs", 300, 280);
-        addCommand("F10", "Debug Mode", 300, 260);
+        addCommand("F5", "Always Day");
+        addCommand("F6", "Demo Modes");
+        // addCommand("F7", "");
+        // addCommand("F8", "");
 
-        // System commands
-        addCommand("Space", "Toggle Time", 500, 400);
-        addCommand("PRNT", "Screenshot", 500, 380);
-        addCommand("Tab", "Profiler", 500, 360);
-        addCommand("V", "VSync Toggle", 500, 340);
-        addCommand("I", "Show Info", 500, 320);
+        addCommand("F9", "Graphs");
+        addCommand("F10", "Toggle Debug Mode");
+        // addCommand("F11", "");
+        // addCommand("F12", "");
 
-        // Camera commands
-        addCommand("F", "Follow Mode", 700, 400);
-        addCommand("C", "Reset Camera", 700, 380);
+        // ---------------------------------------------------------
+        // Numerical keys
+        // ---------------------------------------------------------
+        // addCommand("`", "Slide Shelton");
+        // addCommand("1", "Cockpit Toggle");
+        // addCommand("2", "Left Look");
+        // addCommand("3", "Right Look");
+        // addCommand("4", "Back Look");
+        // addCommand("5", "View Chase");
+        // addCommand("6", "View Panning");
+        // addCommand("7", "View Target");
+        // addCommand("8", "View Panning Target");
+        // addCommand("9", "TC -");
+        // addCommand("0", "TC +");
+        // addCommand("-", "Velocity Decrease");
+        // addCommand("=", "Velocity Increase");
+        // addCommand("Backspace", "Relative Stop");
 
-        // Audio commands
-        addCommand("H", "Toggle HRTF", 700, 360);
+        // ---------------------------------------------------------
+        // First letter row
+        // ---------------------------------------------------------
+        addCommand("Tab", "Profiler (in Info Panel)");
+        addCommand("Q", "Rotate Left");
+        addCommand("W", "Move Camera Forward");
+        addCommand("E", "Rotate Right");
+        // addCommand("R", "Hostile Near Next");
+        // addCommand("T", "Target Next All");
+        // addCommand("Y", "Mode Combat Switch");
+        // addCommand("U", "Target Manmade Next");
+        addCommand("I", "Info Panel");
+        // addCommand("O", "Turret AI On");
+        // addCommand("P", "Boresight Target");
+        // addCommand("[", "Ship Change");
+        // addCommand("]", "Message Text");
+        // addCommand("\\", "Max Velocity");
 
-        // Arrow keys
-        addCommand("Up", "Move Up", 900, 400);
-        addCommand("Down", "Move Down", 900, 380);
-        addCommand("Left", "Move Left", 900, 360);
-        addCommand("Right", "Move Right", 900, 340);
+        // ---------------------------------------------------------
+        //- Second letter row
+        // ---------------------------------------------------------
+        // addCommand("CapsLock", "Caps Lock");
+        addCommand("A", "Move Camera Left");
+        addCommand("S", "Move Camera Backward");
+        addCommand("D", "Move Camera Right");
+        addCommand("F", "Follow selected trader");
+        // addCommand("G", "");
+        addCommand("H", "HRTF");
+        // addCommand("J", "Jump Drive");
+        // addCommand("K", "Friend Near Next");
+        // addCommand("L", "Target Lock");
+        // addCommand(";", "Respawn");
+        // addCommand("'", "Quote");
+        // addCommand("Enter", "Fire Secondary");
+
+        // ---------------------------------------------------------
+        //- Third letter row
+        // ---------------------------------------------------------
+        // addCommand("LShift", "Left Shift");
+        // addCommand("Z", "Up Pan");
+        // addCommand("X", "X Key");
+        // addCommand("C", "Reset Camera");
+        addCommand("V", "VSync");
+        // addCommand("B", "Subunit Next");
+        // addCommand("N", "Target Neutral Next");
+        // addCommand("M", "Left VDU Cycle");
+        // addCommand(",", "Up Thrust");
+        // addCommand(".", "Down Thrust");
+        // addCommand("/", "Forward Slash");
+        // addCommand("RShift", "Right Shift");
+
+        // ---------------------------------------------------------
+        //- Forth letter row
+        // ---------------------------------------------------------
+        // addCommand("LCtrl", "Left Control");
+        // addCommand("LWin", "Left Windows");
+        // addCommand("LAlt", "Left Alt");
+        addCommand("Space", "Pause");
+        // addCommand("RAlt", "Right Alt");
+        // addCommand("RWin", "Right Windows");
+        // addCommand("Menu", "Menu Key");
+        // addCommand("RCtrl", "Right Control");
+
+        // ---------------------------------------------------------
+        //-
+        // ---------------------------------------------------------
+
+        addCommand("PRNT", "Screenshot");
+        // addCommand("ROLL", "");
+        addCommand("PAUSE", "Pause");
+
+        // addCommand("Insert", "Left Roll");
+        // addCommand("Home", "Velocity Match");
+        // addCommand("PageUp", "Text Scroll Up");
+        // addCommand("Delete", "Right Roll");
+        // addCommand("End", "Velocity Zero");
+        // addCommand("PageDown", "Text Scroll Down");
+
+        addCommand("Up", "Move Camera Forward");
+        addCommand("Down", "Move Camera Backward");
+        addCommand("Left", "Move Camera Left");
+        addCommand("Right", "Move Camera Right");
+
     }
 
     private void initializeKeyboardLayout() {
         allKeys.clear();
 
-        // Scale factor to convert SVG coordinates to our coordinate system
-        // SVG uses larger coordinates, so we'll scale them down to fit screen better
         float scaleFactor = 1f; // Reduced from 1f to make keyboard smaller and show proper spacing
-
         // Function keys row (F1-F12) - using inner rect coordinates (outer + 0.5) and dimensions (68x68)
         addKeyFromSVG("F1", 146f, 2f, 68f, 68f, scaleFactor);
         addKeyFromSVG("F2", 218f, 2f, 68f, 68f, scaleFactor);
@@ -548,16 +622,7 @@ public class PauseScreen {
     /**
      * Represents a single keyboard command
      */
-    private static class KeyboardCommand {
-        final String  description;
-        final Vector2 descriptionPosition;
-        final String  key;
-
-        KeyboardCommand(String key, String description) {
-            this.key                 = key;
-            this.description         = description;
-            this.descriptionPosition = new Vector2();
-        }
+    private record KeyboardCommand(String key, String description) {
     }
 
     /**

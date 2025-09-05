@@ -53,11 +53,11 @@ Then you can start mercator by one of its starting classes
 
 ## Issues
 
+- engine thrusters placement is wrong.
+- engine thrusters not firing for docking/undocking.
 - after a while several traders are in-queue, but station believes they are in-dock.
 - tts ignoring pause.
-- no way to see selected station or trader
 - trader acceleration is not constant, why?
-- light bokeh grows too fast with distance
 - there should be the possibility to select a ship but still hear the station chat
 - factory goods keep making static cache dirty
 - pipes visible through hanger door.

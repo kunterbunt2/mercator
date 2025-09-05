@@ -26,7 +26,6 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import de.bushnaq.abdalla.engine.RichLabel;
 import de.bushnaq.abdalla.mercator.engine.AtlasManager;
 import de.bushnaq.abdalla.mercator.engine.GameEngine3D;
-import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -39,63 +38,23 @@ import java.util.Map;
  */
 public class PauseScreen {
 
-    /**
-     * Represents a physical key on the keyboard
-     */
-    private static class KeyboardKey {
-        final String label;
-        final float relativeX;
-        final float relativeY;
-        final float width;
-        final float height;
-
-        KeyboardKey(String label, float relativeX, float relativeY, float width, float height) {
-            this.label = label;
-            this.relativeX = relativeX;
-            this.relativeY = relativeY;
-            this.width = width;
-            this.height = height;
-        }
-    }
-
-    /**
-     * Represents a single keyboard command
-     */
-    private static class KeyboardCommand {
-        final String  description;
-        final Vector2 descriptionPosition;
-        final String  key;
-
-        KeyboardCommand(String key, String description) {
-            this.key                 = key;
-            this.description         = description;
-            this.descriptionPosition = new Vector2();
-        }
-    }
-
-    private static final Color                        DESCRIPTION_COLOR = new Color(0.9f, 0.9f, 0.9f, 1.0f);
-    private static final Color                        KEY_BORDER_COLOR  = new Color(0.6f, 0.6f, 0.6f, 1.0f);
-    private static final Color                        KEY_COLOR         = new Color(0.2f, 0.2f, 0.2f, 0.9f);
     private static final Color                        ASSIGNED_KEY_COLOR = new Color(0.3f, 0.3f, 0.5f, 0.9f);
-    private static final float                        KEY_HEIGHT        = 60f;  // 2x bigger (was 30f, reduced from 120f)
-    private static final float                        KEY_SPACING       = 4f;   // 2x bigger (was 2f, reduced from 8f)
-    private static final float                        KEY_WIDTH         = 80f;  // 2x bigger (was 40f, reduced from 160f)
-    private static final float                        FUNCTION_KEY_WIDTH = 70f;  // 2x bigger (was 35f, reduced from 140f)
-    private static final Color                        LINE_COLOR        = new Color(0.5f, 0.5f, 0.8f, 0.8f);
-    private static final Color                        OVERLAY_COLOR     = new Color(0.0f, 0.0f, 0.0f, 0.7f);
-    private static final float                        ROW_SPACING       = 20f;  // 2x bigger (was 10f, reduced from 40f)
-    private static final Color                        TITLE_COLOR       = Color.WHITE;
-
+    private static final Color                        DESCRIPTION_COLOR  = new Color(0.9f, 0.9f, 0.9f, 1.0f);
+    private static final Color                        KEY_BORDER_COLOR   = new Color(0.6f, 0.6f, 0.6f, 1.0f);
+    private static final Color                        KEY_COLOR          = new Color(0.2f, 0.2f, 0.2f, 0.9f);
+    private static final float                        KEY_HEIGHT         = 60f;  // 2x bigger (was 30f, reduced from 120f)
+    private static final Color                        OVERLAY_COLOR      = new Color(0.0f, 0.0f, 0.0f, 0.7f);
+    private static final Color                        TITLE_COLOR        = Color.WHITE;
+    private final        List<KeyboardKey>            allKeys;
     private final        AtlasManager                 atlasManager;
     private final        Map<String, KeyboardCommand> commands;
     private final        GameEngine3D                 gameEngine;
-    private final        List<KeyboardKey>            allKeys;
+    private              float                        keyboardStartX;
+    private              float                        keyboardStartY;
     private              RichLabel                    resumeLabel;
     private final        ShapeRenderer                shapeRenderer;
     private final        Stage                        stage;
     private              RichLabel                    titleLabel;
-    private              float                        keyboardStartX;
-    private              float                        keyboardStartY;
 
     public PauseScreen(GameEngine3D gameEngine, AtlasManager atlasManager) {
         this.gameEngine    = gameEngine;
@@ -110,127 +69,51 @@ public class PauseScreen {
         createUI();
     }
 
-    private void initializeKeyboardLayout() {
-        allKeys.clear();
-
-        // Scale factor to convert SVG coordinates to our coordinate system
-        // SVG uses larger coordinates, so we'll scale them down
-        float scaleFactor = 1f; // Adjust this to make keyboard bigger/smaller
-
-        // Function keys row (F1-F12)
-        addKeyFromSVG("F1", 145.5f, 1.5f, 69f, 69f, scaleFactor);
-        addKeyFromSVG("F2", 217.5f, 1.5f, 69f, 69f, scaleFactor);
-        addKeyFromSVG("F3", 289.5f, 1.5f, 69f, 69f, scaleFactor);
-        addKeyFromSVG("F4", 361.5f, 1.5f, 69f, 69f, scaleFactor);
-        addKeyFromSVG("F5", 469.5f, 1.5f, 69f, 69f, scaleFactor);
-        addKeyFromSVG("F6", 541.5f, 1.5f, 69f, 69f, scaleFactor);
-        addKeyFromSVG("F7", 613.5f, 1.5f, 69f, 69f, scaleFactor);
-        addKeyFromSVG("F8", 685.5f, 1.5f, 69f, 69f, scaleFactor);
-        addKeyFromSVG("F9", 793.5f, 1.5f, 69f, 69f, scaleFactor);
-        addKeyFromSVG("F10", 865.5f, 1.5f, 69f, 69f, scaleFactor);
-        addKeyFromSVG("F11", 937.5f, 1.5f, 69f, 69f, scaleFactor);
-        addKeyFromSVG("F12", 1009.5f, 1.5f, 69f, 69f, scaleFactor);
-
-        // System keys
-        addKeyFromSVG("PRNT", 1117.5f, 1.5f, 69f, 69f, scaleFactor);
-        addKeyFromSVG("ROLL", 1189.5f, 1.5f, 69f, 69f, scaleFactor);
-        addKeyFromSVG("PAUSE", 1261.5f, 1.5f, 69f, 69f, scaleFactor);
-
-        // Number row
-        addKeyFromSVG("`", 1.5f, 109.5f, 69f, 69f, scaleFactor);
-        addKeyFromSVG("1", 73.5f, 109.5f, 69f, 69f, scaleFactor);
-        addKeyFromSVG("2", 145.5f, 109.5f, 69f, 69f, scaleFactor);
-        addKeyFromSVG("3", 217.5f, 109.5f, 69f, 69f, scaleFactor);
-        addKeyFromSVG("4", 289.5f, 109.5f, 69f, 69f, scaleFactor);
-        addKeyFromSVG("5", 361.5f, 109.5f, 69f, 69f, scaleFactor);
-        addKeyFromSVG("6", 433.5f, 109.5f, 69f, 69f, scaleFactor);
-        addKeyFromSVG("7", 505.5f, 109.5f, 69f, 69f, scaleFactor);
-        addKeyFromSVG("8", 577.5f, 109.5f, 69f, 69f, scaleFactor);
-        addKeyFromSVG("9", 649.5f, 109.5f, 69f, 69f, scaleFactor);
-        addKeyFromSVG("0", 721.5f, 109.5f, 69f, 69f, scaleFactor);
-        addKeyFromSVG("-", 793.5f, 109.5f, 69f, 69f, scaleFactor);
-        addKeyFromSVG("=", 865.5f, 109.5f, 69f, 69f, scaleFactor);
-        addKeyFromSVG("Backspace", 937.5f, 109.5f, 141f, 69f, scaleFactor);
-
-        // QWERTY row
-        addKeyFromSVG("Tab", 1.5f, 181.5f, 105f, 69f, scaleFactor);
-        addKeyFromSVG("Q", 109.5f, 181.5f, 69f, 69f, scaleFactor);
-        addKeyFromSVG("W", 181.5f, 181.5f, 69f, 69f, scaleFactor);
-        addKeyFromSVG("E", 253.5f, 181.5f, 69f, 69f, scaleFactor);
-        addKeyFromSVG("R", 325.5f, 181.5f, 69f, 69f, scaleFactor);
-        addKeyFromSVG("T", 397.5f, 181.5f, 69f, 69f, scaleFactor);
-        addKeyFromSVG("Y", 469.5f, 181.5f, 69f, 69f, scaleFactor);
-        addKeyFromSVG("U", 541.5f, 181.5f, 69f, 69f, scaleFactor);
-        addKeyFromSVG("I", 613.5f, 181.5f, 69f, 69f, scaleFactor);
-        addKeyFromSVG("O", 685.5f, 181.5f, 69f, 69f, scaleFactor);
-        addKeyFromSVG("P", 757.5f, 181.5f, 69f, 69f, scaleFactor);
-        addKeyFromSVG("[", 829.5f, 181.5f, 69f, 69f, scaleFactor);
-        addKeyFromSVG("]", 901.5f, 181.5f, 69f, 69f, scaleFactor);
-        addKeyFromSVG("\\", 973.5f, 181.5f, 105f, 69f, scaleFactor);
-
-        // ASDF row
-        addKeyFromSVG("CapsLock", 1.5f, 253.5f, 123f, 69f, scaleFactor);
-        addKeyFromSVG("A", 127.5f, 253.5f, 69f, 69f, scaleFactor);
-        addKeyFromSVG("S", 199.5f, 253.5f, 69f, 69f, scaleFactor);
-        addKeyFromSVG("D", 271.5f, 253.5f, 69f, 69f, scaleFactor);
-        addKeyFromSVG("F", 343.5f, 253.5f, 69f, 69f, scaleFactor);
-        addKeyFromSVG("G", 415.5f, 253.5f, 69f, 69f, scaleFactor);
-        addKeyFromSVG("H", 487.5f, 253.5f, 69f, 69f, scaleFactor);
-        addKeyFromSVG("J", 559.5f, 253.5f, 69f, 69f, scaleFactor);
-        addKeyFromSVG("K", 631.5f, 253.5f, 69f, 69f, scaleFactor);
-        addKeyFromSVG("L", 703.5f, 253.5f, 69f, 69f, scaleFactor);
-        addKeyFromSVG(";", 775.5f, 253.5f, 69f, 69f, scaleFactor);
-        addKeyFromSVG("'", 847.5f, 253.5f, 69f, 69f, scaleFactor);
-        addKeyFromSVG("Enter", 919.5f, 253.5f, 159f, 69f, scaleFactor);
-
-        // ZXCV row
-        addKeyFromSVG("LShift", 1.5f, 325.5f, 159f, 69f, scaleFactor);
-        addKeyFromSVG("Z", 163.5f, 325.5f, 69f, 69f, scaleFactor);
-        addKeyFromSVG("X", 235.5f, 325.5f, 69f, 69f, scaleFactor);
-        addKeyFromSVG("C", 307.5f, 325.5f, 69f, 69f, scaleFactor);
-        addKeyFromSVG("V", 379.5f, 325.5f, 69f, 69f, scaleFactor);
-        addKeyFromSVG("B", 451.5f, 325.5f, 69f, 69f, scaleFactor);
-        addKeyFromSVG("N", 523.5f, 325.5f, 69f, 69f, scaleFactor);
-        addKeyFromSVG("M", 595.5f, 325.5f, 69f, 69f, scaleFactor);
-        addKeyFromSVG(",", 667.5f, 325.5f, 69f, 69f, scaleFactor);
-        addKeyFromSVG(".", 739.5f, 325.5f, 69f, 69f, scaleFactor);
-        addKeyFromSVG("/", 811.5f, 325.5f, 69f, 69f, scaleFactor);
-        addKeyFromSVG("RShift", 883.5f, 325.5f, 195f, 69f, scaleFactor);
-
-        // Bottom row
-        addKeyFromSVG("LCtrl", 1.5f, 397.5f, 87f, 69f, scaleFactor);
-        addKeyFromSVG("LWin", 91.5f, 397.5f, 87f, 69f, scaleFactor);
-        addKeyFromSVG("LAlt", 181.5f, 397.5f, 87f, 69f, scaleFactor);
-        addKeyFromSVG("Space", 271.5f, 397.5f, 447f, 69f, scaleFactor);
-        addKeyFromSVG("RAlt", 721.5f, 397.5f, 87f, 69f, scaleFactor);
-        addKeyFromSVG("RWin", 811.5f, 397.5f, 87f, 69f, scaleFactor);
-        addKeyFromSVG("Menu", 901.5f, 397.5f, 87f, 69f, scaleFactor);
-        addKeyFromSVG("RCtrl", 991.5f, 397.5f, 87f, 69f, scaleFactor);
-
-        // Arrow keys and navigation cluster
-        addKeyFromSVG("Insert", 1117.5f, 109.5f, 69f, 69f, scaleFactor);
-        addKeyFromSVG("Home", 1189.5f, 109.5f, 69f, 69f, scaleFactor);
-        addKeyFromSVG("PageUp", 1261.5f, 109.5f, 69f, 69f, scaleFactor);
-        addKeyFromSVG("Delete", 1117.5f, 181.5f, 69f, 69f, scaleFactor);
-        addKeyFromSVG("End", 1189.5f, 181.5f, 69f, 69f, scaleFactor);
-        addKeyFromSVG("PageDown", 1261.5f, 181.5f, 69f, 69f, scaleFactor);
-
-        // Arrow keys
-        addKeyFromSVG("Up", 1189.5f, 325.5f, 69f, 69f, scaleFactor);
-        addKeyFromSVG("Left", 1117.5f, 397.5f, 69f, 69f, scaleFactor);
-        addKeyFromSVG("Down", 1189.5f, 397.5f, 69f, 69f, scaleFactor);
-        addKeyFromSVG("Right", 1261.5f, 397.5f, 69f, 69f, scaleFactor);
+    private void addCommand(String key, String description, float descX, float descY) {
+        KeyboardCommand command = new KeyboardCommand(key, description);
+        command.descriptionPosition.set(descX, descY);
+        commands.put(key, command);
     }
 
     private void addKeyFromSVG(String label, float svgX, float svgY, float svgWidth, float svgHeight, float scaleFactor) {
         // Convert SVG coordinates to our coordinate system
         // SVG Y coordinates are from top, but we want from bottom, so we need to flip Y
-        float x = svgX * scaleFactor;
-        float y = -svgY * scaleFactor; // Negative to flip Y coordinate
-        float width = svgWidth * scaleFactor;
+        float x      = svgX * scaleFactor;
+        float y      = -svgY * scaleFactor; // Negative to flip Y coordinate
+        float width  = svgWidth * scaleFactor;
         float height = svgHeight * scaleFactor;
 
         allKeys.add(new KeyboardKey(label, x, y, width, height));
+    }
+
+    private float calculateKeyboardHeight() {
+        float minY = Float.MAX_VALUE;
+        float maxY = Float.MIN_VALUE;
+
+        for (KeyboardKey key : allKeys) {
+            minY = Math.min(minY, key.relativeY);
+            maxY = Math.max(maxY, key.relativeY);
+        }
+
+        return maxY - minY + KEY_HEIGHT;
+    }
+
+    private float calculateKeyboardWidth() {
+        float maxWidth        = 0;
+        float currentRowWidth = 0;
+        float currentY        = Float.MAX_VALUE;
+
+        for (KeyboardKey key : allKeys) {
+            if (key.relativeY != currentY) {
+                maxWidth        = Math.max(maxWidth, currentRowWidth);
+                currentRowWidth = key.relativeX + key.width;
+                currentY        = key.relativeY;
+            } else {
+                currentRowWidth = Math.max(currentRowWidth, key.relativeX + key.width);
+            }
+        }
+        maxWidth = Math.max(maxWidth, currentRowWidth);
+        return maxWidth;
     }
 
     private void calculateLayout() {
@@ -244,41 +127,11 @@ public class PauseScreen {
         resumeLabel.setPosition(screenWidth / 2 - resumeLabel.getWidth() / 2, 50);
 
         // Center the keyboard on screen
-        float totalKeyboardWidth = calculateKeyboardWidth();
+        float totalKeyboardWidth  = calculateKeyboardWidth();
         float totalKeyboardHeight = calculateKeyboardHeight();
 
         keyboardStartX = (screenWidth - totalKeyboardWidth) / 2;
         keyboardStartY = (screenHeight + totalKeyboardHeight) / 2 - 50; // Slight offset from center
-    }
-
-    private float calculateKeyboardWidth() {
-        float maxWidth = 0;
-        float currentRowWidth = 0;
-        float currentY = Float.MAX_VALUE;
-
-        for (KeyboardKey key : allKeys) {
-            if (key.relativeY != currentY) {
-                maxWidth = Math.max(maxWidth, currentRowWidth);
-                currentRowWidth = key.relativeX + key.width;
-                currentY = key.relativeY;
-            } else {
-                currentRowWidth = Math.max(currentRowWidth, key.relativeX + key.width);
-            }
-        }
-        maxWidth = Math.max(maxWidth, currentRowWidth);
-        return maxWidth;
-    }
-
-    private float calculateKeyboardHeight() {
-        float minY = Float.MAX_VALUE;
-        float maxY = Float.MIN_VALUE;
-
-        for (KeyboardKey key : allKeys) {
-            minY = Math.min(minY, key.relativeY);
-            maxY = Math.max(maxY, key.relativeY);
-        }
-
-        return maxY - minY + KEY_HEIGHT;
     }
 
     private void createUI() {
@@ -303,40 +156,49 @@ public class PauseScreen {
         shapeRenderer.dispose();
     }
 
+    /**
+     * Draw an arc using line segments
+     */
+    private void drawArc(float centerX, float centerY, float radius, float startAngle, float arcAngle) {
+        int   segments  = 8; // Number of line segments for the arc
+        float angleStep = arcAngle / segments;
+
+        for (int i = 0; i < segments; i++) {
+            float angle1 = (float) Math.toRadians(startAngle + i * angleStep);
+            float angle2 = (float) Math.toRadians(startAngle + (i + 1) * angleStep);
+
+            float x1 = centerX + radius * (float) Math.cos(angle1);
+            float y1 = centerY + radius * (float) Math.sin(angle1);
+            float x2 = centerX + radius * (float) Math.cos(angle2);
+            float y2 = centerY + radius * (float) Math.sin(angle2);
+
+            shapeRenderer.line(x1, y1, x2, y2);
+        }
+    }
+
     private void drawKeyboardLayout() {
         shapeRenderer.setProjectionMatrix(stage.getCamera().combined);
 
-        // Draw filled rectangles for keys
+        // Draw filled rectangles for keys with rounded corners
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
 
         for (KeyboardKey key : allKeys) {
             // Check if this key has an assigned command
             boolean hasCommand = commands.containsKey(key.label);
 
-            // Draw key background
+            // Draw key background with rounded corners (similar to SVG rx="4" ry="4")
             shapeRenderer.setColor(hasCommand ? ASSIGNED_KEY_COLOR : KEY_COLOR);
-            shapeRenderer.rect(
-                    keyboardStartX + key.relativeX,
-                    keyboardStartY + key.relativeY,
-                    key.width,
-                    key.height
-            );
+            drawRoundedRect(keyboardStartX + key.relativeX, keyboardStartY + key.relativeY, key.width, key.height, 4f);
         }
         shapeRenderer.end();
 
-        // Draw key borders only (no connecting lines)
+        // Draw key borders with rounded corners
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
         shapeRenderer.setColor(KEY_BORDER_COLOR);
 
-        for (KeyboardKey key : allKeys) {
-            // Draw key border
-            shapeRenderer.rect(
-                    keyboardStartX + key.relativeX,
-                    keyboardStartY + key.relativeY,
-                    key.width,
-                    key.height
-            );
-        }
+//        for (KeyboardKey key : allKeys) {
+//            drawRoundedRectOutline(keyboardStartX + key.relativeX, keyboardStartY + key.relativeY, key.width, key.height, 4f);
+//        }
         shapeRenderer.end();
 
         // Draw text on keys and descriptions
@@ -345,7 +207,7 @@ public class PauseScreen {
         for (KeyboardKey key : allKeys) {
             // Draw key label in top-left corner
             atlasManager.menuBoldFont.setColor(Color.WHITE);
-            atlasManager.menuBoldFont.getData().setScale(1.2f); // Slightly smaller for better fit
+            atlasManager.menuBoldFont.getData().setScale(1f); // Slightly smaller for better fit
 
             float labelX = keyboardStartX + key.relativeX + 4; // Small padding from left edge
             float labelY = keyboardStartY + key.relativeY + key.height - 8; // Near top edge
@@ -366,14 +228,14 @@ public class PauseScreen {
                 atlasManager.menuFont.setColor(DESCRIPTION_COLOR);
                 atlasManager.menuFont.getData().setScale(1.0f); // Larger font for descriptions
 
-                float descX = keyboardStartX + key.relativeX + 4; // Same padding as label
+                float descX      = keyboardStartX + key.relativeX + 4; // Same padding as label
                 float lineHeight = 14f;
 
                 // First, determine how many lines we need
-                String[] words = command.description.split(" ");
+                String[]      words       = command.description.split(" ");
                 StringBuilder currentLine = new StringBuilder();
-                int totalLines = 0;
-                float maxLines = Math.max(1, (key.height - 20) / lineHeight); // Dynamic max lines based on key height
+                int           totalLines  = 0;
+                float         maxLines    = Math.max(1, (key.height - 20) / lineHeight); // Dynamic max lines based on key height
 
                 // Count total lines needed
                 for (String word : words) {
@@ -396,7 +258,7 @@ public class PauseScreen {
 
                 // Now draw the lines, starting from bottom for single line, moving up for multi-line
                 currentLine = new StringBuilder();
-                int lineCount = 0;
+                int   lineCount = 0;
                 float startY;
 
                 if (totalLines == 1) {
@@ -451,6 +313,49 @@ public class PauseScreen {
         stage.getBatch().end();
     }
 
+    /**
+     * Draw a filled rounded rectangle using the ShapeRenderer
+     */
+    private void drawRoundedRect(float x, float y, float width, float height, float radius) {
+        width -= 1;
+        height -= 1;
+        // Clamp radius to not exceed half of width or height
+        float maxRadius = Math.min(width / 2, height / 2);
+        radius = Math.min(radius, maxRadius);
+
+        // Main rectangle (without corners)
+        shapeRenderer.rect(x + radius, y, width - 2 * radius, height);
+        shapeRenderer.rect(x, y + radius, width, height - 2 * radius);
+
+        // Corner circles
+        shapeRenderer.circle(x + radius, y + radius, radius, 8); // Bottom-left
+        shapeRenderer.circle(x + width - radius, y + radius, radius, 8); // Bottom-right
+        shapeRenderer.circle(x + radius, y + height - radius, radius, 8); // Top-left
+        shapeRenderer.circle(x + width - radius, y + height - radius, radius, 8); // Top-right
+    }
+
+    /**
+     * Draw a rounded rectangle outline using the ShapeRenderer
+     */
+//    private void drawRoundedRectOutline(float x, float y, float width, float height, float radius) {
+//        width -= 1;
+//        height -= 1;
+//        // Clamp radius to not exceed half of width or height
+//        float maxRadius = Math.min(width / 2, height / 2);
+//        radius = Math.min(radius, maxRadius);
+//
+//        // Draw the four sides
+//        shapeRenderer.line(x + radius, y, x + width - radius, y); // Bottom
+//        shapeRenderer.line(x + radius, y + height, x + width - radius, y + height); // Top
+//        shapeRenderer.line(x, y + radius, x, y + height - radius); // Left
+//        shapeRenderer.line(x + width, y + radius, x + width, y + height - radius); // Right
+//
+//        // Draw corner arcs
+//        drawArc(x + radius, y + radius, radius, 180, 90); // Bottom-left
+//        drawArc(x + width - radius, y + radius, radius, 270, 90); // Bottom-right
+//        drawArc(x + radius, y + height - radius, radius, 90, 90); // Top-left
+//        drawArc(x + width - radius, y + height - radius, radius, 0, 90); // Top-right
+//    }
     private void initializeKeyboardCommands() {
         // Initialize command descriptions and positions
         // Movement commands
@@ -492,10 +397,116 @@ public class PauseScreen {
         addCommand("Right", "Move Right", 900, 340);
     }
 
-    private void addCommand(String key, String description, float descX, float descY) {
-        KeyboardCommand command = new KeyboardCommand(key, description);
-        command.descriptionPosition.set(descX, descY);
-        commands.put(key, command);
+    private void initializeKeyboardLayout() {
+        allKeys.clear();
+
+        // Scale factor to convert SVG coordinates to our coordinate system
+        // SVG uses larger coordinates, so we'll scale them down to fit screen better
+        float scaleFactor = 1f; // Reduced from 1f to make keyboard smaller and show proper spacing
+
+        // Function keys row (F1-F12) - using inner rect coordinates (outer + 0.5) and dimensions (68x68)
+        addKeyFromSVG("F1", 146f, 2f, 68f, 68f, scaleFactor);
+        addKeyFromSVG("F2", 218f, 2f, 68f, 68f, scaleFactor);
+        addKeyFromSVG("F3", 290f, 2f, 68f, 68f, scaleFactor);
+        addKeyFromSVG("F4", 362f, 2f, 68f, 68f, scaleFactor);
+        addKeyFromSVG("F5", 470f, 2f, 68f, 68f, scaleFactor);
+        addKeyFromSVG("F6", 542f, 2f, 68f, 68f, scaleFactor);
+        addKeyFromSVG("F7", 614f, 2f, 68f, 68f, scaleFactor);
+        addKeyFromSVG("F8", 686f, 2f, 68f, 68f, scaleFactor);
+        addKeyFromSVG("F9", 794f, 2f, 68f, 68f, scaleFactor);
+        addKeyFromSVG("F10", 866f, 2f, 68f, 68f, scaleFactor);
+        addKeyFromSVG("F11", 938f, 2f, 68f, 68f, scaleFactor);
+        addKeyFromSVG("F12", 1010f, 2f, 68f, 68f, scaleFactor);
+
+        // System keys
+        addKeyFromSVG("PRNT", 1118f, 2f, 68f, 68f, scaleFactor);
+        addKeyFromSVG("ROLL", 1190f, 2f, 68f, 68f, scaleFactor);
+        addKeyFromSVG("PAUSE", 1262f, 2f, 68f, 68f, scaleFactor);
+
+        // Number row
+        addKeyFromSVG("`", 2f, 110f, 68f, 68f, scaleFactor);
+        addKeyFromSVG("1", 74f, 110f, 68f, 68f, scaleFactor);
+        addKeyFromSVG("2", 146f, 110f, 68f, 68f, scaleFactor);
+        addKeyFromSVG("3", 218f, 110f, 68f, 68f, scaleFactor);
+        addKeyFromSVG("4", 290f, 110f, 68f, 68f, scaleFactor);
+        addKeyFromSVG("5", 362f, 110f, 68f, 68f, scaleFactor);
+        addKeyFromSVG("6", 434f, 110f, 68f, 68f, scaleFactor);
+        addKeyFromSVG("7", 506f, 110f, 68f, 68f, scaleFactor);
+        addKeyFromSVG("8", 578f, 110f, 68f, 68f, scaleFactor);
+        addKeyFromSVG("9", 650f, 110f, 68f, 68f, scaleFactor);
+        addKeyFromSVG("0", 722f, 110f, 68f, 68f, scaleFactor);
+        addKeyFromSVG("-", 794f, 110f, 68f, 68f, scaleFactor);
+        addKeyFromSVG("=", 866f, 110f, 68f, 68f, scaleFactor);
+        addKeyFromSVG("Backspace", 938f, 110f, 140f, 68f, scaleFactor); // Width 141-1 = 140
+
+        // QWERTY row
+        addKeyFromSVG("Tab", 2f, 182f, 104f, 68f, scaleFactor); // Width 105-1 = 104
+        addKeyFromSVG("Q", 110f, 182f, 68f, 68f, scaleFactor);
+        addKeyFromSVG("W", 182f, 182f, 68f, 68f, scaleFactor);
+        addKeyFromSVG("E", 254f, 182f, 68f, 68f, scaleFactor);
+        addKeyFromSVG("R", 326f, 182f, 68f, 68f, scaleFactor);
+        addKeyFromSVG("T", 398f, 182f, 68f, 68f, scaleFactor);
+        addKeyFromSVG("Y", 470f, 182f, 68f, 68f, scaleFactor);
+        addKeyFromSVG("U", 542f, 182f, 68f, 68f, scaleFactor);
+        addKeyFromSVG("I", 614f, 182f, 68f, 68f, scaleFactor);
+        addKeyFromSVG("O", 686f, 182f, 68f, 68f, scaleFactor);
+        addKeyFromSVG("P", 758f, 182f, 68f, 68f, scaleFactor);
+        addKeyFromSVG("[", 830f, 182f, 68f, 68f, scaleFactor);
+        addKeyFromSVG("]", 902f, 182f, 68f, 68f, scaleFactor);
+        addKeyFromSVG("\\", 974f, 182f, 104f, 68f, scaleFactor); // Width 105-1 = 104
+
+        // ASDF row
+        addKeyFromSVG("CapsLock", 2f, 254f, 122f, 68f, scaleFactor); // Width 123-1 = 122
+        addKeyFromSVG("A", 128f, 254f, 68f, 68f, scaleFactor);
+        addKeyFromSVG("S", 200f, 254f, 68f, 68f, scaleFactor);
+        addKeyFromSVG("D", 272f, 254f, 68f, 68f, scaleFactor);
+        addKeyFromSVG("F", 344f, 254f, 68f, 68f, scaleFactor);
+        addKeyFromSVG("G", 416f, 254f, 68f, 68f, scaleFactor);
+        addKeyFromSVG("H", 488f, 254f, 68f, 68f, scaleFactor);
+        addKeyFromSVG("J", 560f, 254f, 68f, 68f, scaleFactor);
+        addKeyFromSVG("K", 632f, 254f, 68f, 68f, scaleFactor);
+        addKeyFromSVG("L", 704f, 254f, 68f, 68f, scaleFactor);
+        addKeyFromSVG(";", 776f, 254f, 68f, 68f, scaleFactor);
+        addKeyFromSVG("'", 848f, 254f, 68f, 68f, scaleFactor);
+        addKeyFromSVG("Enter", 920f, 254f, 158f, 68f, scaleFactor); // Width 159-1 = 158
+
+        // ZXCV row
+        addKeyFromSVG("LShift", 2f, 326f, 158f, 68f, scaleFactor); // Width 159-1 = 158
+        addKeyFromSVG("Z", 164f, 326f, 68f, 68f, scaleFactor);
+        addKeyFromSVG("X", 236f, 326f, 68f, 68f, scaleFactor);
+        addKeyFromSVG("C", 308f, 326f, 68f, 68f, scaleFactor);
+        addKeyFromSVG("V", 380f, 326f, 68f, 68f, scaleFactor);
+        addKeyFromSVG("B", 452f, 326f, 68f, 68f, scaleFactor);
+        addKeyFromSVG("N", 524f, 326f, 68f, 68f, scaleFactor);
+        addKeyFromSVG("M", 596f, 326f, 68f, 68f, scaleFactor);
+        addKeyFromSVG(",", 668f, 326f, 68f, 68f, scaleFactor);
+        addKeyFromSVG(".", 740f, 326f, 68f, 68f, scaleFactor);
+        addKeyFromSVG("/", 812f, 326f, 68f, 68f, scaleFactor);
+        addKeyFromSVG("RShift", 884f, 326f, 194f, 68f, scaleFactor); // Width 195-1 = 194
+
+        // Bottom row
+        addKeyFromSVG("LCtrl", 2f, 398f, 86f, 68f, scaleFactor); // Width 87-1 = 86
+        addKeyFromSVG("LWin", 92f, 398f, 86f, 68f, scaleFactor); // Width 87-1 = 86
+        addKeyFromSVG("LAlt", 182f, 398f, 86f, 68f, scaleFactor); // Width 87-1 = 86
+        addKeyFromSVG("Space", 272f, 398f, 446f, 68f, scaleFactor); // Width 447-1 = 446
+        addKeyFromSVG("RAlt", 722f, 398f, 86f, 68f, scaleFactor); // Width 87-1 = 86
+        addKeyFromSVG("RWin", 812f, 398f, 86f, 68f, scaleFactor); // Width 87-1 = 86
+        addKeyFromSVG("Menu", 902f, 398f, 86f, 68f, scaleFactor); // Width 87-1 = 86
+        addKeyFromSVG("RCtrl", 992f, 398f, 86f, 68f, scaleFactor); // Width 87-1 = 86
+
+        // Arrow keys and navigation cluster
+        addKeyFromSVG("Insert", 1118f, 110f, 68f, 68f, scaleFactor);
+        addKeyFromSVG("Home", 1190f, 110f, 68f, 68f, scaleFactor);
+        addKeyFromSVG("PageUp", 1262f, 110f, 68f, 68f, scaleFactor);
+        addKeyFromSVG("Delete", 1118f, 182f, 68f, 68f, scaleFactor);
+        addKeyFromSVG("End", 1190f, 182f, 68f, 68f, scaleFactor);
+        addKeyFromSVG("PageDown", 1262f, 182f, 68f, 68f, scaleFactor);
+
+        // Arrow keys
+        addKeyFromSVG("Up", 1190f, 326f, 68f, 68f, scaleFactor);
+        addKeyFromSVG("Left", 1118f, 398f, 68f, 68f, scaleFactor);
+        addKeyFromSVG("Down", 1190f, 398f, 68f, 68f, scaleFactor);
+        addKeyFromSVG("Right", 1262f, 398f, 68f, 68f, scaleFactor);
     }
 
     private boolean isPaused() {
@@ -532,6 +543,27 @@ public class PauseScreen {
         if (isPaused()) {
             calculateLayout();
         }
+    }
+
+    /**
+     * Represents a single keyboard command
+     */
+    private static class KeyboardCommand {
+        final String  description;
+        final Vector2 descriptionPosition;
+        final String  key;
+
+        KeyboardCommand(String key, String description) {
+            this.key                 = key;
+            this.description         = description;
+            this.descriptionPosition = new Vector2();
+        }
+    }
+
+    /**
+     * Represents a physical key on the keyboard
+     */
+    private record KeyboardKey(String label, float relativeX, float relativeY, float width, float height) {
     }
 }
 

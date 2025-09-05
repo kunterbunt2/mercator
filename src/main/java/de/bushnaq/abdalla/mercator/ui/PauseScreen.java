@@ -111,86 +111,123 @@ public class PauseScreen {
     private void initializeKeyboardLayout() {
         allKeys.clear();
 
-        // Function key row: F1-F12, Print, Scroll Lock, Pause
-        String[] functionKeys = {"F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "F10", "F11", "F12"};
-        String[] systemKeys = {"PRNT", "ROLL", "PAUSE"};
+        // Scale factor to convert SVG coordinates to our coordinate system
+        // SVG uses larger coordinates, so we'll scale them down
+        float scaleFactor = 1f; // Adjust this to make keyboard bigger/smaller
 
-        float currentX = 0;
-        float currentY = 0;
+        // Function keys row (F1-F12)
+        addKeyFromSVG("F1", 145.5f, 1.5f, 69f, 69f, scaleFactor);
+        addKeyFromSVG("F2", 217.5f, 1.5f, 69f, 69f, scaleFactor);
+        addKeyFromSVG("F3", 289.5f, 1.5f, 69f, 69f, scaleFactor);
+        addKeyFromSVG("F4", 361.5f, 1.5f, 69f, 69f, scaleFactor);
+        addKeyFromSVG("F5", 469.5f, 1.5f, 69f, 69f, scaleFactor);
+        addKeyFromSVG("F6", 541.5f, 1.5f, 69f, 69f, scaleFactor);
+        addKeyFromSVG("F7", 613.5f, 1.5f, 69f, 69f, scaleFactor);
+        addKeyFromSVG("F8", 685.5f, 1.5f, 69f, 69f, scaleFactor);
+        addKeyFromSVG("F9", 793.5f, 1.5f, 69f, 69f, scaleFactor);
+        addKeyFromSVG("F10", 865.5f, 1.5f, 69f, 69f, scaleFactor);
+        addKeyFromSVG("F11", 937.5f, 1.5f, 69f, 69f, scaleFactor);
+        addKeyFromSVG("F12", 1009.5f, 1.5f, 69f, 69f, scaleFactor);
 
-        // F1-F4 group
-        for (int i = 0; i < 4; i++) {
-            allKeys.add(new KeyboardKey(functionKeys[i], currentX, currentY, FUNCTION_KEY_WIDTH));
-            currentX += FUNCTION_KEY_WIDTH + KEY_SPACING;
-        }
+        // System keys
+        addKeyFromSVG("PRNT", 1117.5f, 1.5f, 69f, 69f, scaleFactor);
+        addKeyFromSVG("ROLL", 1189.5f, 1.5f, 69f, 69f, scaleFactor);
+        addKeyFromSVG("PAUSE", 1261.5f, 1.5f, 69f, 69f, scaleFactor);
 
-        currentX += KEY_SPACING; // Gap between F4 and F5
+        // Number row
+        addKeyFromSVG("`", 1.5f, 109.5f, 69f, 69f, scaleFactor);
+        addKeyFromSVG("1", 73.5f, 109.5f, 69f, 69f, scaleFactor);
+        addKeyFromSVG("2", 145.5f, 109.5f, 69f, 69f, scaleFactor);
+        addKeyFromSVG("3", 217.5f, 109.5f, 69f, 69f, scaleFactor);
+        addKeyFromSVG("4", 289.5f, 109.5f, 69f, 69f, scaleFactor);
+        addKeyFromSVG("5", 361.5f, 109.5f, 69f, 69f, scaleFactor);
+        addKeyFromSVG("6", 433.5f, 109.5f, 69f, 69f, scaleFactor);
+        addKeyFromSVG("7", 505.5f, 109.5f, 69f, 69f, scaleFactor);
+        addKeyFromSVG("8", 577.5f, 109.5f, 69f, 69f, scaleFactor);
+        addKeyFromSVG("9", 649.5f, 109.5f, 69f, 69f, scaleFactor);
+        addKeyFromSVG("0", 721.5f, 109.5f, 69f, 69f, scaleFactor);
+        addKeyFromSVG("-", 793.5f, 109.5f, 69f, 69f, scaleFactor);
+        addKeyFromSVG("=", 865.5f, 109.5f, 69f, 69f, scaleFactor);
+        addKeyFromSVG("Backspace", 937.5f, 109.5f, 141f, 69f, scaleFactor);
 
-        // F5-F8 group
-        for (int i = 4; i < 8; i++) {
-            allKeys.add(new KeyboardKey(functionKeys[i], currentX, currentY, FUNCTION_KEY_WIDTH));
-            currentX += FUNCTION_KEY_WIDTH + KEY_SPACING;
-        }
+        // QWERTY row
+        addKeyFromSVG("Tab", 1.5f, 181.5f, 105f, 69f, scaleFactor);
+        addKeyFromSVG("Q", 109.5f, 181.5f, 69f, 69f, scaleFactor);
+        addKeyFromSVG("W", 181.5f, 181.5f, 69f, 69f, scaleFactor);
+        addKeyFromSVG("E", 253.5f, 181.5f, 69f, 69f, scaleFactor);
+        addKeyFromSVG("R", 325.5f, 181.5f, 69f, 69f, scaleFactor);
+        addKeyFromSVG("T", 397.5f, 181.5f, 69f, 69f, scaleFactor);
+        addKeyFromSVG("Y", 469.5f, 181.5f, 69f, 69f, scaleFactor);
+        addKeyFromSVG("U", 541.5f, 181.5f, 69f, 69f, scaleFactor);
+        addKeyFromSVG("I", 613.5f, 181.5f, 69f, 69f, scaleFactor);
+        addKeyFromSVG("O", 685.5f, 181.5f, 69f, 69f, scaleFactor);
+        addKeyFromSVG("P", 757.5f, 181.5f, 69f, 69f, scaleFactor);
+        addKeyFromSVG("[", 829.5f, 181.5f, 69f, 69f, scaleFactor);
+        addKeyFromSVG("]", 901.5f, 181.5f, 69f, 69f, scaleFactor);
+        addKeyFromSVG("\\", 973.5f, 181.5f, 105f, 69f, scaleFactor);
 
-        currentX += KEY_SPACING; // Gap between F8 and F9
+        // ASDF row
+        addKeyFromSVG("CapsLock", 1.5f, 253.5f, 123f, 69f, scaleFactor);
+        addKeyFromSVG("A", 127.5f, 253.5f, 69f, 69f, scaleFactor);
+        addKeyFromSVG("S", 199.5f, 253.5f, 69f, 69f, scaleFactor);
+        addKeyFromSVG("D", 271.5f, 253.5f, 69f, 69f, scaleFactor);
+        addKeyFromSVG("F", 343.5f, 253.5f, 69f, 69f, scaleFactor);
+        addKeyFromSVG("G", 415.5f, 253.5f, 69f, 69f, scaleFactor);
+        addKeyFromSVG("H", 487.5f, 253.5f, 69f, 69f, scaleFactor);
+        addKeyFromSVG("J", 559.5f, 253.5f, 69f, 69f, scaleFactor);
+        addKeyFromSVG("K", 631.5f, 253.5f, 69f, 69f, scaleFactor);
+        addKeyFromSVG("L", 703.5f, 253.5f, 69f, 69f, scaleFactor);
+        addKeyFromSVG(";", 775.5f, 253.5f, 69f, 69f, scaleFactor);
+        addKeyFromSVG("'", 847.5f, 253.5f, 69f, 69f, scaleFactor);
+        addKeyFromSVG("Enter", 919.5f, 253.5f, 159f, 69f, scaleFactor);
 
-        // F9-F12 group
-        for (int i = 8; i < 12; i++) {
-            allKeys.add(new KeyboardKey(functionKeys[i], currentX, currentY, FUNCTION_KEY_WIDTH));
-            currentX += FUNCTION_KEY_WIDTH + KEY_SPACING;
-        }
+        // ZXCV row
+        addKeyFromSVG("LShift", 1.5f, 325.5f, 159f, 69f, scaleFactor);
+        addKeyFromSVG("Z", 163.5f, 325.5f, 69f, 69f, scaleFactor);
+        addKeyFromSVG("X", 235.5f, 325.5f, 69f, 69f, scaleFactor);
+        addKeyFromSVG("C", 307.5f, 325.5f, 69f, 69f, scaleFactor);
+        addKeyFromSVG("V", 379.5f, 325.5f, 69f, 69f, scaleFactor);
+        addKeyFromSVG("B", 451.5f, 325.5f, 69f, 69f, scaleFactor);
+        addKeyFromSVG("N", 523.5f, 325.5f, 69f, 69f, scaleFactor);
+        addKeyFromSVG("M", 595.5f, 325.5f, 69f, 69f, scaleFactor);
+        addKeyFromSVG(",", 667.5f, 325.5f, 69f, 69f, scaleFactor);
+        addKeyFromSVG(".", 739.5f, 325.5f, 69f, 69f, scaleFactor);
+        addKeyFromSVG("/", 811.5f, 325.5f, 69f, 69f, scaleFactor);
+        addKeyFromSVG("RShift", 883.5f, 325.5f, 195f, 69f, scaleFactor);
 
-        currentX += KEY_SPACING; // Gap before system keys
+        // Bottom row
+        addKeyFromSVG("LCtrl", 1.5f, 397.5f, 87f, 69f, scaleFactor);
+        addKeyFromSVG("LWin", 91.5f, 397.5f, 87f, 69f, scaleFactor);
+        addKeyFromSVG("LAlt", 181.5f, 397.5f, 87f, 69f, scaleFactor);
+        addKeyFromSVG("Space", 271.5f, 397.5f, 447f, 69f, scaleFactor);
+        addKeyFromSVG("RAlt", 721.5f, 397.5f, 87f, 69f, scaleFactor);
+        addKeyFromSVG("RWin", 811.5f, 397.5f, 87f, 69f, scaleFactor);
+        addKeyFromSVG("Menu", 901.5f, 397.5f, 87f, 69f, scaleFactor);
+        addKeyFromSVG("RCtrl", 991.5f, 397.5f, 87f, 69f, scaleFactor);
 
-        // System keys (Print, Scroll Lock, Pause) - positioned about one key width to the right
-        currentX += KEY_WIDTH;
-        for (String key : systemKeys) {
-            allKeys.add(new KeyboardKey(key, currentX, currentY, FUNCTION_KEY_WIDTH));
-            currentX += FUNCTION_KEY_WIDTH + KEY_SPACING;
-        }
+        // Arrow keys and navigation cluster
+        addKeyFromSVG("Insert", 1117.5f, 109.5f, 69f, 69f, scaleFactor);
+        addKeyFromSVG("Home", 1189.5f, 109.5f, 69f, 69f, scaleFactor);
+        addKeyFromSVG("PageUp", 1261.5f, 109.5f, 69f, 69f, scaleFactor);
+        addKeyFromSVG("Delete", 1117.5f, 181.5f, 69f, 69f, scaleFactor);
+        addKeyFromSVG("End", 1189.5f, 181.5f, 69f, 69f, scaleFactor);
+        addKeyFromSVG("PageDown", 1261.5f, 181.5f, 69f, 69f, scaleFactor);
 
-        // Number row: 1-0 with additional keys
-        currentY -= KEY_HEIGHT + ROW_SPACING;
-        currentX = 0;
-        String[] numberKeys = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "ß", "´"};
-        for (String key : numberKeys) {
-            allKeys.add(new KeyboardKey(key, currentX, currentY, KEY_WIDTH));
-            currentX += KEY_WIDTH + KEY_SPACING;
-        }
+        // Arrow keys
+        addKeyFromSVG("Up", 1189.5f, 325.5f, 69f, 69f, scaleFactor);
+        addKeyFromSVG("Left", 1117.5f, 397.5f, 69f, 69f, scaleFactor);
+        addKeyFromSVG("Down", 1189.5f, 397.5f, 69f, 69f, scaleFactor);
+        addKeyFromSVG("Right", 1261.5f, 397.5f, 69f, 69f, scaleFactor);
+    }
 
-        // QWERTZ row (half a key to the right of 1)
-        currentY -= KEY_HEIGHT + ROW_SPACING;
-        currentX = KEY_WIDTH / 2;
-        String[] qwertzKeys = {"Q", "W", "E", "R", "T", "Z", "U", "I", "O", "P", "Ü", "+"};
-        for (String key : qwertzKeys) {
-            allKeys.add(new KeyboardKey(key, currentX, currentY, KEY_WIDTH));
-            currentX += KEY_WIDTH + KEY_SPACING;
-        }
+    private void addKeyFromSVG(String label, float svgX, float svgY, float svgWidth, float svgHeight, float scaleFactor) {
+        // Convert SVG coordinates to our coordinate system
+        // SVG Y coordinates are from top, but we want from bottom, so we need to flip Y
+        float x = svgX * scaleFactor;
+        float y = -svgY * scaleFactor; // Negative to flip Y coordinate
+        float width = svgWidth * scaleFactor;
 
-        // ASDF row (quarter a key width to the right of Q)
-        currentY -= KEY_HEIGHT + ROW_SPACING;
-        currentX = KEY_WIDTH / 2 + KEY_WIDTH / 4;
-        String[] asdfKeys = {"A", "S", "D", "F", "G", "H", "J", "K", "L", "Ö", "Ä", "#"};
-        for (String key : asdfKeys) {
-            allKeys.add(new KeyboardKey(key, currentX, currentY, KEY_WIDTH));
-            currentX += KEY_WIDTH + KEY_SPACING;
-        }
-
-        // YXCV row (3/4 a key width to the right of A)
-        currentY -= KEY_HEIGHT + ROW_SPACING;
-        currentX = KEY_WIDTH / 2 + KEY_WIDTH / 4 + KEY_WIDTH * 3 / 4;
-        String[] yxcvKeys = {"Y", "X", "C", "V", "B", "N", "M", ",", ".", "-"};
-        for (String key : yxcvKeys) {
-            allKeys.add(new KeyboardKey(key, currentX, currentY, KEY_WIDTH));
-            currentX += KEY_WIDTH + KEY_SPACING;
-        }
-
-        // Space bar (below X until after M)
-        currentY -= KEY_HEIGHT + ROW_SPACING;
-        float spaceStartX = KEY_WIDTH / 2 + KEY_WIDTH / 4 + KEY_WIDTH * 3 / 4 + KEY_WIDTH + KEY_SPACING; // Position after Y
-        float spaceEndX = KEY_WIDTH / 2 + KEY_WIDTH / 4 + KEY_WIDTH * 3 / 4 + (KEY_WIDTH + KEY_SPACING) * 7; // Position after M
-        float spaceWidth = spaceEndX - spaceStartX;
-        allKeys.add(new KeyboardKey("Space", spaceStartX, currentY, spaceWidth));
+        allKeys.add(new KeyboardKey(label, x, y, width));
     }
 
     private void calculateLayout() {
@@ -444,6 +481,12 @@ public class PauseScreen {
 
         // Audio commands
         addCommand("H", "Toggle HRTF", 700, 360);
+
+        // Arrow keys
+        addCommand("Up", "Move Up", 900, 400);
+        addCommand("Down", "Move Down", 900, 380);
+        addCommand("Left", "Move Left", 900, 360);
+        addCommand("Right", "Move Right", 900, 340);
     }
 
     private void addCommand(String key, String description, float descX, float descY) {
@@ -488,3 +531,4 @@ public class PauseScreen {
         }
     }
 }
+

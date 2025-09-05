@@ -192,9 +192,6 @@ public class PauseScreen {
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
         shapeRenderer.setColor(KEY_BORDER_COLOR);
 
-//        for (KeyboardKey key : allKeys) {
-//            drawRoundedRectOutline(keyboardStartX + key.relativeX, keyboardStartY + key.relativeY, key.width, key.height, 4f);
-//        }
         shapeRenderer.end();
 
         // Draw text on keys and descriptions
@@ -330,28 +327,6 @@ public class PauseScreen {
         shapeRenderer.circle(x + width - radius, y + height - radius, radius, 8); // Top-right
     }
 
-    /**
-     * Draw a rounded rectangle outline using the ShapeRenderer
-     */
-//    private void drawRoundedRectOutline(float x, float y, float width, float height, float radius) {
-//        width -= 1;
-//        height -= 1;
-//        // Clamp radius to not exceed half of width or height
-//        float maxRadius = Math.min(width / 2, height / 2);
-//        radius = Math.min(radius, maxRadius);
-//
-//        // Draw the four sides
-//        shapeRenderer.line(x + radius, y, x + width - radius, y); // Bottom
-//        shapeRenderer.line(x + radius, y + height, x + width - radius, y + height); // Top
-//        shapeRenderer.line(x, y + radius, x, y + height - radius); // Left
-//        shapeRenderer.line(x + width, y + radius, x + width, y + height - radius); // Right
-//
-//        // Draw corner arcs
-//        drawArc(x + radius, y + radius, radius, 180, 90); // Bottom-left
-//        drawArc(x + width - radius, y + radius, radius, 270, 90); // Bottom-right
-//        drawArc(x + radius, y + height - radius, radius, 90, 90); // Top-left
-//        drawArc(x + width - radius, y + height - radius, radius, 0, 90); // Top-right
-//    }
     private void initializeKeyboardCommands() {
         // ---------------------------------------------------------
         // Function keys

@@ -356,6 +356,7 @@ public class PauseScreen {
         // ---------------------------------------------------------
         // Function keys
         // ---------------------------------------------------------
+        addCommand("ESC", "Quit");
         addCommand("F1", "Gamma Correction");
         addCommand("F2", "Depth of Field");
         addCommand("F3", "Bokeh");
@@ -479,6 +480,7 @@ public class PauseScreen {
 
         float scaleFactor = 1f; // Reduced from 1f to make keyboard smaller and show proper spacing
         // Function keys row (F1-F12) - using inner rect coordinates (outer + 0.5) and dimensions (68x68)
+        addKeyFromSVG("ESC", 2f, 2f, 68f, 68f, scaleFactor);
         addKeyFromSVG("F1", 146f, 2f, 68f, 68f, scaleFactor);
         addKeyFromSVG("F2", 218f, 2f, 68f, 68f, scaleFactor);
         addKeyFromSVG("F3", 290f, 2f, 68f, 68f, scaleFactor);

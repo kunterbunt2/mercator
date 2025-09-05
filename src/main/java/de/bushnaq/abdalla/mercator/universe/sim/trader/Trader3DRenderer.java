@@ -29,7 +29,6 @@ import de.bushnaq.abdalla.mercator.desktop.LaunchMode;
 import de.bushnaq.abdalla.mercator.engine.GameEngine2D;
 import de.bushnaq.abdalla.mercator.engine.GameEngine3D;
 import de.bushnaq.abdalla.mercator.engine.audio.synthesis.MercatorSynthesizer;
-import de.bushnaq.abdalla.mercator.universe.Universe;
 import de.bushnaq.abdalla.mercator.universe.good.Good;
 import de.bushnaq.abdalla.mercator.universe.good.Good3DRenderer;
 import de.bushnaq.abdalla.mercator.universe.good.GoodType;
@@ -52,7 +51,6 @@ public class Trader3DRenderer extends ObjectRenderer<GameEngine3D> {
     private static final float                                         ANTENNA_LENGTH          = 8f;
     private static final int                                           DRAW_GOOD_FACTOR        = 5;// we only draw a portion of the actual good containers
     private static final int                                           NUMBER_OF_LIGHTS        = 4;
-    private static final int                                           NUMBER_OF_THRUSTERS     = 4;
     private static final float                                         PORT_HIGHT              = -128f;
     private static final float                                         TRADER_ANTENNA_MARGINE  = 1f;
     private static final float                                         TRADER_COCKPIT_SIZE_Z   = 16f;
@@ -60,18 +58,19 @@ public class Trader3DRenderer extends ObjectRenderer<GameEngine3D> {
     public static final  Color                                         TRADER_COLOR_IS_GOOD    = Color.LIGHT_GRAY; // 0xaaaaaa
     public static final  float                                         TRADER_DOCKING_HEIGHT   = -128f;
     private static final float                                         TRADER_ENGINE_SIZE_Z    = 2f;
-    private static final float                                         TRADER_EXTERNAL_SIZE_X  = 11 / Universe.WORLD_SCALE;
-    public static final  float                                         TRADER_EXTERNAL_SIZE_Y  = 1 / Universe.WORLD_SCALE;
+    public static final  float                                         TRADER_EXTERNAL_SIZE_X  = 5;//used to place thrusters and lights
+    public static final  float                                         TRADER_EXTERNAL_SIZE_Y  = 1;//used to place thrusters and lights
+    public static final  float                                         TRADER_EXTERNAL_SIZE_Z  = 10;//used to place thrusters and lights
     public static final  float                                         TRADER_FLIGHT_HEIGHT    = 4f;
     private static final Color                                         TRADER_NAME_COLOR       = Color.BLACK;//)new Color(0xffa500ff);
-    private static final float                                         TRADER_SIZE_X           = 1 / Universe.WORLD_SCALE;
-    public static final  float                                         TRADER_SIZE_Y           = 3 / Universe.WORLD_SCALE;
-    public static final  float                                         TRADER_SIZE_Z           = 11 / Universe.WORLD_SCALE;
+    public static final  float                                         TRADER_SIZE_X           = 1;//used to place cargo
+    public static final  float                                         TRADER_SIZE_Y           = 3;//used to place cargo
+    public static final  float                                         TRADER_SIZE_Z           = 11;//used to place cargo
     private static final float                                         TRADER_TRAVELING_HEIGHT = -TRADER_SIZE_Y / 2 + Planet3DRenderer.WATER_Y;
     public static final  float                                         TRADER_WIDTH            = 16f;
     final static         Vector3                                       xVectorNeg              = new Vector3(-1, 0, 0);
     final static         Vector3                                       yVectorNeg              = new Vector3(0, -1, 0);
-    static               float                                         TRADER_THRUSTER_MARGIN  = 2f;
+    static               float                                         TRADER_THRUSTER_MARGIN  = .2f;
     private final        Vector3                                       direction               = new Vector3();//intermediate value
     private final        List<GameObject<GameEngine3D>>                goodInstances           = new ArrayList<>();
     //    private              GameObject<GameEngine3D> instance1;
@@ -105,7 +104,7 @@ public class Trader3DRenderer extends ObjectRenderer<GameEngine3D> {
             createTrader(renderEngine);
             if (renderEngine.getGameEngine().launchMode == LaunchMode.development) velocityVector.create(renderEngine);
             createLights(renderEngine);
-            createThrusters(renderEngine);
+            trader.getManeuveringSystem().create(renderEngine.getGameEngine());
             createEngine(renderEngine);
             createGoods(renderEngine);
             synth = renderEngine.getGameEngine().audioEngine.createAudioProducer(MercatorSynthesizer.class, trader.getName() + "-synth");
@@ -165,37 +164,6 @@ public class Trader3DRenderer extends ObjectRenderer<GameEngine3D> {
         };
         for (int i = 0; i < NUMBER_OF_LIGHTS; i++) {
             strobeLights.add(new StrobeLight(renderEngine, delta[i], new GameObject<GameEngine3D>(new ModelInstanceHack(renderEngine.getGameEngine().assetManager.redEmissiveModel), null), new GameObject<GameEngine3D>(new ModelInstanceHack(renderEngine.getGameEngine().assetManager.redEmissiveBohkeyModel), null)));
-        }
-    }
-
-    private void createThrusters(final RenderEngine3D<GameEngine3D> renderEngine) {
-        final Vector3[] delta = {//
-                new Vector3(-TRADER_EXTERNAL_SIZE_X / 2 - TRADER_THRUSTER_MARGIN, 0, -TRADER_SIZE_Z / 2),//left, top, front
-                new Vector3(TRADER_EXTERNAL_SIZE_X / 2 + TRADER_THRUSTER_MARGIN, 0, TRADER_SIZE_Z / 2),//right, top, back
-                new Vector3(TRADER_EXTERNAL_SIZE_X / 2 + TRADER_THRUSTER_MARGIN, 0, -TRADER_SIZE_Z / 2),//right, top, front
-                new Vector3(-TRADER_EXTERNAL_SIZE_X / 2 - TRADER_THRUSTER_MARGIN, 0, TRADER_SIZE_Z / 2),//left, top, back
-        };
-        final Vector3[] direction = {//
-                new Vector3(xVectorNeg).scl(5f),//front/left/bottom
-                new Vector3(Vector3.X).scl(5f),//back/right/top
-                new Vector3(Vector3.X).scl(5f),//front/right/top
-                new Vector3(xVectorNeg).scl(5f),//back/left/bottom
-        };
-        final RotationDirection[] rotationDirection = {//
-                RotationDirection.CLOCKWISE,//front/left/bottom
-                RotationDirection.CLOCKWISE,//back/right/top
-                RotationDirection.COUNTER_CLOCKWISE,//front/right/top
-                RotationDirection.COUNTER_CLOCKWISE,//back/left/bottom
-        };
-        final float[] rotation = {//
-                180f,//front/left/bottom
-                0f,//back/right/top
-                0f,//front/right/top
-                180f,//back/left/bottom
-        };
-        trader.getManeuveringSystem().create(renderEngine.getGameEngine().getAudioEngine());
-        for (int i = 0; i < NUMBER_OF_THRUSTERS; i++) {
-            trader.getManeuveringSystem().getThrusters().add(new Thruster(renderEngine, delta[i], direction[i], rotationDirection[i], rotation[i], new GameObject<GameEngine3D>(new ModelInstanceHack(renderEngine.getGameEngine().assetManager.flame.scene.model), trader)));
         }
     }
 

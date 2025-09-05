@@ -29,34 +29,35 @@ import de.bushnaq.abdalla.mercator.engine.GameEngine3D;
 import net.mgsx.gltf.scene3d.attributes.PBRColorAttribute;
 
 public class Thruster {
-    public static final  float                    LIGHT_MAX_INTENSITY          = 600f;
-    public static final  float                    LIGHT_MIN_INTENSITY          = 500f;
+    public static final  float                    LIGHT_DISTANCE               = 2f;
+    public static final  float                    LIGHT_MAX_INTENSITY          = 60f;
+    public static final  float                    LIGHT_MIN_INTENSITY          = 50f;
     public static final  float                    LIGHT_OFF_DURATION_AVERAGE   = 0.2f;
     public static final  float                    LIGHT_OFF_DURATION_DEVIATION = 0.1f;
     public static final  float                    LIGHT_ON_DURATION            = 0.1f;
     public static final  float                    LIGHT_SIZE                   = .2f;
+    private static final float                    PY2                          = 3.14159f / 2;
     final static         Vector3                  xVector                      = new Vector3(1, 0, 0);
     final static         Vector3                  yVector                      = new Vector3(0, 1, 0);
     final static         Vector3                  zVector                      = new Vector3(0, 0, 1);
-    private static final float                    PY2                          = 3.14159f / 2;
-    public final         GameObject<GameEngine3D> gameObject;
-    public final         PointLight               pointLight;
-    private final        Vector3                  lightScaling                 = new Vector3(LIGHT_SIZE, LIGHT_SIZE, LIGHT_SIZE);
-    private final        float                    rotation;
-    private final        RotationDirection        rotationDirection;
     public               Vector3                  delta                        = new Vector3();
-    public               Vector3                  direction                    = new Vector3();
-    public               int                      lightMode                    = 0;
-    public               float                    lightTimer                   = 0;
+    //    public               Vector3                  direction                    = new Vector3();
+    public final         GameObject<GameEngine3D> gameObject;
     private              boolean                  gameObjectAdded              = false;
+    public               int                      lightMode                    = 0;
+    private final        Vector3                  lightScaling                 = new Vector3(LIGHT_SIZE, LIGHT_SIZE, LIGHT_SIZE);
+    public               float                    lightTimer                   = 0;
+    public final         PointLight               pointLight;
+    private final        Vector3                  rotation                     = new Vector3();
+    private final        RotationDirection        rotationDirection;
 
-    public Thruster(RenderEngine3D<GameEngine3D> renderEngine, Vector3 delta, Vector3 direction, RotationDirection rotationDirection, float rotation, GameObject<GameEngine3D> gameObject) {
+    public Thruster(RenderEngine3D<GameEngine3D> renderEngine, Vector3 delta, RotationDirection rotationDirection, Vector3 rotation, GameObject<GameEngine3D> gameObject) {
         this.delta.set(delta);
-        this.direction.set(direction);
+//        this.direction.set(direction);
         this.rotationDirection = rotationDirection;
-        this.rotation          = rotation;
-        this.gameObject        = gameObject;
-        this.pointLight        = new PointLight();
+        this.rotation.set(rotation);
+        this.gameObject = gameObject;
+        this.pointLight = new PointLight();
     }
 
     private void animate(RenderEngine3D<GameEngine3D> renderEngine) {
@@ -150,15 +151,15 @@ public class Thruster {
             gameObject.instance.transform.rotate(yVector, rotation);
             gameObject.instance.transform.translate(delta);
             float factor = 2;
-            gameObject.instance.transform.rotate(Vector3.Y, this.rotation + factor - (float) Math.random() * factor * 2);
-            gameObject.instance.transform.rotate(Vector3.Z, factor - (float) Math.random() * factor * 2);
-            gameObject.instance.transform.rotate(Vector3.X, factor - (float) Math.random() * factor * 2);
-//            gameObject.instance.transform.scale(scaling.x, scaling.y, scaling.z);
+            gameObject.instance.transform.rotate(Vector3.Y, this.rotation.y + factor - (float) Math.random() * factor * 2);
+            gameObject.instance.transform.rotate(Vector3.Z, this.rotation.z + factor - (float) Math.random() * factor * 2);
+            gameObject.instance.transform.rotate(Vector3.X, this.rotation.x + factor - (float) Math.random() * factor * 2);
+            gameObject.instance.transform.scale(0.2f, 0.2f, 0.2f);
             gameObject.update();
             final float intensity        = calculateIntensity();
             Vector3     lightTranslation = new Vector3();
             gameObject.instance.transform.getTranslation(lightTranslation);
-            pointLight.set(Color.WHITE, lightTranslation.x + 0.2f, lightTranslation.y, lightTranslation.z, intensity);
+            pointLight.set(Color.WHITE, lightTranslation.x, lightTranslation.y, lightTranslation.z, intensity);
         } else {
             on = false;
             if (gameObjectAdded) {

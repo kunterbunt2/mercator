@@ -53,6 +53,7 @@ Then you can start mercator by one of its starting classes
 
 ## Issues
 
+- tts ignoring pause.
 - no way to see selected station or trader
 - trader acceleration is not constant, why?
 - light bokeh grows too fast with distance

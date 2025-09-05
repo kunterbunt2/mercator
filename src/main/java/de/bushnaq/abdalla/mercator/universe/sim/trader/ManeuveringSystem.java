@@ -19,19 +19,23 @@ package de.bushnaq.abdalla.mercator.universe.sim.trader;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import de.bushnaq.abdalla.engine.GameObject;
 import de.bushnaq.abdalla.engine.RenderEngine3D;
-import de.bushnaq.abdalla.engine.audio.AudioEngine;
 import de.bushnaq.abdalla.engine.audio.OggPlayer;
 import de.bushnaq.abdalla.engine.audio.OpenAlException;
 import de.bushnaq.abdalla.mercator.engine.AtlasManager;
 import de.bushnaq.abdalla.mercator.engine.GameEngine3D;
 import de.bushnaq.abdalla.mercator.universe.good.Good;
 import de.bushnaq.abdalla.mercator.universe.path.Waypoint;
+import lombok.Getter;
+import net.mgsx.gltf.scene3d.model.ModelInstanceHack;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static de.bushnaq.abdalla.mercator.universe.sim.trader.Trader3DRenderer.*;
 
 /**
  * thrusters for rotational maneuvering
@@ -39,6 +43,7 @@ import java.util.List;
 public class ManeuveringSystem {
     public static final  float                MAX_ROTATION_SPEED   = 15;
     public static final  float                MIN_ROTATION_SPEED   = 0.1f;
+    private static final int                  NUMBER_OF_THRUSTERS  = 4;
     private static final float                THRUSTER_FORCE       = 0.8f;//newton
     final static         Vector2              zVector              = new Vector2(0, -1);
     private              float                endRotation          = 90;
@@ -51,6 +56,7 @@ public class ManeuveringSystem {
     private              RotationDirection    rotationDirection;
     public               float                rotationSpeed        = 0;
     private              float                startRotation        = 1000;
+    @Getter
     private final        List<Thruster>       thrusters            = new ArrayList<>();
     private final        Trader               trader;
     private final        float[]              velocity             = new float[3];
@@ -153,9 +159,9 @@ public class ManeuveringSystem {
         }
     }
 
-    public void create(AudioEngine audioEngine) {
+    public void create(GameEngine3D gameEngine) {
         try {
-            oggPlayer = audioEngine.createAudioProducer(OggPlayer.class, trader.getName() + "-maneuvering-system");
+            oggPlayer = gameEngine.audioEngine.createAudioProducer(OggPlayer.class, trader.getName() + "-maneuvering-system");
             oggPlayer.setFile(Gdx.files.internal(AtlasManager.getAssetsFolderName() + "/audio/thrusters_loop.ogg"));
             oggPlayer.setGain(100.0f);
             oggPlayer.setAmbient(false);
@@ -164,6 +170,37 @@ public class ManeuveringSystem {
             oggPlayer.ignore(true);
         } catch (OpenAlException e) {
             throw new RuntimeException(e);
+        }
+        createThrusters(gameEngine.renderEngine);
+    }
+
+    private void createThrusters(final RenderEngine3D<GameEngine3D> renderEngine) {
+        final Vector3[] delta = {//
+                new Vector3(-TRADER_EXTERNAL_SIZE_X / 2 - TRADER_THRUSTER_MARGIN, 0, -TRADER_EXTERNAL_SIZE_Z / 2),//left, top, front
+                new Vector3(TRADER_EXTERNAL_SIZE_X / 2 + TRADER_THRUSTER_MARGIN, 0, TRADER_EXTERNAL_SIZE_Z / 2),//right, top, back
+                new Vector3(TRADER_EXTERNAL_SIZE_X / 2 + TRADER_THRUSTER_MARGIN, 0, -TRADER_EXTERNAL_SIZE_Z / 2),//right, top, front
+                new Vector3(-TRADER_EXTERNAL_SIZE_X / 2 - TRADER_THRUSTER_MARGIN, 0, TRADER_EXTERNAL_SIZE_Z / 2),//left, top, back
+        };
+//        final Vector3[] direction = {//
+//                new Vector3(xVectorNeg).scl(1f),//front/left/bottom
+//                new Vector3(Vector3.X).scl(1f),//back/right/top
+//                new Vector3(Vector3.X).scl(1f),//front/right/top
+//                new Vector3(xVectorNeg).scl(1f),//back/left/bottom
+//        };
+        final RotationDirection[] rotationDirection = {//
+                RotationDirection.CLOCKWISE,//front/left/bottom
+                RotationDirection.CLOCKWISE,//back/right/top
+                RotationDirection.COUNTER_CLOCKWISE,//front/right/top
+                RotationDirection.COUNTER_CLOCKWISE,//back/left/bottom
+        };
+        final Vector3[] rotation = {//
+                new Vector3(0, 180f, 0),//front/left/bottom
+                new Vector3(0, 0f, 0),//back/right/top
+                new Vector3(0, 0f, 0),//front/right/top
+                new Vector3(0, 180f, 0),//back/left/bottom
+        };
+        for (int i = 0; i < NUMBER_OF_THRUSTERS; i++) {
+            trader.getManeuveringSystem().getThrusters().add(new Thruster(renderEngine, delta[i]/*, direction[i]*/, rotationDirection[i], rotation[i], new GameObject<GameEngine3D>(new ModelInstanceHack(renderEngine.getGameEngine().assetManager.flame.scene.model), trader)));
         }
     }
 
@@ -184,10 +221,6 @@ public class ManeuveringSystem {
 //            if (Debug.isFilter(trader.getName()))
 //                logger.info("not-end");
         }
-    }
-
-    public List<Thruster> getThrusters() {
-        return thrusters;
     }
 
     private void normalizeRotation() {

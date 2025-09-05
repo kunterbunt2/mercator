@@ -311,7 +311,7 @@ public class Trader3DRenderer extends ObjectRenderer<GameEngine3D> {
     @Override
     public void renderText(final RenderEngine3D<GameEngine3D> renderEngine, final int index, final boolean selected) {
 //        renderTextOnTop(renderEngine, 0, 0, trader.getName().substring(2), TRADER_ENGINE_SIZE_Z);//old name
-        renderTextOnTop(renderEngine, 0, 0, trader.getName(), (4 / (float) trader.getName().length()));
+        renderTextOnTop(renderEngine, 0, 0, trader.getName(), 1);
         if (renderEngine.isDebugMode()) {
 //            renderTextOnTop(renderEngine, -6, -5f, "" + (int) velocity[0], 3);//x speed
 //            renderTextOnTop(renderEngine, 6, -5f, "" + (int) velocity[2], 3);//z speed
@@ -348,7 +348,7 @@ public class Trader3DRenderer extends ObjectRenderer<GameEngine3D> {
 
     private void renderTextOnTop(final RenderEngine3D<GameEngine3D> renderEngine, final float dx, final float dy, final String text, final float size) {
         final BitmapFont font = renderEngine.getGameEngine().getAtlasManager().bold256Font;
-        renderEngine.renderEngine25D.renderTextCenterOnTop(translation, trader.getManeuveringSystem().rotation, dx, TRADER_EXTERNAL_SIZE_Y / 2.0f + SPACE_BETWEEN_OBJECTS, dy - (+TRADER_SIZE_Z / 2 - TRADER_ENGINE_SIZE_Z + (TRADER_ENGINE_SIZE_Z / 2)), font, Color.BLACK, TRADER_NAME_COLOR, text, size);
+        renderEngine.renderEngine25D.renderTextCenterOnTop(translation, trader.getManeuveringSystem().rotation + 90, dx, TRADER_EXTERNAL_SIZE_Y / 2.0f + SPACE_BETWEEN_OBJECTS, dy, font, Color.BLACK, TRADER_NAME_COLOR, text, size);
     }
 
     private float toOneDigitPrecision(final float value) {

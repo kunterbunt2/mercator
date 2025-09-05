@@ -22,7 +22,9 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
-import de.bushnaq.abdalla.engine.*;
+import de.bushnaq.abdalla.engine.GameObject;
+import de.bushnaq.abdalla.engine.ObjectRenderer;
+import de.bushnaq.abdalla.engine.RenderEngine3D;
 import de.bushnaq.abdalla.mercator.desktop.LaunchMode;
 import de.bushnaq.abdalla.mercator.engine.GameEngine2D;
 import de.bushnaq.abdalla.mercator.engine.GameEngine3D;
@@ -263,48 +265,48 @@ public class Trader3DRenderer extends ObjectRenderer<GameEngine3D> {
 
             TextureAtlas.AtlasRegion systemTextureRegion = renderEngine.getGameEngine().getAtlasManager().systemTextureRegion;
 //            renderEngine.renderEngine25D.fillCircle(systemTextureRegion, 0, 0, TRADER_SIZE_Z, 128, new Color(.2f, .2f, .4f, 0.2f));
-            renderEngine.renderEngine25D.circle(renderEngine.getGameEngine().getAtlasManager().patternCircle24, 0, 0, TRADER_SIZE_Z - .5f, 1f, new Color(.9f, .9f, .9f, .5f), 128);
-            if (renderEngine.getGameEngine().getCameraZoomIndex() < 3) renderEngine.renderEngine25D.renderRose(systemTextureRegion, renderEngine.getGameEngine().getAtlasManager().modelFont, translation, TRADER_SIZE_Z / 2, -TRADER_SIZE_Y);
-            BitmapFont modelFont = renderEngine.getGameEngine().getAtlasManager().modelFont;
-            if (trader.navigator.destinationPlanet != null) {
-                String name  = trader.getName();
-                String value = String.format("%.0f credits", trader.getCredits());
-                renderEngine.renderEngine25D.label(translation, rotation, systemTextureRegion, 0, TRADER_EXTERNAL_SIZE_Y / 2, -TRADER_SIZE_Z / 2, TRADER_SIZE_Z * .75f, HAlignment.RIGHT, VAlignment.TOP, 0.2f, modelFont, Color.WHITE, name, TRADER_NAME_COLOR, value, Color.YELLOW);
-            }
-            if (trader.navigator.destinationPlanet != null) {
-                if (trader.getTraderStatus() == TraderStatus.TRADER_STATUS_SELLING) {
-                    String name  = "Selling";
-                    String value = String.format("from %s to %s", trader.planet.getName(), trader.navigator.destinationPlanet.getName());
-                    renderEngine.renderEngine25D.label(translation, rotation, systemTextureRegion, 0, TRADER_EXTERNAL_SIZE_Y / 2, -TRADER_SIZE_Z / 2, TRADER_SIZE_Z * .75f, HAlignment.LEFT, VAlignment.TOP, 0.2f, modelFont, Color.WHITE, name, TRADER_NAME_COLOR, value, Color.YELLOW);
-                } else if (trader.getTraderStatus() == TraderStatus.TRADER_STATUS_BUYING) {
-                    String name  = "Buying";
-                    String value = String.format("from %s", trader.navigator.destinationPlanet.getName());
-                    renderEngine.renderEngine25D.label(translation, rotation, systemTextureRegion, 0, TRADER_EXTERNAL_SIZE_Y / 2, -TRADER_SIZE_Z / 2, TRADER_SIZE_Z * .75f, HAlignment.RIGHT, VAlignment.TOP, 0.2f, modelFont, Color.WHITE, name, TRADER_NAME_COLOR, value, Color.YELLOW);
-                }
-            }
-            if (!trader.getGoodList().isEmpty()) {
-                for (Good good : trader.getGoodList()) {
-                    if (good.getAmount() > 0) {
-                        String name  = good.type.getName();
-                        String value = String.format("%d kt", good.getAmount());
-                        renderEngine.renderEngine25D.label(translation, rotation, systemTextureRegion, 0, TRADER_EXTERNAL_SIZE_Y / 2, 0, TRADER_SIZE_Z * .75f, HAlignment.RIGHT, VAlignment.TOP, 0.2f, modelFont, Color.WHITE, name, TRADER_NAME_COLOR, value, Color.YELLOW);
-                    }
-                }
-            }
-            {
-                String value = String.format("%.1f °", trader.getManeuveringSystem().rotation);
-                renderEngine.renderEngine25D.label(translation, rotation, systemTextureRegion, 0, TRADER_EXTERNAL_SIZE_Y / 2, 0, TRADER_SIZE_Z * .75f, HAlignment.LEFT, VAlignment.TOP, 0.2f, modelFont, Color.WHITE, "Heading", TRADER_NAME_COLOR, value, Color.YELLOW);
-            }
-            if (trader.getTraderSubStatus() == TraderSubStatus.TRADER_STATUS_ALIGNING) {
-                String value = String.format("%.1f °/s", trader.getManeuveringSystem().rotationSpeed);
-                renderEngine.renderEngine25D.label(translation, rotation, systemTextureRegion, 0, TRADER_EXTERNAL_SIZE_Y / 2, TRADER_SIZE_Z / 2, TRADER_SIZE_Z * .75f, HAlignment.LEFT, VAlignment.BOTTOM, 0.2f, modelFont, Color.WHITE, "Aligning", TRADER_NAME_COLOR, value, Color.YELLOW);
-            } else if (trader.getTraderSubStatus() == TraderSubStatus.TRADER_STATUS_ACCELERATING) {
-                String value = String.format("%.1f m/s", trader.getEngine().getEngineSpeed() * Engine.ENGINE_TO_REALITY_FACTOR);
-                renderEngine.renderEngine25D.label(translation, rotation, systemTextureRegion, 0, TRADER_EXTERNAL_SIZE_Y / 2, TRADER_SIZE_Z / 2, TRADER_SIZE_Z * .75f, HAlignment.RIGHT, VAlignment.BOTTOM, 0.2f, modelFont, Color.WHITE, "Accelerating", TRADER_NAME_COLOR, value, Color.YELLOW);
-            } else if (trader.getTraderSubStatus() == TraderSubStatus.TRADER_STATUS_DECELERATING) {
-                String value = String.format("%.1f m/s", trader.getEngine().getEngineSpeed() * Engine.ENGINE_TO_REALITY_FACTOR);
-                renderEngine.renderEngine25D.label(translation, rotation, systemTextureRegion, 0, TRADER_EXTERNAL_SIZE_Y / 2, TRADER_SIZE_Z / 2, TRADER_SIZE_Z * .75f, HAlignment.RIGHT, VAlignment.BOTTOM, 0.2f, modelFont, Color.WHITE, "Decelerating", TRADER_NAME_COLOR, value, Color.YELLOW);
-            }
+//            renderEngine.renderEngine25D.circle(renderEngine.getGameEngine().getAtlasManager().patternCircle24, 0, 0, TRADER_SIZE_Z - .5f, 1f, new Color(.9f, .9f, .9f, .5f), 128);
+//            if (renderEngine.getGameEngine().getCameraZoomIndex() < 3) renderEngine.renderEngine25D.renderRose(systemTextureRegion, renderEngine.getGameEngine().getAtlasManager().modelFont, translation, TRADER_SIZE_Z / 2, -TRADER_SIZE_Y);
+//            BitmapFont modelFont = renderEngine.getGameEngine().getAtlasManager().modelFont;
+//            if (trader.navigator.destinationPlanet != null) {
+//                String name  = trader.getName();
+//                String value = String.format("%.0f credits", trader.getCredits());
+//                renderEngine.renderEngine25D.label(translation, rotation, systemTextureRegion, 0, TRADER_EXTERNAL_SIZE_Y / 2, -TRADER_SIZE_Z / 2, TRADER_SIZE_Z * .75f, HAlignment.RIGHT, VAlignment.TOP, 0.2f, modelFont, Color.WHITE, name, TRADER_NAME_COLOR, value, Color.YELLOW);
+//            }
+//            if (trader.navigator.destinationPlanet != null) {
+//                if (trader.getTraderStatus() == TraderStatus.TRADER_STATUS_SELLING) {
+//                    String name  = "Selling";
+//                    String value = String.format("from %s to %s", trader.planet.getName(), trader.navigator.destinationPlanet.getName());
+//                    renderEngine.renderEngine25D.label(translation, rotation, systemTextureRegion, 0, TRADER_EXTERNAL_SIZE_Y / 2, -TRADER_SIZE_Z / 2, TRADER_SIZE_Z * .75f, HAlignment.LEFT, VAlignment.TOP, 0.2f, modelFont, Color.WHITE, name, TRADER_NAME_COLOR, value, Color.YELLOW);
+//                } else if (trader.getTraderStatus() == TraderStatus.TRADER_STATUS_BUYING) {
+//                    String name  = "Buying";
+//                    String value = String.format("from %s", trader.navigator.destinationPlanet.getName());
+//                    renderEngine.renderEngine25D.label(translation, rotation, systemTextureRegion, 0, TRADER_EXTERNAL_SIZE_Y / 2, -TRADER_SIZE_Z / 2, TRADER_SIZE_Z * .75f, HAlignment.RIGHT, VAlignment.TOP, 0.2f, modelFont, Color.WHITE, name, TRADER_NAME_COLOR, value, Color.YELLOW);
+//                }
+//            }
+//            if (!trader.getGoodList().isEmpty()) {
+//                for (Good good : trader.getGoodList()) {
+//                    if (good.getAmount() > 0) {
+//                        String name  = good.type.getName();
+//                        String value = String.format("%d kt", good.getAmount());
+//                        renderEngine.renderEngine25D.label(translation, rotation, systemTextureRegion, 0, TRADER_EXTERNAL_SIZE_Y / 2, 0, TRADER_SIZE_Z * .75f, HAlignment.RIGHT, VAlignment.TOP, 0.2f, modelFont, Color.WHITE, name, TRADER_NAME_COLOR, value, Color.YELLOW);
+//                    }
+//                }
+//            }
+//            {
+//                String value = String.format("%.1f °", trader.getManeuveringSystem().rotation);
+//                renderEngine.renderEngine25D.label(translation, rotation, systemTextureRegion, 0, TRADER_EXTERNAL_SIZE_Y / 2, 0, TRADER_SIZE_Z * .75f, HAlignment.LEFT, VAlignment.TOP, 0.2f, modelFont, Color.WHITE, "Heading", TRADER_NAME_COLOR, value, Color.YELLOW);
+//            }
+//            if (trader.getTraderSubStatus() == TraderSubStatus.TRADER_STATUS_ALIGNING) {
+//                String value = String.format("%.1f °/s", trader.getManeuveringSystem().rotationSpeed);
+//                renderEngine.renderEngine25D.label(translation, rotation, systemTextureRegion, 0, TRADER_EXTERNAL_SIZE_Y / 2, TRADER_SIZE_Z / 2, TRADER_SIZE_Z * .75f, HAlignment.LEFT, VAlignment.BOTTOM, 0.2f, modelFont, Color.WHITE, "Aligning", TRADER_NAME_COLOR, value, Color.YELLOW);
+//            } else if (trader.getTraderSubStatus() == TraderSubStatus.TRADER_STATUS_ACCELERATING) {
+//                String value = String.format("%.1f m/s", trader.getEngine().getEngineSpeed() * Engine.ENGINE_TO_REALITY_FACTOR);
+//                renderEngine.renderEngine25D.label(translation, rotation, systemTextureRegion, 0, TRADER_EXTERNAL_SIZE_Y / 2, TRADER_SIZE_Z / 2, TRADER_SIZE_Z * .75f, HAlignment.RIGHT, VAlignment.BOTTOM, 0.2f, modelFont, Color.WHITE, "Accelerating", TRADER_NAME_COLOR, value, Color.YELLOW);
+//            } else if (trader.getTraderSubStatus() == TraderSubStatus.TRADER_STATUS_DECELERATING) {
+//                String value = String.format("%.1f m/s", trader.getEngine().getEngineSpeed() * Engine.ENGINE_TO_REALITY_FACTOR);
+//                renderEngine.renderEngine25D.label(translation, rotation, systemTextureRegion, 0, TRADER_EXTERNAL_SIZE_Y / 2, TRADER_SIZE_Z / 2, TRADER_SIZE_Z * .75f, HAlignment.RIGHT, VAlignment.BOTTOM, 0.2f, modelFont, Color.WHITE, "Decelerating", TRADER_NAME_COLOR, value, Color.YELLOW);
+//            }
         }
     }
 

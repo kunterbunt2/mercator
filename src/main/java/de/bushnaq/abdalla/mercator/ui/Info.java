@@ -295,7 +295,7 @@ public class Info {
             updateNameAndValue("anual export credits", planet.getHistoryManager().getAnualExportCredits(), VARIABLE_LABEL);
             updateNameAndValue("anual local credits earned", planet.getHistoryManager().getAnualLocalCreditsEarned(), VARIABLE_LABEL);
             updateNameAndValue("anual local credits spent", planet.getHistoryManager().getAnualLocalCreditsSpent(), VARIABLE_LABEL);
-            updateWidgets("Planet");
+            updateWidgets("Station");
             checkSize(size);
         }
     }

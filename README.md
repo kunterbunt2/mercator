@@ -53,7 +53,8 @@ Then you can start mercator by one of its starting classes
 
 ## Issues
 
-- remove trader detailed info in 3D as it does not go well with depth of field effect.
+- no way to see selected station or trader
+- trader acceleration is not constant, why?
 - light bokeh grows too fast with distance
 - there should be the possibility to select a ship but still hear the station chat
 - factory goods keep making static cache dirty

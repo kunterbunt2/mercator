@@ -284,7 +284,7 @@ public class PauseScreen {
         }
         shapeRenderer.end();
 
-        // Draw key borders and connecting lines
+        // Draw key borders only (no connecting lines)
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
         shapeRenderer.setColor(KEY_BORDER_COLOR);
 
@@ -296,23 +296,6 @@ public class PauseScreen {
                     key.width,
                     KEY_HEIGHT
             );
-
-            // Draw connecting line if this key has a command
-            KeyboardCommand command = commands.get(key.label);
-            if (command != null) {
-                shapeRenderer.setColor(LINE_COLOR);
-                float keyCenter = keyboardStartX + key.relativeX + key.width;
-                float keyCenterY = keyboardStartY + key.relativeY + KEY_HEIGHT / 2;
-
-                shapeRenderer.line(
-                        keyCenter,
-                        keyCenterY,
-                        command.descriptionPosition.x - 5,
-                        command.descriptionPosition.y
-                );
-
-                shapeRenderer.setColor(KEY_BORDER_COLOR);
-            }
         }
         shapeRenderer.end();
 
@@ -320,37 +303,108 @@ public class PauseScreen {
         stage.getBatch().begin();
 
         for (KeyboardKey key : allKeys) {
-            // Draw key text with larger font
+            // Draw key label in top-left corner
             atlasManager.menuBoldFont.setColor(Color.WHITE);
-            atlasManager.menuBoldFont.getData().setScale(1.5f); // Make font 1.5x larger
+            atlasManager.menuBoldFont.getData().setScale(1.2f); // Slightly smaller for better fit
 
-            // Calculate proper text positioning using GlyphLayout for accurate centering
-            com.badlogic.gdx.graphics.g2d.GlyphLayout layout = new com.badlogic.gdx.graphics.g2d.GlyphLayout();
-            layout.setText(atlasManager.menuBoldFont, key.label);
-
-            float textX = keyboardStartX + key.relativeX + (key.width - layout.width) / 2;
-            float textY = keyboardStartY + key.relativeY + (KEY_HEIGHT + layout.height) / 2;
+            float labelX = keyboardStartX + key.relativeX + 4; // Small padding from left edge
+            float labelY = keyboardStartY + key.relativeY + KEY_HEIGHT - 8; // Near top edge
 
             atlasManager.menuBoldFont.draw(
                     stage.getBatch(),
                     key.label,
-                    textX,
-                    textY
+                    labelX,
+                    labelY
             );
 
-            // Reset font scale for descriptions
+            // Reset font scale
             atlasManager.menuBoldFont.getData().setScale(1.0f);
 
-            // Draw description if this key has a command
+            // Draw command description in bottom-left corner if this key has a command
             KeyboardCommand command = commands.get(key.label);
             if (command != null) {
                 atlasManager.menuFont.setColor(DESCRIPTION_COLOR);
-                atlasManager.menuFont.draw(
-                        stage.getBatch(),
-                        command.description,
-                        command.descriptionPosition.x,
-                        command.descriptionPosition.y
-                );
+                atlasManager.menuFont.getData().setScale(1.0f); // Larger font for descriptions
+
+                float descX = keyboardStartX + key.relativeX + 4; // Same padding as label
+                float lineHeight = 14f;
+
+                // First, determine how many lines we need
+                String[] words = command.description.split(" ");
+                StringBuilder currentLine = new StringBuilder();
+                int totalLines = 0;
+                float maxLines = 3; // Maximum lines that fit in the key
+
+                // Count total lines needed
+                for (String word : words) {
+                    String testLine = currentLine.length() > 0 ? currentLine + " " + word : word;
+
+                    // Check if the line would be too wide for the key
+                    com.badlogic.gdx.graphics.g2d.GlyphLayout testLayout = new com.badlogic.gdx.graphics.g2d.GlyphLayout();
+                    testLayout.setText(atlasManager.menuFont, testLine);
+
+                    if (testLayout.width > key.width - 8 && currentLine.length() > 0) {
+                        totalLines++;
+                        currentLine = new StringBuilder(word);
+                    } else {
+                        currentLine = new StringBuilder(testLine);
+                    }
+                }
+                if (currentLine.length() > 0) {
+                    totalLines++;
+                }
+
+                // Now draw the lines, starting from bottom for single line, moving up for multi-line
+                currentLine = new StringBuilder();
+                int lineCount = 0;
+                float startY;
+
+                if (totalLines == 1) {
+                    // Single line: position at bottom of key
+                    startY = keyboardStartY + key.relativeY + 16;
+                } else {
+                    // Multi-line: start higher up to fit all lines
+                    startY = keyboardStartY + key.relativeY + 16 + (totalLines - 1) * lineHeight;
+                }
+
+                for (String word : words) {
+                    String testLine = currentLine.length() > 0 ? currentLine + " " + word : word;
+
+                    // Check if the line would be too wide for the key
+                    com.badlogic.gdx.graphics.g2d.GlyphLayout testLayout = new com.badlogic.gdx.graphics.g2d.GlyphLayout();
+                    testLayout.setText(atlasManager.menuFont, testLine);
+
+                    if (testLayout.width > key.width - 8 && currentLine.length() > 0) {
+                        // Draw current line
+                        if (lineCount < maxLines) {
+                            float descY = startY - (lineCount * lineHeight);
+                            atlasManager.menuFont.draw(
+                                    stage.getBatch(),
+                                    currentLine.toString(),
+                                    descX,
+                                    descY
+                            );
+                        }
+                        currentLine = new StringBuilder(word);
+                        lineCount++;
+                    } else {
+                        currentLine = new StringBuilder(testLine);
+                    }
+                }
+
+                // Draw the last line
+                if (currentLine.length() > 0 && lineCount < maxLines) {
+                    float descY = startY - (lineCount * lineHeight);
+                    atlasManager.menuFont.draw(
+                            stage.getBatch(),
+                            currentLine.toString(),
+                            descX,
+                            descY
+                    );
+                }
+
+                // Reset font scale
+                atlasManager.menuFont.getData().setScale(1.0f);
             }
         }
 

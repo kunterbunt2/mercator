@@ -46,6 +46,7 @@ import de.bushnaq.abdalla.mercator.engine.demo.Demo2;
 import de.bushnaq.abdalla.mercator.renderer.ScreenListener;
 import de.bushnaq.abdalla.mercator.renderer.ShowGood;
 import de.bushnaq.abdalla.mercator.ui.Info;
+import de.bushnaq.abdalla.mercator.ui.PauseScreen;
 import de.bushnaq.abdalla.mercator.universe.Universe;
 import de.bushnaq.abdalla.mercator.universe.good.Good;
 import de.bushnaq.abdalla.mercator.universe.land.Land;
@@ -156,6 +157,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
     private final        Logger                            logger                          = LoggerFactory.getLogger(this.getClass());
     public               OggPlayer                         oggPlayer;
     private final        boolean                           old                             = true;
+    private              PauseScreen                       pauseScreen;
     public               RenderEngine3D<GameEngine3D>      renderEngine;
     @Getter
     @Setter
@@ -273,6 +275,8 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
             assetManager.create();
             createEnvironment();
             createStage();
+            pauseScreen = new PauseScreen(this, atlasManager);
+
             audioEngine.create(AtlasManager.getAssetsFolderName());
             audioEngine.enableHrtf(0);
             audioEngine.radio.loadResource(this.getClass());
@@ -822,6 +826,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
                 exit();
                 return true;
             case Input.Keys.PAUSE:
+            case Input.Keys.SPACE:
                 assetManager.universe.setEnableTime(!assetManager.universe.isEnableTime());
                 return true;
             case Input.Keys.PRINT_SCREEN:
@@ -1103,9 +1108,11 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
         demo1.renderDemo(deltaTime);
         demo2.renderDemo(deltaTime);
         subtitles.render(deltaTime);
+        pauseScreen.render(deltaTime);
         renderEngine.renderEngine2D.batch.end();
 
         renderEngine.gpuGraph.end();
+
         renderStage();
         renderEngine.handleQueuedScreenshot(takeScreenShot);
         takeScreenShot = false;

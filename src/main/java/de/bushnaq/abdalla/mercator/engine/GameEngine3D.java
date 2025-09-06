@@ -233,14 +233,14 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
             renderEngine = new RenderEngine3D<GameEngine3D>(context, this, camera, camera2D, getAtlasManager().menuFont, getAtlasManager().menuBoldFont, getAtlasManager().systemTextureRegion);
             renderEngine.setSceneBoxMin(new Vector3(-500, -500, -500));
             renderEngine.setSceneBoxMax(new Vector3(1000, 0, 1000));
-            renderEngine.getWater().setPresent(false);
+//            renderEngine.getWater().setPresent(false);
 //            renderEngine.getWater().setWaterLevel(-10f);
 //            renderEngine.getWater().setTiling(universe.size * 2 * 4 * 2 * 4 / Universe.WORLD_SCALE);
 //            renderEngine.getWater().setWaveStrength(0.01f / Universe.WORLD_SCALE);
 //            renderEngine.getWater().setWaveSpeed(0.01f);
 //            renderEngine.getWater().setRefractiveMultiplicator(1f);
 //            renderEngine.getMirror().setPresent(false);
-//            renderEngine.getMirror().setMirrorLevel(-12f);
+//            renderEngine.getMirror().setMirrorLevel(13.5f);
 //            renderEngine.getMirror().setReflectivity(0.2f);
 //            renderEngine.setReflectionClippingPlane(-(context.getWaterLevel() - 2));
 //            renderEngine.setRefractionClippingPlane((context.getWaterLevel() - 2));

@@ -59,7 +59,7 @@ public class Trader3DRenderer extends ObjectRenderer<GameEngine3D> {
     public static final  Color                                         TRADER_COLOR_IS_GOOD    = Color.LIGHT_GRAY; // 0xaaaaaa
     public static final  float                                         TRADER_DOCKING_HEIGHT   = -128f;
     private static final float                                         TRADER_ENGINE_SIZE_Z    = 2f;
-    public static final  float                                         TRADER_EXTERNAL_SIZE_X  = 5;//used to place thrusters and lights
+    public static final  float                                         TRADER_EXTERNAL_SIZE_X  = 3;//used to place thrusters and lights
     public static final  float                                         TRADER_EXTERNAL_SIZE_Y  = 1;//used to place thrusters and lights
     public static final  float                                         TRADER_EXTERNAL_SIZE_Z  = 10;//used to place thrusters and lights
     public static final  float                                         TRADER_FLIGHT_HEIGHT    = 4f;
@@ -71,8 +71,8 @@ public class Trader3DRenderer extends ObjectRenderer<GameEngine3D> {
     public static final  float                                         TRADER_WIDTH            = 16f;
     final static         Vector3                                       xVectorNeg              = new Vector3(-1, 0, 0);
     final static         Vector3                                       yVectorNeg              = new Vector3(0, -1, 0);
-    static               float                                         TRADER_THRUSTER_MARGIN  = .2f;
-    private final List<GameObject<GameEngine3D>> animatedObjects = new ArrayList<>();
+    static               float                                         TRADER_THRUSTER_MARGIN  = .5f;
+    private final        List<GameObject<GameEngine3D>>                animatedObjects         = new ArrayList<>();
     private final        Vector3                                       direction               = new Vector3();//intermediate value
     private final        List<GameObject<GameEngine3D>>                goodInstances           = new ArrayList<>();
     //    private              GameObject<GameEngine3D> instance1;

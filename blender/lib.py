@@ -30,6 +30,14 @@ def hex_to_linear_rgba(hex_str):
         a
     )
 
+def find_faces( root, target_z, tolerance ):
+    faces_at_z = []
+    for face in root.data.polygons:
+        verts = [root.data.vertices[v].co for v in face.vertices]
+        if all(abs(v.z - target_z) < tolerance for v in verts):
+            faces_at_z.append(face.index)
+
+
 def create_material( name, color, metallic, roughness, alpha=1):
     mat = bpy.data.materials.get(name)
     if mat is None:

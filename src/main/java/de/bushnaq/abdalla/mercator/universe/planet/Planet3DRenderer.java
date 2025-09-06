@@ -22,6 +22,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.PointLight;
+import com.badlogic.gdx.graphics.g3d.model.Animation;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
 import de.bushnaq.abdalla.engine.GameObject;
@@ -306,6 +307,12 @@ public class Planet3DRenderer extends ObjectRenderer<GameEngine3D> {
         //			sectorInstance.update();
         //			renderMaster.sceneManager.addStatic(sectorInstance);
         //		}
+        dockingStationGameObject.controller = new AnimationControllerHack(dockingStationGameObject.instance);
+        Animation radarAction = dockingStationGameObject.instance.getAnimation("radarAction");
+        if (radarAction != null) {
+            dockingStationGameObject.controller.setAnimation(radarAction, -1);
+            animatedObjects.add(dockingStationGameObject);
+        }
     }
 
     public static Color getBuildingColor(final int index) {
@@ -544,6 +551,8 @@ public class Planet3DRenderer extends ObjectRenderer<GameEngine3D> {
         for (final GameObject<GameEngine3D> go : animatedObjects) {
             if (go.interactive instanceof ProductionFacility pf) {
                 if (pf.status == ProductionFacilityStatus.PRODUCING) go.controller.update(Gdx.graphics.getDeltaTime());
+            } else if (go.interactive instanceof Planet t) {
+                go.controller.update(Gdx.graphics.getDeltaTime());
             }
         }
         //animate lights

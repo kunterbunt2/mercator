@@ -19,6 +19,128 @@ station_x = 128
 station_y = 128
 station_z = 128
 station_distance = 256
+distance_from_edge = 8
+tower_x = 8
+tower_y = 8
+tower_z = 16
+
+def create_radar( name, location, material ):
+    bpy.ops.mesh.primitive_cube_add(size=1, enter_editmode=False, align='WORLD', location=(location[0],location[1],location[2]+.5), scale=(.05, 5, 1))
+    cube = bpy.context.active_object
+    cube.name = name
+    cube.data.materials.append(material)
+    # Set the cube's initial rotation (frame 1)
+    cube.rotation_euler = (0, 0, 0)  # x, y, z
+    cube.keyframe_insert(data_path="rotation_euler", frame=1, index=2)  # index=2 is Z-axis
+
+    # Set final rotation (frame 100)
+    cube.rotation_euler = (0, 0, 6.28319)  # 360° in radians
+    cube.keyframe_insert(data_path="rotation_euler", frame=100, index=2)
+    # Make it loop seamlessly
+    fcurve = cube.animation_data.action.fcurves.find("rotation_euler", index=2)
+    fcurve.modifiers.new(type='CYCLES')        
+
+def create_table( name, location, scale, material ):
+    bpy.ops.mesh.primitive_cube_add(size=1, enter_editmode=False, align='WORLD', location=location, scale=scale)
+    cube = bpy.context.active_object
+    cube.name = name
+    cube.data.materials.append(material)
+    
+def find_faces(root, target_z, tolerance=1e-4):
+    """
+    Find all faces whose centers lie on the XY plane at a given world Z.
+    """
+    faces = []
+    for face in root.data.polygons:
+        # Convert local center to world coordinates
+        world_center = root.matrix_world @ face.center
+        if abs(world_center.z - target_z) < tolerance:
+            faces.append(face.index)
+    return faces
+
+def assign_material_to_faces(obj, face_indices, mat):
+    # Add material if not already present
+    if mat.name not in [m.name for m in obj.data.materials]:
+        obj.data.materials.append(mat)
+
+    mat_index = list(obj.data.materials).index(mat)
+
+    # Assign material index directly to faces
+    for f in obj.data.polygons:
+        if f.index in face_indices:
+            f.material_index = mat_index
+
+def assign_material(obj, mat):
+    # Add material if not already present
+    if mat.name not in [m.name for m in obj.data.materials]:
+        obj.data.materials.append(mat)
+
+    mat_index = list(obj.data.materials).index(mat)
+
+    # Assign material index directly to faces
+    for f in obj.data.polygons:
+        f.material_index = mat_index
+
+def create_tower( x=0, y=0, z=0, scale=(tower_x, tower_y, tower_z) ):
+    wall_width = .5
+    window_z = 2
+    # outer
+    tower_mat = lib.create_material( name="m.station", color=lib.hex_to_rgba("#FFFFFFFF"), metallic=0.5, roughness=.5)
+    bpy.ops.mesh.primitive_cube_add(size=1, enter_editmode=False, align='WORLD', location=(x, y, z+tower_z/2), scale=(tower_x, tower_y, tower_z))
+    tower = bpy.context.active_object
+    tower.name = 'tower'
+    # IMPORTANT: Apply transforms so vertices reflect true coordinates
+#    bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
+    tower.data.materials.append(tower_mat)
+#    assign_material( tower, tower_mat )
+    # enable smooth shading
+    bpy.ops.object.shade_smooth()
+    # enable Auto Smooth so edges stay sharp
+    mod = tower.modifiers.new(name="Smooth by Angle", type='NODES')
+    bpy.ops.object.shade_auto_smooth(use_auto_smooth=True, angle=1.0472)
+
+    # inner    
+    bpy.ops.mesh.primitive_cube_add(size=1, enter_editmode=False, align='WORLD', location=(x, y, z-tower_z/2), scale=(tower_x-wall_width*2, tower_y-wall_width*2, tower_z-wall_width*2))
+    station_inner = bpy.context.active_object
+    station_inner.name = 'station_inner'
+    station_inner.hide_set(True)
+
+    lib.create_boolean_modifier( root = tower, name="m1", operation = 'DIFFERENCE', object = station_inner, apply=True )
+    lib.create_bevel_modifier( root = tower, name="m3", segments=3, width=2, apply=True )
+    
+    # window_hole_x
+    bpy.ops.mesh.primitive_cube_add(size=1, enter_editmode=False, align='WORLD', location=(x, y, z+tower_z-window_z/2-wall_width), scale=(tower_x*2-wall_width*2, tower_y-wall_width*2, window_z))
+    window_hole_x = bpy.context.active_object
+    window_hole_x.name = 'window_hole_x'
+    window_hole_x.hide_set(True)
+    lib.create_boolean_modifier( root = tower, name="m2", operation = 'DIFFERENCE', object = window_hole_x, apply=True )
+
+    # window_hole_y
+    bpy.ops.mesh.primitive_cube_add(size=1, enter_editmode=False, align='WORLD', location=(x, y, z+tower_z-window_z/2-wall_width), scale=(tower_x-wall_width*2, tower_y*2-wall_width*2, window_z))
+    window_hole_y = bpy.context.active_object
+    window_hole_y.name = 'window_hole_y'
+    window_hole_y.hide_set(True)
+    lib.create_boolean_modifier( root = tower, name="m2", operation = 'DIFFERENCE', object = window_hole_y, apply=True )
+
+#    target_z=z+tower_z-window_z-wall_width
+#    faces_at_z = find_faces( root=tower, target_z=target_z, tolerance=.1)
+#    floor_mat = lib.create_material( name="floor", color=lib.hex_to_rgba("#FFFF00FF"), metallic=0.5, roughness=0.5 )
+#    assign_material_to_faces(tower, faces_at_z, floor_mat)
+    
+    # window
+    window_mat = lib.create_material( name="m.window", color=(0, 0, 0, 1), metallic=1, roughness=0.3, alpha=0.9)
+    bpy.ops.mesh.primitive_cube_add(size=1, enter_editmode=False, align='WORLD', location=(x, y, z+tower_z-window_z/2-wall_width), scale=(tower_x-wall_width, tower_y-wall_width, window_z))
+    window = bpy.context.active_object
+    window.name = 'window'
+    window.data.materials.append(window_mat)
+    
+    # tables
+#    table_mat = lib.create_material( name="m.table", color=(0, 0, 1, 1.0), metallic=0.1, roughness=0.1)
+#    create_table( 'table', location=(x, y, z+tower_z-window_z-wall_width), scale=(.5,.5,1), material=table_mat )
+    # Radar
+#    radar_mat = lib.create_material( name="m.radar", color=(1, 1, 1, 1.0), metallic=0.9, roughness=0.5)
+#    create_radar( name='radar', location=(x, y, z+tower_z+0.1), material=radar_mat )
+
 
 def create_station( x=0, y=0, z=0, size=1 ):
     door_x = 16
@@ -184,5 +306,5 @@ pipe_mat = lib.create_material( name="m.pipe", color=lib.hex_to_rgba("#FFA500FF"
 
 create_station_neighbors( station_mat=[station_mat1,station_mat2,station_mat3,station_mat4], pipe_mat=pipe_mat, station_size=128, station_distance=128+64, radius=20 )
 create_station()
-
+create_tower( x=-station_x/2+tower_x/2+distance_from_edge, y=station_y/2-tower_y/2-distance_from_edge, z=0, scale=(tower_x, tower_y, tower_z) )
 

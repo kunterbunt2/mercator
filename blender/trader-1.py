@@ -25,6 +25,21 @@ def create_container( s_x=0, s_y=0, s_z=0, s_f=1 ):
         # No Specular input found, skipping it.
         obj.data.materials.append(mat)
 
+def create_radar( name, location, material ):
+    bpy.ops.mesh.primitive_cube_add(size=1, enter_editmode=False, align='WORLD', location=location, scale=(.05, 1, 1))
+    cube = bpy.context.active_object
+    cube.name = name
+    cube.data.materials.append(material)
+    # Set the cube's initial rotation (frame 1)
+    cube.rotation_euler = (0, 0, 0)  # x, y, z
+    cube.keyframe_insert(data_path="rotation_euler", frame=1, index=2)  # index=2 is Z-axis
+
+    # Set final rotation (frame 100)
+    cube.rotation_euler = (0, 0, 6.28319)  # 360° in radians
+    cube.keyframe_insert(data_path="rotation_euler", frame=100, index=2)
+    fcurve = cube.animation_data.action.fcurves.find("rotation_euler", index=2)
+    fcurve.modifiers.new(type='CYCLES')        
+    
 def create_cone( name, location, material, s_f=1, rotation=(0,0,0) ):
     bpy.ops.mesh.primitive_cone_add(radius1=0.21*s_f, radius2=0.11*s_f, depth=.5*s_f, enter_editmode=False, align='WORLD', location=location, scale=(1, 1, 1), vertices=8)
     cone = bpy.context.active_object
@@ -190,7 +205,9 @@ def create_ship( s_x=0, s_y=0, s_z=0, s_f=1 ):
     bpy.ops.object.shade_auto_smooth(use_auto_smooth=True, angle=1.0472)
 
     lib.create_bevel_modifier( root = body_top, name="b8", segments=3, width=5, apply=True )
-    
+
+    radar_mat = lib.create_material( name="m.thruster", color=(1, 1, 1, 1.0), metallic=0.9, roughness=0.5)
+    create_radar( name='radar', location=(s_x, s_y, s_z+1), material=radar_mat )
 
 
 # main script

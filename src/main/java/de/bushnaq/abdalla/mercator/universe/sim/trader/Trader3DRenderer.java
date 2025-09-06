@@ -33,6 +33,7 @@ import de.bushnaq.abdalla.mercator.universe.good.Good;
 import de.bushnaq.abdalla.mercator.universe.good.Good3DRenderer;
 import de.bushnaq.abdalla.mercator.universe.good.GoodType;
 import de.bushnaq.abdalla.mercator.universe.planet.Planet3DRenderer;
+import net.mgsx.gltf.scene3d.animation.AnimationControllerHack;
 import net.mgsx.gltf.scene3d.lights.SpotLightEx;
 import net.mgsx.gltf.scene3d.model.ModelInstanceHack;
 import org.slf4j.Logger;
@@ -71,6 +72,7 @@ public class Trader3DRenderer extends ObjectRenderer<GameEngine3D> {
     final static         Vector3                                       xVectorNeg              = new Vector3(-1, 0, 0);
     final static         Vector3                                       yVectorNeg              = new Vector3(0, -1, 0);
     static               float                                         TRADER_THRUSTER_MARGIN  = .2f;
+    private final List<GameObject<GameEngine3D>> animatedObjects = new ArrayList<>();
     private final        Vector3                                       direction               = new Vector3();//intermediate value
     private final        List<GameObject<GameEngine3D>>                goodInstances           = new ArrayList<>();
     //    private              GameObject<GameEngine3D> instance1;
@@ -174,6 +176,10 @@ public class Trader3DRenderer extends ObjectRenderer<GameEngine3D> {
 //        renderEngine.add(spotLight);
 //        instance1 = new GameObject<GameEngine3D>(new ModelInstanceHack(renderEngine.getGameEngine().assetManager.cubeTrans1), trader, this);
 //        renderEngine.addDynamic(instance1);
+        traderGameObject.controller = new AnimationControllerHack(traderGameObject.instance);
+        traderGameObject.controller.setAnimation(traderGameObject.instance.getAnimation("radarAction"), -1);
+        animatedObjects.add(traderGameObject);
+
     }
 
     private int getColorIndex() {
@@ -346,6 +352,11 @@ public class Trader3DRenderer extends ObjectRenderer<GameEngine3D> {
             lastTransaction = trader.lastTransaction;
         }
         updateGoods(renderEngine);
+        for (final GameObject<GameEngine3D> go : animatedObjects) {
+            if (go.interactive instanceof Trader t) {
+                if (t.getTraderSubStatus().isTraveling()) go.controller.update(Gdx.graphics.getDeltaTime());
+            }
+        }
     }
 
 //    private void updateLightColor(final RenderEngine3D<GameEngine3D> renderEngine) {

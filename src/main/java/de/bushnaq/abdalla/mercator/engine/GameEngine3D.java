@@ -275,7 +275,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
             assetManager.create();
             createEnvironment();
             createStage();
-            pauseScreen = new PauseScreen(this, atlasManager);
+            pauseScreen = new PauseScreen(this, atlasManager.systemTextureRegion, atlasManager.menuBoldFont, atlasManager.menuFont);
 
             audioEngine.create(AtlasManager.getAssetsFolderName());
             audioEngine.enableHrtf(0);
@@ -795,6 +795,11 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
             // distinctiveColorlist.add( new Color( low, low, low, alpha ) );
         }
         // distinctiveColorArray = distinctiveColorlist.toArray( new Color[0] );
+    }
+
+    @Override
+    public boolean isPaused() {
+        return !universe.isEnableTime();
     }
 
     @Override

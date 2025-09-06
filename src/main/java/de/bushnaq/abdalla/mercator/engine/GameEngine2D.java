@@ -49,6 +49,7 @@ import de.bushnaq.abdalla.mercator.util.Message;
 import de.bushnaq.abdalla.mercator.util.TimeAccuracy;
 import de.bushnaq.abdalla.mercator.util.TimeStatistic;
 import de.bushnaq.abdalla.mercator.util.TimeUnit;
+import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -101,6 +102,7 @@ public class GameEngine2D implements ScreenListener, ApplicationListener, InputP
     private              BitmapFont                   font;
     //	private Environment environment;
     private              Info                         info;
+    @Getter
     private              boolean                      infoVisible;
     private final        InputMultiplexer             inputMultiplexer                = new InputMultiplexer();
     private final        List<Label>                  labels                          = new ArrayList<>();
@@ -462,8 +464,9 @@ public class GameEngine2D implements ScreenListener, ApplicationListener, InputP
         // distinctiveColorArray = distinctiveColorlist.toArray( new Color[0] );
     }
 
-    public boolean isInfoVisible() {
-        return infoVisible;
+    @Override
+    public boolean isPaused() {
+        return !universe.isEnableTime();
     }
 
     /*

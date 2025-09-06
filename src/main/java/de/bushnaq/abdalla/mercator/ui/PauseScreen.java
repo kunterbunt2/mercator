@@ -37,13 +37,11 @@ import java.util.Map;
  */
 public class PauseScreen {
 
-    private static final Color                        ASSIGNED_KEY_COLOR = new Color(0.3f, 0.3f, 0.5f, 0.9f);
-    private static final Color                        DESCRIPTION_COLOR  = new Color(0.9f, 0.9f, 0.9f, 1.0f);
-    private static final Color                        KEY_BORDER_COLOR   = new Color(0.6f, 0.6f, 0.6f, 1.0f);
-    private static final Color                        KEY_COLOR          = new Color(0.2f, 0.2f, 0.2f, 0.9f);
-    private static final float                        KEY_HEIGHT         = 60f;  // 2x bigger (was 30f, reduced from 120f)
-    private static final Color                        OVERLAY_COLOR      = new Color(0.0f, 0.0f, 0.0f, 0.7f);
-    private static final Color                        TITLE_COLOR        = Color.WHITE;
+    private static final Color                        DESCRIPTION_COLOR = new Color(0.9f, 0.9f, 0.9f, 1.0f);
+    private static final Color                        KEY_COLOR         = new Color(0.2f, 0.2f, 0.2f, 0.9f);
+    private static final float                        KEY_HEIGHT        = 60f;  // 2x bigger (was 30f, reduced from 120f)
+    private static final Color                        OVERLAY_COLOR     = new Color(0.0f, 0.0f, 0.0f, 0.7f);
+    private static final Color                        TITLE_COLOR       = Color.WHITE;
     private final        List<KeyboardKey>            allKeys;
     private final        AtlasManager                 atlasManager;
     private final        Map<String, KeyboardCommand> commands;
@@ -68,8 +66,8 @@ public class PauseScreen {
         createUI();
     }
 
-    private void addCommand(String key, String description) {
-        KeyboardCommand command = new KeyboardCommand(key, description);
+    private void addCommand(String key, String description, KeyType keyType) {
+        KeyboardCommand command = new KeyboardCommand(key, description, keyType);
         commands.put(key, command);
     }
 
@@ -152,26 +150,6 @@ public class PauseScreen {
         shapeRenderer.dispose();
     }
 
-    /**
-     * Draw an arc using line segments
-     */
-    private void drawArc(float centerX, float centerY, float radius, float startAngle, float arcAngle) {
-        int   segments  = 8; // Number of line segments for the arc
-        float angleStep = arcAngle / segments;
-
-        for (int i = 0; i < segments; i++) {
-            float angle1 = (float) Math.toRadians(startAngle + i * angleStep);
-            float angle2 = (float) Math.toRadians(startAngle + (i + 1) * angleStep);
-
-            float x1 = centerX + radius * (float) Math.cos(angle1);
-            float y1 = centerY + radius * (float) Math.sin(angle1);
-            float x2 = centerX + radius * (float) Math.cos(angle2);
-            float y2 = centerY + radius * (float) Math.sin(angle2);
-
-            shapeRenderer.line(x1, y1, x2, y2);
-        }
-    }
-
     private void drawKeyboardLayout() {
         shapeRenderer.setProjectionMatrix(stage.getCamera().combined);
 
@@ -180,18 +158,13 @@ public class PauseScreen {
 
         for (KeyboardKey key : allKeys) {
             // Check if this key has an assigned command
-            boolean hasCommand = commands.containsKey(key.label);
+            boolean         hasCommand      = commands.containsKey(key.label);
+            KeyboardCommand keyboardCommand = commands.get(key.label);
 
             // Draw key background with rounded corners (similar to SVG rx="4" ry="4")
-            shapeRenderer.setColor(hasCommand ? ASSIGNED_KEY_COLOR : KEY_COLOR);
+            shapeRenderer.setColor(hasCommand ? keyboardCommand.keyType.getColor() : KEY_COLOR);
             drawRoundedRect(keyboardStartX + key.relativeX, keyboardStartY + key.relativeY, key.width, key.height, 4f);
         }
-        shapeRenderer.end();
-
-        // Draw key borders with rounded corners
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
-        shapeRenderer.setColor(KEY_BORDER_COLOR);
-
         shapeRenderer.end();
 
         // Draw text on keys and descriptions
@@ -331,19 +304,19 @@ public class PauseScreen {
         // ---------------------------------------------------------
         // Function keys
         // ---------------------------------------------------------
-        addCommand("ESC", "Quit");
-        addCommand("F1", "Gamma Correction");
-        addCommand("F2", "Depth of Field");
-        addCommand("F3", "Bokeh");
-        addCommand("F4", "SSAO");
+        addCommand("ESC", "Quit", KeyType.GameControl);
+        addCommand("F1", "Gamma Correction", KeyType.Debugging);
+        addCommand("F2", "Depth of Field", KeyType.Debugging);
+        addCommand("F3", "Bokeh", KeyType.Debugging);
+        addCommand("F4", "SSAO", KeyType.Debugging);
 
-        addCommand("F5", "Always Day");
-        addCommand("F6", "Demo Modes");
+        addCommand("F5", "Always Day", KeyType.Debugging);
+        addCommand("F6", "Demo Modes", KeyType.GameControl);
         // addCommand("F7", "");
         // addCommand("F8", "");
 
-        addCommand("F9", "Graphs");
-        addCommand("F10", "Toggle Debug Mode");
+        addCommand("F9", "Graphs", KeyType.Debugging);
+        addCommand("F10", "Toggle Debug Mode", KeyType.Debugging);
         // addCommand("F11", "");
         // addCommand("F12", "");
 
@@ -368,15 +341,15 @@ public class PauseScreen {
         // ---------------------------------------------------------
         // First letter row
         // ---------------------------------------------------------
-        addCommand("Tab", "Profiler (in Info Panel)");
-        addCommand("Q", "Rotate Left");
-        addCommand("W", "Move Camera Forward");
-        addCommand("E", "Rotate Right");
+        addCommand("Tab", "Profiler (in Info Panel)", KeyType.Debugging);
+        addCommand("Q", "Rotate Camera Left", KeyType.Camera);
+        addCommand("W", "Move Camera Forward", KeyType.Camera);
+        addCommand("E", "Rotate Camera Right", KeyType.Camera);
         // addCommand("R", "Hostile Near Next");
         // addCommand("T", "Target Next All");
         // addCommand("Y", "Mode Combat Switch");
         // addCommand("U", "Target Manmade Next");
-        addCommand("I", "Info Panel");
+        addCommand("I", "Info Panel", KeyType.UI);
         // addCommand("O", "Turret AI On");
         // addCommand("P", "Boresight Target");
         // addCommand("[", "Ship Change");
@@ -387,12 +360,12 @@ public class PauseScreen {
         //- Second letter row
         // ---------------------------------------------------------
         // addCommand("CapsLock", "Caps Lock");
-        addCommand("A", "Move Camera Left");
-        addCommand("S", "Move Camera Backward");
-        addCommand("D", "Move Camera Right");
-        addCommand("F", "Follow selected trader");
+        addCommand("A", "Move Camera Left", KeyType.Camera);
+        addCommand("S", "Move Camera Backward", KeyType.Camera);
+        addCommand("D", "Move Camera Right", KeyType.Camera);
+        addCommand("F", "Follow selected trader", KeyType.Camera);
         // addCommand("G", "");
-        addCommand("H", "HRTF");
+        addCommand("H", "HRTF", KeyType.Debugging);
         // addCommand("J", "Jump Drive");
         // addCommand("K", "Friend Near Next");
         // addCommand("L", "Target Lock");
@@ -407,7 +380,7 @@ public class PauseScreen {
         // addCommand("Z", "Up Pan");
         // addCommand("X", "X Key");
         // addCommand("C", "Reset Camera");
-        addCommand("V", "VSync");
+        addCommand("V", "VSync", KeyType.Debugging);
         // addCommand("B", "Subunit Next");
         // addCommand("N", "Target Neutral Next");
         // addCommand("M", "Left VDU Cycle");
@@ -422,7 +395,7 @@ public class PauseScreen {
         // addCommand("LCtrl", "Left Control");
         // addCommand("LWin", "Left Windows");
         // addCommand("LAlt", "Left Alt");
-        addCommand("Space", "Pause");
+        addCommand("Space", "Pause", KeyType.GameControl);
         // addCommand("RAlt", "Right Alt");
         // addCommand("RWin", "Right Windows");
         // addCommand("Menu", "Menu Key");
@@ -432,9 +405,9 @@ public class PauseScreen {
         //-
         // ---------------------------------------------------------
 
-        addCommand("PRNT", "Screenshot");
+        addCommand("PRNT", "Screenshot", KeyType.GameControl);
         // addCommand("ROLL", "");
-        addCommand("PAUSE", "Pause");
+        addCommand("PAUSE", "Pause", KeyType.GameControl);
 
         // addCommand("Insert", "Left Roll");
         // addCommand("Home", "Velocity Match");
@@ -443,10 +416,10 @@ public class PauseScreen {
         // addCommand("End", "Velocity Zero");
         // addCommand("PageDown", "Text Scroll Down");
 
-        addCommand("Up", "Move Camera Forward");
-        addCommand("Down", "Move Camera Backward");
-        addCommand("Left", "Move Camera Left");
-        addCommand("Right", "Move Camera Right");
+        addCommand("Up", "Move Camera Forward", KeyType.Camera);
+        addCommand("Down", "Move Camera Backward", KeyType.Camera);
+        addCommand("Left", "Move Camera Left", KeyType.Camera);
+        addCommand("Right", "Move Camera Right", KeyType.Camera);
 
     }
 
@@ -599,7 +572,7 @@ public class PauseScreen {
     /**
      * Represents a single keyboard command
      */
-    private record KeyboardCommand(String key, String description) {
+    private record KeyboardCommand(String key, String description, KeyType keyType) {
     }
 
     /**

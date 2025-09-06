@@ -48,6 +48,7 @@ public class PauseScreen {
     private final        GameEngine3D                 gameEngine;
     private              float                        keyboardStartX;
     private              float                        keyboardStartY;
+    private final        List<LegendItem>             legendItems       = new ArrayList<>();
     private              RichLabel                    resumeLabel;
     private final        ShapeRenderer                shapeRenderer;
     private final        Stage                        stage;
@@ -63,6 +64,7 @@ public class PauseScreen {
 
         initializeKeyboardCommands();
         initializeKeyboardLayout();
+        initializeLegendLayout();
         createUI();
     }
 
@@ -73,11 +75,19 @@ public class PauseScreen {
 
     private void addKeyFromSVG(String label, float svgX, float svgY, float svgWidth, float svgHeight, float scaleFactor) {
         float x      = svgX * scaleFactor;
-        float y      = -svgY * scaleFactor; // Negative to flip Y coordinate
+        float y      = -(svgY + svgHeight) * scaleFactor; // Negative to flip Y coordinate
         float width  = svgWidth * scaleFactor;
         float height = svgHeight * scaleFactor;
 
         allKeys.add(new KeyboardKey(label, x, y, width, height));
+    }
+
+    private void addLegendFromSVG(String label, KeyType keyType, float svgX, float svgY, float svgWidth, float svgHeight, float scaleFactor) {
+        float x      = svgX * scaleFactor;
+        float y      = -(svgY + svgHeight) * scaleFactor; // Negative to flip Y coordinate
+        float width  = svgWidth * scaleFactor;
+        float height = svgHeight * scaleFactor;
+        legendItems.add(new LegendItem(label, keyType, x, y, width, height));
     }
 
     private float calculateKeyboardHeight() {
@@ -88,6 +98,11 @@ public class PauseScreen {
             minY = Math.min(minY, key.relativeY);
             maxY = Math.max(maxY, key.relativeY);
         }
+        for (LegendItem legendItem : legendItems) {
+            minY = Math.min(minY, legendItem.relativeY);
+            maxY = Math.max(maxY, legendItem.relativeY);
+        }
+
 
         return maxY - minY + KEY_HEIGHT;
     }
@@ -155,17 +170,16 @@ public class PauseScreen {
 
         // Draw filled rectangles for keys with rounded corners
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-
         for (KeyboardKey key : allKeys) {
             // Check if this key has an assigned command
             boolean         hasCommand      = commands.containsKey(key.label);
             KeyboardCommand keyboardCommand = commands.get(key.label);
-
             // Draw key background with rounded corners (similar to SVG rx="4" ry="4")
             shapeRenderer.setColor(hasCommand ? keyboardCommand.keyType.getColor() : KEY_COLOR);
             drawRoundedRect(keyboardStartX + key.relativeX, keyboardStartY + key.relativeY, key.width, key.height, 4f);
         }
         shapeRenderer.end();
+
 
         // Draw text on keys and descriptions
         stage.getBatch().begin();
@@ -173,7 +187,7 @@ public class PauseScreen {
         for (KeyboardKey key : allKeys) {
             // Draw key label in top-left corner
             atlasManager.menuBoldFont.setColor(Color.WHITE);
-            atlasManager.menuBoldFont.getData().setScale(1f); // Slightly smaller for better fit
+//            atlasManager.menuBoldFont.getData().setScale(1f); // Slightly smaller for better fit
 
             float labelX = keyboardStartX + key.relativeX + 4; // Small padding from left edge
             float labelY = keyboardStartY + key.relativeY + key.height - 8; // Near top edge
@@ -186,7 +200,6 @@ public class PauseScreen {
             );
 
             // Reset font scale
-            atlasManager.menuBoldFont.getData().setScale(1.0f);
 
             // Draw command description in bottom-left corner if this key has a command
             KeyboardCommand command = commands.get(key.label);
@@ -276,6 +289,27 @@ public class PauseScreen {
             }
         }
 
+        stage.getBatch().end();
+    }
+
+    private void drawLegend() {
+        shapeRenderer.setProjectionMatrix(stage.getCamera().combined);
+
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+        for (LegendItem legendItem : legendItems) {
+            shapeRenderer.setColor(legendItem.keyType().getColor());
+            shapeRenderer.rect(keyboardStartX + legendItem.relativeX, keyboardStartY + legendItem.relativeY, legendItem.width, legendItem.height);
+        }
+        shapeRenderer.end();
+
+        stage.getBatch().begin();
+        atlasManager.menuBoldFont.setColor(Color.WHITE);
+        atlasManager.menuFont.setColor(DESCRIPTION_COLOR);
+        for (LegendItem legendItem : legendItems) {
+            float labelX = keyboardStartX + legendItem.relativeX + 20; // Small padding from left edge
+            float labelY = keyboardStartY + legendItem.relativeY + 14; // Near top edge
+            atlasManager.menuFont.draw(stage.getBatch(), legendItem.label, labelX, labelY);
+        }
         stage.getBatch().end();
     }
 
@@ -426,7 +460,7 @@ public class PauseScreen {
     private void initializeKeyboardLayout() {
         allKeys.clear();
 
-        float scaleFactor = 1f; // Reduced from 1f to make keyboard smaller and show proper spacing
+        float scaleFactor = 1f;
         // Function keys row (F1-F12) - using inner rect coordinates (outer + 0.5) and dimensions (68x68)
         addKeyFromSVG("ESC", 2f, 2f, 68f, 68f, scaleFactor);
         addKeyFromSVG("F1", 146f, 2f, 68f, 68f, scaleFactor);
@@ -533,6 +567,20 @@ public class PauseScreen {
         addKeyFromSVG("Right", 1262f, 398f, 68f, 68f, scaleFactor);
     }
 
+    private void initializeLegendLayout() {
+//        x="109.5" y="505.5"
+        legendItems.clear();
+        float scaleFactor = 1f;
+        addLegendFromSVG("Combat", KeyType.Combat, 110f, 506f, 15, 15, scaleFactor);
+        addLegendFromSVG("UI", KeyType.UI, 310f, 506f, 15, 15, scaleFactor);
+        addLegendFromSVG("Targeting", KeyType.Targeting, 110f, 526f, 15, 15, scaleFactor);
+        addLegendFromSVG("Camera", KeyType.Camera, 310f, 526f, 15, 15, scaleFactor);
+        addLegendFromSVG("Navigation", KeyType.Navigation, 110f, 546f, 15, 15, scaleFactor);
+        addLegendFromSVG("Game Control", KeyType.GameControl, 310f, 546f, 15, 15, scaleFactor);
+        addLegendFromSVG("Debugging", KeyType.Debugging, 110f, 566f, 15, 15, scaleFactor);
+
+    }
+
     private boolean isPaused() {
         return !gameEngine.assetManager.universe.isEnableTime();
     }
@@ -557,6 +605,7 @@ public class PauseScreen {
 
         // Draw keyboard layout and connecting lines
         drawKeyboardLayout();
+        drawLegend();
 
         // Restart batch for any additional rendering
         batch.begin();
@@ -579,6 +628,10 @@ public class PauseScreen {
      * Represents a physical key on the keyboard
      */
     private record KeyboardKey(String label, float relativeX, float relativeY, float width, float height) {
+    }
+
+    private record LegendItem(String label, KeyType keyType, float relativeX, float relativeY, float width,
+                              float height) {
     }
 }
 

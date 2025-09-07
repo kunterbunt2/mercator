@@ -2,6 +2,7 @@ import bpy
 from bpy_extras import view3d_utils
 import colorsys
 import random
+import mathutils
 
 # -------------------------------------------------------
 import os
@@ -23,6 +24,7 @@ distance_from_edge = 8
 tower_x = 8
 tower_y = 8
 tower_z = 16
+wall_width = 1
 
 def create_radar( name, location, material ):
     bpy.ops.mesh.primitive_cube_add(size=1, enter_editmode=False, align='WORLD', location=(location[0],location[1],location[2]+.5), scale=(.05, 5, 1))
@@ -146,7 +148,6 @@ def create_station( x=0, y=0, z=0, size=1 ):
     door_x = 16
     door_y = 16
     door_z = 16
-    wall_width = 1
 
     # outer
     station_mat = lib.create_material( name="m.station", color=lib.hex_to_rgba("#FFFFFFFF"), metallic=0.5, roughness=.5)
@@ -189,33 +190,40 @@ def create_cube(mat, x, y, z, size=1):
     bpy.ops.object.shade_auto_smooth(use_auto_smooth=True, angle=1.0472)
     return cube
 
-def create_round_pipe(mat, start, end, radius=0.1):
-    """Create a pipe (cylinder) between two cube centers"""
+def create_round_pipe(mat, start, end, radius=0.1, inset=0.2):
+    """Create a pipe (cylinder) between two cube surfaces instead of their centers.
+       inset = how far into the cube the pipe should enter (0 = flush with surface).
+    """
     import mathutils
     start = mathutils.Vector(start)
     end = mathutils.Vector(end)
-    direction = end - start
-    length = direction.length
-    midpoint = (start + end) / 2
+    direction = (end - start).normalized()
+
+    # Shift start and end inward by inset
+    start_shifted = start + direction * inset
+    end_shifted = end - direction * inset
+
+    length = (end_shifted - start_shifted).length
+    midpoint = (start_shifted + end_shifted) / 2
 
     # Create cylinder
     bpy.ops.mesh.primitive_cylinder_add(
-        radius=radius, 
-        depth=length, 
+        radius=radius,
+        depth=length,
         location=midpoint,
         vertices=16
     )
     pipe = bpy.context.active_object
     pipe.data.materials.append(mat)
-    # enable smooth shading
+
+    # Smooth shading
     bpy.ops.object.shade_smooth()
-    # enable Auto Smooth so edges stay sharp
-    mod = pipe.modifiers.new(name="Smooth by Angle", type='NODES')
+    pipe.modifiers.new(name="Smooth by Angle", type='NODES')
     bpy.ops.object.shade_auto_smooth(use_auto_smooth=True, angle=1.0472)
 
     # Rotate cylinder to align with direction
     pipe.rotation_mode = 'QUATERNION'
-    pipe.rotation_quaternion = direction.to_track_quat('Z', 'Y')
+    pipe.rotation_quaternion = (end_shifted - start_shifted).to_track_quat('Z', 'Y')
 
     return pipe
 
@@ -245,9 +253,9 @@ def create_square_pipe(mat, start, end, radius=0.1):
 
     return pipe
 
-def create_station_neighbors(station_mat, pipe_mat, station_size, station_distance, radius):
+def create_station_neighbors(station_mat, pipe_mat, station_size, station_distance, radius, inset=0.2, station_z=0):
+    import mathutils
     grid = {}
-    positions = []
 
     # Step 1: Generate random cubes in grid
     for z in range(0, -4, -1):
@@ -260,7 +268,6 @@ def create_station_neighbors(station_mat, pipe_mat, station_size, station_distan
     # Step 2: Remove isolated cubes (no neighbors)
     valid_grid = {}
     for (x, y, z) in grid:
-        # 6-connected neighbors
         neighbors = [
             (x+1, y, z), (x-1, y, z),
             (x, y+1, z), (x, y-1, z),
@@ -271,16 +278,29 @@ def create_station_neighbors(station_mat, pipe_mat, station_size, station_distan
     grid = valid_grid
 
     # Ensure (0,0,0) always exists
-    grid[(0,0,0)] = True
+    grid[(0, 0, 0)] = True
 
-    # Step 3: Create cubes
+    # Step 3: Create cubes with consistent offset
     created_cubes = {}
+    print("station_z="+str(station_size))
+    global_offset = mathutils.Vector((0, 0, -station_size/2))
+
     for (x, y, z) in grid:
-        loc = [x*station_distance, y*station_distance, z*station_distance-station_z/2]
-        if x != 0 or y != 0 or z != 0:
-            cube = create_cube(station_mat[random.randint(0, len(station_mat)-1)], *loc, station_size)
-        loc[2] += station_size/4
-        created_cubes[(x,y,z)] = tuple(loc)
+        cube_center = mathutils.Vector((
+            x * station_distance,
+            y * station_distance,
+            z * station_distance
+        )) + global_offset
+
+        if (x, y, z) != (0, 0, 0):
+            cube = create_cube(
+                station_mat[random.randint(0, len(station_mat)-1)],
+                *cube_center,
+                station_size
+            )
+
+        # Always store the true cube center (with offset applied)
+        created_cubes[(x, y, z)] = tuple(cube_center)
 
     # Step 4: Create pipes between neighbors
     for (x, y, z), loc in created_cubes.items():
@@ -290,10 +310,9 @@ def create_station_neighbors(station_mat, pipe_mat, station_size, station_distan
             (x, y, z+1), (x, y, z-1)
         ]
         for n in neighbors:
-            if n in created_cubes and n > (x,y,z):  # avoid duplicates
-                create_round_pipe(pipe_mat, loc, created_cubes[n], radius=radius)
-                #create_square_pipe(pipe_mat, loc, created_cubes[n], radius=radius)
-                
+            if n in created_cubes and n > (x, y, z):  # avoid duplicates
+                create_round_pipe(pipe_mat, loc, created_cubes[n], radius=radius, inset=inset)
+                                
 # main script
 lib.clear_scene()
 station_mat1 = lib.create_material( name="m.station1", color=lib.hex_to_rgba("#00614eff"), metallic=0.5, roughness=.5)
@@ -304,7 +323,7 @@ station_mat4 = lib.create_material( name="m.station4", color=lib.hex_to_rgba("#4
 #pipe_mat = lib.create_material( name="m.pipe", color=lib.hex_to_rgba("#404080FF"), metallic=0.5, roughness=.1)
 pipe_mat = lib.create_material( name="m.pipe", color=lib.hex_to_rgba("#FFA500FF"), metallic=0.5, roughness=.5)
 
-create_station_neighbors( station_mat=[station_mat1,station_mat2,station_mat3,station_mat4], pipe_mat=pipe_mat, station_size=128, station_distance=128+64, radius=20 )
+create_station_neighbors( station_mat=[station_mat1,station_mat2,station_mat3,station_mat4], pipe_mat=pipe_mat, station_size=128, station_distance=128+64, radius=20, inset=station_x/2-wall_width/2 )
 create_station()
 create_tower( x=-station_x/2+tower_x/2+distance_from_edge, y=station_y/2-tower_y/2-distance_from_edge, z=0, scale=(tower_x, tower_y, tower_z) )
 

@@ -1113,7 +1113,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
         demo1.renderDemo(deltaTime);
         demo2.renderDemo(deltaTime);
         subtitles.render(deltaTime);
-        pauseScreen.render(deltaTime);
+//        pauseScreen.render(deltaTime);
         renderEngine.renderEngine2D.batch.end();
 
         renderEngine.gpuGraph.end();

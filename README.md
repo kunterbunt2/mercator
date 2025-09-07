@@ -53,7 +53,6 @@ Then you can start mercator by one of its starting classes
 
 ## Issues
 
-- pipes visible through hanger door.
 - audio engine throws endless exceptions when quitting the game
 - after a while several traders are in-queue, but station believes they are in-dock.
 - tts ignoring pause.

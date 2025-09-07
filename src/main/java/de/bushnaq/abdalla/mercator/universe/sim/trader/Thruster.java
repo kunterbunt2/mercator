@@ -24,7 +24,6 @@ import com.badlogic.gdx.math.Vector3;
 import de.bushnaq.abdalla.engine.GameObject;
 import de.bushnaq.abdalla.engine.RenderEngine3D;
 import de.bushnaq.abdalla.mercator.engine.GameEngine3D;
-import net.mgsx.gltf.scene3d.attributes.PBRColorAttribute;
 
 public class Thruster {
     //    public static final  float                    LIGHT_DISTANCE               = 2f;
@@ -76,12 +75,12 @@ public class Thruster {
                 case 0: {
                     resetLightOffTimer();
                     lightMode = 1;//wait for light to go on
-                    for (Material m : gameObject.instance.materials) {
-                        if (m.id.equals("flame.material")) {
-                            PBRColorAttribute baseColorFactor = PBRColorAttribute.createBaseColorFactor(new Color(Color.WHITE));
-                            m.set(baseColorFactor);
-                        }
-                    }
+//                    for (Material m : gameObject.instance.materials) {
+//                        if (m.id.equals("flame.material")) {
+//                            PBRColorAttribute baseColorFactor = PBRColorAttribute.createBaseColorFactor(new Color(Color.WHITE));
+//                            m.set(baseColorFactor);
+//                        }
+//                    }
                 }
                 break;
                 case 1: {
@@ -91,8 +90,8 @@ public class Thruster {
                     pointLight.setIntensity(intensity);
                     for (Material m : gameObject.instance.materials) {
                         if (m.id.equals("flame.material")) {
-                            PBRColorAttribute baseColorFactor = PBRColorAttribute.createBaseColorFactor(new Color(Color.WHITE));
-                            m.set(baseColorFactor);
+//                            PBRColorAttribute baseColorFactor = PBRColorAttribute.createBaseColorFactor(new Color(Color.WHITE));
+//                            m.set(baseColorFactor);
                         }
                     }
                 }

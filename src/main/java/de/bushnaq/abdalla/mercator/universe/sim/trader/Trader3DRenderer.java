@@ -20,6 +20,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.graphics.g3d.model.Animation;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
 import de.bushnaq.abdalla.engine.GameObject;
@@ -49,7 +50,7 @@ import static de.bushnaq.abdalla.mercator.universe.good.Good3DRenderer.SPACE_BET
 
 public class Trader3DRenderer extends ObjectRenderer<GameEngine3D> {
 
-    private static final float                                         ANTENNA_LENGTH          = 8f;
+    private static final float                                         ANTENNA_LENGTH          = 0f;
     private static final int                                           DRAW_GOOD_FACTOR        = 5;// we only draw a portion of the actual good containers
     private static final int                                           NUMBER_OF_LIGHTS        = 4;
     private static final float                                         PORT_HIGHT              = -128f;
@@ -156,10 +157,10 @@ public class Trader3DRenderer extends ObjectRenderer<GameEngine3D> {
 
     private void createLights(final RenderEngine3D<GameEngine3D> renderEngine) {
         final Vector3[] delta = {//
-                new Vector3(TRADER_EXTERNAL_SIZE_X / 2 + ANTENNA_LENGTH + StrobeLight.LIGHT_SIZE / 2, 0, TRADER_SIZE_Z / 2 - TRADER_ENGINE_SIZE_Z + TRADER_ANTENNA_MARGINE),//back/right/top
-                new Vector3(TRADER_SIZE_X / 2 - TRADER_ANTENNA_MARGINE, 0, -TRADER_SIZE_Z / 2 - ANTENNA_LENGTH - StrobeLight.LIGHT_SIZE / 2),//front/right/top
-                new Vector3(-TRADER_EXTERNAL_SIZE_X / 2 - ANTENNA_LENGTH - StrobeLight.LIGHT_SIZE / 2, 0, -TRADER_SIZE_Z / 2 + +TRADER_COCKPIT_SIZE_Z - TRADER_ANTENNA_MARGINE),//front/left/bottom
-                new Vector3(-TRADER_SIZE_X / 2 + TRADER_ANTENNA_MARGINE, -TRADER_EXTERNAL_SIZE_Y / 2 - ANTENNA_LENGTH - StrobeLight.LIGHT_SIZE / 2, TRADER_SIZE_Z / 2 - TRADER_ENGINE_SIZE_Z / 2 + 2),//back/left/bottom
+                new Vector3(TRADER_EXTERNAL_SIZE_X / 2 - StrobeLight.LIGHT_SIZE / 2, TRADER_EXTERNAL_SIZE_Y / 2 + StrobeLight.LIGHT_SIZE / 2, -TRADER_EXTERNAL_SIZE_Z / 2),//back/right/top
+                new Vector3(TRADER_EXTERNAL_SIZE_X / 2 - StrobeLight.LIGHT_SIZE / 2, TRADER_EXTERNAL_SIZE_Y / 2 + StrobeLight.LIGHT_SIZE / 2, TRADER_EXTERNAL_SIZE_Z / 2),//front/right/top
+                new Vector3(-TRADER_EXTERNAL_SIZE_X / 2 + StrobeLight.LIGHT_SIZE / 2, TRADER_EXTERNAL_SIZE_Y / 2 + StrobeLight.LIGHT_SIZE / 2, TRADER_EXTERNAL_SIZE_Z / 2),//front/left/bottom
+                new Vector3(-TRADER_EXTERNAL_SIZE_X / 2 + StrobeLight.LIGHT_SIZE / 2, TRADER_EXTERNAL_SIZE_Y / 2 + StrobeLight.LIGHT_SIZE / 2, -TRADER_EXTERNAL_SIZE_Z / 2),//back/left/bottom
         };
         for (int i = 0; i < NUMBER_OF_LIGHTS; i++) {
             strobeLights.add(new StrobeLight(renderEngine, delta[i], new GameObject<GameEngine3D>(new ModelInstanceHack(renderEngine.getGameEngine().assetManager.redEmissiveModel), null), new GameObject<GameEngine3D>(new ModelInstanceHack(renderEngine.getGameEngine().assetManager.redEmissiveBohkeyModel), null)));
@@ -174,8 +175,11 @@ public class Trader3DRenderer extends ObjectRenderer<GameEngine3D> {
 //        instance1 = new GameObject<GameEngine3D>(new ModelInstanceHack(renderEngine.getGameEngine().assetManager.cubeTrans1), trader, this);
 //        renderEngine.addDynamic(instance1);
         traderGameObject.controller = new AnimationControllerHack(traderGameObject.instance);
-        traderGameObject.controller.setAnimation(traderGameObject.instance.getAnimation("radarAction"), -1);
-        animatedObjects.add(traderGameObject);
+        Animation radarAction = traderGameObject.instance.getAnimation("radarAction");
+        if (radarAction != null) {
+            traderGameObject.controller.setAnimation(radarAction, -1);
+            animatedObjects.add(traderGameObject);
+        }
 
     }
 
@@ -435,6 +439,7 @@ public class Trader3DRenderer extends ObjectRenderer<GameEngine3D> {
         }
         for (StrobeLight strobeLight : strobeLights) {
             strobeLight.update(renderEngine, translation, trader.getManeuveringSystem().rotation);
+
         }
     }
 

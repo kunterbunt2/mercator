@@ -24,7 +24,6 @@ import com.badlogic.gdx.graphics.g3d.Attribute;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
-import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import de.bushnaq.abdalla.engine.util.ModelCreator;
 import de.bushnaq.abdalla.mercator.renderer.ShowGood;
@@ -206,12 +205,12 @@ public class AssetManager {
         flame = new GLBLoader().load(Gdx.files.internal(String.format(AtlasManager.getAssetsFolderName() + "/models/flame.glb")));
         PBRColorAttribute baseColorFactor = PBRColorAttribute.createBaseColorFactor(new Color(Color.WHITE));
 //        final Attribute   blending        = new BlendingAttribute(0.5f); // opacity is set by pbrMetallicRoughness below
-        ColorAttribute emissive = PBRColorAttribute.createEmissive(new Color(Color.WHITE));
-        for (Material m : flame.scene.model.materials) {
-            if (m.id.equals("flame.material")) m.set(baseColorFactor, emissive);
-            if (m.id.equals("Thruster_Material")) m.set(emissive);
-
-        }
+//        ColorAttribute emissive = PBRColorAttribute.createEmissive(new Color(.5f, 0.5f, 1, 1f));
+//        for (Material m : flame.scene.model.materials) {
+//            if (m.id.equals("flame.material")) m.set(baseColorFactor, emissive);
+//            if (m.id.equals("Thruster_Material")) m.set(emissive);
+//
+//        }
     }
 
 //    private void createGate() {
@@ -308,12 +307,13 @@ public class AssetManager {
     }
 
     private void createRedEmissiveModel(ModelCreator modelCreator) {
-        final Material material = new Material();
-//        material.set(PBRColorAttribute.createBaseColorFactor(new Color(Color.WHITE).fromHsv(15, .9f, .8f)));
+        final Material  material  = new Material();
+        final Attribute color     = new PBRColorAttribute(PBRColorAttribute.BaseColorFactor, new Color(.1f, 0, 0, 1f));
+        final Attribute metallic  = PBRFloatAttribute.createMetallic(1f);
+        final Attribute roughness = PBRFloatAttribute.createRoughness(0f);
         material.set(PBRColorAttribute.createEmissive(new Color(Color.RED)));
+//        material.set(PBRColorAttribute.createAmbientLight(Color.RED));
 
-//        final Attribute emissive = ColorAttribute.createEmissive(Color.RED);
-//        final Material  material = new Material(emissive);
         redEmissiveModel = modelCreator.createBox(material);
     }
 

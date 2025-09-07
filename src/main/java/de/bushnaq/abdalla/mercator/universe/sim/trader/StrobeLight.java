@@ -18,18 +18,21 @@ package de.bushnaq.abdalla.mercator.universe.sim.trader;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g3d.Attribute;
+import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.environment.PointLight;
 import com.badlogic.gdx.math.Vector3;
 import de.bushnaq.abdalla.engine.GameObject;
 import de.bushnaq.abdalla.engine.RenderEngine3D;
 import de.bushnaq.abdalla.mercator.engine.GameEngine3D;
+import net.mgsx.gltf.scene3d.attributes.PBRColorAttribute;
 
 enum LightMode {
     ON, OFF
 }
 
 public class StrobeLight {
-    public static final  float                    LIGHT_MAX_INTENSITY          = 10000f;
+    public static final  float                    LIGHT_MAX_INTENSITY          = 1000f;
     public static final  float                    LIGHT_OFF_DURATION_AVERAGE   = 3f;
     public static final  float                    LIGHT_OFF_DURATION_DEVIATION = 0.1f;
     public static final  float                    LIGHT_ON_DURATION            = 1.1f;
@@ -70,6 +73,13 @@ public class StrobeLight {
                     resetLightOffTimer();
                     lightMode = LightMode.OFF;//wait for light to go on
                     renderEngine.remove(pointLight, true);
+                    {
+                        float lightIntensity = calculateIntensity() / LIGHT_MAX_INTENSITY;
+                        for (Material m : lightGameObject.instance.materials) {
+                            m.set(PBRColorAttribute.createAmbient(new Color(0, 0, 0, 1f)));
+                            m.set(PBRColorAttribute.createEmissive(new Color(0, 0, 0, 1f)));
+                        }
+                    }
 //                    if (Debug.isFilter(trader.getName())) {
 //                        logger.info("lights off");
 //                    }
@@ -80,6 +90,16 @@ public class StrobeLight {
                     lightMode = LightMode.ON;//wait for light to go off
                     final float intensity = (float) Math.abs(Math.sin(PY2 * (lightTimer / LIGHT_ON_DURATION)) * LIGHT_MAX_INTENSITY);
                     pointLight.setIntensity(intensity);
+                    {
+                        float           lightIntensity = calculateIntensity() / LIGHT_MAX_INTENSITY;
+                        final Attribute emissive       = PBRColorAttribute.createEmissive(new Color(lightIntensity, 0, 0, 1f));
+                        for (Material m : lightGameObject.instance.materials) {
+//                            m.set(color);
+//                            m.set(metallic);
+//                            m.set(roughness);
+                            m.set(emissive);
+                        }
+                    }
                     renderEngine.add(pointLight, true);
 //                    if (Debug.isFilter(trader.getName())) {
 //                        logger.info("lights on");
@@ -112,6 +132,8 @@ public class StrobeLight {
             lightGameObject.instance.transform.rotate(Vector3.Y, rotation);
             lightGameObject.instance.transform.translate(delta);
             lightGameObject.instance.transform.scale(lightScaling.x, lightScaling.y, lightScaling.z);
+
+
             lightGameObject.update();
             Vector3 lightTranslation = new Vector3();
             lightGameObject.instance.transform.getTranslation(lightTranslation);

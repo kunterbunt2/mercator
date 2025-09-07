@@ -55,7 +55,7 @@ public class Universe {
     @Setter
     private              ScreenListener          ScreenListener;
     public               PieChartData            amountPieChart                    = new PieChartData("volumen");
-    private final        boolean                 autoSelectNearestPlanet           = false;
+    private final        boolean                 autoSelectNearestPlanet           = true;
     public               PieChartData            creditPieChart                    = new PieChartData("credits");
     private              float                   credits; // ---credits at creation time, should never change
     public               long                    currentTime                       = 0L;//simulation time in milliseconds

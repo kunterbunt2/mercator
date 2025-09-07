@@ -105,7 +105,7 @@ public class PauseScreen extends AbstractPauseScreen {
         // addCommand("LCtrl", "Left Control");
         // addCommand("LWin", "Left Windows");
         // addCommand("LAlt", "Left Alt");
-        addCommand("Space", "Pause", KeyType.GameControl);
+        addCommand("Space", "Debug Pause", KeyType.GameControl);
         // addCommand("RAlt", "Right Alt");
         // addCommand("RWin", "Right Windows");
         // addCommand("Menu", "Menu Key");

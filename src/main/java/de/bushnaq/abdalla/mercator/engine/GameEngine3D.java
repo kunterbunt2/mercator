@@ -178,6 +178,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
     @Getter
     @Setter
     private              boolean                           showInfo                        = false;
+    private              boolean                           showKeyAssignments;
     @Getter
     @Setter
     private              boolean                           showTime                        = true;
@@ -831,8 +832,12 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
                 exit();
                 return true;
             case Input.Keys.PAUSE:
+                assetManager.universe.setEnableTime(!assetManager.universe.isEnableTime());
+                showKeyAssignments = !assetManager.universe.isEnableTime();
+                break;
             case Input.Keys.SPACE:
                 assetManager.universe.setEnableTime(!assetManager.universe.isEnableTime());
+                showKeyAssignments = false;
                 return true;
             case Input.Keys.PRINT_SCREEN:
                 queueScreenshot();
@@ -1113,7 +1118,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
         demo1.renderDemo(deltaTime);
         demo2.renderDemo(deltaTime);
         subtitles.render(deltaTime);
-//        pauseScreen.render(deltaTime);
+        pauseScreen.render(deltaTime, showKeyAssignments);
         renderEngine.renderEngine2D.batch.end();
 
         renderEngine.gpuGraph.end();

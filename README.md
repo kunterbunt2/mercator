@@ -53,34 +53,17 @@ Then you can start mercator by one of its starting classes
 
 ## Issues
 
+- trader position lights are not positioned correctly.
 - after a while several traders are in-queue, but station believes they are in-dock.
 - tts ignoring pause.
-- there should be the possibility to select a ship but still hear the station chat
-- factory goods keep making static cache dirty
+- there should be the possibility to select a ship but still hear the station chat.
+- factory goods keep making static cache dirty.
 - Economy is not stable, all sims eventually die of hunger.
 - simulation advanceintime is triggered every frame.
 - ensure adding/removing lights does not cause any caching to get dirty.
-- optimize selected path performance
+- optimize selected path performance.
 - audio engine cannot switch to new audio output.
--
-- Fixed? add all spoken messages to event manager.
-- Fixed? subtitles now are missing message endings like ., ?, !.
-- Fixed? subtitles include <> tags sometimes.
-- fixed?. java.lang.RuntimeException: TTS service returned error 500: {"error":"float division by zero"} for
-  text: '</p>'.
-
-## Tasks
-
-- remove universe time in gui in demo mode
-- remove info text bottom left in demo mode
-- remove quotation marks around subtitles.
-- add back background under subtitle
-- break down subtitle if too long.
-- remove "" from tts subtitles
 - stations should be further apart.
-- add demo scheduled effect to blend in, maybe camera to follow nearest trader?
-- fix ships will collide while navigating from planet to planet.
-- add SSAO
-- fix openAL error when stopping demo mode
+- add SSAO.
 
 # Bugs

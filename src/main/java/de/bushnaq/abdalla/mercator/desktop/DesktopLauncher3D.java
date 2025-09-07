@@ -36,6 +36,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
+import java.awt.event.WindowEvent;
 
 /**
  * @author kunterbunt
@@ -134,6 +135,11 @@ public class DesktopLauncher3D implements ApplicationListener {
             } catch (Throwable e) {
                 logger.error(e.getMessage(), e);
             }
+            SwingUtilities.invokeLater(() -> {
+                // send a WINDOW_CLOSING event to simulate user closing
+                frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
+            });
+
             contextFactory.getContext().dispose();
             restart = contextFactory.getContext().restart;
             universe.dispose();

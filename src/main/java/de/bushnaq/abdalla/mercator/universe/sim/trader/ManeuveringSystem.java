@@ -45,15 +45,15 @@ public class ManeuveringSystem {
     public static final  float                MAX_ROTATION_SPEED       = 15;
     public static final  float                MIN_ROTATION_SPEED       = 0.1f;
     private static final int                  NUMBER_OF_THRUSTERS      = 4;
-    private static final float                THRUSTER_FORCE           = 0.8f;//newton
+    private static final float                THRUSTER_FORCE           = 1f;//newton
     private static final float                TRADER_THRUSTER_MARGIN_X = .5f;
     private final static Vector2              zVector                  = new Vector2(0, -1);
     private              float                endRotation              = 90;
     private final        Logger               logger                   = LoggerFactory.getLogger(this.getClass());
     private              OggPlayer            oggPlayer;
-    private final        float[]              position                 = new float[3];
+    private final        float[]              position                 = new float[3];//for audio position
     private              float                progress                 = 0;
-    public               float                rotation                 = 270;//0 degrees orientation
+    public               float                rotation                 = 270;//trader rotation. 0 degrees orientation
     private              RotationAcceleration rotationAcceleration     = RotationAcceleration.ACCELERATING;
     private              RotationDirection    rotationDirection;
     public               float                rotationSpeed            = 0;
@@ -61,7 +61,7 @@ public class ManeuveringSystem {
     @Getter
     private final        List<Thruster>       thrusters                = new ArrayList<>();
     private final        Trader               trader;
-    private final        float[]              velocity                 = new float[3];
+    private final        float[]              velocity                 = new float[3];//for audio velocity
 
     public ManeuveringSystem(Trader trader) {
         this.trader = trader;

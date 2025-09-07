@@ -41,41 +41,41 @@ import static de.bushnaq.abdalla.mercator.universe.sim.trader.Trader3DRenderer.*
  * Engine for translational movement
  */
 public class Engine {
-    private static final float          ENGINE_FORCE                 = .6f;//newton
-    public static final  float          ENGINE_TO_REALITY_FACTOR     = 10;
-    public static final  float          LIGHT_MAX_INTENSITY          = 600f;
-    public static final  float          LIGHT_MIN_INTENSITY          = 500f;
-    public static final  float          LIGHT_OFF_DURATION_AVERAGE   = 0.2f;
-    public static final  float          LIGHT_OFF_DURATION_DEVIATION = 0.1f;
-    public static final  float          LIGHT_ON_DURATION            = 0.1f;
-    public static final  float          LIGHT_SIZE                   = .2f;
-    public static final  int            MAX_ENGINE_SPEED             = 100;
-    public static final  float          MIN_ENGINE_SPEED             = .1f;
-    private static final int            NUMBER_OF_THRUSTERS          = 16;
-    private static final float          PY2                          = 3.14159f / 2;
-    private static final float          TRADER_THRUSTER_MARGIN_X     = .25f;
-    private static final float          TRADER_THRUSTER_MARGIN_Y     = .25f;
-    private static final float          TRADER_THRUSTER_MARGIN_Z     = .5f;
+    private static final float          ENGINE_FORCE             = 2f;//newton
+    public static final  float          ENGINE_TO_REALITY_FACTOR = 10;
+    //    public static final  float          LIGHT_MAX_INTENSITY          = 600f;
+//    public static final  float          LIGHT_MIN_INTENSITY          = 500f;
+//    public static final  float          LIGHT_OFF_DURATION_AVERAGE   = 0.2f;
+//    public static final  float          LIGHT_OFF_DURATION_DEVIATION = 0.1f;
+//    public static final  float          LIGHT_ON_DURATION            = 0.1f;
+//    public static final  float          LIGHT_SIZE                   = .2f;
+    public static final  int            MAX_ENGINE_SPEED         = 100;
+    public static final  float          MIN_ENGINE_SPEED         = .1f;
+    private static final int            NUMBER_OF_THRUSTERS      = 16;
+    //    private static final float          PY2                          = 3.14159f / 2;
+    private static final float          TRADER_THRUSTER_MARGIN_X = .25f;
+    private static final float          TRADER_THRUSTER_MARGIN_Y = .25f;
+    private static final float          TRADER_THRUSTER_MARGIN_Z = .5f;
     //    public float calculateIntensity() {
 //        return LIGHT_MIN_INTENSITY + (float) Math.abs(Math.sin(PY2 * (lightTimer / LIGHT_ON_DURATION)) * (LIGHT_MAX_INTENSITY - LIGHT_MIN_INTENSITY));
 //    }
-    private final static Vector3        yVectorNeg                   = new Vector3(0, -1, 0);
-    private final static Vector3        zVectorNeg                   = new Vector3(0, 0, -1f);
+    private final static Vector3        yVectorNeg               = new Vector3(0, -1, 0);
+    private final static Vector3        zVectorNeg               = new Vector3(0, 0, -1f);
     @Getter
-    private              float          engineSpeed                  = MIN_ENGINE_SPEED;
+    private              float          engineSpeed              = MIN_ENGINE_SPEED;
     //    private              GameObject<GameEngine3D> gameObject;
 //    private              boolean                  gameObjectAdded              = false;
 //    private              int                      lightMode                    = 0;
-    private final        float          lightTimer                   = 0;
-    private final        Logger         logger                       = LoggerFactory.getLogger(this.getClass());
+//    private final        float          lightTimer               = 0;
+    private final        Logger         logger                   = LoggerFactory.getLogger(this.getClass());
     private              OggPlayer      oggPlayer;
     //    private final        PointLight               pointLight;
-    private final        float[]        position                     = new float[3];
-    private final        Vector3        thrustDirection              = new Vector3();
+    private final        float[]        position                 = new float[3];//for 3D sound position
+    private final        Vector3        thrustDirection          = new Vector3();
     @Getter
-    private final        List<Thruster> thrusters                    = new ArrayList<>();
+    private final        List<Thruster> thrusters                = new ArrayList<>();
     private final        Trader         trader;
-    private final        float[]        velocity                     = new float[3];
+    private final        float[]        velocity                 = new float[3];//for 3D sound velocity
 
 //    private void animate(RenderEngine3D<GameEngine3D> renderEngine) {
 //        final float deltaTime = Gdx.graphics.getDeltaTime();

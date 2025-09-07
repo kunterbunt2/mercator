@@ -20,22 +20,20 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.environment.PointLight;
-import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
-import de.bushnaq.abdalla.engine.CustomizedSpriteBatch;
 import de.bushnaq.abdalla.engine.GameObject;
 import de.bushnaq.abdalla.engine.RenderEngine3D;
 import de.bushnaq.abdalla.mercator.engine.GameEngine3D;
 import net.mgsx.gltf.scene3d.attributes.PBRColorAttribute;
 
 public class Thruster {
-    public static final  float                    LIGHT_DISTANCE               = 2f;
+    //    public static final  float                    LIGHT_DISTANCE               = 2f;
     public static final  float                    LIGHT_MAX_INTENSITY          = 30f;
     public static final  float                    LIGHT_MIN_INTENSITY          = 27f;
     public static final  float                    LIGHT_OFF_DURATION_AVERAGE   = 0.2f;
     public static final  float                    LIGHT_OFF_DURATION_DEVIATION = 0.1f;
     public static final  float                    LIGHT_ON_DURATION            = 0.1f;
-    public static final  float                    LIGHT_SIZE                   = .2f;
+    //    public static final  float                    LIGHT_SIZE                   = .2f;
     private static final float                    PY2                          = 3.14159f / 2;
     final static         Vector3                  xVector                      = new Vector3(1, 0, 0);
     final static         Vector3                  yVector                      = new Vector3(0, 1, 0);
@@ -44,7 +42,7 @@ public class Thruster {
     public final         GameObject<GameEngine3D> gameObject;
     private              boolean                  gameObjectAdded              = false;
     public               int                      lightMode                    = 0;
-    private final        Vector3                  lightScaling                 = new Vector3(LIGHT_SIZE, LIGHT_SIZE, LIGHT_SIZE);
+    //    private final        Vector3                  lightScaling                 = new Vector3(LIGHT_SIZE, LIGHT_SIZE, LIGHT_SIZE);
     public               float                    lightTimer                   = 0;
     public final         PointLight               pointLight;
     private final        Vector3                  rotation                     = new Vector3();
@@ -78,7 +76,6 @@ public class Thruster {
                 case 0: {
                     resetLightOffTimer();
                     lightMode = 1;//wait for light to go on
-//                    renderEngine.remove(pointLight, true);
                     for (Material m : gameObject.instance.materials) {
                         if (m.id.equals("flame.material")) {
                             PBRColorAttribute baseColorFactor = PBRColorAttribute.createBaseColorFactor(new Color(Color.WHITE));
@@ -92,7 +89,6 @@ public class Thruster {
                     lightMode = 0;//wait for light to go off
                     final float intensity = (float) Math.abs(Math.sin(PY2 * (lightTimer / LIGHT_ON_DURATION)) * LIGHT_MAX_INTENSITY);
                     pointLight.setIntensity(intensity);
-//                    renderEngine.add(pointLight, true);
                     for (Material m : gameObject.instance.materials) {
                         if (m.id.equals("flame.material")) {
                             PBRColorAttribute baseColorFactor = PBRColorAttribute.createBaseColorFactor(new Color(Color.WHITE));
@@ -131,28 +127,27 @@ public class Thruster {
                 gameObjectAdded = true;
             }
 
-            final CustomizedSpriteBatch batch = renderEngine.renderEngine25D.batch;
-            final Matrix4               m     = new Matrix4();
-            {
-                //move center of text to center of trader
-                m.setToTranslation(translation.x, translation.y, translation.z);
-                m.rotate(yVector, rotation);//rotate with trader
-                //move to the top and back on engine
-                m.translate(delta);
-                //rotate into the xz layer
-                m.rotate(xVector, -90);
-                //scale to fit trader engine
-            }
-            batch.setTransformMatrix(m);
-            float cr = (float) Math.random();
-            float ar = (float) Math.random();
-            Color c  = new Color(cr, cr, cr, ar / 4);
-            float z  = (1f - (float) Math.random()) / 2;
-            float x  = +(1f - (float) Math.random()) * 2;
-            float t  = (float) Math.random();
-            batch.setColor(Color.WHITE);
-            float thickness = .3f + t / 2;
-
+//            final CustomizedSpriteBatch batch = renderEngine.renderEngine25D.batch;
+//            final Matrix4               m     = new Matrix4();
+//            {
+//                //move center of text to center of trader
+//                m.setToTranslation(translation.x, translation.y, translation.z);
+//                m.rotate(yVector, rotation);//rotate with trader
+//                //move to the top and back on engine
+//                m.translate(delta);
+//                //rotate into the xz layer
+//                m.rotate(xVector, -90);
+//                //scale to fit trader engine
+//            }
+//            batch.setTransformMatrix(m);
+//            float cr = (float) Math.random();
+//            float ar = (float) Math.random();
+//            Color c  = new Color(cr, cr, cr, ar / 4);
+//            float z  = (1f - (float) Math.random()) / 2;
+//            float x  = +(1f - (float) Math.random()) * 2;
+//            float t  = (float) Math.random();
+//            batch.setColor(Color.WHITE);
+//            float thickness = .3f + t / 2;
 //            batch.line(renderEngine.getGameEngine().getAtlasManager().systemTextureRegion, 0, 0, 0, direction.x + x, 0, direction.z + z, c, thickness);
             animate(renderEngine);
 
@@ -203,28 +198,27 @@ public class Thruster {
                 gameObjectAdded = true;
             }
 
-            final CustomizedSpriteBatch batch = renderEngine.renderEngine25D.batch;
-            final Matrix4               m     = new Matrix4();
-            {
-                //move center of text to center of trader
-                m.setToTranslation(translation.x, translation.y, translation.z);
-                m.rotate(yVector, rotation);//rotate with trader
-                //move to the top and back on engine
-                m.translate(delta);
-                //rotate into the xz layer
-                m.rotate(xVector, -90);
-                //scale to fit trader engine
-            }
-            batch.setTransformMatrix(m);
-            float cr = (float) Math.random();
-            float ar = (float) Math.random();
-            Color c  = new Color(cr, cr, cr, ar / 4);
-            float z  = (1f - (float) Math.random()) / 2;
-            float x  = +(1f - (float) Math.random()) * 2;
-            float t  = (float) Math.random();
-            batch.setColor(Color.WHITE);
-            float thickness = .3f + t / 2;
-
+//            final CustomizedSpriteBatch batch = renderEngine.renderEngine25D.batch;
+//            final Matrix4               m     = new Matrix4();
+//            {
+//                //move center of text to center of trader
+//                m.setToTranslation(translation.x, translation.y, translation.z);
+//                m.rotate(yVector, rotation);//rotate with trader
+//                //move to the top and back on engine
+//                m.translate(delta);
+//                //rotate into the xz layer
+//                m.rotate(xVector, -90);
+//                //scale to fit trader engine
+//            }
+//            batch.setTransformMatrix(m);
+//            float cr = (float) Math.random();
+//            float ar = (float) Math.random();
+//            Color c  = new Color(cr, cr, cr, ar / 4);
+//            float z  = (1f - (float) Math.random()) / 2;
+//            float x  = +(1f - (float) Math.random()) * 2;
+//            float t  = (float) Math.random();
+//            batch.setColor(Color.WHITE);
+//            float thickness = .3f + t / 2;
 //            batch.line(renderEngine.getGameEngine().getAtlasManager().systemTextureRegion, 0, 0, 0, direction.x + x, 0, direction.z + z, c, thickness);
             animate(renderEngine);
 

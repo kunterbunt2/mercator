@@ -53,15 +53,12 @@ Then you can start mercator by one of its starting classes
 
 ## Issues
 
-- engine thrusters placement is wrong.
+- pipes visible through hanger door.
 - audio engine throws endless exceptions when quitting the game
-- engine thrusters not firing for docking/undocking.
 - after a while several traders are in-queue, but station believes they are in-dock.
 - tts ignoring pause.
-- trader acceleration is not constant, why?
 - there should be the possibility to select a ship but still hear the station chat
 - factory goods keep making static cache dirty
-- pipes visible through hanger door.
 - Economy is not stable, all sims eventually die of hunger.
 - simulation advanceintime is triggered every frame.
 - ensure adding/removing lights does not cause any caching to get dirty.

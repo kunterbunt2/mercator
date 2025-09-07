@@ -366,7 +366,7 @@ public class Info {
             updateNameAndValue("Start Credits", Sim.SIM_START_CREDITS, STATIC_LABEL);
             updateNameAndValue("Cargo Capacity", trader.goodSpace, STATIC_LABEL);
             updateNameAndValue("Engine Speed", trader.getEngine().getEngineSpeed() * Engine.ENGINE_TO_REALITY_FACTOR, STATIC_LABEL);
-            updateNameAndValue("Engine Acceleration", trader.getEngine().getEngineSpeed(), STATIC_LABEL);
+            updateNameAndValue("Engine Acceleration", trader.getEngine().getAcceleration(), STATIC_LABEL);
             updateNameAndValue("Rotation Speed", trader.getManeuveringSystem().rotationSpeed, STATIC_LABEL);
             updateNameAndValue("Credits", String.format("%.2f", trader.getCredits()), VARIABLE_LABEL);
             updateNameAndValue("Credits to Save", String.format("%.2f", trader.creditsToSave), VARIABLE_LABEL);

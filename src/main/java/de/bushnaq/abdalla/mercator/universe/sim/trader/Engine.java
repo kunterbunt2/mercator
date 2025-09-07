@@ -62,6 +62,8 @@ public class Engine {
     private final static Vector3        yVectorNeg               = new Vector3(0, -1, 0);
     private final static Vector3        zVectorNeg               = new Vector3(0, 0, -1f);
     @Getter
+    private              float          acceleration;
+    @Getter
     private              float          engineSpeed              = MIN_ENGINE_SPEED;
     //    private              GameObject<GameEngine3D> gameObject;
 //    private              boolean                  gameObjectAdded              = false;
@@ -75,9 +77,8 @@ public class Engine {
     @Getter
     private final        List<Thruster> thrusters                = new ArrayList<>();
     private final        Trader         trader;
-    private final        float[]        velocity                 = new float[3];//for 3D sound velocity
 
-//    private void animate(RenderEngine3D<GameEngine3D> renderEngine) {
+    //    private void animate(RenderEngine3D<GameEngine3D> renderEngine) {
 //        final float deltaTime = Gdx.graphics.getDeltaTime();
 //        if (lightTimer <= 0f) {
 //            //lightMode
@@ -86,6 +87,7 @@ public class Engine {
 //                case 0: {
 //                    resetLightOffTimer();
 //                    lightMode = 1;//wait for light to go on
+    private final float[] velocity = new float[3];//for 3D sound velocity
 
     public Engine(Trader trader) {
         this.trader = trader;
@@ -158,8 +160,8 @@ public class Engine {
                 if (Debug.isFilterTrader(trader.getName()))
                     logger.info("*** min engine speed");
             } else {
-                float acceleration = calculateAcceleration();
-                float progress     = trader.navigator.destinationWaypointDistanceProgress / trader.navigator.destinationWaypointDistance;
+                acceleration = calculateAcceleration();
+                float progress = trader.navigator.destinationWaypointDistanceProgress / trader.navigator.destinationWaypointDistance;
                 if (progress < 0.5f) {
                     //accelerating
                     thrustDirection.set(zVectorNeg);
@@ -190,8 +192,8 @@ public class Engine {
             }
         } else if (trader.getTraderSubStatus() == TraderSubStatus.TRADER_STATUS_DOCKING_ACC || trader.getTraderSubStatus() == TraderSubStatus.TRADER_STATUS_DOCKING_DEC) {
             // descend to dock
-            float acceleration = calculateAcceleration();
-            float progress     = (TRADER_FLIGHT_HEIGHT - trader.y) / (TRADER_FLIGHT_HEIGHT - TRADER_DOCKING_HEIGHT);
+            acceleration = calculateAcceleration();
+            float progress = (TRADER_FLIGHT_HEIGHT - trader.y) / (TRADER_FLIGHT_HEIGHT - TRADER_DOCKING_HEIGHT);
             if (progress < 0.5) {
                 //accelerating
                 thrustDirection.set(Vector3.Y);
@@ -214,8 +216,8 @@ public class Engine {
             }
         } else if (trader.getTraderSubStatus() == TraderSubStatus.TRADER_STATUS_UNDOCKING_ACC || trader.getTraderSubStatus() == TraderSubStatus.TRADER_STATUS_UNDOCKING_DEC) {
             // ascend to undock
-            float acceleration = calculateAcceleration();
-            float progress     = (trader.y - TRADER_DOCKING_HEIGHT) / (TRADER_FLIGHT_HEIGHT - TRADER_DOCKING_HEIGHT);
+            acceleration = calculateAcceleration();
+            float progress = (trader.y - TRADER_DOCKING_HEIGHT) / (TRADER_FLIGHT_HEIGHT - TRADER_DOCKING_HEIGHT);
             if (progress < 0.5) {
                 //accelerating
                 thrustDirection.set(yVectorNeg);

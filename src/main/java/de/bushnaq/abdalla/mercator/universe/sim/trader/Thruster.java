@@ -30,8 +30,8 @@ import net.mgsx.gltf.scene3d.attributes.PBRColorAttribute;
 
 public class Thruster {
     public static final  float                    LIGHT_DISTANCE               = 2f;
-    public static final  float                    LIGHT_MAX_INTENSITY          = 60f;
-    public static final  float                    LIGHT_MIN_INTENSITY          = 50f;
+    public static final  float                    LIGHT_MAX_INTENSITY          = 30f;
+    public static final  float                    LIGHT_MIN_INTENSITY          = 27f;
     public static final  float                    LIGHT_OFF_DURATION_AVERAGE   = 0.2f;
     public static final  float                    LIGHT_OFF_DURATION_DEVIATION = 0.1f;
     public static final  float                    LIGHT_ON_DURATION            = 0.1f;
@@ -39,9 +39,8 @@ public class Thruster {
     private static final float                    PY2                          = 3.14159f / 2;
     final static         Vector3                  xVector                      = new Vector3(1, 0, 0);
     final static         Vector3                  yVector                      = new Vector3(0, 1, 0);
-    final static         Vector3                  zVector                      = new Vector3(0, 0, 1);
+    //    final static         Vector3                  zVector                      = new Vector3(0, 0, 1);
     public               Vector3                  delta                        = new Vector3();
-    //    public               Vector3                  direction                    = new Vector3();
     public final         GameObject<GameEngine3D> gameObject;
     private              boolean                  gameObjectAdded              = false;
     public               int                      lightMode                    = 0;
@@ -50,14 +49,24 @@ public class Thruster {
     public final         PointLight               pointLight;
     private final        Vector3                  rotation                     = new Vector3();
     private final        RotationDirection        rotationDirection;
+    private final        Vector3                  thrustDirection;
 
     public Thruster(RenderEngine3D<GameEngine3D> renderEngine, Vector3 delta, RotationDirection rotationDirection, Vector3 rotation, GameObject<GameEngine3D> gameObject) {
         this.delta.set(delta);
-//        this.direction.set(direction);
         this.rotationDirection = rotationDirection;
         this.rotation.set(rotation);
-        this.gameObject = gameObject;
-        this.pointLight = new PointLight();
+        this.gameObject      = gameObject;
+        this.pointLight      = new PointLight();
+        this.thrustDirection = null;
+    }
+
+    public Thruster(RenderEngine3D<GameEngine3D> renderEngine, Vector3 delta, Vector3 thrustDirection, Vector3 rotation, GameObject<GameEngine3D> gameObject) {
+        this.delta.set(delta);
+        this.thrustDirection = thrustDirection;
+        this.rotation.set(rotation);
+        this.gameObject        = gameObject;
+        this.pointLight        = new PointLight();
+        this.rotationDirection = null;
     }
 
     private void animate(RenderEngine3D<GameEngine3D> renderEngine) {
@@ -114,7 +123,7 @@ public class Thruster {
         boolean on = false;
 //        if (direction.x != 0f || direction.y != 0f || direction.z != 0f)
 //        mp3Player.setPositionAndVelocity(position, velocity);
-        if (rotationDirection != RotationDirection.NON && (this.rotationDirection == rotationDirection && rotationAcceleration == RotationAcceleration.ACCELERATING || this.rotationDirection != rotationDirection && rotationAcceleration == RotationAcceleration.DECELLERATING)) {
+        if (rotationDirection != RotationDirection.NON && this.thrustDirection == null && (this.rotationDirection == rotationDirection && rotationAcceleration == RotationAcceleration.ACCELERATING || this.rotationDirection != rotationDirection && rotationAcceleration == RotationAcceleration.DECELLERATING)) {
             on = true;
             if (!gameObjectAdded) {
                 renderEngine.addDynamic(gameObject);
@@ -127,7 +136,7 @@ public class Thruster {
             {
                 //move center of text to center of trader
                 m.setToTranslation(translation.x, translation.y, translation.z);
-                m.rotate(yVector, rotation);
+                m.rotate(yVector, rotation);//rotate with trader
                 //move to the top and back on engine
                 m.translate(delta);
                 //rotate into the xz layer
@@ -148,7 +157,79 @@ public class Thruster {
             animate(renderEngine);
 
             gameObject.instance.transform.setToTranslation(translation);
-            gameObject.instance.transform.rotate(yVector, rotation);
+            gameObject.instance.transform.rotate(yVector, rotation);//rotate with trader
+            gameObject.instance.transform.translate(delta);
+            float factor = 2;
+            gameObject.instance.transform.rotate(Vector3.Y, this.rotation.y + factor - (float) Math.random() * factor * 2);
+            gameObject.instance.transform.rotate(Vector3.Z, this.rotation.z + factor - (float) Math.random() * factor * 2);
+            gameObject.instance.transform.rotate(Vector3.X, this.rotation.x + factor - (float) Math.random() * factor * 2);
+            gameObject.instance.transform.scale(0.2f, 0.2f, 0.2f);
+            gameObject.update();
+            final float intensity        = calculateIntensity();
+            Vector3     lightTranslation = new Vector3();
+            gameObject.instance.transform.getTranslation(lightTranslation);
+            pointLight.set(Color.WHITE, lightTranslation.x, lightTranslation.y, lightTranslation.z, intensity);
+        } else {
+            on = false;
+            if (gameObjectAdded) {
+                renderEngine.remove(pointLight, true);
+                renderEngine.removeDynamic(gameObject);
+                gameObjectAdded = false;
+            }
+        }
+        return on;
+    }
+
+    public boolean update(RenderEngine3D<GameEngine3D> renderEngine, Trader trader, Vector3 translation, float rotation, Vector3 thrustDirection) throws Exception {
+        boolean on = false;
+//        if (direction.x != 0f || direction.y != 0f || direction.z != 0f)
+//        mp3Player.setPositionAndVelocity(position, velocity);
+        //are we thrusting in the direction of this thruster?
+        if (thrustDirection.hasSameDirection(this.thrustDirection) && rotationDirection == null
+                && (trader.getTraderSubStatus() == TraderSubStatus.TRADER_STATUS_ACCELERATING ||
+                trader.getTraderSubStatus() == TraderSubStatus.TRADER_STATUS_DECELERATING ||
+                trader.getTraderSubStatus() == TraderSubStatus.TRADER_STATUS_DOCKING_ACC ||
+                trader.getTraderSubStatus() == TraderSubStatus.TRADER_STATUS_DOCKING_DEC ||
+                trader.getTraderSubStatus() == TraderSubStatus.TRADER_STATUS_UNDOCKING_ACC ||
+                trader.getTraderSubStatus() == TraderSubStatus.TRADER_STATUS_UNDOCKING_DEC
+        )
+
+
+        ) {
+            on = true;
+            if (!gameObjectAdded) {
+                renderEngine.addDynamic(gameObject);
+                renderEngine.add(pointLight, true);
+                gameObjectAdded = true;
+            }
+
+            final CustomizedSpriteBatch batch = renderEngine.renderEngine25D.batch;
+            final Matrix4               m     = new Matrix4();
+            {
+                //move center of text to center of trader
+                m.setToTranslation(translation.x, translation.y, translation.z);
+                m.rotate(yVector, rotation);//rotate with trader
+                //move to the top and back on engine
+                m.translate(delta);
+                //rotate into the xz layer
+                m.rotate(xVector, -90);
+                //scale to fit trader engine
+            }
+            batch.setTransformMatrix(m);
+            float cr = (float) Math.random();
+            float ar = (float) Math.random();
+            Color c  = new Color(cr, cr, cr, ar / 4);
+            float z  = (1f - (float) Math.random()) / 2;
+            float x  = +(1f - (float) Math.random()) * 2;
+            float t  = (float) Math.random();
+            batch.setColor(Color.WHITE);
+            float thickness = .3f + t / 2;
+
+//            batch.line(renderEngine.getGameEngine().getAtlasManager().systemTextureRegion, 0, 0, 0, direction.x + x, 0, direction.z + z, c, thickness);
+            animate(renderEngine);
+
+            gameObject.instance.transform.setToTranslation(translation);
+            gameObject.instance.transform.rotate(yVector, rotation);//rotate with trader
             gameObject.instance.transform.translate(delta);
             float factor = 2;
             gameObject.instance.transform.rotate(Vector3.Y, this.rotation.y + factor - (float) Math.random() * factor * 2);

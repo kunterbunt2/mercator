@@ -54,6 +54,7 @@ Then you can start mercator by one of its starting classes
 ## Issues
 
 - engine thrusters placement is wrong.
+- audio engine throws endless exceptions when quitting the game
 - engine thrusters not firing for docking/undocking.
 - after a while several traders are in-queue, but station believes they are in-dock.
 - tts ignoring pause.

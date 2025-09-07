@@ -35,31 +35,33 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 
-import static de.bushnaq.abdalla.mercator.universe.sim.trader.Trader3DRenderer.*;
+import static de.bushnaq.abdalla.mercator.universe.sim.trader.Trader3DRenderer.TRADER_EXTERNAL_SIZE_X;
+import static de.bushnaq.abdalla.mercator.universe.sim.trader.Trader3DRenderer.TRADER_EXTERNAL_SIZE_Z;
 
 /**
  * thrusters for rotational maneuvering
  */
 public class ManeuveringSystem {
-    public static final  float                MAX_ROTATION_SPEED   = 15;
-    public static final  float                MIN_ROTATION_SPEED   = 0.1f;
-    private static final int                  NUMBER_OF_THRUSTERS  = 4;
-    private static final float                THRUSTER_FORCE       = 0.8f;//newton
-    final static         Vector2              zVector              = new Vector2(0, -1);
-    private              float                endRotation          = 90;
-    private final        Logger               logger               = LoggerFactory.getLogger(this.getClass());
+    public static final  float                MAX_ROTATION_SPEED       = 15;
+    public static final  float                MIN_ROTATION_SPEED       = 0.1f;
+    private static final int                  NUMBER_OF_THRUSTERS      = 4;
+    private static final float                THRUSTER_FORCE           = 0.8f;//newton
+    private static final float                TRADER_THRUSTER_MARGIN_X = .5f;
+    private final static Vector2              zVector                  = new Vector2(0, -1);
+    private              float                endRotation              = 90;
+    private final        Logger               logger                   = LoggerFactory.getLogger(this.getClass());
     private              OggPlayer            oggPlayer;
-    private final        float[]              position             = new float[3];
-    private              float                progress             = 0;
-    public               float                rotation             = 270;//0 degrees orientation
-    private              RotationAcceleration rotationAcceleration = RotationAcceleration.ACCELERATING;
+    private final        float[]              position                 = new float[3];
+    private              float                progress                 = 0;
+    public               float                rotation                 = 270;//0 degrees orientation
+    private              RotationAcceleration rotationAcceleration     = RotationAcceleration.ACCELERATING;
     private              RotationDirection    rotationDirection;
-    public               float                rotationSpeed        = 0;
-    private              float                startRotation        = 1000;
+    public               float                rotationSpeed            = 0;
+    private              float                startRotation            = 1000;
     @Getter
-    private final        List<Thruster>       thrusters            = new ArrayList<>();
+    private final        List<Thruster>       thrusters                = new ArrayList<>();
     private final        Trader               trader;
-    private final        float[]              velocity             = new float[3];
+    private final        float[]              velocity                 = new float[3];
 
     public ManeuveringSystem(Trader trader) {
         this.trader = trader;
@@ -176,17 +178,11 @@ public class ManeuveringSystem {
 
     private void createThrusters(final RenderEngine3D<GameEngine3D> renderEngine) {
         final Vector3[] delta = {//
-                new Vector3(-TRADER_EXTERNAL_SIZE_X / 2 - TRADER_THRUSTER_MARGIN, 0, -TRADER_EXTERNAL_SIZE_Z / 2),//left, top, front
-                new Vector3(TRADER_EXTERNAL_SIZE_X / 2 + TRADER_THRUSTER_MARGIN, 0, TRADER_EXTERNAL_SIZE_Z / 2),//right, top, back
-                new Vector3(TRADER_EXTERNAL_SIZE_X / 2 + TRADER_THRUSTER_MARGIN, 0, -TRADER_EXTERNAL_SIZE_Z / 2),//right, top, front
-                new Vector3(-TRADER_EXTERNAL_SIZE_X / 2 - TRADER_THRUSTER_MARGIN, 0, TRADER_EXTERNAL_SIZE_Z / 2),//left, top, back
+                new Vector3(-TRADER_EXTERNAL_SIZE_X / 2 - TRADER_THRUSTER_MARGIN_X, 0, -TRADER_EXTERNAL_SIZE_Z / 2),//left, top, front
+                new Vector3(TRADER_EXTERNAL_SIZE_X / 2 + TRADER_THRUSTER_MARGIN_X, 0, TRADER_EXTERNAL_SIZE_Z / 2),//right, top, back
+                new Vector3(TRADER_EXTERNAL_SIZE_X / 2 + TRADER_THRUSTER_MARGIN_X, 0, -TRADER_EXTERNAL_SIZE_Z / 2),//right, top, front
+                new Vector3(-TRADER_EXTERNAL_SIZE_X / 2 - TRADER_THRUSTER_MARGIN_X, 0, TRADER_EXTERNAL_SIZE_Z / 2),//left, top, back
         };
-//        final Vector3[] direction = {//
-//                new Vector3(xVectorNeg).scl(1f),//front/left/bottom
-//                new Vector3(Vector3.X).scl(1f),//back/right/top
-//                new Vector3(Vector3.X).scl(1f),//front/right/top
-//                new Vector3(xVectorNeg).scl(1f),//back/left/bottom
-//        };
         final RotationDirection[] rotationDirection = {//
                 RotationDirection.CLOCKWISE,//front/left/bottom
                 RotationDirection.CLOCKWISE,//back/right/top
@@ -200,7 +196,7 @@ public class ManeuveringSystem {
                 new Vector3(0, 180f, 0),//back/left/bottom
         };
         for (int i = 0; i < NUMBER_OF_THRUSTERS; i++) {
-            trader.getManeuveringSystem().getThrusters().add(new Thruster(renderEngine, delta[i]/*, direction[i]*/, rotationDirection[i], rotation[i], new GameObject<GameEngine3D>(new ModelInstanceHack(renderEngine.getGameEngine().assetManager.flame.scene.model), trader)));
+            thrusters.add(new Thruster(renderEngine, delta[i], rotationDirection[i], rotation[i], new GameObject<GameEngine3D>(new ModelInstanceHack(renderEngine.getGameEngine().assetManager.flame.scene.model), trader)));
         }
     }
 
@@ -208,6 +204,10 @@ public class ManeuveringSystem {
 //        startRotation = 1000;
 //    }
 
+    /**
+     * Call this method periodically to check if rotation is completed
+     * If completed, it will call onEvent.aligned()
+     */
     public void endRotation() {
         boolean reached = progress >= 1.0f;
         if (reached) {

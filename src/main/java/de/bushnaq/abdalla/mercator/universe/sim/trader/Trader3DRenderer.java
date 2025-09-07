@@ -69,9 +69,6 @@ public class Trader3DRenderer extends ObjectRenderer<GameEngine3D> {
     public static final  float                                         TRADER_SIZE_Z           = 11;//used to place cargo
     private static final float                                         TRADER_TRAVELING_HEIGHT = -TRADER_SIZE_Y / 2 + Planet3DRenderer.WATER_Y;
     public static final  float                                         TRADER_WIDTH            = 16f;
-    final static         Vector3                                       xVectorNeg              = new Vector3(-1, 0, 0);
-    final static         Vector3                                       yVectorNeg              = new Vector3(0, -1, 0);
-    static               float                                         TRADER_THRUSTER_MARGIN  = .5f;
     private final        List<GameObject<GameEngine3D>>                animatedObjects         = new ArrayList<>();
     private final        Vector3                                       direction               = new Vector3();//intermediate value
     private final        List<GameObject<GameEngine3D>>                goodInstances           = new ArrayList<>();

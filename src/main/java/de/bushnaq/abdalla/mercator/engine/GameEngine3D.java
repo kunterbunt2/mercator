@@ -278,7 +278,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
             createStage();
             pauseScreen = new PauseScreen(this, atlasManager.systemTextureRegion, atlasManager.menuBoldFont, atlasManager.menuFont);
 
-            audioEngine.create(AtlasManager.getAssetsFolderName());
+            audioEngine.create();
             audioEngine.enableHrtf(0);
             audioEngine.radio.loadResource(this.getClass());
             MercatorSystemPrompts.register(getRadio());//register all ai prompts to the radioTTS

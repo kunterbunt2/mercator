@@ -62,7 +62,7 @@ public class Planet3DRenderer extends ObjectRenderer<GameEngine3D> {
     public static final  float                          MIRROR_Y               = -16;//TODO should use context.getWaterLevel()
     private static final Color                          ORANGE_YELLOW          = new Color(0xf07e02ff);
     private static final Color                          PEACOCK_BLUE           = new Color(0x092f5cff);
-    public static final  float                          PLANET_2D_SIZE         = 64;
+    public static final  float                          PLANET_2D_SIZE         = 128;
     public static final  float                          PLANET_3D_SIZE         = 128;
     public static final  float                          PLANET_ATMOSPHARE_SIZE = 9.6f;
     public static final  int                            PLANET_BORDER          = 256;
@@ -436,9 +436,9 @@ public class Planet3DRenderer extends ObjectRenderer<GameEngine3D> {
                     final float z1    = z;
                     renderEngine.renderutils2Dxz.circle(renderEngine.getGameEngine().getAtlasManager().planetTextureRegion, x1, 0, z1, PLANET_2D_SIZE * index, 8f, renderEngine.getGameEngine().distinctiveTransparentColorlist.get(planet.sector.type), 32);
                 }
-                renderEngine.renderutils2Dxz.label(renderEngine.getGameEngine().getAtlasManager().systemTextureRegion, x, 0f, z, Trader2DRenderer.TRADER_WIDTH, Trader2DRenderer.TRADER_HEIGHT, PLANET_2D_SIZE * 4, PLANET_2D_SIZE * 5, renderEngine.getGameEngine().getAtlasManager().demoMidFont, color, planet.getName(), color, String.format("%.0f", planet.getCredits()), renderEngine.getGameEngine().queryCreditColor(planet.getCredits(), Planet.PLANET_START_CREDITS));
+                renderEngine.renderutils2Dxz.label(renderEngine.getGameEngine().getAtlasManager().systemTextureRegion, x, 0f, z, Trader2DRenderer.TRADER_WIDTH, Trader2DRenderer.TRADER_HEIGHT, PLANET_2D_SIZE * 4, -PLANET_2D_SIZE * 5, renderEngine.getGameEngine().getAtlasManager().modelFont, color, planet.getName(), color, String.format("%.0f", planet.getCredits()), renderEngine.getGameEngine().queryCreditColor(planet.getCredits(), Planet.PLANET_START_CREDITS));
             } else {
-                renderEngine.renderutils2Dxz.label(renderEngine.getGameEngine().getAtlasManager().systemTextureRegion, x, 0, z, Trader2DRenderer.TRADER_WIDTH, Trader2DRenderer.TRADER_HEIGHT, PLANET_2D_SIZE * 1, PLANET_2D_SIZE * 2, renderEngine.getGameEngine().getAtlasManager().demoMidFont, color, planet.getName(), color, String.format("%.0f", planet.getCredits()), renderEngine.getGameEngine().queryCreditColor(planet.getCredits(), Planet.PLANET_START_CREDITS));
+                renderEngine.renderutils2Dxz.label(renderEngine.getGameEngine().getAtlasManager().systemTextureRegion, x, 0, z, Trader2DRenderer.TRADER_WIDTH, Trader2DRenderer.TRADER_HEIGHT, PLANET_2D_SIZE * 1, -PLANET_2D_SIZE * 2, renderEngine.getGameEngine().getAtlasManager().modelFont, color, planet.getName(), color, String.format("%.0f", planet.getCredits()), renderEngine.getGameEngine().queryCreditColor(planet.getCredits(), Planet.PLANET_START_CREDITS));
             }
             renderEngine.renderutils2Dxz.text(x, 0, z + 100, renderEngine.getGameEngine().getAtlasManager().demoMidFont, color, color, planet.sector.name);
             renderSims(planet, renderEngine, x, z, hps);

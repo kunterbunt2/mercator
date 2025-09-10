@@ -53,7 +53,6 @@ Then you can start mercator by one of its starting classes
 
 ## Issues
 
-- trader position lights are not positioned correctly.
 - after a while several traders are in-queue, but station believes they are in-dock.
 - tts ignoring pause.
 - there should be the possibility to select a ship but still hear the station chat.
@@ -62,7 +61,6 @@ Then you can start mercator by one of its starting classes
 - simulation advanceintime is triggered every frame.
 - ensure adding/removing lights does not cause any caching to get dirty.
 - optimize selected path performance.
-- audio engine cannot switch to new audio output.
 - stations should be further apart.
 - add SSAO.
 

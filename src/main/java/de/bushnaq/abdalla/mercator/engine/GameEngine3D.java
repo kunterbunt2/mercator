@@ -449,7 +449,7 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
         renderEngine.environment.set(PBRCubemapAttribute.createDiffuseEnv(diffuseCubemap));
         renderEngine.environment.set(PBRCubemapAttribute.createSpecularEnv(specularCubemap));
         renderEngine.environment.set(new PBRTextureAttribute(PBRTextureAttribute.BRDFLUTTexture, brdfLUT));
-        renderEngine.environment.set(new PBRFloatAttribute(PBRFloatAttribute.ShadowBias, .002f));
+        renderEngine.environment.set(new PBRFloatAttribute(PBRFloatAttribute.ShadowBias, .001f));
     }
 
     private void createInputProcessor(final InputProcessor inputProcessor, GameEngine3D gameEngine) throws Exception {
@@ -459,8 +459,8 @@ public class GameEngine3D implements ScreenListener, ApplicationListener, InputP
         inputMultiplexer.addProcessor(inputProcessor);
         inputMultiplexer.addProcessor(camController);
         Gdx.input.setInputProcessor(inputMultiplexer);
-        camController.setTargetZoomIndex(2);
-        camController.setZoomIndex(2);
+        camController.setTargetZoomIndex(3);
+        camController.setZoomIndex(3);
         camController.update(true);
     }
 

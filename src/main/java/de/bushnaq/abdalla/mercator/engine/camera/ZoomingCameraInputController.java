@@ -36,7 +36,7 @@ public class ZoomingCameraInputController extends CameraInputController {
     private       float              progress        = 0;
     @Getter
     @Setter
-    private       int                targetZoomIndex = 2;
+    private       int                targetZoomIndex = 3;
     private final Vector3            tmpV1           = new Vector3();
     private final Vector3            tmpV2           = new Vector3();
     @Getter

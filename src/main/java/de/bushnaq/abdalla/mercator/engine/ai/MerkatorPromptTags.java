@@ -22,7 +22,7 @@ public class MerkatorPromptTags extends PromptTags {
         StringBuilder tonnage = new StringBuilder();
         for (Good good : trader.getGoodList()) {
             if (good.getAmount() != 0)
-                tonnage.append(String.format("%d kiloton '%s'", good.getAmount(), good.type.getName()));
+                tonnage.append(String.format("%d unit of '%s'", good.getAmount(), good.type.getName()));
         }
 
         addPreTag(TONNAGE, tonnage.toString());

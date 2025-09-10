@@ -140,7 +140,7 @@ public class MercatorSystemPrompts {
             """;
     private static final String REQUEST_UNDOCKING_SYSTEM_PROMPT  = """
             You are a minion communications officer of a lego cargo ship in space.
-            You need to request clearance from a minion at a space station to undock and depart.
+            you have filled your ship with <cargo> from this station and need to request clearance from a minion at a space station to undock.
             
             Rules:
             - Always request permission to undock in radio style, but like a minion would do.

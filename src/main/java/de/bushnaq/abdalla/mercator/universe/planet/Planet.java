@@ -46,7 +46,7 @@ import org.slf4j.LoggerFactory;
  */
 public class Planet extends Waypoint implements TradingPartner {
     public static final float                  CHANNEL_SIZE           = 196 / Universe.WORLD_SCALE;
-    public static final int                    PLANET_DISTANCE        = 2048;
+    public static final int                    PLANET_DISTANCE        = 2048 * 2 * 2;
     public final static int                    PLANET_MAX_SIMS        = 10;
     public final static float                  PLANET_START_CREDITS   = 20000;
     public              PlanetRadioChannel     communicationPartner;

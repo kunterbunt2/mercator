@@ -19,19 +19,23 @@ package de.bushnaq.abdalla.mercator.universe.good;
 import de.bushnaq.abdalla.mercator.renderer.Renderable;
 import de.bushnaq.abdalla.mercator.universe.planet.Planet;
 import de.bushnaq.abdalla.mercator.util.TimeUnit;
+import lombok.Getter;
 
 /**
  * @author bushnaq Created 13.02.2005
  */
 public class Good extends Renderable implements Cloneable {
     private static final long          MAX_BUY_INTEREST_INTERVAL = 250 * TimeUnit.TICKS_PER_DAY;
+    @Getter
+    private              int           amount                    = 0;
+    @Getter
     public               int           averageAmount             = 0;
+    @Getter
     public               float         averagePrice              = 0;
     public               long          lastBuyInterest           = Long.MIN_VALUE;
     public               float         price                     = getAveragePrice();
     public               GoodStatistic statistic                 = new GoodStatistic();
     public               GoodType      type;
-    private              int           amount                    = 0;
     //	public List<Volume> volume = new LinkedList<Volume>();
 
     public Good(final GoodType type, final float averagePrice, final int averageAmount, final int amount, final Planet planetOfOrigin) {
@@ -82,25 +86,9 @@ public class Good extends Renderable implements Cloneable {
         return good;
     }
 
-    public String toString() {
-        return type.getName();
-    }
-
     public void consume(final int volume) {
         this.amount -= volume;
         statistic.consumed += volume;
-    }
-
-    public int getAmount() {
-        return amount;
-    }
-
-    public int getAverageAmount() {
-        return averageAmount;
-    }
-
-    public float getAveragePrice() {
-        return averagePrice;
     }
 
     public int getMaxAmount() {
@@ -157,5 +145,9 @@ public class Good extends Renderable implements Cloneable {
 
     public void setAmount(final int amount) {
         this.amount = amount;
+    }
+
+    public String toString() {
+        return type.getName();
     }
 }

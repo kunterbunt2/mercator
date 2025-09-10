@@ -14,6 +14,8 @@ if blend_dir not in sys.path:
     sys.path.append(blend_dir)
 import lib
 importlib.reload(lib)
+import minion
+importlib.reload(minion)
 # -------------------------------------------------------
 
 station_x = 128
@@ -21,10 +23,13 @@ station_y = 128
 station_z = 128
 station_distance = 256
 distance_from_edge = 8
-tower_x = 8
-tower_y = 8
-tower_z = 16
+tower_x = 4
+tower_y = 4
+tower_z = 8
 wall_width = 1
+door_x = 16
+door_y = 16
+door_z = 16
 
 def create_radar( name, location, material ):
     bpy.ops.mesh.primitive_cube_add(size=1, enter_editmode=False, align='WORLD', location=(location[0],location[1],location[2]+.5), scale=(.05, 5, 1))
@@ -130,11 +135,12 @@ def create_tower( x=0, y=0, z=0, scale=(tower_x, tower_y, tower_z) ):
 #    assign_material_to_faces(tower, faces_at_z, floor_mat)
     
     # window
-    window_mat = lib.create_material( name="m.window", color=(0, 0, 0, 1), metallic=1, roughness=0.3, alpha=0.9)
-    bpy.ops.mesh.primitive_cube_add(size=1, enter_editmode=False, align='WORLD', location=(x, y, z+tower_z-window_z/2-wall_width), scale=(tower_x-wall_width, tower_y-wall_width, window_z))
-    window = bpy.context.active_object
-    window.name = 'window'
-    window.data.materials.append(window_mat)
+#    window_mat = lib.create_material( name="m.window", color=(0, 0, 0, 1), metallic=1, roughness=0.3, alpha=0.9)
+#    bpy.ops.mesh.primitive_cube_add(size=1, enter_editmode=False, align='WORLD', location=(x, y, z+tower_z-window_z/2-wall_width), scale=(tower_x-wall_width, tower_y-wall_width, window_z))
+#    window = bpy.context.active_object
+#    window.name = 'window'
+#    window.data.materials.append(window_mat)
+    minion.create_minion( x, y, z+tower_z-window_z-wall_width, 0.2)
     
     # tables
 #    table_mat = lib.create_material( name="m.table", color=(0, 0, 1, 1.0), metallic=0.1, roughness=0.1)
@@ -145,9 +151,6 @@ def create_tower( x=0, y=0, z=0, scale=(tower_x, tower_y, tower_z) ):
 
 
 def create_station( x=0, y=0, z=0, size=1 ):
-    door_x = 16
-    door_y = 16
-    door_z = 16
 
     # outer
     station_mat = lib.create_material( name="m.station", color=lib.hex_to_rgba("#FFFFFFFF"), metallic=0.5, roughness=.5)
@@ -156,10 +159,10 @@ def create_station( x=0, y=0, z=0, size=1 ):
     station.name = 'station'
     station.data.materials.append(station_mat)
     # enable smooth shading
-    bpy.ops.object.shade_smooth()
+#    bpy.ops.object.shade_smooth()
     # enable Auto Smooth so edges stay sharp
-    mod = station.modifiers.new(name="Smooth by Angle", type='NODES')
-    bpy.ops.object.shade_auto_smooth(use_auto_smooth=True, angle=1.0472)
+#    mod = station.modifiers.new(name="Smooth by Angle", type='NODES')
+#    bpy.ops.object.shade_auto_smooth(use_auto_smooth=True, angle=1.0472)
 
     # inner    
     bpy.ops.mesh.primitive_cube_add(size=1, enter_editmode=False, align='WORLD', location=(x, y, z-station_z/2), scale=(station_x-wall_width*2, station_y-wall_width*2, station_z-wall_width*2))
@@ -168,7 +171,7 @@ def create_station( x=0, y=0, z=0, size=1 ):
     station_inner.hide_set(True)
 
     lib.create_boolean_modifier( root = station, name="m1", operation = 'DIFFERENCE', object = station_inner, apply=True )
-    lib.create_bevel_modifier( root = station, name="m3", segments=3, width=2, apply=True )
+    lib.create_bevel_modifier( root = station, name="m3", segments=1, width=1, apply=True )
 
     # hanger doors
     bpy.ops.mesh.primitive_cube_add(size=1, enter_editmode=False, align='WORLD', location=(x, y, z), scale=(door_x, door_y, door_z))
@@ -182,12 +185,12 @@ def create_cube(mat, x, y, z, size=1):
     bpy.ops.mesh.primitive_cube_add(size=size, location=(x, y, z))
     cube = bpy.context.active_object
     cube.data.materials.append(mat)
-    bevel = lib.create_bevel_modifier( root = cube, name="m1", segments=3, width=2, apply=True )
+    bevel = lib.create_bevel_modifier( root = cube, name="m1", segments=1, width=1, apply=True )
     # enable smooth shading
-    bpy.ops.object.shade_smooth()
+#    bpy.ops.object.shade_smooth()
     # enable Auto Smooth so edges stay sharp
-    mod = cube.modifiers.new(name="Smooth by Angle", type='NODES')
-    bpy.ops.object.shade_auto_smooth(use_auto_smooth=True, angle=1.0472)
+#    mod = cube.modifiers.new(name="Smooth by Angle", type='NODES')
+#    bpy.ops.object.shade_auto_smooth(use_auto_smooth=True, angle=1.0472)
     return cube
 
 def create_round_pipe(mat, start, end, radius=0.1, inset=0.2):
@@ -325,5 +328,5 @@ pipe_mat = lib.create_material( name="m.pipe", color=lib.hex_to_rgba("#FFA500FF"
 
 create_station_neighbors( station_mat=[station_mat1,station_mat2,station_mat3,station_mat4], pipe_mat=pipe_mat, station_size=128, station_distance=128+64, radius=20, inset=station_x/2-wall_width/2 )
 create_station()
-create_tower( x=-station_x/2+tower_x/2+distance_from_edge, y=station_y/2-tower_y/2-distance_from_edge, z=0, scale=(tower_x, tower_y, tower_z) )
+create_tower( x=-door_x, y=door_y, z=0, scale=(tower_x, tower_y, tower_z) )
 

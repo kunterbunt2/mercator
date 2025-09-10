@@ -49,7 +49,7 @@ public class Engine {
 //    public static final  float          LIGHT_OFF_DURATION_DEVIATION = 0.1f;
 //    public static final  float          LIGHT_ON_DURATION            = 0.1f;
 //    public static final  float          LIGHT_SIZE                   = .2f;
-    public static final  int            MAX_ENGINE_SPEED         = 100;
+    public static final  int            MAX_ENGINE_SPEED         = 10000;
     public static final  float          MIN_ENGINE_SPEED         = .1f;
     private static final int            NUMBER_OF_THRUSTERS      = 16;
     //    private static final float          PY2                          = 3.14159f / 2;

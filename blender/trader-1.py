@@ -13,7 +13,10 @@ if blend_dir not in sys.path:
     sys.path.append(blend_dir)
 import lib
 importlib.reload(lib)
+import minion
+importlib.reload(minion)
 # -------------------------------------------------------
+
 min_distance = .01
 
 def create_container( x=0, y=0, z=0, f=1 ):
@@ -83,36 +86,76 @@ def create_weld_modifier( root, name, apply=False ):
 
 def create_ship( x=0, y=0, z=0, f=1 ):
 
+    minion.create_minion(x, y+5*f+0.1, z+1, 0.2)
+#    # pilot
+#    pilot_head_mat = lib.create_material( name="m.pilot.head", color=(1,1,1,1), metallic=0.5, roughness=0.5)
+#    bpy.ops.mesh.primitive_uv_sphere_add(radius=0.2*f, enter_editmode=False, align='WORLD', location=(x, y+6*f+0.1, z+0.3), scale=(1, 1, 1))
+#    pilot_head = bpy.context.active_object
+#    pilot_head.data.materials.append(pilot_head_mat)
+#    # enable smooth shading
+#    bpy.ops.object.shade_smooth()
+#    # enable Auto Smooth so edges stay sharp
+#    mod = pilot_head.modifiers.new(name="Smooth by Angle", type='NODES')
+#    bpy.ops.object.shade_auto_smooth(use_auto_smooth=True, angle=1.0472)
+
+#    # pilot body
+#    bpy.ops.mesh.primitive_uv_sphere_add(radius=0.2*f, enter_editmode=False, align='WORLD', location=(x, y+6*f+0.1, z-0.1), scale=(2, 1, 1))
+#    pilot_body = bpy.context.active_object
+#    pilot_body.data.materials.append(pilot_head_mat)
+#    # enable smooth shading
+#    bpy.ops.object.shade_smooth()
+#    # enable Auto Smooth so edges stay sharp
+#    mod = pilot_body.modifiers.new(name="Smooth by Angle", type='NODES')
+#    bpy.ops.object.shade_auto_smooth(use_auto_smooth=True, angle=1.0472)
+#    
+
+    # cockpit
+#    cockpit_mat = lib.create_material( name="m.cockpit", color=(0, 0, 0, 1), metallic=1, roughness=0.1, alpha=0.8)
+#    bpy.ops.mesh.primitive_cube_add(size=1, enter_editmode=False, align='WORLD', location=(x, y+6*f+min_distance, z+min_distance), scale=(1*f, 1*f, 1*f))
+#    body_cockpit = bpy.context.active_object
+#    body_cockpit.name = 'body_cockpit'
+#    body_cockpit.data.materials.append(cockpit_mat)
+#    lib.create_bevel_modifier( root = body_cockpit, name="b8", segments=3, width=5, apply=True )
+#    # enable smooth shading
+#    bpy.ops.object.shade_smooth()
+#    # enable Auto Smooth so edges stay sharp
+#    mod = body_cockpit.modifiers.new(name="Smooth by Angle", type='NODES')
+#    bpy.ops.object.shade_auto_smooth(use_auto_smooth=True, angle=1.0472)
+
     body_mat = lib.create_material( name="m.body", color=lib.hex_to_rgba("#FFA500FF"), metallic=0.1, roughness=.5)
+    # cockpit
+    bpy.ops.mesh.primitive_cube_add(size=1, enter_editmode=False, align='WORLD', location=(x, y+5*f, z+1), scale=(1*f, 1*f, 1*f))
+    cockpit = bpy.context.active_object
+    cockpit.name = 'cockpit'
+    cockpit.data.materials.append(body_mat)
+    # cockpit_hole_x
+    bpy.ops.mesh.primitive_cube_add(size=1, enter_editmode=False, align='WORLD', location=(x, y+5*f, z+1+0.1), scale=(2*f, .9*f, .65*f))
+    cockpit_hole_x = bpy.context.active_object
+    cockpit_hole_x.name = 'cockpit_hole_x'
+    cockpit_hole_x.data.materials.append(body_mat)
+    cockpit_hole_x.hide_set(True)
+    lib.create_boolean_modifier( root = cockpit, name="m2", operation = 'DIFFERENCE', object = cockpit_hole_x, apply=True )
+    # cockpit_hole_y
+    bpy.ops.mesh.primitive_cube_add(size=1, enter_editmode=False, align='WORLD', location=(x, y+5*f, z+1+0.1), scale=(.9*f, 2*f, .65*f))
+    cockpit_hole_y = bpy.context.active_object
+    cockpit_hole_y.name = 'cockpit_hole_y'
+    cockpit_hole_y.data.materials.append(body_mat)
+    cockpit_hole_y.hide_set(True)
+    lib.create_boolean_modifier( root = cockpit, name="m2", operation = 'DIFFERENCE', object = cockpit_hole_y, apply=True )
+    # cockpit_hole_z
+    bpy.ops.mesh.primitive_cube_add(size=1, enter_editmode=False, align='WORLD', location=(x, y+5*f, z+1+0.1), scale=(.9*f, .9*f, 2*f))
+    cockpit_hole_z = bpy.context.active_object
+    cockpit_hole_z.name = 'cockpit_hole_z'
+    cockpit_hole_z.data.materials.append(body_mat)
+    cockpit_hole_z.hide_set(True)
+    lib.create_boolean_modifier( root = cockpit, name="m2", operation = 'DIFFERENCE', object = cockpit_hole_z, apply=True )
+
+
     # body-top
     bpy.ops.mesh.primitive_cube_add(size=1, enter_editmode=False, align='WORLD', location=(x, y, z), scale=(1*f, 11*f, 1*f))
     body_top = bpy.context.active_object
     body_top.name = 'body_top'
     body_top.data.materials.append(body_mat)
-
-    # body-cockpit
-    pilot_head_mat = lib.create_material( name="m.pilot.head", color=(1,1,1,1), metallic=0.5, roughness=0.5)
-    bpy.ops.mesh.primitive_uv_sphere_add(radius=0.2*f, enter_editmode=False, align='WORLD', location=(x, y+6*f+0.1, z+0.1), scale=(1, 1, 1))
-    pilot_head = bpy.context.active_object
-    pilot_head.data.materials.append(pilot_head_mat)
-    # enable smooth shading
-    bpy.ops.object.shade_smooth()
-    # enable Auto Smooth so edges stay sharp
-    mod = pilot_head.modifiers.new(name="Smooth by Angle", type='NODES')
-    bpy.ops.object.shade_auto_smooth(use_auto_smooth=True, angle=1.0472)
-
-
-    cockpit_mat = lib.create_material( name="m.cockpit", color=(0, 0, 0, 1), metallic=1, roughness=0.1, alpha=0.8)
-    bpy.ops.mesh.primitive_cube_add(size=1, enter_editmode=False, align='WORLD', location=(x, y+6*f+min_distance, z+min_distance), scale=(1*f, 1*f, 1*f))
-    body_cockpit = bpy.context.active_object
-    body_cockpit.name = 'body_cockpit'
-    body_cockpit.data.materials.append(cockpit_mat)
-    lib.create_bevel_modifier( root = body_cockpit, name="b8", segments=3, width=5, apply=True )
-    # enable smooth shading
-    bpy.ops.object.shade_smooth()
-    # enable Auto Smooth so edges stay sharp
-    mod = body_cockpit.modifiers.new(name="Smooth by Angle", type='NODES')
-    bpy.ops.object.shade_auto_smooth(use_auto_smooth=True, angle=1.0472)
 
     # body-front-right-sholder
     bpy.ops.mesh.primitive_cube_add(size=1, enter_editmode=False, align='WORLD', location=(x+1*f, y+5*f, z*f), scale=(1*f, 1*f, 1*f))
@@ -147,9 +190,9 @@ def create_ship( x=0, y=0, z=0, f=1 ):
     body_back_left.data.materials.append(body_mat)
     thruster_back_left = create_thruster( 'thruster_back_left', x-2*f+0.25, y-5*f, z*f, s_orientation='left', f=0.5 )
     
-    lib.join( objects_to_join=[ "body_top", "body_front_right", "body_front_left", "body_back_right", "body_back_left", 'thruster_front_right','thruster_front_left', "thruster_back_right", "thruster_back_left"])
+    lib.join( objects_to_join=[ "body_top", "body_front_right", "body_front_left", "body_back_right", "body_back_left", 'thruster_front_right','thruster_front_left', "thruster_back_right", "thruster_back_left", "cockpit"])
     #create_weld_modifier( root = body_top, name='w1', apply=True )
-    lib.create_remesh( bpy.context.view_layer.objects.active, name='remesh1', octree_depth=4, apply=True )
+    lib.create_remesh( bpy.context.view_layer.objects.active, name='remesh1', octree_depth=8, apply=True )
 
     # enable smooth shading
     bpy.ops.object.shade_smooth()

@@ -29,7 +29,7 @@ def create_container( x=0, y=0, z=0, f=1 ):
         obj.data.materials.append(mat)
 
 def create_radar( name, location, material ):
-    bpy.ops.mesh.primitive_cube_add(size=1, enter_editmode=False, align='WORLD', location=location, scale=(.05, 1, 1))
+    bpy.ops.mesh.primitive_cube_add(size=1, enter_editmode=False, align='WORLD', location=location, scale=(.05, 2, .5))
     cube = bpy.context.active_object
     cube.name = name
     cube.data.materials.append(material)
@@ -86,7 +86,7 @@ def create_weld_modifier( root, name, apply=False ):
 
 def create_ship( x=0, y=0, z=0, f=1 ):
 
-    minion.create_minion(x, y+5*f+0.1, z+1, 0.2)
+#    minion.create_minion(x, y+5*f+0.1, z+1, 0.2)
 #    # pilot
 #    pilot_head_mat = lib.create_material( name="m.pilot.head", color=(1,1,1,1), metallic=0.5, roughness=0.5)
 #    bpy.ops.mesh.primitive_uv_sphere_add(radius=0.2*f, enter_editmode=False, align='WORLD', location=(x, y+6*f+0.1, z+0.3), scale=(1, 1, 1))
@@ -124,31 +124,31 @@ def create_ship( x=0, y=0, z=0, f=1 ):
 
     body_mat = lib.create_material( name="m.body", color=lib.hex_to_rgba("#FFA500FF"), metallic=0.1, roughness=.5)
     # cockpit
-    bpy.ops.mesh.primitive_cube_add(size=1, enter_editmode=False, align='WORLD', location=(x, y+5*f, z+1), scale=(1*f, 1*f, 1*f))
-    cockpit = bpy.context.active_object
-    cockpit.name = 'cockpit'
-    cockpit.data.materials.append(body_mat)
-    # cockpit_hole_x
-    bpy.ops.mesh.primitive_cube_add(size=1, enter_editmode=False, align='WORLD', location=(x, y+5*f, z+1+0.1), scale=(2*f, .9*f, .65*f))
-    cockpit_hole_x = bpy.context.active_object
-    cockpit_hole_x.name = 'cockpit_hole_x'
-    cockpit_hole_x.data.materials.append(body_mat)
-    cockpit_hole_x.hide_set(True)
-    lib.create_boolean_modifier( root = cockpit, name="m2", operation = 'DIFFERENCE', object = cockpit_hole_x, apply=True )
-    # cockpit_hole_y
-    bpy.ops.mesh.primitive_cube_add(size=1, enter_editmode=False, align='WORLD', location=(x, y+5*f, z+1+0.1), scale=(.9*f, 2*f, .65*f))
-    cockpit_hole_y = bpy.context.active_object
-    cockpit_hole_y.name = 'cockpit_hole_y'
-    cockpit_hole_y.data.materials.append(body_mat)
-    cockpit_hole_y.hide_set(True)
-    lib.create_boolean_modifier( root = cockpit, name="m2", operation = 'DIFFERENCE', object = cockpit_hole_y, apply=True )
-    # cockpit_hole_z
-    bpy.ops.mesh.primitive_cube_add(size=1, enter_editmode=False, align='WORLD', location=(x, y+5*f, z+1+0.1), scale=(.9*f, .9*f, 2*f))
-    cockpit_hole_z = bpy.context.active_object
-    cockpit_hole_z.name = 'cockpit_hole_z'
-    cockpit_hole_z.data.materials.append(body_mat)
-    cockpit_hole_z.hide_set(True)
-    lib.create_boolean_modifier( root = cockpit, name="m2", operation = 'DIFFERENCE', object = cockpit_hole_z, apply=True )
+#    bpy.ops.mesh.primitive_cube_add(size=1, enter_editmode=False, align='WORLD', location=(x, y+5*f, z+1), scale=(1*f, 1*f, 1*f))
+#    cockpit = bpy.context.active_object
+#    cockpit.name = 'cockpit'
+#    cockpit.data.materials.append(body_mat)
+#    # cockpit_hole_x
+#    bpy.ops.mesh.primitive_cube_add(size=1, enter_editmode=False, align='WORLD', location=(x, y+5*f, z+1+0.1), scale=(2*f, .9*f, .65*f))
+#    cockpit_hole_x = bpy.context.active_object
+#    cockpit_hole_x.name = 'cockpit_hole_x'
+#    cockpit_hole_x.data.materials.append(body_mat)
+#    cockpit_hole_x.hide_set(True)
+#    lib.create_boolean_modifier( root = cockpit, name="m2", operation = 'DIFFERENCE', object = cockpit_hole_x, apply=True )
+#    # cockpit_hole_y
+#    bpy.ops.mesh.primitive_cube_add(size=1, enter_editmode=False, align='WORLD', location=(x, y+5*f, z+1+0.1), scale=(.9*f, 2*f, .65*f))
+#    cockpit_hole_y = bpy.context.active_object
+#    cockpit_hole_y.name = 'cockpit_hole_y'
+#    cockpit_hole_y.data.materials.append(body_mat)
+#    cockpit_hole_y.hide_set(True)
+#    lib.create_boolean_modifier( root = cockpit, name="m2", operation = 'DIFFERENCE', object = cockpit_hole_y, apply=True )
+#    # cockpit_hole_z
+#    bpy.ops.mesh.primitive_cube_add(size=1, enter_editmode=False, align='WORLD', location=(x, y+5*f, z+1+0.1), scale=(.9*f, .9*f, 2*f))
+#    cockpit_hole_z = bpy.context.active_object
+#    cockpit_hole_z.name = 'cockpit_hole_z'
+#    cockpit_hole_z.data.materials.append(body_mat)
+#    cockpit_hole_z.hide_set(True)
+#    lib.create_boolean_modifier( root = cockpit, name="m2", operation = 'DIFFERENCE', object = cockpit_hole_z, apply=True )
 
 
     # body-top
@@ -203,7 +203,7 @@ def create_ship( x=0, y=0, z=0, f=1 ):
     lib.create_bevel_modifier( root = body_top, name="b8", segments=3, width=5, apply=True )
 
     radar_mat = lib.create_material( name="m.thruster", color=(1, 1, 1, 1.0), metallic=0.9, roughness=0.5)
-    create_radar( name='radar', location=(x, y, z+1), material=radar_mat )
+    create_radar( name='radar', location=(x, y-5*f, z+1), material=radar_mat )
 
 
 # main script

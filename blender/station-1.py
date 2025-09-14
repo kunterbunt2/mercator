@@ -140,7 +140,7 @@ def create_tower( x=0, y=0, z=0, scale=(tower_x, tower_y, tower_z) ):
 #    window = bpy.context.active_object
 #    window.name = 'window'
 #    window.data.materials.append(window_mat)
-    minion.create_minion( x, y, z+tower_z-window_z-wall_width, 0.2)
+#    minion.create_minion( x, y, z+tower_z-window_z-wall_width, 0.2)
     
     # tables
 #    table_mat = lib.create_material( name="m.table", color=(0, 0, 1, 1.0), metallic=0.1, roughness=0.1)

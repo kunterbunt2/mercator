@@ -23,11 +23,11 @@ container = bpy.context.active_object
 container.name = 'container'
 material = lib.create_material( name="m.container", color=(1.0, 1.0, 1.0, 1.0), metallic=0.5, roughness=0.5)
 container.data.materials.append(material)
-lib.create_bevel_modifier( root = container, name="b1", segments=2, width=.02 )
+lib.create_bevel_modifier( root = container, name="b1", segments=1, width=.2 )
 # enable smooth shading
-bpy.ops.object.shade_smooth()
+#bpy.ops.object.shade_smooth()
 # enable Auto Smooth so edges stay sharp
-mod = container.modifiers.new(name="Smooth by Angle", type='NODES')
-bpy.ops.object.shade_auto_smooth(use_auto_smooth=True, angle=1.0472)
+#mod = container.modifiers.new(name="Smooth by Angle", type='NODES')
+#bpy.ops.object.shade_auto_smooth(use_auto_smooth=True, angle=1.0472)
 
 

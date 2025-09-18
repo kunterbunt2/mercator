@@ -90,7 +90,7 @@ def assign_material(obj, mat):
 
 def create_tower( x=0, y=0, z=0, scale=(tower_x, tower_y, tower_z) ):
     wall_width = .5
-    window_z = 2
+    window_z = 1
     # outer
     tower_mat = lib.create_material( name="m.station", color=lib.hex_to_rgba("#FFFFFFFF"), metallic=0.5, roughness=.5)
     bpy.ops.mesh.primitive_cube_add(size=1, enter_editmode=False, align='WORLD', location=(x, y, z+tower_z/2), scale=(tower_x, tower_y, tower_z))
@@ -171,7 +171,7 @@ def create_station( x=0, y=0, z=0, size=1 ):
     station_inner.hide_set(True)
 
     lib.create_boolean_modifier( root = station, name="m1", operation = 'DIFFERENCE', object = station_inner, apply=True )
-    lib.create_bevel_modifier( root = station, name="m3", segments=1, width=1, apply=True )
+    #lib.create_bevel_modifier( root = station, name="m3", segments=1, width=1, apply=True )
 
     # hanger doors
     bpy.ops.mesh.primitive_cube_add(size=1, enter_editmode=False, align='WORLD', location=(x, y, z), scale=(door_x, door_y, door_z))
@@ -181,17 +181,99 @@ def create_station( x=0, y=0, z=0, size=1 ):
 
     lib.create_boolean_modifier( root = station, name="m4", operation = 'DIFFERENCE', object = neg_door )
       
-def create_cube(mat, x, y, z, size=1):
+#def create_cube(mat, x, y, z, size=1):
+#    bpy.ops.mesh.primitive_cube_add(size=size, location=(x, y, z))
+#    cube = bpy.context.active_object
+#    cube.data.materials.append(mat)
+#    return cube
+
+
+def create_cube_with_shafts_and_elevators(station_mat, elevator_mat, x, y, z, size=128, shaft_size=2):
+    # Create the main cube (space station)
     bpy.ops.mesh.primitive_cube_add(size=size, location=(x, y, z))
     cube = bpy.context.active_object
-    cube.data.materials.append(mat)
-    bevel = lib.create_bevel_modifier( root = cube, name="m1", segments=1, width=1, apply=True )
-    # enable smooth shading
-#    bpy.ops.object.shade_smooth()
-    # enable Auto Smooth so edges stay sharp
-#    mod = cube.modifiers.new(name="Smooth by Angle", type='NODES')
-#    bpy.ops.object.shade_auto_smooth(use_auto_smooth=True, angle=1.0472)
+    cube.name = "SpaceStation"
+    cube.data.materials.append(station_mat)
+
+#    half_size = size / 2.0
+
+#    directions = [
+#        (1, 0),   # +X face
+#        (-1, 0),  # -X face
+#        (0, 1),   # +Y face
+#        (0, -1)   # -Y face
+#    ]
+
+#    for i, (dx, dy) in enumerate(directions):
+#        # Random horizontal offset for shaft
+#        offset = random.uniform(-half_size + 2, half_size - 2)
+
+#        if dx != 0:  # Shaft on X face
+#            shaft_loc = (
+#                x + dx * (half_size - shaft_size/2),
+#                y + offset,
+#                z
+#            )
+#            shaft_scale = (shaft_size/2, shaft_size/2, half_size + 2)
+
+#        elif dy != 0:  # Shaft on Y face
+#            shaft_loc = (
+#                x + offset,
+#                y + dy * (half_size - shaft_size/2),
+#                z
+#            )
+#            shaft_scale = (shaft_size/2, shaft_size/2, half_size + 2)
+
+#        # === Create shaft cutter cube ===
+#        bpy.ops.mesh.primitive_cube_add(size=2, location=shaft_loc)
+#        shaft = bpy.context.active_object
+#        shaft.name = f"ElevatorShaft_{i}"
+#        shaft.scale = shaft_scale
+
+#        # Boolean cut
+#        mod = cube.modifiers.new(name=f"Bool_Shaft_{i}", type='BOOLEAN')
+#        mod.object = shaft
+#        mod.operation = 'DIFFERENCE'
+#        bpy.context.view_layer.objects.active = cube
+#        bpy.ops.object.modifier_apply(modifier=mod.name)
+#        bpy.data.objects.remove(shaft, do_unlink=True)
+
+#        # === Create elevator inside shaft ===
+#        bpy.ops.mesh.primitive_cube_add(size=shaft_size-0.01, location=(shaft_loc[0], shaft_loc[1], z))
+#        elevator = bpy.context.active_object
+#        elevator.name = f"Elevator_{i}"
+#        elevator.data.materials.append(elevator_mat)
+
+#        # === Animate elevator ===
+#        bottom = z - half_size + 1
+#        top = z + half_size - 1
+
+#        # Randomize animation offset (so elevators don't sync)
+#        frame_offset = random.randint(0, 100)
+
+#        # Duration of one leg (down or up)
+#        travel_time = random.randint(80, 160)
+#        frame_start = 1 + frame_offset
+#        frame_mid = frame_start + travel_time
+#        frame_end = frame_start + 2 * travel_time
+
+#        # Keyframes (constant speed up & down)
+#        elevator.location[2] = top
+#        elevator.keyframe_insert(data_path="location", frame=frame_start)
+
+#        elevator.location[2] = bottom
+#        elevator.keyframe_insert(data_path="location", frame=frame_mid)
+
+#        elevator.location[2] = top
+#        elevator.keyframe_insert(data_path="location", frame=frame_end)
+
+#        # Make animation cyclic
+#        action = elevator.animation_data.action
+#        for fc in action.fcurves:
+#            fc.modifiers.new(type='CYCLES')
+
     return cube
+
 
 def create_round_pipe(mat, start, end, radius=0.1, inset=0.2):
     """Create a pipe (cylinder) between two cube surfaces instead of their centers.
@@ -230,33 +312,37 @@ def create_round_pipe(mat, start, end, radius=0.1, inset=0.2):
 
     return pipe
 
-def create_square_pipe(mat, start, end, radius=0.1):
+def create_square_pipe(mat, start, end, radius=0.1, inset=0.2):
     """Create a pipe (cylinder) between two cube centers"""
     import mathutils
     start = mathutils.Vector(start)
     end = mathutils.Vector(end)
-    direction = end - start
-    length = direction.length
-    midpoint = (start + end) / 2
+    direction = (end - start).normalized()
+    # Shift start and end inward by inset
+    start_shifted = start + direction * inset
+    end_shifted = end - direction * inset
+
+    length = (end_shifted - start_shifted).length
+    midpoint = (start_shifted + end_shifted) / 2
 
     # Create cylinder
     bpy.ops.mesh.primitive_cube_add(size=1, location=midpoint, scale=(radius, radius, length) )
     pipe = bpy.context.active_object
     pipe.data.materials.append(mat)
     # enable smooth shading
-    bpy.ops.object.shade_smooth()
+    #bpy.ops.object.shade_smooth()
     # enable Auto Smooth so edges stay sharp
-    mod = pipe.modifiers.new(name="Smooth by Angle", type='NODES')
-    bpy.ops.object.shade_auto_smooth(use_auto_smooth=True, angle=1.0472)
+    #mod = pipe.modifiers.new(name="Smooth by Angle", type='NODES')
+    #bpy.ops.object.shade_auto_smooth(use_auto_smooth=True, angle=1.0472)
 
     # Rotate cylinder to align with direction
     pipe.rotation_mode = 'QUATERNION'
     pipe.rotation_quaternion = direction.to_track_quat('Z', 'Y')
-    lib.create_bevel_modifier( root = pipe, name="m3", segments=3, width=2, apply=True )
+    #lib.create_bevel_modifier( root = pipe, name="m3", segments=3, width=2, apply=True )
 
     return pipe
 
-def create_station_neighbors(station_mat, pipe_mat, station_size, station_distance, radius, inset=0.2, station_z=0):
+def create_station_neighbors(station_mat, elevator_mat, pipe_mat, station_size, shaft_size, station_distance, radius, inset=0.2, station_z=0):
     import mathutils
     grid = {}
 
@@ -296,10 +382,12 @@ def create_station_neighbors(station_mat, pipe_mat, station_size, station_distan
         )) + global_offset
 
         if (x, y, z) != (0, 0, 0):
-            cube = create_cube(
+            cube = create_cube_with_shafts_and_elevators(
                 station_mat[random.randint(0, len(station_mat)-1)],
+                elevator_mat,
                 *cube_center,
-                station_size
+                station_size,
+                shaft_size
             )
 
         # Always store the true cube center (with offset applied)
@@ -314,19 +402,21 @@ def create_station_neighbors(station_mat, pipe_mat, station_size, station_distan
         ]
         for n in neighbors:
             if n in created_cubes and n > (x, y, z):  # avoid duplicates
-                create_round_pipe(pipe_mat, loc, created_cubes[n], radius=radius, inset=inset)
+                #create_round_pipe(pipe_mat, loc, created_cubes[n], radius=radius, inset=inset)
+                create_square_pipe(pipe_mat, loc, created_cubes[n], radius=radius, inset=inset)
                                 
 # main script
 lib.clear_scene()
-station_mat1 = lib.create_material( name="m.station1", color=lib.hex_to_rgba("#00614eff"), metallic=0.5, roughness=.5)
-station_mat2 = lib.create_material( name="m.station2", color=lib.hex_to_rgba("#b00233ff"), metallic=0.5, roughness=.5)
-station_mat3 = lib.create_material( name="m.station3", color=lib.hex_to_rgba("#006ab6ff"), metallic=0.5, roughness=.5)
-station_mat4 = lib.create_material( name="m.station4", color=lib.hex_to_rgba("#404853ff"), metallic=0.5, roughness=.5)
+station_mat1 = lib.create_material( name="m.station1", color=lib.hex_to_rgba("#00614eff"), metallic=0.5, roughness=.2)
+station_mat2 = lib.create_material( name="m.station2", color=lib.hex_to_rgba("#b00233ff"), metallic=0.5, roughness=.3)
+station_mat3 = lib.create_material( name="m.station3", color=lib.hex_to_rgba("#006ab6ff"), metallic=0.5, roughness=.1)
+station_mat4 = lib.create_material( name="m.station4", color=lib.hex_to_rgba("#404853ff"), metallic=0.5, roughness=.4)
 
 #pipe_mat = lib.create_material( name="m.pipe", color=lib.hex_to_rgba("#404080FF"), metallic=0.5, roughness=.1)
 pipe_mat = lib.create_material( name="m.pipe", color=lib.hex_to_rgba("#FFA500FF"), metallic=0.5, roughness=.5)
+elevator_mat = lib.create_material( name="m.elevator", color=lib.hex_to_rgba("#00000FF"), metallic=0.9, roughness=0.1)
 
-create_station_neighbors( station_mat=[station_mat1,station_mat2,station_mat3,station_mat4], pipe_mat=pipe_mat, station_size=128, station_distance=128+64, radius=20, inset=station_x/2-wall_width/2 )
+create_station_neighbors( station_mat=[station_mat1,station_mat2,station_mat3,station_mat4], pipe_mat=pipe_mat, elevator_mat=elevator_mat, station_size=128, shaft_size=2, station_distance=128+64, radius=20, inset=station_x/2-wall_width/2 )
 create_station()
 create_tower( x=-door_x, y=door_y, z=0, scale=(tower_x, tower_y, tower_z) )
 

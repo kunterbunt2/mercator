@@ -211,9 +211,10 @@ public class Planet3DRenderer extends ObjectRenderer<GameEngine3D> {
             go.instance.transform.setToTranslationAndScaling(fx, 0, fz, TURBINE_SIZE, TURBINE_SIZE, TURBINE_SIZE);
             go.instance.transform.rotate(Vector3.Y, 90);
             go.update();
-            go.controller = new AnimationControllerHack(go.instance);
-            go.controller.setAnimation(go.instance.getAnimation("rotate"), -1);
-            animatedObjects.add(go);
+            go.controllerList.add(new AnimationControllerHack(go.instance));
+            go.controllerList.getLast().setAnimation(go.instance.getAnimation("rotate"), -1);
+            if (!go.instance.animations.isEmpty())
+                animatedObjects.add(go);
             renderEngine.addDynamic(go);
             go = new GameObject<>(new ModelInstanceHack(renderEngine.getGameEngine().assetManager.redEmissiveModel), planet);
             go.instance.materials.get(0).set(emissiveAttribute);
@@ -307,12 +308,18 @@ public class Planet3DRenderer extends ObjectRenderer<GameEngine3D> {
         //			sectorInstance.update();
         //			renderMaster.sceneManager.addStatic(sectorInstance);
         //		}
-        dockingStationGameObject.controller = new AnimationControllerHack(dockingStationGameObject.instance);
-        Animation radarAction = dockingStationGameObject.instance.getAnimation("radarAction");
-        if (radarAction != null) {
-            dockingStationGameObject.controller.setAnimation(radarAction, -1);
-            animatedObjects.add(dockingStationGameObject);
+        for (Animation animation : dockingStationGameObject.instance.animations) {
+            dockingStationGameObject.controllerList.add(new AnimationControllerHack(dockingStationGameObject.instance));
+            dockingStationGameObject.controllerList.getLast().setAnimation(animation, -1);
         }
+        if (!dockingStationGameObject.instance.animations.isEmpty())
+            animatedObjects.add(dockingStationGameObject);
+
+//        Animation radarAction = dockingStationGameObject.instance.animations.get(0);
+//        if (radarAction != null) {
+//            dockingStationGameObject.controller.setAnimation(radarAction, -1);
+//            animatedObjects.add(dockingStationGameObject);
+//        }
     }
 
     public static Color getBuildingColor(final int index) {
@@ -546,28 +553,36 @@ public class Planet3DRenderer extends ObjectRenderer<GameEngine3D> {
     }
 
     private void updatePlanet(final RenderEngine3D<GameEngine3D> renderEngine) throws OpenAlException {
-        float realTimeDelta = Gdx.graphics.getDeltaTime();
-        // animate factories
-        for (final GameObject<GameEngine3D> go : animatedObjects) {
-            if (go.interactive instanceof ProductionFacility pf) {
-                if (pf.status == ProductionFacilityStatus.PRODUCING) go.controller.update(Gdx.graphics.getDeltaTime());
-            } else if (go.interactive instanceof Planet t) {
-                go.controller.update(Gdx.graphics.getDeltaTime());
+//        if (renderEngine.getCamera().frustum.boundsInFrustum(dockingStationGameObject.transformedBoundingBox))
+        {
+            float realTimeDelta = Gdx.graphics.getDeltaTime();
+            // animate factories
+            for (final GameObject<GameEngine3D> go : animatedObjects) {
+                if (go.interactive instanceof ProductionFacility pf) {
+                    if (pf.status == ProductionFacilityStatus.PRODUCING) {
+                        for (AnimationControllerHack animationControllerHack : go.controllerList) {
+                            animationControllerHack.update(Gdx.graphics.getDeltaTime());
+                        }
+                    }
+                } else if (go.interactive instanceof Planet t) {
+                    for (AnimationControllerHack animationControllerHack : go.controllerList) {
+                        animationControllerHack.update(Gdx.graphics.getDeltaTime() * .1f);
+                    }
+                }
             }
-        }
-        //animate lights
-        if (renderEngine.getGameEngine().renderEngine.isNight() && dayMode) {
-            for (final PointLight l : pointLight) {
-                l.intensity = LIGHT_NIGHT_INTENSITY;
+            //animate lights
+            if (renderEngine.getGameEngine().renderEngine.isNight() && dayMode) {
+                for (final PointLight l : pointLight) {
+                    l.intensity = LIGHT_NIGHT_INTENSITY;
+                }
+                dayMode = false;
+            } else if (renderEngine.getGameEngine().renderEngine.isDay() && !dayMode) {
+                for (final PointLight l : pointLight) {
+                    l.intensity = LIGHT_DAY_INTENSITY;
+                }
+                dayMode = true;
             }
-            dayMode = false;
-        } else if (renderEngine.getGameEngine().renderEngine.isDay() && !dayMode) {
-            for (final PointLight l : pointLight) {
-                l.intensity = LIGHT_DAY_INTENSITY;
-            }
-            dayMode = true;
-        }
-        rotation += rotationSpeed * realTimeDelta;
+            rotation += rotationSpeed * realTimeDelta;
 //        dynamicStationGameObject.instance.transform.setToTranslation(planet.x, -128, planet.z);
 //        dynamicStationGameObject.instance.transform.rotate(Vector3.Y, rotation);
 //        dynamicStationGameObject.update();
@@ -577,8 +592,8 @@ public class Planet3DRenderer extends ObjectRenderer<GameEngine3D> {
 //        planet.communicationPartner.ttsPlayer.play();
 //        planet.communicationPartner.ttsPlayer.setPositionAndVelocity(position, velocity);
 
-        planet.dockingDoors.render(renderEngine);
-
+            planet.dockingDoors.render(renderEngine);
+        }
     }
 
 }

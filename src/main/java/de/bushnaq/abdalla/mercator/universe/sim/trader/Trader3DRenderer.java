@@ -174,13 +174,11 @@ public class Trader3DRenderer extends ObjectRenderer<GameEngine3D> {
 //        renderEngine.add(spotLight);
 //        instance1 = new GameObject<GameEngine3D>(new ModelInstanceHack(renderEngine.getGameEngine().assetManager.cubeTrans1), trader, this);
 //        renderEngine.addDynamic(instance1);
-        traderGameObject.controller = new AnimationControllerHack(traderGameObject.instance);
-        Animation radarAction = traderGameObject.instance.getAnimation("radarAction");
-        if (radarAction != null) {
-            traderGameObject.controller.setAnimation(radarAction, -1);
-            animatedObjects.add(traderGameObject);
+        for (Animation animation : traderGameObject.instance.animations) {
+            traderGameObject.controllerList.add(new AnimationControllerHack(traderGameObject.instance));
+            traderGameObject.controllerList.getLast().setAnimation(animation, -1);
         }
-
+        animatedObjects.add(traderGameObject);
     }
 
     private int getColorIndex() {
@@ -355,7 +353,9 @@ public class Trader3DRenderer extends ObjectRenderer<GameEngine3D> {
         updateGoods(renderEngine);
         for (final GameObject<GameEngine3D> go : animatedObjects) {
             if (go.interactive instanceof Trader t) {
-                if (t.getTraderSubStatus().isTraveling()) go.controller.update(Gdx.graphics.getDeltaTime());
+                for (AnimationControllerHack animationControllerHack : go.controllerList) {
+                    animationControllerHack.update(Gdx.graphics.getDeltaTime());
+                }
             }
         }
     }
